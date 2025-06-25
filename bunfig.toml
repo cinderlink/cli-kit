@@ -1,0 +1,17 @@
+[test]
+# Preload setup files (uncomment when setup.ts is created)
+# preload = ["./src/testing/setup.ts"]
+
+# Enable coverage reporting
+coverage = true
+coverageDirectory = "./coverage"
+coverageReporter = ["text", "lcov"]
+
+# Set test timeout (in milliseconds)
+timeout = 10000
+
+# Test file patterns
+root = "./"
+
+# Exclude files from coverage
+coverageSkipTestFiles = true
