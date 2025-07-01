@@ -1,0 +1,570 @@
+/**
+ * Style System - Immutable, chainable styling API inspired by Lipgloss
+ * 
+ * Features:
+ * - Immutable style objects with chainable API
+ * - Comprehensive styling properties
+ * - Style composition and inheritance
+ * - Performance optimization with caching
+ * - Type-safe property access
+ */
+
+import { Data, Option, pipe } from "effect"
+import type { Color } from "./color.ts"
+import { type Border, BorderSide } from "./borders.ts"
+import { 
+  type StyleProps,
+  type Padding,
+  type Margin,
+  type Position,
+  type TextTransform,
+  HorizontalAlign,
+  VerticalAlign,
+  normalizeSpacing,
+  isInheritable
+} from "./types.ts"
+
+// =============================================================================
+// Style Class
+// =============================================================================
+
+/**
+ * Immutable style class with chainable API
+ * 
+ * @example
+ * const myStyle = style()
+ *   .foreground(Colors.red)
+ *   .background(Colors.blue)
+ *   .bold()
+ *   .padding(2, 4)
+ *   .border(Borders.Rounded)
+ */
+export class Style extends Data.Class<{
+  readonly props: StyleProps
+  readonly parent: Option.Option<Style>
+}> {
+  // ===========================================================================
+  // Color Methods
+  // ===========================================================================
+  
+  /**
+   * Set the foreground (text) color
+   */
+  foreground(color: Color): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, foreground: color }
+    })
+  }
+  
+  /**
+   * Set the background color
+   */
+  background(color: Color): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, background: color }
+    })
+  }
+  
+  // ===========================================================================
+  // Border Methods
+  // ===========================================================================
+  
+  /**
+   * Set the border style
+   */
+  border(border: Border, sides: BorderSide = BorderSide.All): Style {
+    return new Style({
+      ...this,
+      props: { 
+        ...this.props, 
+        border,
+        borderSides: sides
+      }
+    })
+  }
+  
+  /**
+   * Set which border sides to render
+   */
+  borderSides(sides: BorderSide): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, borderSides: sides }
+    })
+  }
+  
+  /**
+   * Set the border foreground color
+   */
+  borderForeground(color: Color): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, borderForeground: color }
+    })
+  }
+  
+  /**
+   * Set the border background color
+   */
+  borderBackground(color: Color): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, borderBackground: color }
+    })
+  }
+  
+  // ===========================================================================
+  // Spacing Methods
+  // ===========================================================================
+  
+  /**
+   * Set padding (CSS-style parameters)
+   */
+  padding(top: number, right?: number, bottom?: number, left?: number): Style {
+    const [t, r, b, l] = normalizeSpacing(top, right, bottom, left)
+    return new Style({
+      ...this,
+      props: {
+        ...this.props,
+        padding: { top: t, right: r, bottom: b, left: l }
+      }
+    })
+  }
+  
+  /**
+   * Set padding with explicit sides
+   */
+  paddingSides(padding: Partial<Padding>): Style {
+    const current = this.props.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+    return new Style({
+      ...this,
+      props: {
+        ...this.props,
+        padding: { ...current, ...padding }
+      }
+    })
+  }
+  
+  /**
+   * Set margin (CSS-style parameters)
+   */
+  margin(top: number, right?: number, bottom?: number, left?: number): Style {
+    const [t, r, b, l] = normalizeSpacing(top, right, bottom, left)
+    return new Style({
+      ...this,
+      props: {
+        ...this.props,
+        margin: { top: t, right: r, bottom: b, left: l }
+      }
+    })
+  }
+  
+  /**
+   * Set margin with explicit sides
+   */
+  marginSides(margin: Partial<Margin>): Style {
+    const current = this.props.margin || { top: 0, right: 0, bottom: 0, left: 0 }
+    return new Style({
+      ...this,
+      props: {
+        ...this.props,
+        margin: { ...current, ...margin }
+      }
+    })
+  }
+  
+  // ===========================================================================
+  // Text Decoration Methods
+  // ===========================================================================
+  
+  /**
+   * Make text bold
+   */
+  bold(value = true): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, bold: value }
+    })
+  }
+  
+  /**
+   * Make text italic
+   */
+  italic(value = true): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, italic: value }
+    })
+  }
+  
+  /**
+   * Make text underlined
+   */
+  underline(value = true): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, underline: value }
+    })
+  }
+  
+  /**
+   * Make text strikethrough
+   */
+  strikethrough(value = true): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, strikethrough: value }
+    })
+  }
+  
+  /**
+   * Invert foreground and background colors
+   */
+  inverse(value = true): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, inverse: value }
+    })
+  }
+  
+  /**
+   * Make text blink
+   */
+  blink(value = true): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, blink: value }
+    })
+  }
+  
+  /**
+   * Make text faint/dim
+   */
+  faint(value = true): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, faint: value }
+    })
+  }
+  
+  /**
+   * Make style inline - prevents style bleeding to subsequent text
+   * Similar to Lipgloss Inline(true)
+   */
+  inline(value = true): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, inline: value }
+    })
+  }
+  
+  // ===========================================================================
+  // Dimension Methods
+  // ===========================================================================
+  
+  /**
+   * Set fixed width
+   */
+  width(width: number): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, width }
+    })
+  }
+  
+  /**
+   * Set fixed height
+   */
+  height(height: number): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, height }
+    })
+  }
+  
+  /**
+   * Set minimum width
+   */
+  minWidth(minWidth: number): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, minWidth }
+    })
+  }
+  
+  /**
+   * Set minimum height
+   */
+  minHeight(minHeight: number): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, minHeight }
+    })
+  }
+  
+  /**
+   * Set maximum width
+   */
+  maxWidth(maxWidth: number): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, maxWidth }
+    })
+  }
+  
+  /**
+   * Set maximum height
+   */
+  maxHeight(maxHeight: number): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, maxHeight }
+    })
+  }
+  
+  // ===========================================================================
+  // Alignment Methods
+  // ===========================================================================
+  
+  /**
+   * Set horizontal alignment
+   */
+  align(align: HorizontalAlign): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, horizontalAlign: align }
+    })
+  }
+  
+  /**
+   * Set vertical alignment
+   */
+  valign(align: VerticalAlign): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, verticalAlign: align }
+    })
+  }
+  
+  /**
+   * Center content horizontally
+   */
+  center(): Style {
+    return this.align(HorizontalAlign.Center)
+  }
+  
+  /**
+   * Center content vertically
+   */
+  middle(): Style {
+    return this.valign(VerticalAlign.Middle)
+  }
+  
+  // ===========================================================================
+  // Transform Methods
+  // ===========================================================================
+  
+  /**
+   * Set text transformation
+   */
+  transform(transform: TextTransform): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, transform }
+    })
+  }
+  
+  /**
+   * Transform text to uppercase
+   */
+  uppercase(): Style {
+    return this.transform({ _tag: "uppercase" })
+  }
+  
+  /**
+   * Transform text to lowercase
+   */
+  lowercase(): Style {
+    return this.transform({ _tag: "lowercase" })
+  }
+  
+  /**
+   * Capitalize first letter of each word
+   */
+  capitalize(): Style {
+    return this.transform({ _tag: "capitalize" })
+  }
+  
+  // ===========================================================================
+  // Overflow Methods
+  // ===========================================================================
+  
+  /**
+   * Set overflow behavior
+   */
+  overflow(overflow: "visible" | "hidden" | "wrap" | "ellipsis"): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, overflow }
+    })
+  }
+  
+  /**
+   * Set word break behavior
+   */
+  wordBreak(wordBreak: "normal" | "break-all" | "keep-all"): Style {
+    return new Style({
+      ...this,
+      props: { ...this.props, wordBreak }
+    })
+  }
+  
+  // ===========================================================================
+  // Composition Methods
+  // ===========================================================================
+  
+  /**
+   * Inherit from another style (sets as parent)
+   */
+  inherit(parent: Style): Style {
+    return new Style({
+      ...this,
+      parent: Option.some(parent)
+    })
+  }
+  
+  /**
+   * Merge with another style (other style takes precedence)
+   */
+  merge(other: Style): Style {
+    return new Style({
+      props: { ...this.getResolvedProps(), ...other.getResolvedProps() },
+      parent: Option.none()
+    })
+  }
+  
+  /**
+   * Copy this style
+   */
+  copy(): Style {
+    return new Style({
+      props: { ...this.props },
+      parent: this.parent
+    })
+  }
+  
+  /**
+   * Reset all properties
+   */
+  reset(): Style {
+    return new Style({
+      props: {},
+      parent: Option.none()
+    })
+  }
+  
+  // ===========================================================================
+  // Property Access
+  // ===========================================================================
+  
+  /**
+   * Get resolved properties (including inherited values)
+   */
+  getResolvedProps(): StyleProps {
+    if (Option.isNone(this.parent)) {
+      return this.props
+    }
+    
+    const parentProps = this.parent.value.getResolvedProps()
+    const resolved: StyleProps = { ...this.props }
+    
+    // Apply inheritance
+    for (const key in parentProps) {
+      const prop = key as keyof StyleProps
+      if (isInheritable(prop) && resolved[prop] === undefined) {
+        (resolved as any)[prop] = parentProps[prop]
+      }
+    }
+    
+    return resolved
+  }
+  
+  /**
+   * Check if a property is set (not inherited)
+   */
+  has(prop: keyof StyleProps): boolean {
+    return this.props[prop] !== undefined
+  }
+  
+  /**
+   * Get a specific property value
+   */
+  get<K extends keyof StyleProps>(prop: K): StyleProps[K] | undefined {
+    return this.getResolvedProps()[prop]
+  }
+}
+
+// =============================================================================
+// Style Factory
+// =============================================================================
+
+/**
+ * Create a new empty style
+ */
+export const style = (): Style => 
+  new Style({
+    props: {},
+    parent: Option.none()
+  })
+
+/**
+ * Create a style from properties
+ */
+export const styleFrom = (props: StyleProps): Style =>
+  new Style({
+    props,
+    parent: Option.none()
+  })
+
+// =============================================================================
+// Common Style Presets
+// =============================================================================
+
+export const Styles = {
+  /**
+   * Base style with no properties
+   */
+  Base: style(),
+  
+  /**
+   * Bold text
+   */
+  Bold: style().bold(),
+  
+  /**
+   * Italic text
+   */
+  Italic: style().italic(),
+  
+  /**
+   * Underlined text
+   */
+  Underline: style().underline(),
+  
+  /**
+   * Faint/dim text
+   */
+  Faint: style().faint(),
+  
+  /**
+   * Centered content
+   */
+  Center: style().center().middle(),
+  
+  /**
+   * Hidden content (for spacing)
+   */
+  Hidden: style().overflow("hidden")
+} as const

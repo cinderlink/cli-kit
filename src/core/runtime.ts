@@ -251,16 +251,38 @@ const handleSubscriptions = <Model, Msg>(
   Effect.gen(function* (_) {
     if (!component.subscriptions) return
     
-    // Get initial model and start subscription
-    const currentState = yield* _(Ref.get(state))
-    const sub = yield* _(component.subscriptions!(currentState.model))
+    let currentSub: Stream.Stream<Msg, never, any> | null = null
+    let currentFiber: Fiber.Fiber<void, never> | null = null
     
-    // Run the subscription stream
+    // Watch for model changes and restart subscription
     yield* _(
-      sub.pipe(
-        Stream.runForEach(msg => 
-          Queue.offer(msgQueue, { _tag: "UserMsg" as const, msg })
-        )
+      Effect.repeat(
+        Effect.gen(function* (_) {
+          const currentState = yield* _(Ref.get(state))
+          if (!currentState.running) return
+          
+          // Cancel previous subscription if exists
+          if (currentFiber) {
+            yield* _(Fiber.interrupt(currentFiber))
+          }
+          
+          // Start new subscription with current model
+          const sub = yield* _(component.subscriptions!(currentState.model))
+          
+          // Fork the subscription processing
+          currentFiber = yield* _(
+            sub.pipe(
+              Stream.runForEach(msg => 
+                Queue.offer(msgQueue, { _tag: "UserMsg" as const, msg })
+              ),
+              Effect.fork
+            )
+          )
+          
+          // Wait a bit before checking again
+          yield* _(Effect.sleep(100))
+        }),
+        Schedule.forever
       )
     )
   })

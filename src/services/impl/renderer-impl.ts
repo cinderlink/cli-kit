@@ -284,39 +284,35 @@ export const RendererServiceLive = Layer.effect(
       )
     
     return {
-      render: (view: View) =>
-        Effect.gen(function* (_) {
-          const startTime = Date.now()
-          
-          // Get current viewport
-          const viewports = yield* _(Ref.get(viewportStack))
-          const viewport = viewports[viewports.length - 1]
-          
-          // Clear back buffer in viewport area
-          const back = yield* _(Ref.get(backBuffer))
-          
-          // Render view to back buffer
-          const rendered = yield* _(view.render())
-          back.writeText(viewport.x, viewport.y, rendered)
-          
-          // Update stats
-          const endTime = Date.now()
-          yield* _(Ref.update(stats, s => ({
-            ...s,
-            lastFrameTime: endTime - startTime
-          })))
-        }),
-      
       beginFrame: Effect.gen(function* (_) {
-        // Clear back buffer
-        const back = yield* _(Ref.get(backBuffer))
+        // Get current terminal size and update buffers if needed
+        const terminal = yield* _(TerminalService)
+        const size = yield* _(terminal.getSize)
+        
+        let back = yield* _(Ref.get(backBuffer))
+        if (back.width !== size.width || back.height !== size.height) {
+          // Resize buffers
+          const newBack = new Buffer(size.width, size.height)
+          const newFront = new Buffer(size.width, size.height)
+          yield* _(Ref.set(backBuffer, newBack))
+          yield* _(Ref.set(frontBuffer, newFront))
+          back = newBack
+          
+          // Update viewport
+          yield* _(Ref.set(viewportStack, [{
+            x: 0,
+            y: 0,
+            width: size.width,
+            height: size.height
+          }]))
+        }
+        
+        // Clear the back buffer to prepare for new frame
         back.clear()
       }),
       
       endFrame: Effect.gen(function* (_) {
-        const startTime = Date.now()
-        
-        // Get buffers
+        // Swap buffers and apply diff
         const front = yield* _(Ref.get(frontBuffer))
         const back = yield* _(Ref.get(backBuffer))
         
@@ -331,39 +327,59 @@ export const RendererServiceLive = Layer.effect(
         yield* _(Ref.set(backBuffer, front))
         
         // Update stats
-        const endTime = Date.now()
         yield* _(Ref.update(stats, s => ({
           framesRendered: s.framesRendered + 1,
-          averageFrameTime: 
-            (s.averageFrameTime * s.framesRendered + (endTime - startTime)) / 
-            (s.framesRendered + 1),
-          lastFrameTime: endTime - startTime,
+          averageFrameTime: s.averageFrameTime,
+          lastFrameTime: 0,
           dirtyRegionCount: patches.length,
           bufferSwitches: s.bufferSwitches + 1
         })))
       }),
       
+      render: (view: View) =>
+        Effect.gen(function* (_) {
+          const startTime = Date.now()
+          
+          // Get current viewport
+          const viewports = yield* _(Ref.get(viewportStack))
+          const viewport = viewports[viewports.length - 1]
+          
+          // Get back buffer
+          const back = yield* _(Ref.get(backBuffer))
+          
+          // Render view to back buffer
+          const rendered = yield* _(view.render())
+          back.writeText(viewport.x, viewport.y, rendered)
+          
+          // Update stats
+          const endTime = Date.now()
+          yield* _(Ref.update(stats, s => ({
+            ...s,
+            lastFrameTime: endTime - startTime
+          })))
+        }),
+      
       forceRedraw: Effect.gen(function* (_) {
-        const back = yield* _(Ref.get(backBuffer))
+        const terminal = yield* _(TerminalService)
         const front = yield* _(Ref.get(frontBuffer))
+        const size = yield* _(terminal.getSize)
         
-        // Clear front buffer to force full redraw
+        // Clear the actual terminal screen and reset cursor
+        yield* _(terminal.clear)
+        yield* _(terminal.moveCursor(1, 1))
+        
+        // Clear the front buffer completely to force full redraw
         front.clear()
         
-        // Apply all cells from back buffer
-        const patches: DiffPatch[] = []
-        for (let y = 0; y < back.height; y++) {
-          const cells: Cell[] = []
-          for (let x = 0; x < back.width; x++) {
-            const cell = back.get(x, y)
-            if (cell) cells.push(cell)
-          }
-          if (cells.length > 0) {
-            patches.push({ x: 0, y, cells })
-          }
+        // Fill the screen with spaces to ensure no artifacts remain
+        // We need to actually write spaces to the terminal, not just clear
+        for (let y = 0; y < size.height; y++) {
+          yield* _(terminal.moveCursor(1, y + 1))
+          yield* _(terminal.write(' '.repeat(size.width)))
         }
         
-        yield* _(applyPatches(patches))
+        // Reset cursor to home position
+        yield* _(terminal.moveCursor(1, 1))
       }),
       
       setViewport: (viewport: Viewport) =>
@@ -421,13 +437,25 @@ export const RendererServiceLive = Layer.effect(
         }),
       
       renderBatch: (views) =>
-        Effect.forEach(views, ({ view, x, y }) =>
-          Effect.gen(function* (_) {
-            const rendered = yield* _(view.render())
-            const back = yield* _(Ref.get(backBuffer))
-            back.writeText(x, y, rendered)
-          })
-        ),
+        Effect.gen(function* (_) {
+          const back = yield* _(Ref.get(backBuffer))
+          
+          // Render all views in parallel for better performance
+          const rendered = yield* _(
+            Effect.all(
+              views.map(({ view, x, y }) => 
+                view.render().pipe(
+                  Effect.map(content => ({ content, x, y }))
+                )
+              )
+            )
+          )
+          
+          // Write all rendered content to back buffer
+          for (const { content, x, y } of rendered) {
+            back.writeText(x, y, content)
+          }
+        }),
       
       setClipRegion: (_region) =>
         Effect.void, // TODO: Implement clipping

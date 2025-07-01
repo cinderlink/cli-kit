@@ -6,6 +6,7 @@ import { Effect } from "effect"
 import stringWidth from "string-width"
 import type { View, RenderError } from "@/core/types.ts"
 import { RendererService } from "@/services/index.ts"
+import { style as createStyle, renderStyledSync, type Style } from "@/styling/index.ts"
 
 /**
  * Create a simple text view
@@ -127,3 +128,12 @@ export const blue = (view: View) => styled(view, '\x1b[34m')
 export const magenta = (view: View) => styled(view, '\x1b[35m')
 export const cyan = (view: View) => styled(view, '\x1b[36m')
 export const white = (view: View) => styled(view, '\x1b[37m')
+
+/**
+ * Create a styled text view using the new styling system
+ */
+export const styledText = (content: string, style: Style): View => ({
+  render: () => Effect.succeed(renderStyledSync(content, style)),
+  width: style.get("width") || content.split('\n').reduce((max, line) => Math.max(max, stringWidth(line)), 0),
+  height: style.get("height") || content.split('\n').length
+})

@@ -44,3 +44,7 @@ export type { RuntimeConfig, SystemMsg } from "./runtime.ts"
 
 // Key handling utilities
 export { KeyUtils, KeyType } from "./keys.ts"
+
+// View utilities
+import * as ViewModule from "./view.ts"
+export const View = ViewModule
