@@ -11,7 +11,7 @@
  */
 
 import { Effect, Option, pipe } from "effect"
-import stringWidth from "string-width"
+import { stringWidth } from "@/utils/string-width.ts"
 import type { View, Cmd, AppServices, KeyEvent } from "@/core/types.ts"
 import { KeyUtils, KeyType } from "@/core/keys.ts"
 import { Style, style, Colors, renderStyledSync } from "@/styling/index.ts"

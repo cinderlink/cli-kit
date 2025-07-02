@@ -6,7 +6,7 @@
  */
 
 import { Effect } from "effect"
-import type { View, Cmd, AppServices, KeyEvent } from "@/core/types.ts"
+import type { View, Cmd, AppServices, KeyEvent, MouseEvent } from "@/core/types.ts"
 import { Style, style, Colors } from "@/styling/index.ts"
 
 // =============================================================================
@@ -34,6 +34,12 @@ export interface UIComponent<Model, Msg> {
   
   // Key handling
   handleKey?: (key: KeyEvent, model: Model) => Msg | null
+  
+  // Mouse handling
+  handleMouse?: (mouse: MouseEvent, model: Model) => Msg | null
+  
+  // Component ID for hit testing
+  readonly id: string
   
   // Styling
   styles?: ComponentStyles

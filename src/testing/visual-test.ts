@@ -4,7 +4,7 @@
 
 import { Effect } from "effect"
 import * as View from "@/core/view.ts"
-import stringWidth from "string-width"
+import { stringWidth } from "@/utils/string-width.ts"
 
 /**
  * Test individual view components and their rendered output

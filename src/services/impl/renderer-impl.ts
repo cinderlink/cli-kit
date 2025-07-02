@@ -3,7 +3,7 @@
  */
 
 import { Effect, Layer, Ref, Chunk } from "effect"
-import stringWidth from "string-width"
+import { stringWidth } from "@/utils/string-width.ts"
 import { RendererService } from "../renderer.ts"
 import { TerminalService } from "@/services/terminal.ts"
 import { RenderError } from "@/core/errors.ts"
@@ -110,17 +110,55 @@ class Buffer {
           continue
         }
         
-        // Get next character
-        const char = remainingText[0]
-        remainingText = remainingText.slice(1)
+        // Get next grapheme cluster (handles multi-byte chars like emojis)
+        // Try to detect emoji or multi-byte character
+        let char = remainingText[0]
+        let charLength = 1
         
-        if (segmentX < this.width && currentY < this.height) {
-          this.set(segmentX, currentY, { char, style: currentStyle })
+        // Check if this might be the start of an emoji or multi-byte sequence
+        const codePoint = remainingText.codePointAt(0)
+        if (codePoint && codePoint > 0xFFFF) {
+          // This is a surrogate pair (emoji or other Unicode)
+          charLength = 2
+          char = remainingText.slice(0, 2)
+        } else if (codePoint && codePoint >= 0x1F000) {
+          // Emoji range
+          // Check for emoji modifiers and zero-width joiners
+          let pos = 1
+          while (pos < remainingText.length) {
+            const nextCode = remainingText.codePointAt(pos)
+            if (nextCode === 0xFE0F || // Variation selector
+                nextCode === 0x200D || // Zero-width joiner
+                (nextCode >= 0x1F3FB && nextCode <= 0x1F3FF) || // Skin tone modifiers
+                (nextCode >= 0x1F000)) { // Another emoji (for sequences)
+              pos += nextCode > 0xFFFF ? 2 : 1
+            } else {
+              break
+            }
+          }
+          charLength = pos
+          char = remainingText.slice(0, pos)
         }
         
-        // Advance cursor by the display width of the character
+        remainingText = remainingText.slice(charLength)
+        
+        // Calculate display width
         const charWidth = stringWidth(char)
-        segmentX += Math.max(1, charWidth)
+        
+        // Write the character to the buffer
+        if (segmentX < this.width && currentY < this.height) {
+          this.set(segmentX, currentY, { char, style: currentStyle })
+          
+          // For wide characters, fill the extra columns with empty cells
+          for (let i = 1; i < charWidth; i++) {
+            if (segmentX + i < this.width) {
+              this.set(segmentX + i, currentY, { char: '', style: currentStyle })
+            }
+          }
+        }
+        
+        // Advance cursor by the display width
+        segmentX += charWidth
       }
     }
   }

@@ -6,7 +6,7 @@
  */
 
 import { Effect } from "effect"
-import stringWidth from "string-width"
+import { stringWidth } from "@/utils/string-width.ts"
 import type { View } from "@/core/types.ts"
 import * as ViewUtils from "@/core/view.ts"
 import { style, type Style, type Border, Borders, renderBox, BorderSide } from "@/styling/index.ts"

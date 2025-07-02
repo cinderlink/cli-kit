@@ -1,167 +1,211 @@
-# CLI Framework Examples
+# CLI-Kit Examples
 
-This directory contains curated examples demonstrating the features and capabilities of our Bubble Tea-inspired CLI framework for Bun.
+This directory contains real-world examples demonstrating CLI-Kit's capabilities through TUI applications inspired by popular open-source tools.
 
-## 📁 Example Overview
+## Available Examples
 
-### **basic-panel.ts** - Framework Verification
-A simple test confirming the framework fundamentals work correctly:
-- ✅ **Complete borders** rendered properly on all sides
-- ✅ **Color system** working with ANSI codes
-- ✅ **Panel layout** with correct padding and spacing
-- ✅ **Basic interactions** (counter increment/decrement)
+### 🔧 Git Dashboard (`git-dashboard.ts`)
+A lazygit-inspired Git repository management interface.
 
-### **contact-form.ts** - Clean Form Implementation
-A properly styled contact form demonstrating:
-- ✅ **Professional form layout** with complete borders
-- ✅ **Clean component composition** with proper focus management
-- ✅ **Input validation** with real-time feedback (email validation)
-- ✅ **Consistent styling** across all form elements
-- ✅ **Tab navigation** and form submission workflow
+**Features:**
+- Multi-panel layout (Working Directory, Staging Area, Commit History)
+- File staging/unstaging simulation
+- Git workflow demonstration
+- Panel navigation with Tab and number keys
 
-**Key Features:**
-- Name and email inputs with validation
-- Tab navigation between fields
-- Submit/cancel buttons with proper styling
-- Success screen with form data display
-- Theme-aware colors that adapt to terminal
+**Run:** `bun examples/git-dashboard.ts`
 
-### **button-showcase.ts** - Button Variants and States
-Comprehensive demonstration of button components:
-- ✅ **All button variants**: Primary, Secondary, Success, Danger, Warning, Ghost
-- ✅ **Interactive states**: Focus, hover, pressed, disabled
-- ✅ **Consistent sizing** and alignment
-- ✅ **Theme integration** with proper color relationships
-- ✅ **Keyboard navigation** and click handling
+**Key Patterns Demonstrated:**
+- Multi-panel navigation
+- State management across panels
+- Table components with different configurations
+- Focus management between components
 
-**Key Features:**
-- 6 button variants in a clean grid layout
-- Tab navigation between buttons
-- Visual feedback for button clicks
-- Consistent styling and behavior
+### 📊 Process Monitor (`process-monitor.ts`)
+An htop-inspired system process monitoring interface.
 
-### **layout-patterns.ts** - Layout System Capabilities
-Advanced layout demonstrations including:
-- ✅ **Panel composition** with borders and padding
-- ✅ **Flexbox layouts** (horizontal and vertical)
-- ✅ **Centering and alignment** techniques
-- ✅ **Nested layouts** for complex UIs
-- ✅ **Responsive design** patterns
+**Features:**
+- Real-time process table with CPU/Memory usage
+- System resource meters (CPU, Memory, Network)
+- Process management operations (kill, refresh)
+- Auto-refresh with configurable intervals
 
-**Key Features:**
-- 4 different layout patterns to browse
-- Basic panels with proper spacing
-- Flexbox grid system demonstration
-- Centered modal-style content
-- Complex nested layout (header/sidebar/main/footer)
+**Run:** `bun examples/process-monitor.ts`
 
-## 🎨 **Color System**
+**Key Patterns Demonstrated:**
+- Real-time data updates
+- Progress bars for system metrics
+- Auto-refresh mechanisms
+- Process management workflows
 
-All examples use the proven ANSI color system for maximum compatibility:
+### 📝 Log Viewer (`log-viewer.ts`)
+An lnav-inspired log file viewer and analyzer.
 
-### **Color Palette**
-- **Basic ANSI colors** - `Colors.white`, `Colors.cyan`, `Colors.gray`, etc.
-- **Status colors** - `Colors.green`, `Colors.yellow`, `Colors.red` for feedback
-- **Terminal compatibility** - Works in all terminal environments
-- **Consistent appearance** - Reliable color rendering across platforms
+**Features:**
+- Streaming log display with auto-scroll
+- Log level filtering (ERROR, WARN, INFO, DEBUG)
+- Search functionality with highlighting
+- Multiple view modes (list/detail)
 
-### **Styling Features**
-- **Text decorations** - Bold, italic, underline, etc.
-- **Background colors** - Highlight and focus states
-- **Borders and panels** - Clean UI structure
-- **Proper spacing** - Padding and margin control
+**Run:** `bun examples/log-viewer.ts`
 
-## 🏗️ **Architecture Patterns**
+**Key Patterns Demonstrated:**
+- Streaming data display
+- Advanced filtering systems
+- Search and highlighting
+- Toggle-based UI controls
 
-### **Component Design**
-- **Interface-driven development** with consistent contracts
-- **Effect-based state management** for robust error handling
-- **Composable components** that work together seamlessly
-- **Focus management** with proper visual feedback
+### 📦 Package Manager (`package-manager.ts`)
+An npm/yarn-inspired package management interface.
 
-### **Layout System**
-- **Flexbox-inspired layouts** with gap control
-- **Panel composition** with padding and borders
-- **Centering utilities** for modal-style content
-- **Responsive techniques** for different terminal sizes
+**Features:**
+- Multi-tab interface (Packages, Dependencies, Search)
+- Package operations (install/uninstall/update)
+- Bulk operations and selection
+- Package details and metadata display
 
-### **Message Architecture**
-- **Type-safe messages** with discriminated unions
-- **Command composition** using Effect sequences
-- **Event handling** with proper state updates
-- **Focus propagation** between components
+**Run:** `bun examples/package-manager.ts`
 
-## 🚀 **Running Examples**
+**Key Patterns Demonstrated:**
+- Tab-based navigation
+- Complex table interactions
+- Bulk operations
+- Multi-view state management
 
-Each example is a standalone application. Run them with:
+### 📋 Contact Form (`contact-form.ts`)
+A comprehensive form example with validation.
+
+**Features:**
+- Multiple input fields with validation
+- Field navigation and focus management
+- Form submission and error handling
+- Responsive layout
+
+**Run:** `bun examples/contact-form.ts`
+
+**Key Patterns Demonstrated:**
+- Form state management
+- Input validation
+- Field navigation
+- Error display
+
+### 🎨 Layout Patterns (`layout-patterns.ts`)
+Demonstrates various layout techniques and responsive design.
+
+**Features:**
+- Grid layouts and nested containers
+- Dynamic sizing and alignment
+- Responsive behavior demonstration
+- Box model examples
+
+**Run:** `bun examples/layout-patterns.ts`
+
+**Key Patterns Demonstrated:**
+- Advanced layouts
+- Responsive design
+- Container composition
+- Styling techniques
+
+## Quick Test
+
+To quickly test all examples and ensure they work:
 
 ```bash
-# Basic framework test
-bun examples/basic-panel.ts
-
-# Clean contact form
-bun examples/contact-form.ts
-
-# Button showcase
-bun examples/button-showcase.ts
-
-# Layout demonstrations
-bun examples/layout-patterns.ts
+# Run examples with timeout to test basic functionality
+timeout 3s bun examples/git-dashboard.ts
+timeout 3s bun examples/process-monitor.ts
+timeout 3s bun examples/log-viewer.ts
+timeout 3s bun examples/package-manager.ts
+timeout 3s bun examples/contact-form.ts
+timeout 3s bun examples/layout-patterns.ts
 ```
 
-## 🎯 **Key Learnings from Examples**
+## Example Categories
 
-### **1. Framework Fundamentals Work Correctly**
-- **Complete borders** - All panel borders render properly on all sides
-- **ANSI color system** - Proven color constants work reliably
-- **Layout composition** - Flexbox and panel systems function correctly
+### Real-World Application Patterns
+- **Git Dashboard**: Version control workflows
+- **Process Monitor**: System administration tools
+- **Log Viewer**: Log analysis and monitoring
+- **Package Manager**: Package management workflows
 
-### **2. Proper Component Architecture**
-- **Effect-based state management** - Robust error handling and async flows
-- **Focus management** - Tab navigation works smoothly between components
-- **Component composition** - Panels, forms, and layouts work together seamlessly
+### UI Pattern Libraries
+- **Contact Form**: Form handling and validation
+- **Layout Patterns**: Layout composition and responsive design
 
-### **3. Layout System Capabilities**
-- **Flexbox patterns** - Horizontal and vertical arrangements work correctly
-- **Panel composition** - Borders, padding, and nested layouts function properly
-- **Centering utilities** - Modal-style content positioning works
+## Common Keyboard Shortcuts
 
-### **4. Professional UI Quality Achieved**
-- **Visual consistency** - All elements have proper styling and spacing
-- **Keyboard navigation** - Intuitive focus management and interactions
-- **Form handling** - Validation, submission, and success flows work correctly
+Most examples follow these conventions:
 
-## 📚 **Comparison to Original Issues**
+- **Tab**: Navigate between panels/tabs
+- **1-9**: Direct access to tabs/panels
+- **↑↓**: Navigate lists/tables
+- **Space**: Select/toggle items
+- **Enter**: Confirm/submit actions
+- **Escape**: Cancel/clear
+- **Ctrl+C**: Exit application
 
-Our curated examples successfully resolved all the original form demo problems:
+## Testing
 
-| **Original Issue** | **Root Cause** | **Solution** | **Status** |
-|-------------------|----------------|------------|------------|
-| "undefined" values | Theming integration mismatch | Use existing Colors system | ✅ Fixed |
-| Missing borders | Theming errors obscuring borders | Fixed color system integration | ✅ Fixed |
-| Inconsistent styling | Color format incompatibilities | ANSI color constants | ✅ Fixed |
-| Focus management | No issues - working correctly | Tab navigation functional | ✅ Working |
-| Layout problems | No issues - working correctly | Panel and flexbox systems working | ✅ Working |
+Each example has comprehensive e2e tests:
 
-## 🎨 **Visual Quality**
+```bash
+# Run all e2e tests
+bun tests/e2e/run-tests.ts
 
-These examples demonstrate **professional-grade terminal UIs** that:
-- ✅ Render consistently across different terminals
-- ✅ Provide clear visual hierarchy and feedback
-- ✅ Handle focus states properly without visual glitches
-- ✅ Use appropriate colors for light and dark backgrounds
-- ✅ Maintain proper spacing and alignment
+# Run specific test
+bun test tests/e2e/git-dashboard.test.ts
+```
 
-The result is a **framework that produces beautiful, consistent terminal applications** similar to modern CLI tools like `glow`, `lazygit`, and other polished terminal UIs.
+## Creating New Examples
 
-## 🔄 **Next Steps**
+Use this template for new examples:
 
-Future examples could demonstrate:
-- **Modal and overlay systems** with proper layering
-- **List components** with selection and filtering
-- **Table layouts** with data visualization
-- **Progress indicators** and loading states
-- **Toast notifications** and error handling
-- **Complex forms** with validation and conditional fields
+```typescript
+import { Effect } from "effect"
+import { runApp } from "@/index.ts"
+import { text, vstack } from "@/core/view.ts"
+import { style, Colors } from "@/styling/index.ts"
+import { InputService } from "@/services/index.ts"
+import type { Component, RuntimeConfig } from "@/core/types.ts"
+import { LiveServices } from "../src/services/impl/index.ts"
 
-These examples provide a solid foundation for building professional terminal applications with consistent, beautiful UIs.
+interface Model {
+  // Your state
+}
+
+type Msg = 
+  // Your messages
+
+const app: Component<Model, Msg> = {
+  init: Effect.succeed([/* initial state */, []]),
+  update: (msg, model) => { /* handle updates */ },
+  view: (model) => { /* render UI */ },
+  subscriptions: (model) => { /* handle input */ }
+}
+
+const config: RuntimeConfig = {
+  fps: 30,
+  quitOnCtrlC: true,
+  fullscreen: true
+}
+
+Effect.runPromise(runApp(app, config).pipe(
+  Effect.provide(LiveServices)
+)).catch(console.error)
+```
+
+## Design Philosophy
+
+These examples demonstrate:
+
+1. **Real-world patterns**: Based on actual TUI applications
+2. **Component composition**: How to build complex UIs from simple components
+3. **State management**: Effective patterns for managing application state
+4. **User experience**: Intuitive keyboard navigation and feedback
+5. **Performance**: Efficient rendering and update patterns
+
+Each example is designed to be:
+- **Educational**: Clear demonstration of specific patterns
+- **Functional**: Complete working applications
+- **Tested**: Comprehensive e2e test coverage
+- **Documented**: Well-commented code explaining key concepts

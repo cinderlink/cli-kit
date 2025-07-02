@@ -3,7 +3,7 @@
  */
 
 import { Effect } from "effect"
-import stringWidth from "string-width"
+import { stringWidth } from "@/utils/string-width.ts"
 import type { View, RenderError } from "@/core/types.ts"
 import { RendererService } from "@/services/index.ts"
 import { style as createStyle, renderStyledSync, type Style } from "@/styling/index.ts"
@@ -38,18 +38,61 @@ export const vstack = (...views: View[]): View => ({
 })
 
 /**
- * Combine multiple views horizontally
+ * Combine multiple views horizontally with proper multi-line support
+ * Note: For advanced alignment options, use joinHorizontal from @/layout/join.ts
  */
 export const hstack = (...views: View[]): View => ({
   render: () =>
     Effect.gen(function* (_) {
-      const rendered = yield* _(
-        Effect.forEach(views, v => v.render())
+      // Render all views
+      const renderedViews = yield* _(
+        Effect.forEach(views, (v, index) => 
+          Effect.gen(function* (_) {
+            const content = yield* _(v.render())
+            return { content, width: v.width || 0, index }
+          })
+        )
       )
       
-      // Simple horizontal concatenation
-      // In a real implementation, this would handle multi-line views
-      return rendered.join(' ')
+      // Split each into lines
+      const viewData = renderedViews.map(({ content, width }) => {
+        const lines = content.split('\n')
+        return { lines, width }
+      })
+      
+      // Find max height
+      const maxHeight = Math.max(...viewData.map(({ lines }) => lines.length))
+      
+      // Pad shorter views to max height and ensure each line is full width
+      const aligned = viewData.map(({ lines, width }) => {
+        // Pad each line to the view's width
+        const paddedLines = lines.map(line => {
+          const lineWidth = stringWidth(line)
+          if (lineWidth < width) {
+            return line + ' '.repeat(width - lineWidth)
+          }
+          return line
+        })
+        
+        // Add empty lines if needed
+        const height = paddedLines.length
+        if (height < maxHeight) {
+          const emptyLine = ' '.repeat(width)
+          const padding = maxHeight - height
+          return [...paddedLines, ...Array(padding).fill(emptyLine)]
+        }
+        
+        return paddedLines
+      })
+      
+      // Join horizontally line by line
+      const result: string[] = []
+      for (let i = 0; i < maxHeight; i++) {
+        const line = aligned.map(lines => lines[i] || '').join('')
+        result.push(line)
+      }
+      
+      return result.join('\n')
     }),
   width: views.reduce((sum, v) => sum + (v.width || 0), 0),
   height: Math.max(...views.map(v => v.height || 1))

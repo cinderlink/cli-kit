@@ -19,7 +19,7 @@
  * with professional appearance and smooth user interaction.
  */
 
-import { Effect, Option } from "effect"
+import { Effect, Option, Stream } from "effect"
 import { 
   runApp,
   View,
@@ -61,6 +61,8 @@ interface ContactFormModel {
   formData: { name: string; email: string } | null
 }
 
+const FOCUS_NONE = -1  // No component focused
+
 const FOCUS_NAME = 0
 const FOCUS_EMAIL = 1
 const FOCUS_SUBMIT = 2
@@ -73,9 +75,12 @@ const FOCUS_CANCEL = 3
 type ContactFormMsg =
   | { _tag: "NextField" }
   | { _tag: "PrevField" }
+  | { _tag: "FocusField"; index: number }
+  | { _tag: "Blur" }
   | { _tag: "Submit" }
   | { _tag: "Cancel" }
   | { _tag: "Reset" }
+  | { _tag: "Quit" }
   | TextInputMsg
   | ButtonMsg
 
@@ -117,6 +122,11 @@ const setFocus = (newIndex: number, model: ContactFormModel): Effect.Effect<[Con
       emailInput: blurredEmail,
       submitButton: blurredSubmit,
       cancelButton: blurredCancel
+    }
+    
+    // If newIndex is FOCUS_NONE, we're done (everything is blurred)
+    if (newIndex === FOCUS_NONE) {
+      return [updatedModel, []]
     }
     
     // Focus the new component
@@ -187,6 +197,15 @@ export const ContactFormComponent: Component<ContactFormModel, ContactFormMsg> =
           return yield* _(setFocus(prevIndex, model))
         }
         
+        case "FocusField": {
+          return yield* _(setFocus(msg.index, model))
+        }
+        
+        case "Blur": {
+          // Blur all fields and set focus to none
+          return yield* _(setFocus(FOCUS_NONE, model))
+        }
+        
         case "Submit": {
           // Basic validation
           if (!model.nameInput.value || !model.emailInput.value) {
@@ -205,11 +224,11 @@ export const ContactFormComponent: Component<ContactFormModel, ContactFormMsg> =
           return [{ ...model, submitted: true, formData }, []]
         }
         
-        case "Cancel": {
-          process.stdout.write('\x1b[?25h') // Show cursor
-          process.stdout.write('\x1b[2J')   // Clear screen
-          process.stdout.write('\x1b[H')    // Move to top
-          process.exit(0)
+        case "Cancel":
+        case "Quit": {
+          // Create a quit command that will be processed by the runtime
+          const quitCmd = Effect.succeed({ _tag: "Quit" as const })
+          return [model, [quitCmd]]
         }
         
         case "Reset": {
@@ -218,32 +237,48 @@ export const ContactFormComponent: Component<ContactFormModel, ContactFormMsg> =
         }
         
         default: {
-          // Update all components
-          const [newName] = yield* _(nameField.update(msg as any, model.nameInput))
-          const [newEmail] = yield* _(emailField.update(msg as any, model.emailInput))
-          const [newSubmit] = yield* _(submitBtn.update(msg as any, model.submitButton))
-          const [newCancel] = yield* _(cancelBtn.update(msg as any, model.cancelButton))
+          // Only update the focused component
+          let newModel = model
           
-          // Check for button clicks
-          if (msg._tag === "Click") {
-            if (model.focusIndex === FOCUS_SUBMIT && newSubmit !== model.submitButton) {
-              return yield* _(update({ _tag: "Submit" }, model))
+          // If nothing is focused, ignore component messages
+          if (model.focusIndex === FOCUS_NONE) {
+            return [model, []]
+          }
+          
+          switch (model.focusIndex) {
+            case FOCUS_NAME: {
+              const [newName] = yield* _(nameField.update(msg as any, model.nameInput))
+              newModel = { ...model, nameInput: newName }
+              break
             }
-            if (model.focusIndex === FOCUS_CANCEL && newCancel !== model.cancelButton) {
-              return yield* _(update({ _tag: "Cancel" }, model))
+            case FOCUS_EMAIL: {
+              const [newEmail] = yield* _(emailField.update(msg as any, model.emailInput))
+              newModel = { ...model, emailInput: newEmail }
+              break
+            }
+            case FOCUS_SUBMIT: {
+              const [newSubmit] = yield* _(submitBtn.update(msg as any, model.submitButton))
+              newModel = { ...model, submitButton: newSubmit }
+              
+              // Check for button click
+              if (msg._tag === "Click" && newSubmit !== model.submitButton) {
+                return yield* _(update({ _tag: "Submit" }, model))
+              }
+              break
+            }
+            case FOCUS_CANCEL: {
+              const [newCancel] = yield* _(cancelBtn.update(msg as any, model.cancelButton))
+              newModel = { ...model, cancelButton: newCancel }
+              
+              // Check for button click
+              if (msg._tag === "Click" && newCancel !== model.cancelButton) {
+                return yield* _(update({ _tag: "Cancel" }, model))
+              }
+              break
             }
           }
           
-          return [
-            {
-              ...model,
-              nameInput: newName,
-              emailInput: newEmail,
-              submitButton: newSubmit,
-              cancelButton: newCancel
-            },
-            []
-          ]
+          return [newModel, []]
         }
       }
     }),
@@ -322,12 +357,16 @@ export const ContactFormComponent: Component<ContactFormModel, ContactFormMsg> =
       const input = yield* _(InputService)
       
       return input.mapKeys(key => {
-        // Global keys
-        if (key.key === 'q' || (key.ctrl && key.key === 'ctrl+c')) {
-          process.stdout.write('\x1b[?25h')  // Show cursor
-          process.stdout.write('\x1b[2J')    // Clear screen
-          process.stdout.write('\x1b[H')     // Move to home
-          process.exit(0)
+        // Always allow Ctrl+C to quit
+        if (key.ctrl && key.key === 'ctrl+c') {
+          return { _tag: "Quit" as const }
+        }
+        
+        // Only allow 'q' to quit when no input field is focused
+        if (key.key === 'q' && (model.focusIndex === FOCUS_NONE || 
+            model.focusIndex === FOCUS_SUBMIT || 
+            model.focusIndex === FOCUS_CANCEL)) {
+          return { _tag: "Quit" as const }
         }
         
         if (model.submitted && key.key === 'r') {
@@ -339,26 +378,48 @@ export const ContactFormComponent: Component<ContactFormModel, ContactFormMsg> =
           return null
         }
         
+        // ESC key blurs current field
+        if (key.key === 'escape') {
+          return { _tag: "Blur" as const }
+        }
+        
         // Tab navigation
         if (key.key === 'tab' && !key.shift) {
+          // If nothing is focused, start at the beginning
+          if (model.focusIndex === FOCUS_NONE) {
+            return { _tag: "FocusField" as const, index: FOCUS_NAME }
+          }
           return { _tag: "NextField" as const }
         }
         if (key.key === 'tab' && key.shift) {
+          // If nothing is focused, start at the end
+          if (model.focusIndex === FOCUS_NONE) {
+            return { _tag: "FocusField" as const, index: FOCUS_CANCEL }
+          }
           return { _tag: "PrevField" as const }
         }
         
-        // Try all components
-        const nameMsg = nameField.handleKey(key, model.nameInput)
-        if (nameMsg) return nameMsg
-        
-        const emailMsg = emailField.handleKey(key, model.emailInput)
-        if (emailMsg) return emailMsg
-        
-        const submitMsg = submitBtn.handleKey(key, model.submitButton)
-        if (submitMsg) return submitMsg
-        
-        const cancelMsg = cancelBtn.handleKey(key, model.cancelButton)
-        if (cancelMsg) return cancelMsg
+        // Only handle keys for the focused component if something is focused
+        if (model.focusIndex !== FOCUS_NONE) {
+          switch (model.focusIndex) {
+            case FOCUS_NAME:
+              const nameMsg = nameField.handleKey(key, model.nameInput)
+              if (nameMsg) return nameMsg
+              break
+            case FOCUS_EMAIL:
+              const emailMsg = emailField.handleKey(key, model.emailInput)
+              if (emailMsg) return emailMsg
+              break
+            case FOCUS_SUBMIT:
+              const submitMsg = submitBtn.handleKey(key, model.submitButton)
+              if (submitMsg) return submitMsg
+              break
+            case FOCUS_CANCEL:
+              const cancelMsg = cancelBtn.handleKey(key, model.cancelButton)
+              if (cancelMsg) return cancelMsg
+              break
+          }
+        }
         
         return null
       })
@@ -376,7 +437,7 @@ const config: RuntimeConfig = {
   fps: 30,
   debug: false,
   quitOnEscape: false,
-  quitOnCtrlC: false,
+  quitOnCtrlC: true,  // Enable Ctrl+C handling by default
   enableMouse: false,
   fullscreen: true
 }
@@ -390,4 +451,9 @@ const program = runApp(ContactFormComponent, config).pipe(
   Effect.provide(LiveServices)
 )
 
-Effect.runPromise(program).catch(console.error)
+Effect.runPromise(program)
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })

@@ -16,14 +16,24 @@
     "test:unit": "bun test __tests__/unit",
     "test:integration": "bun test __tests__/integration",
     "test:e2e": "bun test __tests__/e2e",
-    "test:e2e:all": "bun run scripts/run-e2e-tests.ts",
+    "test:e2e:all": "bun tests/e2e/run-tests.ts",
     "test:perf": "bun test __tests__/performance",
     "test:update-snapshots": "bun test -u",
     "typecheck": "tsc --noEmit",
     "lint": "echo 'No linter configured yet'",
     "clean": "rm -rf dist coverage",
     "check": "bun run typecheck && bun test",
-    "example:counter": "bun run examples/counter.ts"
+    "example:git-dashboard": "bun examples/git-dashboard.ts",
+    "example:process-monitor": "bun examples/process-monitor.ts",
+    "example:log-viewer": "bun examples/log-viewer.ts",
+    "example:package-manager": "bun examples/package-manager.ts",
+    "example:contact-form": "bun examples/contact-form.ts",
+    "example:layout-patterns": "bun examples/layout-patterns.ts",
+    "example:tabs-showcase": "bun examples/tabs-showcase.ts",
+    "example:table-showcase": "bun examples/table-showcase.ts",
+    "example:mouse-demo": "bun examples/mouse-demo.ts",
+    "examples": "bun scripts/show-examples.ts",
+    "examples:test": "bun scripts/test-examples.ts"
   },
   "keywords": ["tui", "terminal", "cli", "bun", "typescript", "mvU", "effect"],
   "author": "Cinderlink",
@@ -35,7 +45,6 @@
   ],
   "dependencies": {
     "effect": "^3.0.0",
-    "string-width": "^7.2.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {

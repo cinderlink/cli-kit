@@ -10,6 +10,8 @@ export * from "./terminal.ts"
 export * from "./input.ts"
 export * from "./renderer.ts"
 export * from "./storage.ts"
+export * from "./hit-test.ts"
+export * from "./mouse-router.ts"
 
 // Re-export common types from core
 export type {

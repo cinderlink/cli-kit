@@ -8,7 +8,7 @@
  * - Border inheritance and composition
  */
 
-import stringWidth from "string-width"
+import { stringWidth } from "@/utils/string-width.ts"
 
 import { Data } from "effect"
 

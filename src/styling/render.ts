@@ -7,7 +7,7 @@
  */
 
 import { Effect, pipe } from "effect"
-import stringWidth from "string-width"
+import { stringWidth } from "@/utils/string-width.ts"
 import type { Style } from "./style.ts"
 import { type Color, ColorProfile, toAnsiSequence } from "./color.ts"
 import { type Border, BorderSide, renderBox, getBorderChar } from "./borders.ts"

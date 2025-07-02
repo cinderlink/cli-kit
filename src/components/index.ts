@@ -64,3 +64,59 @@ export {
   singleSelectList,
   multiSelectList
 } from "./list.ts"
+
+// Spinner component
+export {
+  type SpinnerModel,
+  type SpinnerMsg,
+  SpinnerStyle,
+  spinner,
+  loadingSpinner,
+  processingSpinner,
+  savingSpinner,
+  errorSpinner
+} from "./Spinner.ts"
+
+// ProgressBar component
+export {
+  type ProgressBarModel,
+  type ProgressBarMsg,
+  type ProgressBarStyle,
+  progressBar,
+  simpleProgressBar,
+  fancyProgressBar,
+  asciiProgressBar,
+  loadingBar,
+  setProgress,
+  defaultProgressBarStyle,
+  fancyProgressBarStyle,
+  asciiProgressBarStyle
+} from "./ProgressBar.ts"
+
+// Table component
+export {
+  type TableModel,
+  type TableMsg,
+  type TableColumn,
+  type TableRow,
+  type TableSort,
+  type TableFilter,
+  TableSelectionMode,
+  table,
+  createColumn,
+  createRow,
+  simpleTable
+} from "./Table.ts"
+
+// Tabs component
+export {
+  type Tab,
+  type TabStyles,
+  type TabsModel,
+  type TabsMsg,
+  tabs,
+  createTab,
+  stringTabs,
+  viewTabs,
+  defaultTabStyles
+} from "./Tabs.ts"

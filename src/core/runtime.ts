@@ -18,7 +18,8 @@ import {
   TerminalService, 
   InputService, 
   RendererService, 
-  StorageService 
+  StorageService,
+  MouseRouterService 
 } from "@/services/index.ts"
 import { ApplicationError } from "@/core/errors.ts"
 
@@ -62,7 +63,18 @@ export class Runtime<Model, Msg> {
   constructor(
     private readonly component: Component<Model, Msg>,
     private readonly config: RuntimeConfig = {}
-  ) {}
+  ) {
+    // Apply sensible defaults
+    this.config = {
+      fps: 60,
+      debug: false,
+      quitOnEscape: false,
+      quitOnCtrlC: true,  // Default to true for safety
+      enableMouse: false,
+      fullscreen: true,
+      ...config  // User config overrides defaults
+    }
+  }
 
   /**
    * Run the application
@@ -84,6 +96,11 @@ export class Runtime<Model, Msg> {
     yield* _(terminal.hideCursor)
     yield* _(terminal.clear)
     
+    // Enable mouse if configured
+    if (self.config.enableMouse) {
+      yield* _(input.enableMouse)
+    }
+    
     // Initialize component
     const [initialModel, initialCmds] = yield* _(self.component.init)
     
@@ -101,13 +118,17 @@ export class Runtime<Model, Msg> {
     // Process initial commands
     yield* _(processCmds(initialCmds, msgQueue))
     
-    // Start input handling fiber
-    const inputFiber = yield* _(
-      handleInput(input, msgQueue, self.config).pipe(
-        Effect.fork,
-        Effect.interruptible
-      )
-    )
+    // Setup signal handlers for graceful shutdown
+    const signalHandlers = yield* _(setupSignalHandlers(msgQueue, terminal, self.config))
+    
+    // Start automatic quit key handling if enabled
+    const quitFiber = (self.config.quitOnCtrlC || self.config.quitOnEscape) ? 
+      yield* _(
+        handleAutomaticQuitKeys(input, msgQueue, self.config).pipe(
+          Effect.fork,
+          Effect.interruptible
+        )
+      ) : null
     
     // Start subscription handling fiber
     const subFiber = yield* _(
@@ -130,13 +151,15 @@ export class Runtime<Model, Msg> {
       Stream.fromQueue(msgQueue).pipe(
         Stream.takeWhile(msg => msg._tag !== "Quit"),
         Stream.runForEach(msg =>
-          processMessage(self.component, state, msgQueue, msg)
+          processMessage(self.component, state, msgQueue, msg, self.config)
         )
       )
     )
     
     // Cleanup
-    yield* _(Fiber.interruptAll([inputFiber, subFiber, renderFiber]))
+    yield* _(signalHandlers.cleanup)
+    const fibersToInterrupt = quitFiber ? [quitFiber, subFiber, renderFiber] : [subFiber, renderFiber]
+    yield* _(Fiber.interruptAll(fibersToInterrupt))
     yield* _(cleanup(terminal, self.config))
   }).pipe(
     Effect.scoped,
@@ -146,6 +169,14 @@ export class Runtime<Model, Msg> {
         const terminal = yield* _(TerminalService)
         yield* _(cleanup(terminal, self.config))
         yield* _(Effect.die(defect))
+      })
+    ),
+    Effect.catchAll(error =>
+      Effect.gen(function* (_) {
+        // Emergency cleanup on any error
+        const terminal = yield* _(TerminalService)
+        yield* _(cleanup(terminal, self.config))
+        yield* _(Effect.fail(error))
       })
     )
   )
@@ -159,7 +190,8 @@ const processMessage = <Model, Msg>(
   component: Component<Model, Msg>,
   state: Ref.Ref<RuntimeState<Model, Msg>>,
   msgQueue: Queue.Queue<SystemMsg<Msg>>,
-  sysMsg: SystemMsg<Msg>
+  sysMsg: SystemMsg<Msg>,
+  config: RuntimeConfig
 ) =>
   Effect.gen(function* (_) {
     const currentState = yield* _(Ref.get(state))
@@ -175,7 +207,28 @@ const processMessage = <Model, Msg>(
         // Otherwise ignore
         return
       case "KeyPressed":
+        // Key events would be routed to focused component
+        // For now, they're not processed at the system level
+        return
+        
       case "MouseEvent":
+        // Route mouse event to component
+        const mouseRouter = yield* _(MouseRouterService)
+        const routingResult = yield* _(mouseRouter.routeMouseEvent(sysMsg.event))
+        
+        if (config.debug) {
+          if (routingResult) {
+            console.log(`Mouse routed to ${routingResult.componentId}: ${sysMsg.event.type} ${sysMsg.event.button} at (${sysMsg.event.x}, ${sysMsg.event.y})`)
+          } else {
+            console.log(`Mouse not routed: ${sysMsg.event.type} ${sysMsg.event.button} at (${sysMsg.event.x}, ${sysMsg.event.y})`)
+          }
+        }
+        
+        if (routingResult) {
+          // Convert to user message and process
+          yield* _(Queue.offer(msgQueue, { _tag: "UserMsg", msg: routingResult.message }))
+        }
+        return
       case "Tick":
         // These would be converted to user messages if component handles them
         return
@@ -205,37 +258,117 @@ const processCmds = <Msg>(
 ) =>
   Effect.forEach(cmds, cmd =>
     cmd.pipe(
-      Effect.map(msg => ({ _tag: "UserMsg" as const, msg })),
-      Effect.flatMap(sysMsg => Queue.offer(msgQueue, sysMsg)),
+      Effect.flatMap(msg => {
+        // Check if this is a quit command
+        if (typeof msg === 'object' && msg !== null && '_tag' in msg && msg._tag === 'Quit') {
+          // Send system quit message
+          return Queue.offer(msgQueue, { _tag: "Quit" })
+        } else {
+          // Regular user message
+          return Queue.offer(msgQueue, { _tag: "UserMsg" as const, msg })
+        }
+      }),
       Effect.catchAll(() => Effect.void) // Ignore failed commands
     )
   )
 
 /**
- * Handle input events
+ * Setup signal handlers for graceful shutdown
  */
-const handleInput = <Msg>(
+const setupSignalHandlers = <Msg>(
+  msgQueue: Queue.Queue<SystemMsg<Msg>>,
+  terminal: TerminalService,
+  config: RuntimeConfig
+) =>
+  Effect.gen(function* (_) {
+    let isShuttingDown = false
+    
+    const handleShutdown = () => {
+      if (isShuttingDown) return
+      isShuttingDown = true
+      
+      // Send quit message to gracefully exit
+      Effect.runSync(Queue.offer(msgQueue, { _tag: "Quit" }))
+    }
+    
+    const emergencyCleanup = () => {
+      if (isShuttingDown) return
+      isShuttingDown = true
+      
+      // Emergency cleanup - bypass the normal shutdown process
+      // Ensure terminal is restored even in raw mode
+      try {
+        // Try to restore terminal state synchronously
+        if (process.stdin.isTTY && 'setRawMode' in process.stdin) {
+          process.stdin.setRawMode(false)
+        }
+        process.stdout.write('\x1b[?25h')  // Show cursor
+        process.stdout.write('\x1b[?1049l') // Exit alternate screen
+        process.stdout.write('\x1b[2J')     // Clear screen
+        process.stdout.write('\x1b[H')      // Move to home
+      } catch (e) {
+        // Ignore errors during emergency cleanup
+      }
+      
+      Effect.runSync(cleanup(terminal, config).pipe(
+        Effect.catchAll(() => Effect.void)
+      ))
+      process.exit(0)
+    }
+    
+    // Handle SIGINT (Ctrl+C) - Note: may not fire in raw mode
+    process.on('SIGINT', handleShutdown)
+    
+    // Handle SIGTERM (termination request)
+    process.on('SIGTERM', handleShutdown)
+    
+    // Handle process exit events
+    process.on('exit', emergencyCleanup)
+    process.on('beforeExit', emergencyCleanup)
+    
+    // Handle uncaught exceptions
+    process.on('uncaughtException', (error) => {
+      console.error('Uncaught exception:', error)
+      emergencyCleanup()
+    })
+    
+    process.on('unhandledRejection', (reason) => {
+      console.error('Unhandled rejection:', reason)
+      emergencyCleanup()
+    })
+    
+    return {
+      cleanup: Effect.sync(() => {
+        process.removeListener('SIGINT', handleShutdown)
+        process.removeListener('SIGTERM', handleShutdown)
+        process.removeListener('exit', emergencyCleanup)
+        process.removeListener('beforeExit', emergencyCleanup)
+        process.removeListener('uncaughtException', emergencyCleanup)
+        process.removeListener('unhandledRejection', emergencyCleanup)
+      })
+    }
+  })
+
+
+/**
+ * Handle automatic quit keys - this runs in parallel with component subscriptions
+ * and ensures quit keys always work unless explicitly disabled
+ */
+const handleAutomaticQuitKeys = <Msg>(
   input: InputService,
   msgQueue: Queue.Queue<SystemMsg<Msg>>,
   config: RuntimeConfig
 ) =>
   Effect.gen(function* (_) {
-    const keyStream = yield* _(input.keyEvents)
-    
+    // Create a separate subscription to handle quit keys
+    // This doesn't conflict with component subscriptions because PubSub broadcasts to all subscribers
     yield* _(
-      keyStream.pipe(
-        Stream.runForEach(key => {
-          // Check for quit keys
-          if (config.quitOnEscape && key.name === "escape") {
-            return Queue.offer(msgQueue, { _tag: "Quit" })
-          }
-          if (config.quitOnCtrlC && key.ctrl && key.name === "c") {
-            return Queue.offer(msgQueue, { _tag: "Quit" })
-          }
-          
-          // Otherwise send as key event
-          return Queue.offer(msgQueue, { _tag: "KeyPressed", key })
-        })
+      input.filterKeys(key => {
+        const isQuit = (config.quitOnCtrlC && key.ctrl && key.key === 'ctrl+c') ||
+                      (config.quitOnEscape && key.key === 'escape')
+        return isQuit
+      }).pipe(
+        Stream.runForEach(() => Queue.offer(msgQueue, { _tag: "Quit" }))
       )
     )
   })
@@ -251,38 +384,21 @@ const handleSubscriptions = <Model, Msg>(
   Effect.gen(function* (_) {
     if (!component.subscriptions) return
     
-    let currentSub: Stream.Stream<Msg, never, any> | null = null
-    let currentFiber: Fiber.Fiber<void, never> | null = null
+    // Start subscription once with initial model
+    const initialState = yield* _(Ref.get(state))
+    const sub = yield* _(component.subscriptions(initialState.model))
     
-    // Watch for model changes and restart subscription
+    // Run the subscription and keep it running
+    // Don't restart unless the app is shutting down
     yield* _(
-      Effect.repeat(
-        Effect.gen(function* (_) {
+      sub.pipe(
+        Stream.takeWhile(() => Effect.gen(function* (_) {
           const currentState = yield* _(Ref.get(state))
-          if (!currentState.running) return
-          
-          // Cancel previous subscription if exists
-          if (currentFiber) {
-            yield* _(Fiber.interrupt(currentFiber))
-          }
-          
-          // Start new subscription with current model
-          const sub = yield* _(component.subscriptions!(currentState.model))
-          
-          // Fork the subscription processing
-          currentFiber = yield* _(
-            sub.pipe(
-              Stream.runForEach(msg => 
-                Queue.offer(msgQueue, { _tag: "UserMsg" as const, msg })
-              ),
-              Effect.fork
-            )
-          )
-          
-          // Wait a bit before checking again
-          yield* _(Effect.sleep(100))
-        }),
-        Schedule.forever
+          return currentState.running
+        })),
+        Stream.runForEach(msg => 
+          Queue.offer(msgQueue, { _tag: "UserMsg" as const, msg })
+        )
       )
     )
   })
@@ -340,6 +456,12 @@ const renderLoop = <Model, Msg>(
  */
 const cleanup = (terminal: TerminalService, config: RuntimeConfig) =>
   Effect.gen(function* (_) {
+    // Disable mouse if it was enabled
+    if (config.enableMouse) {
+      const input = yield* _(InputService)
+      yield* _(input.disableMouse)
+    }
+    
     yield* _(terminal.showCursor)
     yield* _(terminal.setRawMode(false))
     if (config.fullscreen ?? true) {

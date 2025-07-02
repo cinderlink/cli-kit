@@ -12,7 +12,7 @@
  */
 
 import { Effect } from "effect"
-import stringWidth from "string-width"
+import { stringWidth } from "@/utils/string-width.ts"
 import type { View } from "@/core/types.ts"
 import {
   type FlexboxProps,

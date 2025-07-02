@@ -302,7 +302,7 @@ const config: RuntimeConfig = {
   fps: 30,
   debug: false,
   quitOnEscape: false,
-  quitOnCtrlC: false,
+  quitOnCtrlC: true,  // Enable Ctrl+C handling by default
   enableMouse: false,
   fullscreen: true
 }
@@ -311,4 +311,9 @@ const program = runApp(LayoutShowcaseComponent, config).pipe(
   Effect.provide(LiveServices)
 )
 
-Effect.runPromise(program).catch(console.error)
+Effect.runPromise(program)
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })

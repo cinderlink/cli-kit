@@ -2,46 +2,97 @@
  * Input Service Implementation V2 - Using BubbleTea-inspired key handling
  */
 
-import { Effect, Layer, Stream, Queue, Chunk, Option } from "effect"
+import { Effect, Layer, Stream, Queue, Chunk, Option, PubSub } from "effect"
 import { InputService } from "../input.ts"
 import { InputError } from "@/core/errors.ts"
 import { 
-  KeyEvent, 
   KeyType, 
   ANSI_SEQUENCES, 
   parseChar, 
   getKeyName 
 } from "@/core/keys.ts"
-import type { MouseEvent } from "@/core/types.ts"
+import type { KeyEvent, MouseEvent, WindowSize } from "@/core/types.ts"
 
 /**
  * Parse mouse events from ANSI sequences
  */
 const parseMouseEvent = (sequence: string): MouseEvent | null => {
-  // Basic X10 mouse protocol: ESC [ M <button+32> <x+32> <y+32>
-  const match = sequence.match(/^\x1b\[M(.)(.)(.)/)
-  if (!match) return null
-  
-  const info = match[1].charCodeAt(0) - 32
-  const x = match[2].charCodeAt(0) - 32
-  const y = match[3].charCodeAt(0) - 32
-  
-  // Decode button info
-  const button = info & 0x03
-  const shift = !!(info & 0x04)
-  const alt = !!(info & 0x08)
-  const ctrl = !!(info & 0x10)
-  const motion = !!(info & 0x20)
-  
-  return {
-    x,
-    y,
-    button: button === 0 ? 'left' : button === 1 ? 'middle' : 'right',
-    action: motion ? 'move' : 'click',
-    shift,
-    alt,
-    ctrl,
+  // SGR extended mode: ESC [ < btn ; x ; y ; M/m
+  let match = sequence.match(/^\x1b\[<(\d+);(\d+);(\d+)([Mm])/)
+  if (match) {
+    const info = parseInt(match[1])
+    const x = parseInt(match[2])
+    const y = parseInt(match[3])
+    const isPress = match[4] === 'M'
+    
+    const button = info & 0x03
+    const shift = !!(info & 0x04)
+    const alt = !!(info & 0x08)
+    const ctrl = !!(info & 0x10)
+    const isWheel = !!(info & 0x40)
+    
+    let buttonName: MouseEvent['button']
+    let eventType: MouseEvent['type']
+    
+    if (isWheel) {
+      buttonName = (info & 0x01) ? 'wheel-down' : 'wheel-up'
+      eventType = 'wheel'
+    } else {
+      buttonName = button === 0 ? 'left' : button === 1 ? 'middle' : button === 2 ? 'right' : 'none'
+      eventType = isPress ? 'press' : 'release'
+    }
+    
+    return {
+      type: eventType,
+      button: buttonName,
+      x,
+      y,
+      ctrl,
+      alt,
+      shift
+    }
   }
+  
+  // Basic X10 mouse protocol: ESC [ M <button+32> <x+32> <y+32>
+  match = sequence.match(/^\x1b\[M(.)(.)(.)/)
+  if (match) {
+    const info = match[1].charCodeAt(0) - 32
+    const x = match[2].charCodeAt(0) - 32
+    const y = match[3].charCodeAt(0) - 32
+    
+    const button = info & 0x03
+    const shift = !!(info & 0x04)
+    const alt = !!(info & 0x08)
+    const ctrl = !!(info & 0x10)
+    const motion = !!(info & 0x20)
+    const release = !!(info & 0x03 === 3)
+    
+    let buttonName: MouseEvent['button']
+    let eventType: MouseEvent['type']
+    
+    if (motion) {
+      buttonName = 'none'
+      eventType = 'motion'
+    } else if (release) {
+      buttonName = 'none' // X10 doesn't tell us which button was released
+      eventType = 'release'
+    } else {
+      buttonName = button === 0 ? 'left' : button === 1 ? 'middle' : 'right'
+      eventType = 'press'
+    }
+    
+    return {
+      type: eventType,
+      button: buttonName,
+      x,
+      y,
+      ctrl,
+      alt,
+      shift
+    }
+  }
+  
+  return null
 }
 
 /**
@@ -49,18 +100,31 @@ const parseMouseEvent = (sequence: string): MouseEvent | null => {
  */
 const parseBuffer = (
   buffer: string, 
-  keyQueue: Queue.Queue<KeyEvent>,
-  mouseQueue: Queue.Queue<MouseEvent>
+  keyPubSub: PubSub.PubSub<KeyEvent>,
+  mousePubSub: PubSub.PubSub<MouseEvent>
 ): string => {
   while (buffer.length > 0) {
-    // Check for mouse events first
+    // Check for SGR mouse events first: ESC [ < btn ; x ; y ; M/m
+    const sgrMatch = buffer.match(/^\x1b\[<(\d+);(\d+);(\d+)[Mm]/)
+    if (sgrMatch) {
+      const mouseSeq = sgrMatch[0]
+      buffer = buffer.slice(mouseSeq.length)
+      
+      const mouseEvent = parseMouseEvent(mouseSeq)
+      if (mouseEvent) {
+        Effect.runSync(PubSub.publish(mousePubSub, mouseEvent))
+      }
+      continue
+    }
+    
+    // Check for X10 mouse events: ESC [ M <3 bytes>
     if (buffer.startsWith('\x1b[M') && buffer.length >= 6) {
       const mouseSeq = buffer.slice(0, 6)
       buffer = buffer.slice(6)
       
       const mouseEvent = parseMouseEvent(mouseSeq)
       if (mouseEvent) {
-        Effect.runSync(Queue.offer(mouseQueue, mouseEvent))
+        Effect.runSync(PubSub.publish(mousePubSub, mouseEvent))
       }
       continue
     }
@@ -82,7 +146,7 @@ const parseBuffer = (
           meta: false,
           sequence: seq
         }
-        Effect.runSync(Queue.offer(keyQueue, keyEvent))
+        Effect.runSync(PubSub.publish(keyPubSub, keyEvent))
         buffer = buffer.slice(seq.length)
         matched = true
         break
@@ -101,7 +165,7 @@ const parseBuffer = (
         key: `alt+${baseKey.runes || baseKey.key}`,
         sequence: buffer.slice(0, 2)
       }
-      Effect.runSync(Queue.offer(keyQueue, keyEvent))
+      Effect.runSync(PubSub.publish(keyPubSub, keyEvent))
       buffer = buffer.slice(2)
       continue
     }
@@ -110,7 +174,7 @@ const parseBuffer = (
     if (!buffer.startsWith('\x1b') || buffer.length === 1) {
       const char = buffer[0]
       const keyEvent = parseChar(char)
-      Effect.runSync(Queue.offer(keyQueue, {
+      Effect.runSync(PubSub.publish(keyPubSub, {
         ...keyEvent,
         sequence: char
       }))
@@ -138,8 +202,9 @@ export const InputServiceLive = Layer.scoped(
   InputService,
   Effect.gen(function* (_) {
     const stdin = process.stdin
-    const keyQueue = yield* _(Queue.unbounded<KeyEvent>())
-    const mouseQueue = yield* _(Queue.unbounded<MouseEvent>())
+    // Use PubSub to broadcast events to all consumers
+    const keyPubSub = yield* _(PubSub.unbounded<KeyEvent>())
+    const mousePubSub = yield* _(PubSub.unbounded<MouseEvent>())
     
     // Start reading from stdin
     yield* _(Effect.acquireRelease(
@@ -156,21 +221,7 @@ export const InputServiceLive = Layer.scoped(
         let buffer = ''
         stdin.on('data', (chunk: string) => {
           buffer += chunk
-          buffer = parseBuffer(buffer, keyQueue, mouseQueue)
-        })
-        
-        // Handle process signals
-        process.on('SIGINT', () => {
-          // Send Ctrl+C event
-          const ctrlC: KeyEvent = {
-            type: KeyType.CtrlC,
-            key: 'ctrl+c',
-            ctrl: true,
-            alt: false,
-            shift: false,
-            meta: false,
-          }
-          Effect.runSync(Queue.offer(keyQueue, ctrlC))
+          buffer = parseBuffer(buffer, keyPubSub, mousePubSub)
         })
       }),
       () => Effect.sync(() => {
@@ -178,40 +229,44 @@ export const InputServiceLive = Layer.scoped(
         if (stdin.isTTY && 'setRawMode' in stdin) {
           stdin.setRawMode(false)
         }
-        process.removeAllListeners('SIGINT')
       })
     ))
     
     return {
-      keyEvents: Stream.fromQueue(keyQueue),
+      keyEvents: Stream.fromPubSub(keyPubSub),
       
-      mouseEvents: Stream.fromQueue(mouseQueue),
+      mouseEvents: Stream.fromPubSub(mousePubSub),
       
       allEvents: Stream.merge(
-        Stream.fromQueue(keyQueue).pipe(
+        Stream.fromPubSub(keyPubSub).pipe(
           Stream.map(key => ({ _tag: 'key' as const, event: key }))
         ),
-        Stream.fromQueue(mouseQueue).pipe(
+        Stream.fromPubSub(mousePubSub).pipe(
           Stream.map(mouse => ({ _tag: 'mouse' as const, event: mouse }))
         )
       ),
       
-      waitForKey: Queue.take(keyQueue),
+      waitForKey: Stream.fromPubSub(keyPubSub).pipe(
+        Stream.take(1), 
+        Stream.runHead, 
+        Effect.map(opt => Option.getOrElse(opt, () => null as any))
+      ),
       
-      waitForMouse: Queue.take(mouseQueue),
+      waitForMouse: Stream.fromPubSub(mousePubSub).pipe(
+        Stream.take(1), 
+        Stream.runHead, 
+        Effect.map(opt => Option.getOrElse(opt, () => null as any))
+      ),
       
-      clearInputBuffer: Effect.gen(function* (_) {
-        yield* _(Queue.takeAll(keyQueue))
-        yield* _(Queue.takeAll(mouseQueue))
-      }),
+      clearInputBuffer: Effect.void,
       
       filterKeys: (predicate) =>
-        Stream.fromQueue(keyQueue).pipe(
+        Stream.fromPubSub(keyPubSub).pipe(
           Stream.filter(predicate)
         ),
       
       mapKeys: <T>(mapper: (key: KeyEvent) => T | null) =>
-        Stream.fromQueue(keyQueue).pipe(
+        Stream.fromPubSub(keyPubSub).pipe(
           Stream.filterMap((key): Option.Option<T> => {
             const result = mapper(key)
             return result !== null ? Option.some(result) : Option.none()
@@ -219,7 +274,7 @@ export const InputServiceLive = Layer.scoped(
         ),
       
       debounceKeys: (ms) =>
-        Stream.fromQueue(keyQueue).pipe(
+        Stream.fromPubSub(keyPubSub).pipe(
           Stream.debounce(ms)
         ),
       
@@ -257,7 +312,70 @@ export const InputServiceLive = Layer.scoped(
             device: 'keyboard',
             cause: error
           })
+        }),
+      
+      // Mouse Control
+      enableMouse: Effect.try({
+        try: () => {
+          process.stdout.write('\x1b[?1000h') // Enable X10 mouse tracking
+          process.stdout.write('\x1b[?1002h') // Enable button event tracking
+          process.stdout.write('\x1b[?1015h') // Enable urxvt extended mode
+          process.stdout.write('\x1b[?1006h') // Enable SGR extended mode
+        },
+        catch: (error) => new InputError({
+          device: 'mouse',
+          cause: error
         })
+      }),
+      
+      disableMouse: Effect.try({
+        try: () => {
+          process.stdout.write('\x1b[?1000l') // Disable X10 mouse tracking
+          process.stdout.write('\x1b[?1002l') // Disable button event tracking
+          process.stdout.write('\x1b[?1015l') // Disable urxvt extended mode
+          process.stdout.write('\x1b[?1006l') // Disable SGR extended mode
+        },
+        catch: (error) => new InputError({
+          device: 'mouse',
+          cause: error
+        })
+      }),
+      
+      enableMouseMotion: Effect.try({
+        try: () => {
+          process.stdout.write('\x1b[?1003h') // Enable all mouse motion tracking
+        },
+        catch: (error) => new InputError({
+          device: 'mouse',
+          cause: error
+        })
+      }),
+      
+      disableMouseMotion: Effect.try({
+        try: () => {
+          process.stdout.write('\x1b[?1003l') // Disable all mouse motion tracking
+        },
+        catch: (error) => new InputError({
+          device: 'mouse',
+          cause: error
+        })
+      }),
+      
+      resizeEvents: Stream.async<WindowSize>((emit) => {
+        const handleResize = () => {
+          emit(Effect.succeed(Chunk.of({
+            width: process.stdout.columns || 80,
+            height: process.stdout.rows || 24
+          })))
+        }
+        
+        process.stdout.on('resize', handleResize)
+        return Effect.sync(() => {
+          process.stdout.removeListener('resize', handleResize)
+        })
+      }),
+      
+      pasteEvents: Stream.empty // Not implemented yet
     }
   })
 )
