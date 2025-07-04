@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T01:09:58.954Z",
+    "name": "test-multi",
+    "description": "Screenshot of: echo 'Testing multi feature'",
+    "app": "echo 'Testing multi feature'",
+    "dimensions": {
+      "width": 80,
+      "height": 2
+    }
+  },
+  "visual": {
+    "lines": [
+      "Testing multi feature",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "echo 'Testing multi feature'"
+    },
+    "content": "Testing multi feature\n"
+  }
+}

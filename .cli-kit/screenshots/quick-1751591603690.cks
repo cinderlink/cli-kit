@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T01:13:23.708Z",
+    "name": "quick-1751591603690",
+    "description": "Quick capture: echo 'This is a quick test\\!'",
+    "app": "echo 'This is a quick test\\!'",
+    "dimensions": {
+      "width": 80,
+      "height": 2
+    }
+  },
+  "visual": {
+    "lines": [
+      "This is a quick test\\!",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "echo 'This is a quick test\\!'"
+    },
+    "content": "This is a quick test\\!\n"
+  }
+}

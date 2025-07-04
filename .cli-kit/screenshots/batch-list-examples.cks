@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T01:13:29.729Z",
+    "name": "batch-list-examples",
+    "description": "List of example files",
+    "app": "ls -la examples/*.ts | head -15",
+    "dimensions": {
+      "width": 80,
+      "height": 16
+    }
+  },
+  "visual": {
+    "lines": [
+      "-rw-r--r--@ 1 aewing  staff   7015 Jul  3 02:20 examples/button-showcase.ts",
+      "-rw-r--r--@ 1 aewing  staff  14964 Jul  3 02:14 examples/contact-form.ts",
+      "-rw-r--r--@ 1 aewing  staff   5974 Jul  3 02:14 examples/filepicker-demo.ts",
+      "-rw-r--r--@ 1 aewing  staff  15203 Jul  3 02:15 examples/git-dashboard.ts",
+      "-rw-r--r--@ 1 aewing  staff  16666 Jul  3 02:57 examples/gradient-demo.ts",
+      "-rw-r--r--@ 1 aewing  staff  13624 Jul  3 02:16 examples/help-demo.ts",
+      "-rw-r--r--@ 1 aewing  staff   9910 Jul  3 02:16 examples/layout-patterns.ts",
+      "-rw-r--r--@ 1 aewing  staff  15761 Jul  3 04:32 examples/loading-screen.ts",
+      "-rw-r--r--@ 1 aewing  staff  21414 Jul  3 02:21 examples/log-viewer.ts",
+      "-rw-r--r--@ 1 aewing  staff  16577 Jul  3 02:17 examples/modal-demo.ts",
+      "-rw-r--r--@ 1 aewing  staff   4056 Jul  3 02:17 examples/mouse-demo.ts",
+      "-rw-r--r--@ 1 aewing  staff  13934 Jul  3 02:21 examples/mouse-routing.ts",
+      "-rw-r--r--@ 1 aewing  staff  21354 Jul  3 02:22 examples/package-manager.ts",
+      "-rw-r--r--@ 1 aewing  staff   8189 Jul  3 02:18 examples/process-monitor.ts",
+      "-rw-r--r--@ 1 aewing  staff   3732 Jul  3 17:51 examples/screenshot-aware-demo.ts",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "ls -la examples/*.ts | head -15"
+    },
+    "content": "-rw-r--r--@ 1 aewing  staff   7015 Jul  3 02:20 examples/button-showcase.ts\n-rw-r--r--@ 1 aewing  staff  14964 Jul  3 02:14 examples/contact-form.ts\n-rw-r--r--@ 1 aewing  staff   5974 Jul  3 02:14 examples/filepicker-demo.ts\n-rw-r--r--@ 1 aewing  staff  15203 Jul  3 02:15 examples/git-dashboard.ts\n-rw-r--r--@ 1 aewing  staff  16666 Jul  3 02:57 examples/gradient-demo.ts\n-rw-r--r--@ 1 aewing  staff  13624 Jul  3 02:16 examples/help-demo.ts\n-rw-r--r--@ 1 aewing  staff   9910 Jul  3 02:16 examples/layout-patterns.ts\n-rw-r--r--@ 1 aewing  staff  15761 Jul  3 04:32 examples/loading-screen.ts\n-rw-r--r--@ 1 aewing  staff  21414 Jul  3 02:21 examples/log-viewer.ts\n-rw-r--r--@ 1 aewing  staff  16577 Jul  3 02:17 examples/modal-demo.ts\n-rw-r--r--@ 1 aewing  staff   4056 Jul  3 02:17 examples/mouse-demo.ts\n-rw-r--r--@ 1 aewing  staff  13934 Jul  3 02:21 examples/mouse-routing.ts\n-rw-r--r--@ 1 aewing  staff  21354 Jul  3 02:22 examples/package-manager.ts\n-rw-r--r--@ 1 aewing  staff   8189 Jul  3 02:18 examples/process-monitor.ts\n-rw-r--r--@ 1 aewing  staff   3732 Jul  3 17:51 examples/screenshot-aware-demo.ts\n"
+  }
+}

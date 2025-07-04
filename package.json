@@ -6,6 +6,7 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
+    "cli-kit": "./bin/cli-kit.ts",
     "build": "bun build src/index.ts --outdir dist --format esm",
     "build:compile": "bun build --compile --minify --bytecode --target bun-linux-x64 --outfile dist/cli-kit src/index.ts",
     "dev": "bun --watch run src/index.ts",
@@ -28,27 +29,45 @@
     "example:log-viewer": "bun examples/log-viewer.ts",
     "example:package-manager": "bun examples/package-manager.ts",
     "example:contact-form": "bun examples/contact-form.ts",
+    "example:viewport-demo": "bun examples/viewport-demo.ts",
+    "example:modal-demo": "bun examples/modal-demo.ts",
+    "example:filepicker-demo": "bun examples/filepicker-demo.ts",
+    "example:help-demo": "bun examples/help-demo.ts",
+    "example:gradient-demo": "bun examples/gradient-demo.ts",
     "example:layout-patterns": "bun examples/layout-patterns.ts",
     "example:tabs-showcase": "bun examples/tabs-showcase.ts",
     "example:table-showcase": "bun examples/table-showcase.ts",
     "example:mouse-demo": "bun examples/mouse-demo.ts",
+    "example:loading-screen": "bun examples/loading-screen.ts",
     "examples": "bun scripts/show-examples.ts",
-    "examples:test": "bun scripts/test-examples.ts"
+    "examples:test": "bun scripts/test-examples.ts",
+    "screenshot:list": "./bin/cli-kit.ts screenshot list",
+    "screenshot:examples": "./bin/cli-kit.ts screenshot multi",
+    "screenshot:clean": "rm -rf .cli-kit/screenshots"
   },
   "keywords": ["tui", "terminal", "cli", "bun", "typescript", "mvU", "effect"],
   "author": "Cinderlink",
   "license": "MIT",
+  "bin": {
+    "cli-kit": "./bin/cli-kit.ts"
+  },
   "files": [
     "dist",
     "src",
+    "bin",
     "README.md"
   ],
   "dependencies": {
+    "@types/figlet": "^1.7.0",
+    "commander": "^11.1.0",
     "effect": "^3.0.0",
+    "figlet": "^1.8.1",
+    "strip-ansi": "^7.1.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/strip-ansi": "^5.2.1",
     "node-pty": "^1.0.0",
     "typescript": "^5.3.0"
   },

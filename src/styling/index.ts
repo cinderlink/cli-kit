@@ -65,3 +65,51 @@ export {
   isInheritable,
   INHERITABLE_PROPS
 } from "./types.ts"
+
+// Gradient and advanced styling
+export {
+  type GradientStop,
+  type GradientConfig,
+  type TextGradientOptions,
+  type BackgroundGradientOptions,
+  textGradient,
+  backgroundGradient,
+  borderGradient,
+  rainbowGradient,
+  sunsetGradient,
+  oceanGradient,
+  forestGradient,
+  fireGradient,
+  pastelGradient,
+  monochromeGradient,
+  createGradient,
+  reverseGradient,
+  shiftGradient,
+  scaleGradient,
+  animatedGradient,
+  pulsingGradient
+} from "./gradients.ts"
+
+export {
+  type ShadowConfig,
+  type GlowConfig,
+  type PatternConfig,
+  type BorderStyle,
+  type LayerEffect,
+  createDropShadow,
+  createInnerShadow,
+  createGlow,
+  generatePattern,
+  applyPattern,
+  createStyledBorder,
+  applyLayerEffect,
+  createPulse,
+  createShake,
+  createBounce,
+  createTypewriter,
+  createWaveText,
+  createRainbowText,
+  createNeonEffect,
+  createMatrixEffect,
+  createHologramEffect
+} from "./advanced.ts"

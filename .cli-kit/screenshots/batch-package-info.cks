@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T01:13:29.739Z",
+    "name": "batch-package-info",
+    "description": "Package information",
+    "app": "cat package.json | jq '{name, version, description}'",
+    "dimensions": {
+      "width": 80,
+      "height": 6
+    }
+  },
+  "visual": {
+    "lines": [
+      "{",
+      "  \"name\": \"@cinderlink/cli-kit\",",
+      "  \"version\": \"0.1.0\",",
+      "  \"description\": \"A performant TUI framework for Bun inspired by bubbletea\"",
+      "}",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "cat package.json | jq '{name, version, description}'"
+    },
+    "content": "{\n  \"name\": \"@cinderlink/cli-kit\",\n  \"version\": \"0.1.0\",\n  \"description\": \"A performant TUI framework for Bun inspired by bubbletea\"\n}\n"
+  }
+}

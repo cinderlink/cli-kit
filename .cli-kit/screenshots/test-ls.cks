@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T00:52:54.679Z",
+    "name": "test-ls",
+    "description": "Test screenshot of ls command",
+    "app": "ls -la",
+    "dimensions": {
+      "width": 80,
+      "height": 27
+    }
+  },
+  "visual": {
+    "lines": [
+      "total 144",
+      "drwxr-xr-x@ 18 aewing  staff    576 Jul  3 00:47 __tests__",
+      "drwxr-xr-x@ 25 aewing  staff    800 Jul  3 17:52 .",
+      "drwxr-xr-x@  9 aewing  staff    288 Jun 25 00:02 ..",
+      "drwxr-xr-x@  3 aewing  staff     96 Jun 25 00:02 .cursor",
+      "drwxr-xr-x@ 12 aewing  staff    384 Jul  3 03:23 .git",
+      "-rw-r--r--@  1 aewing  staff    471 Jun 30 19:31 .gitignore",
+      "-rw-r--r--@  1 aewing  staff   5102 Jul  3 17:39 auto-font-test.ts",
+      "drwxr-xr-x@  3 aewing  staff     96 Jul  3 17:50 bin",
+      "-rw-r--r--@  1 aewing  staff   6727 Jul  3 17:52 bun.lock",
+      "-rw-r--r--@  1 aewing  staff    366 Jun 25 01:35 bunfig.toml",
+      "-rw-r--r--@  1 aewing  staff   5563 Jun 25 01:33 CLAUDE.md",
+      "drwxr-xr-x@ 32 aewing  staff   1024 Jul  3 01:00 coverage",
+      "drwxr-xr-x@  3 aewing  staff     96 Jun 25 01:01 dist",
+      "drwxr-xr-x@  7 aewing  staff    224 Jul  3 00:47 docs",
+      "drwxr-xr-x@ 28 aewing  staff    896 Jul  3 17:51 examples",
+      "-rw-r--r--@  1 aewing  staff   5586 Jul  3 17:33 font-scale-test.ts",
+      "drwxr-xr-x@ 23 aewing  staff    736 Jun 25 00:49 node_modules",
+      "-rw-r--r--@  1 aewing  staff   2746 Jul  3 17:52 package.json",
+      "-rw-r--r--@  1 aewing  staff   7314 Jul  3 03:38 proposals.md",
+      "-rw-r--r--@  1 aewing  staff  11072 Jun 30 23:20 README.md",
+      "drwxr-xr-x@  5 aewing  staff    160 Jun 30 23:21 scripts",
+      "-rw-r--r--@  1 aewing  staff    234 Jun 25 02:04 services.ts",
+      "drwxr-xr-x@ 13 aewing  staff    416 Jul  3 17:46 src",
+      "drwxr-xr-x@  3 aewing  staff     96 Jun 30 23:12 tests",
+      "-rw-r--r--@  1 aewing  staff   1162 Jun 25 00:49 tsconfig.json",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "ls -la"
+    },
+    "content": "total 144\ndrwxr-xr-x@ 18 aewing  staff    576 Jul  3 00:47 __tests__\ndrwxr-xr-x@ 25 aewing  staff    800 Jul  3 17:52 .\ndrwxr-xr-x@  9 aewing  staff    288 Jun 25 00:02 ..\ndrwxr-xr-x@  3 aewing  staff     96 Jun 25 00:02 .cursor\ndrwxr-xr-x@ 12 aewing  staff    384 Jul  3 03:23 .git\n-rw-r--r--@  1 aewing  staff    471 Jun 30 19:31 .gitignore\n-rw-r--r--@  1 aewing  staff   5102 Jul  3 17:39 auto-font-test.ts\ndrwxr-xr-x@  3 aewing  staff     96 Jul  3 17:50 bin\n-rw-r--r--@  1 aewing  staff   6727 Jul  3 17:52 bun.lock\n-rw-r--r--@  1 aewing  staff    366 Jun 25 01:35 bunfig.toml\n-rw-r--r--@  1 aewing  staff   5563 Jun 25 01:33 CLAUDE.md\ndrwxr-xr-x@ 32 aewing  staff   1024 Jul  3 01:00 coverage\ndrwxr-xr-x@  3 aewing  staff     96 Jun 25 01:01 dist\ndrwxr-xr-x@  7 aewing  staff    224 Jul  3 00:47 docs\ndrwxr-xr-x@ 28 aewing  staff    896 Jul  3 17:51 examples\n-rw-r--r--@  1 aewing  staff   5586 Jul  3 17:33 font-scale-test.ts\ndrwxr-xr-x@ 23 aewing  staff    736 Jun 25 00:49 node_modules\n-rw-r--r--@  1 aewing  staff   2746 Jul  3 17:52 package.json\n-rw-r--r--@  1 aewing  staff   7314 Jul  3 03:38 proposals.md\n-rw-r--r--@  1 aewing  staff  11072 Jun 30 23:20 README.md\ndrwxr-xr-x@  5 aewing  staff    160 Jun 30 23:21 scripts\n-rw-r--r--@  1 aewing  staff    234 Jun 25 02:04 services.ts\ndrwxr-xr-x@ 13 aewing  staff    416 Jul  3 17:46 src\ndrwxr-xr-x@  3 aewing  staff     96 Jun 30 23:12 tests\n-rw-r--r--@  1 aewing  staff   1162 Jun 25 00:49 tsconfig.json\n"
+  }
+}

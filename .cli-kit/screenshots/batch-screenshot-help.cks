@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T01:13:29.945Z",
+    "name": "batch-screenshot-help",
+    "description": "Screenshot command help",
+    "app": "./bin/cli-kit.ts screenshot --help",
+    "dimensions": {
+      "width": 80,
+      "height": 17
+    }
+  },
+  "visual": {
+    "lines": [
+      "Usage: cli-kit screenshot|ss [options] [command]",
+      "",
+      "Screenshot management for CLI apps",
+      "",
+      "Options:",
+      "  -h, --help                        display help for command",
+      "",
+      "Commands:",
+      "  list|ls [options]                 List all screenshots",
+      "  quick|q [options] <command>       Quick screenshot with auto-generated name",
+      "  create|new [options] <name>       Create a new screenshot",
+      "  show|view [options] <name>        Display a screenshot",
+      "  delete|rm [options] <name>        Delete a screenshot",
+      "  export [options] <name> <output>  Export a screenshot to different formats",
+      "  multi|batch [options]             Take screenshots of multiple commands",
+      "  help [command]                    display help for command",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "./bin/cli-kit.ts screenshot --help"
+    },
+    "content": "Usage: cli-kit screenshot|ss [options] [command]\n\nScreenshot management for CLI apps\n\nOptions:\n  -h, --help                        display help for command\n\nCommands:\n  list|ls [options]                 List all screenshots\n  quick|q [options] <command>       Quick screenshot with auto-generated name\n  create|new [options] <name>       Create a new screenshot\n  show|view [options] <name>        Display a screenshot\n  delete|rm [options] <name>        Delete a screenshot\n  export [options] <name> <output>  Export a screenshot to different formats\n  multi|batch [options]             Take screenshots of multiple commands\n  help [command]                    display help for command\n"
+  }
+}

@@ -7,8 +7,9 @@
 
 import { Effect, Stream } from "effect"
 import { runApp } from "@/index.ts"
-import { vstack, text, box } from "@/core/view.ts"
-import type { Component, RuntimeConfig } from "@/core/types.ts"
+import { View } from "@/index.ts"
+const { vstack, text, styledText, box } = View
+import type { Component, AppOptions } from "@/core/types.ts"
 import { style, Colors } from "@/styling/index.ts"
 import { LiveServices } from "../src/services/impl/index.ts"
 
@@ -51,32 +52,32 @@ const mouseDemoComponent: Component<Model, Msg> = {
   },
   
   view(model: Model) {
-    const title = text("Mouse Event Demo", style(Colors.BrightWhite))
-    const subtitle = text("Move mouse and click - events captured by runtime", style(Colors.Gray))
+    const title = styledText("Mouse Event Demo", style().foreground(Colors.brightWhite))
+    const subtitle = styledText("Move mouse and click - events captured by runtime", style().foreground(Colors.gray))
     
     const eventsList = model.mouseEvents.length > 0 
-      ? model.mouseEvents.map(event => text(`• ${event}`, style(Colors.White)))
-      : [text("No mouse events captured yet", style(Colors.Gray))]
+      ? model.mouseEvents.map(event => styledText(`• ${event}`, style().foreground(Colors.white)))
+      : [styledText("No mouse events captured yet", style().foreground(Colors.gray))]
     
     const stats = [
-      text(`Total clicks captured: ${model.clickCount}`, style(Colors.Cyan)),
-      text(`Recent events (last 10):`, style(Colors.Yellow))
+      styledText(`Total clicks captured: ${model.clickCount}`, style().foreground(Colors.cyan)),
+      styledText(`Recent events (last 10):`, style().foreground(Colors.yellow))
     ]
     
     const instructions = [
-      text("Instructions:", style(Colors.Yellow)),
-      text("• Move mouse around", style(Colors.Gray)),
-      text("• Click left mouse button", style(Colors.Gray)),
-      text("• Check console for debug output", style(Colors.Gray)),
-      text("• Press Ctrl+C to exit", style(Colors.Gray))
+      styledText("Instructions:", style().foreground(Colors.yellow)),
+      styledText("• Move mouse around", style().foreground(Colors.gray)),
+      styledText("• Click left mouse button", style().foreground(Colors.gray)),
+      styledText("• Check console for debug output", style().foreground(Colors.gray)),
+      styledText("• Press Ctrl+C to exit", style().foreground(Colors.gray))
     ]
     
     return vstack(
       title,
       subtitle,
-      text("", style()),
+      text(""),
       vstack(...stats),
-      text("", style()),
+      text(""),
       box(
         vstack(...eventsList),
         {
@@ -85,7 +86,7 @@ const mouseDemoComponent: Component<Model, Msg> = {
           padding: { top: 0, right: 1, bottom: 0, left: 1 }
         }
       ),
-      text("", style()),
+      text(""),
       vstack(...instructions)
     )
   }
@@ -95,13 +96,11 @@ const mouseDemoComponent: Component<Model, Msg> = {
 // Main
 // =============================================================================
 
-const config: RuntimeConfig = {
+const config: AppOptions = {
   fps: 30,
   debug: true, // Enable debug logging to see mouse events in console
-  quitOnEscape: true,
-  quitOnCtrlC: true,
-  enableMouse: true,
-  fullscreen: false
+  mouse: true,
+  alternateScreen: false
 }
 
 console.log("Mouse Demo Starting...")
@@ -114,7 +113,7 @@ const program = runApp(mouseDemoComponent, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error(error)
     process.exit(1)
   })

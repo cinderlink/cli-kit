@@ -110,7 +110,7 @@ describe("String Width Calculations", () => {
       const expectedWidths = [6, 8, 7]  // 📁 and 📊 are 2 chars wide each
       
       headers.forEach((header, i) => {
-        expect(stringWidth(header)).toBe(expectedWidths[i])
+        expect(stringWidth(header)).toBe(expectedWidths[i] ?? 0)
       })
     })
     
@@ -126,9 +126,9 @@ describe("String Width Calculations", () => {
       expect(cells[2]).toBe("  1.2KB")
       
       // All cells should render to their specified widths
-      expect(stringWidth(cells[0])).toBe(8)
-      expect(stringWidth(cells[1])).toBe(15)
-      expect(stringWidth(cells[2])).toBe(7)
+      expect(stringWidth(cells[0] ?? "")).toBe(8)
+      expect(stringWidth(cells[1] ?? "")).toBe(15)
+      expect(stringWidth(cells[2] ?? "")).toBe(7)
     })
   })
   

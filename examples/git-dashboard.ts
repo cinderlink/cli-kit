@@ -10,11 +10,10 @@
  */
 
 import { Effect, Stream } from "effect"
-import { runApp } from "@/index.ts"
-import { vstack, hstack, text, box } from "@/core/view.ts"
-import type { Component, Cmd, AppServices, RuntimeConfig } from "@/core/types.ts"
-import { style, Colors, Borders } from "@/styling/index.ts"
-import { InputService } from "@/services/index.ts"
+import { runApp, View, type Component, type Cmd, type AppServices, type AppOptions } from "../src/index.ts"
+import { style, Colors, Borders } from "../src/styling/index.ts"
+import { styledBox } from "../src/layout/box.ts"
+import { InputService } from "../src/services/index.ts"
 import { 
   list,
   table,
@@ -25,7 +24,7 @@ import {
   type TableModel,
   type TableMsg,
   TableSelectionMode
-} from "@/components/index.ts"
+} from "../src/components/index.ts"
 import { LiveServices } from "../src/services/impl/index.ts"
 
 // =============================================================================
@@ -94,6 +93,7 @@ type Msg =
   | { readonly tag: "stageFile" }
   | { readonly tag: "unstageFile" }
   | { readonly tag: "commit" }
+  | { readonly tag: "quit" }
 
 // =============================================================================
 // Component Setup
@@ -209,8 +209,8 @@ const gitDashboard: Component<Model, Msg> = {
   update(msg: Msg, model: Model) {
     switch (msg.tag) {
       case "quit":
-        // Return a quit command to exit the app
-        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" as const })]])
+        // Return an empty array - the runtime will handle quit via config
+        return Effect.succeed([model, []])
       case "filesMsg": {
         const filesTableComponent = createFilesTable()
         return filesTableComponent.update(msg.msg, model.filesTable).pipe(
@@ -283,108 +283,109 @@ const gitDashboard: Component<Model, Msg> = {
   },
   
   view(model: Model) {
-    const title = text("Git Dashboard 🔧", style(Colors.BrightCyan).bold())
+    const { text, styledText, vstack, hstack, box } = View
+    const title = styledText("Git Dashboard 🔧", style().foreground(Colors.brightCyan).bold())
     
     // Panel titles with focus indicators
     const filesPanelTitle = model.activePanel === 'files' 
-      ? text("📁 Working Directory", style(Colors.BrightWhite).background(Colors.Blue))
-      : text("📁 Working Directory", style(Colors.Gray))
+      ? styledText("📁 Working Directory", style().foreground(Colors.brightWhite).background(Colors.blue))
+      : styledText("📁 Working Directory", style().foreground(Colors.gray))
     
     const stagedPanelTitle = model.activePanel === 'staged'
-      ? text("📋 Staging Area", style(Colors.BrightWhite).background(Colors.Blue))
-      : text("📋 Staging Area", style(Colors.Gray))
+      ? styledText("📋 Staging Area", style().foreground(Colors.brightWhite).background(Colors.blue))
+      : styledText("📋 Staging Area", style().foreground(Colors.gray))
     
     const commitsPanelTitle = model.activePanel === 'commits'
-      ? text("📚 Commit History", style(Colors.BrightWhite).background(Colors.Blue))
-      : text("📚 Commit History", style(Colors.Gray))
+      ? styledText("📚 Commit History", style().foreground(Colors.brightWhite).background(Colors.blue))
+      : styledText("📚 Commit History", style().foreground(Colors.gray))
     
     // Tables
     const filesTableComponent = createFilesTable()
     const stagedTableComponent = createStagedTable()
     const commitsTableComponent = createCommitsTable()
     
-    const filesPanel = box(
+    const filesPanel = styledBox(
       vstack(
         filesPanelTitle,
-        text("", style()),
+        text(""),
         filesTableComponent.view(model.filesTable)
       ),
       {
-        border: model.activePanel === 'files' ? Borders.single : Borders.single,
-        borderStyle: model.activePanel === 'files' 
-          ? style(Colors.BrightBlue) 
-          : style(Colors.Gray),
+        border: Borders.Normal,
         padding: { top: 0, right: 1, bottom: 0, left: 1 },
-        width: 64,
-        height: 12
+        minWidth: 64,
+        minHeight: 12,
+        style: model.activePanel === 'files' 
+          ? style().foreground(Colors.brightBlue) 
+          : style().foreground(Colors.gray)
       }
     )
     
-    const stagedPanel = box(
+    const stagedPanel = styledBox(
       vstack(
         stagedPanelTitle,
-        text("", style()),
+        text(""),
         stagedTableComponent.view(model.stagedTable)
       ),
       {
-        border: model.activePanel === 'staged' ? Borders.single : Borders.single,
-        borderStyle: model.activePanel === 'staged' 
-          ? style(Colors.BrightBlue) 
-          : style(Colors.Gray),
+        border: Borders.Normal,
         padding: { top: 0, right: 1, bottom: 0, left: 1 },
-        width: 30,
-        height: 8
+        minWidth: 30,
+        minHeight: 8,
+        style: model.activePanel === 'staged' 
+          ? style().foreground(Colors.brightBlue) 
+          : style().foreground(Colors.gray)
       }
     )
     
-    const commitsPanel = box(
+    const commitsPanel = styledBox(
       vstack(
         commitsPanelTitle,
-        text("", style()),
+        text(""),
         commitsTableComponent.view(model.commitsTable)
       ),
       {
-        border: model.activePanel === 'commits' ? Borders.single : Borders.single,
-        borderStyle: model.activePanel === 'commits' 
-          ? style(Colors.BrightBlue) 
-          : style(Colors.Gray),
+        border: Borders.Normal,
         padding: { top: 0, right: 1, bottom: 0, left: 1 },
-        width: 30,
-        height: 8
+        minWidth: 30,
+        minHeight: 8,
+        style: model.activePanel === 'commits' 
+          ? style().foreground(Colors.brightBlue) 
+          : style().foreground(Colors.gray)
       }
     )
     
     // Status bar
-    const statusBar = box(
-      text(model.statusMessage, style(Colors.White)),
+    const statusBar = styledBox(
+      styledText(model.statusMessage, style().foreground(Colors.white)),
       {
-        border: Borders.single,
-        borderStyle: style(Colors.Gray),
+        border: Borders.Normal,
         padding: { top: 0, right: 1, bottom: 0, left: 1 },
-        width: 64
+        minWidth: 64,
+        style: style().foreground(Colors.gray)
       }
     )
     
     // Keybindings help
     const help = vstack(
-      text("Keybindings:", style(Colors.Yellow)),
-      text("Tab/1-3: Switch panels  |  ↑↓: Navigate  |  Space: Stage/Unstage", style(Colors.Gray)),
-      text("C: Commit  |  Enter: View details  |  Ctrl+C: Exit", style(Colors.Gray))
+      styledText("Keybindings:", style().foreground(Colors.yellow)),
+      styledText("Tab/1-3: Switch panels  |  ↑↓: Navigate  |  Space: Stage/Unstage", style().foreground(Colors.gray)),
+      styledText("C: Commit  |  Enter: View details  |  Ctrl+C: Exit", style().foreground(Colors.gray))
     )
     
     return vstack(
       title,
-      text("", style()),
+      text(""),
       filesPanel,
-      text("", style()),
+      text(""),
       hstack(
         stagedPanel,
-        text("  ", style()),
+        styledText("  ", style()),
         commitsPanel
       ),
-      text("", style()),
+      text(""),
       statusBar,
-      text("", style()),
+      text(""),
       help
     )
   },
@@ -396,7 +397,7 @@ const gitDashboard: Component<Model, Msg> = {
       return input.mapKeys(key => {
         // Quit keys
         if (key.key === 'q' || (key.ctrl && key.key === 'ctrl+c')) {
-          return { tag: "quit" }
+          return { tag: "quit" } as const
         }
         
         // Panel switching
@@ -404,36 +405,41 @@ const gitDashboard: Component<Model, Msg> = {
           const panels: Panel[] = ['files', 'staged', 'commits']
           const currentIndex = panels.indexOf(model.activePanel)
           const nextIndex = (currentIndex + 1) % panels.length
-          return { tag: "switchPanel", panel: panels[nextIndex] }
+          const nextPanel = panels[nextIndex]
+          if (nextPanel) {
+            return { tag: "switchPanel", panel: nextPanel } as const
+          }
         }
         
         // Direct panel access
-        if (key.key === '1') return { tag: "switchPanel", panel: 'files' }
-        if (key.key === '2') return { tag: "switchPanel", panel: 'staged' }
-        if (key.key === '3') return { tag: "switchPanel", panel: 'commits' }
+        if (key.key === '1') return { tag: "switchPanel", panel: 'files' as const } as const
+        if (key.key === '2') return { tag: "switchPanel", panel: 'staged' as const } as const
+        if (key.key === '3') return { tag: "switchPanel", panel: 'commits' as const } as const
         
         // Actions
         if (key.key === ' ') {
           return model.activePanel === 'files' 
-            ? { tag: "stageFile" }
-            : { tag: "unstageFile" }
+            ? { tag: "stageFile" } as const
+            : { tag: "unstageFile" } as const
         }
-        if (key.key === 'c') return { tag: "commit" }
+        if (key.key === 'c') return { tag: "commit" } as const
         
         // Navigation within active panel
         if (key.key === 'up' || key.key === 'down' || key.key === 'enter') {
           switch (model.activePanel) {
             case 'files':
-              return { tag: "filesMsg", msg: { tag: key.key === 'up' ? "navigateUp" : key.key === 'down' ? "navigateDown" : "selectRow", rowId: "" } }
+              return { tag: "filesMsg", msg: { tag: key.key === 'up' ? "navigateUp" : key.key === 'down' ? "navigateDown" : "selectRow", rowId: "" } as TableMsg<GitFile> } as const
             case 'staged':
-              return { tag: "stagedMsg", msg: { tag: key.key === 'up' ? "navigateUp" : key.key === 'down' ? "navigateDown" : "selectRow", rowId: "" } }
+              return { tag: "stagedMsg", msg: { tag: key.key === 'up' ? "navigateUp" : key.key === 'down' ? "navigateDown" : "selectRow", rowId: "" } as TableMsg<GitFile> } as const
             case 'commits':
-              return { tag: "commitsMsg", msg: { tag: key.key === 'up' ? "navigateUp" : key.key === 'down' ? "navigateDown" : "selectRow", rowId: "" } }
+              return { tag: "commitsMsg", msg: { tag: key.key === 'up' ? "navigateUp" : key.key === 'down' ? "navigateDown" : "selectRow", rowId: "" } as TableMsg<GitCommit> } as const
           }
         }
         
         return null
-      })
+      }).pipe(
+        Stream.catchAll(() => Stream.empty)
+      )
     })
 }
 
@@ -441,13 +447,11 @@ const gitDashboard: Component<Model, Msg> = {
 // Main
 // =============================================================================
 
-const config: RuntimeConfig = {
+const config: AppOptions = {
   fps: 30,
   debug: false,
-  quitOnEscape: true,
-  quitOnCtrlC: true,
-  enableMouse: false,
-  fullscreen: true
+  mouse: false,
+  alternateScreen: true
 }
 
 const program = runApp(gitDashboard, config).pipe(
@@ -456,7 +460,7 @@ const program = runApp(gitDashboard, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error(error)
     process.exit(1)
   })

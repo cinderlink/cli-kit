@@ -25,7 +25,7 @@ import {
   View,
   type Component,
   type Cmd,
-  type RuntimeConfig,
+  type AppOptions,
   type AppServices
 } from "../src/index.ts"
 import { LiveServices } from "../src/services/impl/index.ts"
@@ -290,10 +290,10 @@ export const ContactFormComponent: Component<ContactFormModel, ContactFormMsg> =
           "✓ Form Submitted Successfully!",
           style().foreground(Colors.green).bold()
         ),
-        View.text(""),
+        View.empty,
         View.styledText(`Name: ${model.formData.name}`, style()),
         View.styledText(`Email: ${model.formData.email}`, style()),
-        View.text(""),
+        View.empty,
         View.styledText(
           "Press 'r' to reset or 'q' to quit",
           style().foreground(Colors.gray).italic()
@@ -337,13 +337,13 @@ export const ContactFormComponent: Component<ContactFormModel, ContactFormMsg> =
     // Compose form
     const formContent = simpleVBox([
       title,
-      View.text(""),
+      View.empty,
       nameSection,
-      View.text(""),
+      View.empty,
       emailSection,
-      View.text(""),
+      View.empty,
       buttonContainer,
-      View.text(""),
+      View.empty,
       help
     ])
     
@@ -422,7 +422,9 @@ export const ContactFormComponent: Component<ContactFormModel, ContactFormMsg> =
         }
         
         return null
-      })
+      }).pipe(
+        Stream.catchAll(() => Stream.empty)
+      )
     })
 }
 
@@ -433,13 +435,11 @@ const { init, update } = ContactFormComponent
 // Main Application - Demonstrates complete form functionality
 // =============================================================================
 
-const config: RuntimeConfig = {
+const config: AppOptions = {
   fps: 30,
   debug: false,
-  quitOnEscape: false,
-  quitOnCtrlC: true,  // Enable Ctrl+C handling by default
-  enableMouse: false,
-  fullscreen: true
+  mouse: false,
+  alternateScreen: true
 }
 
 // This demonstrates that our framework can handle:
@@ -453,7 +453,7 @@ const program = runApp(ContactFormComponent, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error(error)
     process.exit(1)
   })

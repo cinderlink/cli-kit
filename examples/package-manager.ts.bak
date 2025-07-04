@@ -11,9 +11,7 @@
 
 import { Effect, Stream } from "effect"
 import { runApp } from "@/index.ts"
-import { View } from "@/index.ts"
-const { vstack, hstack, text, styledText } = View
-import { styledBox as box } from "@/layout/box.ts"
+import { vstack, hstack, text, box } from "@/core/view.ts"
 import type { Component, Cmd, AppServices, AppOptions } from "@/core/types.ts"
 import { style, Colors, Borders } from "@/styling/index.ts"
 import { InputService } from "@/services/index.ts"
@@ -367,8 +365,8 @@ const packageManager: Component<Model, Msg> = {
   },
   
   view(model: Model) {
-    const title = styledText("Package Manager 📦", style().foreground(Colors.brightMagenta).bold())
-    const subtitle = styledText(`${mockPackages.length} packages available • ${model.selectedPackages.size} selected`, style().foreground(Colors.gray))
+    const title = text("Package Manager 📦", style().foreground(Colors.brightMagenta).bold())
+    const subtitle = text(`${mockPackages.length} packages available • ${model.selectedPackages.size} selected`, style().foreground(Colors.gray))
     
     // Tabs
     const tabsComponent = createTabsComponent()
@@ -382,12 +380,12 @@ const packageManager: Component<Model, Msg> = {
         const packagesTableComponent = createPackagesTable(mockPackages)
         content = box(
           vstack(
-            styledText("Available Packages", style().foreground(Colors.brightWhite)),
-            text(""),
+            text("Available Packages", style().foreground(Colors.brightWhite)),
+            text("", style()),
             packagesTableComponent.view(model.packagesTable)
           ),
           {
-            border: Borders.Normal,
+            border: Borders.single,
             borderStyle: style().foreground(Colors.brightBlue),
             padding: { top: 0, right: 1, bottom: 0, left: 1 },
             width: 104,
@@ -400,12 +398,12 @@ const packageManager: Component<Model, Msg> = {
         const dependenciesTableComponent = createDependenciesTable()
         content = box(
           vstack(
-            styledText("Project Dependencies", style().foreground(Colors.brightWhite)),
-            text(""),
+            text("Project Dependencies", style().foreground(Colors.brightWhite)),
+            text("", style()),
             dependenciesTableComponent.view(model.dependenciesTable)
           ),
           {
-            border: Borders.Normal,
+            border: Borders.single,
             borderStyle: style().foreground(Colors.brightGreen),
             padding: { top: 0, right: 1, bottom: 0, left: 1 },
             width: 75,
@@ -418,15 +416,15 @@ const packageManager: Component<Model, Msg> = {
         const searchComponent = textInput({ placeholder: "Search packages...", width: 50 })
         content = box(
           vstack(
-            styledText("Search Packages", style().foreground(Colors.brightWhite)),
-            text(""),
-            styledText("Enter package name or keyword:", style().foreground(Colors.gray)),
+            text("Search Packages", style().foreground(Colors.brightWhite)),
+            text("", style()),
+            text("Enter package name or keyword:", style().foreground(Colors.gray)),
             searchComponent.view(model.searchInput),
-            text(""),
-            styledText(model.searchTerm ? `Searching for: "${model.searchTerm}"` : "Type to search packages", style().foreground(Colors.yellow))
+            text("", style()),
+            text(model.searchTerm ? `Searching for: "${model.searchTerm}"` : "Type to search packages", style().foreground(Colors.yellow))
           ),
           {
-            border: Borders.Normal,
+            border: Borders.single,
             borderStyle: style().foreground(Colors.brightYellow),
             padding: { top: 0, right: 1, bottom: 0, left: 1 },
             width: 60,
@@ -442,16 +440,16 @@ const packageManager: Component<Model, Msg> = {
       const pkg = selectedRow.data as Package
       return box(
         vstack(
-          styledText("Package Details", style().foreground(Colors.brightCyan)),
-          text(""),
-          styledText(`Name: ${pkg.name}`, style().foreground(Colors.white)),
-          styledText(`Version: ${pkg.version}`, style().foreground(Colors.white)),
-          styledText(`Author: ${pkg.author}`, style().foreground(Colors.white)),
-          styledText(`License: ${pkg.license}`, style().foreground(Colors.white)),
-          styledText(`Dependencies: ${pkg.dependencies}`, style().foreground(Colors.white)),
-          styledText(`Size: ${pkg.size}`, style().foreground(Colors.white)),
-          text(""),
-          styledText(pkg.description, style().foreground(Colors.gray))
+          text("Package Details", style().foreground(Colors.brightCyan)),
+          text("", style()),
+          text(`Name: ${pkg.name}`, style().foreground(Colors.white)),
+          text(`Version: ${pkg.version}`, style().foreground(Colors.white)),
+          text(`Author: ${pkg.author}`, style().foreground(Colors.white)),
+          text(`License: ${pkg.license}`, style().foreground(Colors.white)),
+          text(`Dependencies: ${pkg.dependencies}`, style().foreground(Colors.white)),
+          text(`Size: ${pkg.size}`, style().foreground(Colors.white)),
+          text("", style()),
+          text(pkg.description, style().foreground(Colors.gray))
         ),
         {
           border: Borders.single,
@@ -461,13 +459,13 @@ const packageManager: Component<Model, Msg> = {
           height: 12
         }
       )
-    })() : styledText("", style())
+    })() : text("", style())
     
     // Status bar
     const statusBar = box(
       hstack(
-        styledText(model.statusMessage, style().foreground(Colors.white)),
-        styledText(model.operationInProgress ? " ⏳" : "", style().foreground(Colors.brightYellow))
+        text(model.statusMessage, style().foreground(Colors.white)),
+        text(model.operationInProgress ? " ⏳" : "", style().foreground(Colors.brightYellow))
       ),
       {
         border: Borders.single,
@@ -479,25 +477,25 @@ const packageManager: Component<Model, Msg> = {
     
     // Keybindings help
     const help = vstack(
-      styledText("Keybindings:", style().foreground(Colors.yellow)),
-      styledText("Tab/1-3: Switch tabs  |  ↑↓: Navigate  |  Space: Select/Toggle  |  Enter: Details", style().foreground(Colors.gray)),
-      styledText("I: Install  |  U: Uninstall  |  Shift+U: Update  |  B: Bulk install  |  Ctrl+C: Exit", style().foreground(Colors.gray))
+      text("Keybindings:", style().foreground(Colors.yellow)),
+      text("Tab/1-3: Switch tabs  |  ↑↓: Navigate  |  Space: Select/Toggle  |  Enter: Details", style().foreground(Colors.gray)),
+      text("I: Install  |  U: Uninstall  |  Shift+U: Update  |  B: Bulk install  |  Ctrl+C: Exit", style().foreground(Colors.gray))
     )
     
     const mainContent = model.activeTab === 'packages' && selectedRow
-      ? hstack(content, styledText("  ", style()), packageDetails)
+      ? hstack(content, text("  ", style()), packageDetails)
       : content
     
     return vstack(
       title,
       subtitle,
-      text(""),
+      text("", style()),
       tabsView,
-      text(""),
+      text("", style()),
       mainContent,
-      text(""),
+      text("", style()),
       statusBar,
-      text(""),
+      text("", style()),
       help
     )
   },
@@ -512,19 +510,19 @@ const packageManager: Component<Model, Msg> = {
           const tabs: Tab[] = ['packages', 'dependencies', 'search']
           const currentIndex = tabs.indexOf(model.activeTab)
           const nextIndex = (currentIndex + 1) % tabs.length
-          return { tag: "switchTab", tab: tabs[nextIndex] } as const
+          return { tag: "switchTab", tab: tabs[nextIndex] }
         }
         
         // Direct tab access
-        if (key.key === '1') return { tag: "switchTab", tab: 'packages' as const } as const
-        if (key.key === '2') return { tag: "switchTab", tab: 'dependencies' as const } as const
-        if (key.key === '3') return { tag: "switchTab", tab: 'search' as const } as const
+        if (key.key === '1') return { tag: "switchTab", tab: 'packages' }
+        if (key.key === '2') return { tag: "switchTab", tab: 'dependencies' }
+        if (key.key === '3') return { tag: "switchTab", tab: 'search' }
         
         // Package operations
-        if (key.key === 'i') return { tag: "installPackage" } as const
-        if (key.key === 'u') return { tag: "uninstallPackage" } as const
-        if (key.key === 'U') return { tag: "updatePackage" } as const
-        if (key.key === 'b') return { tag: "bulkInstall" } as const
+        if (key.key === 'i') return { tag: "installPackage" }
+        if (key.key === 'u') return { tag: "uninstallPackage" }
+        if (key.key === 'U') return { tag: "updatePackage" }
+        if (key.key === 'b') return { tag: "bulkInstall" }
         
         // Navigation within active content
         if (key.key === 'up' || key.key === 'down' || key.key === ' ' || key.key === 'enter') {
@@ -535,13 +533,13 @@ const packageManager: Component<Model, Msg> = {
                      key.key === 'down' ? "navigateDown" :
                      key.key === ' ' ? "toggleRowSelection" : "selectRow", 
                 rowId: "" 
-              } as TableMsg<Package> } as const
+              }}
             case 'dependencies':
               return { tag: "dependenciesMsg", msg: { 
                 tag: key.key === 'up' ? "navigateUp" : 
                      key.key === 'down' ? "navigateDown" : "selectRow", 
                 rowId: "" 
-              } as TableMsg<Dependency> } as const
+              }}
             case 'search':
               // Search input handles its own keys
               return null
@@ -560,8 +558,10 @@ const packageManager: Component<Model, Msg> = {
 const config: AppOptions = {
   fps: 30,
   debug: false,
-  mouse: false,
-  alternateScreen: true
+  quitOnEscape: true,
+  quitOnCtrlC: true,
+  enableMouse: false,
+  fullscreen: true
 }
 
 console.log("Starting Package Manager...")
@@ -573,7 +573,7 @@ const program = runApp(packageManager, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error: unknown) => {
+  .catch((error) => {
     console.error(error)
     process.exit(1)
   })

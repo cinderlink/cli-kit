@@ -1,0 +1,1631 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T08:00:16.181Z",
+    "name": "cli-kit",
+    "description": "Enhanced CLI-KIT screenshot of: bun run cli-kit",
+    "app": "bun run cli-kit",
+    "dimensions": {
+      "width": 80,
+      "height": 42
+    }
+  },
+  "visual": {
+    "lines": [
+      "",
+      " ██████╗██╗     ██╗      ██╗  ██╗██╗████████╗",
+      "██╔════╝██║     ██║      ██║ ██╔╝██║╚══██╔══╝",
+      "██║     ██║     ██║█████╗█████╔╝ ██║   ██║   ",
+      "██║     ██║     ██║╚════╝██╔═██╗ ██║   ██║   ",
+      "╚██████╗███████╗██║      ██║  ██╗██║   ██║   ",
+      " ╚═════╝╚══════╝╚═╝      ╚═╝  ╚═╝╚═╝   ╚═╝   ",
+      "",
+      "                    The Ultimate Terminal UI Framework",
+      "                             v1.0.0",
+      "",
+      "📸 Screenshot Commands",
+      "",
+      "  screenshot list                          List all saved screenshots",
+      "  screenshot quick <cmd>                   Quick capture with auto-generated name",
+      "  screenshot create <name>                 Create named screenshot",
+      "  screenshot show <name>                   Display a saved screenshot",
+      "  screenshot delete <name>                 Delete a screenshot",
+      "  screenshot export <name> <file>          Export to file (json/text/ansi)",
+      "  screenshot multi                         Batch capture multiple commands",
+      "",
+      "🎨 Screenshot Options",
+      "",
+      "  --pty                                    Use PTY mode for interactive commands",
+      "  --duration <ms>                          Set capture duration for PTY mode",
+      "  --raw                                    Include raw ANSI codes in capture",
+      "  -s, --show                               Show screenshot immediately after capture",
+      "  -d, --description                        Add description to screenshot",
+      "  -f, --format                             Export format: json, text, or ansi",
+      "",
+      "🚀 Getting Started",
+      "",
+      "  cli-kit ss quick 'ls -la'                Capture directory listing",
+      "  cli-kit ss create demo --command 'echo Hello' --show Named capture with preview",
+      "  cli-kit ss multi --examples              Capture CLI-KIT examples",
+      "  cli-kit create my-app                    Create new CLI-KIT app (coming soon!)",
+      "",
+      "Built with ❤️  using CLI-KIT",
+      "",
+      "",
+      "$ ./bin/cli-kit.ts",
+      ""
+    ],
+    "styles": [
+      {
+        "line": 1,
+        "segments": [
+          {
+            "start": 0,
+            "end": 1,
+            "style": {}
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "style": {}
+          },
+          {
+            "start": 2,
+            "end": 3,
+            "style": {}
+          },
+          {
+            "start": 3,
+            "end": 4,
+            "style": {}
+          },
+          {
+            "start": 4,
+            "end": 5,
+            "style": {}
+          },
+          {
+            "start": 5,
+            "end": 6,
+            "style": {}
+          },
+          {
+            "start": 6,
+            "end": 7,
+            "style": {}
+          },
+          {
+            "start": 7,
+            "end": 8,
+            "style": {}
+          },
+          {
+            "start": 8,
+            "end": 9,
+            "style": {}
+          },
+          {
+            "start": 9,
+            "end": 10,
+            "style": {}
+          },
+          {
+            "start": 10,
+            "end": 15,
+            "style": {}
+          },
+          {
+            "start": 15,
+            "end": 16,
+            "style": {}
+          },
+          {
+            "start": 16,
+            "end": 17,
+            "style": {}
+          },
+          {
+            "start": 17,
+            "end": 18,
+            "style": {}
+          },
+          {
+            "start": 18,
+            "end": 24,
+            "style": {}
+          },
+          {
+            "start": 24,
+            "end": 25,
+            "style": {}
+          },
+          {
+            "start": 25,
+            "end": 26,
+            "style": {}
+          },
+          {
+            "start": 26,
+            "end": 27,
+            "style": {}
+          },
+          {
+            "start": 27,
+            "end": 29,
+            "style": {}
+          },
+          {
+            "start": 29,
+            "end": 30,
+            "style": {}
+          },
+          {
+            "start": 30,
+            "end": 31,
+            "style": {}
+          },
+          {
+            "start": 31,
+            "end": 32,
+            "style": {}
+          },
+          {
+            "start": 32,
+            "end": 33,
+            "style": {}
+          },
+          {
+            "start": 33,
+            "end": 34,
+            "style": {}
+          },
+          {
+            "start": 34,
+            "end": 35,
+            "style": {}
+          },
+          {
+            "start": 35,
+            "end": 36,
+            "style": {}
+          },
+          {
+            "start": 36,
+            "end": 37,
+            "style": {}
+          },
+          {
+            "start": 37,
+            "end": 38,
+            "style": {}
+          },
+          {
+            "start": 38,
+            "end": 39,
+            "style": {}
+          },
+          {
+            "start": 39,
+            "end": 40,
+            "style": {}
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 42,
+            "style": {}
+          },
+          {
+            "start": 42,
+            "end": 43,
+            "style": {}
+          },
+          {
+            "start": 43,
+            "end": 44,
+            "style": {}
+          }
+        ]
+      },
+      {
+        "line": 2,
+        "segments": [
+          {
+            "start": 0,
+            "end": 1,
+            "style": {}
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "style": {}
+          },
+          {
+            "start": 2,
+            "end": 3,
+            "style": {}
+          },
+          {
+            "start": 3,
+            "end": 4,
+            "style": {}
+          },
+          {
+            "start": 4,
+            "end": 5,
+            "style": {}
+          },
+          {
+            "start": 5,
+            "end": 6,
+            "style": {}
+          },
+          {
+            "start": 6,
+            "end": 7,
+            "style": {}
+          },
+          {
+            "start": 7,
+            "end": 8,
+            "style": {}
+          },
+          {
+            "start": 8,
+            "end": 9,
+            "style": {}
+          },
+          {
+            "start": 9,
+            "end": 10,
+            "style": {}
+          },
+          {
+            "start": 10,
+            "end": 11,
+            "style": {}
+          },
+          {
+            "start": 11,
+            "end": 16,
+            "style": {}
+          },
+          {
+            "start": 16,
+            "end": 17,
+            "style": {}
+          },
+          {
+            "start": 17,
+            "end": 18,
+            "style": {}
+          },
+          {
+            "start": 18,
+            "end": 19,
+            "style": {}
+          },
+          {
+            "start": 19,
+            "end": 25,
+            "style": {}
+          },
+          {
+            "start": 25,
+            "end": 26,
+            "style": {}
+          },
+          {
+            "start": 26,
+            "end": 27,
+            "style": {}
+          },
+          {
+            "start": 27,
+            "end": 28,
+            "style": {}
+          },
+          {
+            "start": 28,
+            "end": 29,
+            "style": {}
+          },
+          {
+            "start": 29,
+            "end": 30,
+            "style": {}
+          },
+          {
+            "start": 30,
+            "end": 31,
+            "style": {}
+          },
+          {
+            "start": 31,
+            "end": 32,
+            "style": {}
+          },
+          {
+            "start": 32,
+            "end": 33,
+            "style": {}
+          },
+          {
+            "start": 33,
+            "end": 34,
+            "style": {}
+          },
+          {
+            "start": 34,
+            "end": 35,
+            "style": {}
+          },
+          {
+            "start": 35,
+            "end": 36,
+            "style": {}
+          },
+          {
+            "start": 36,
+            "end": 37,
+            "style": {}
+          },
+          {
+            "start": 37,
+            "end": 38,
+            "style": {}
+          },
+          {
+            "start": 38,
+            "end": 39,
+            "style": {}
+          },
+          {
+            "start": 39,
+            "end": 40,
+            "style": {}
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 42,
+            "style": {}
+          },
+          {
+            "start": 42,
+            "end": 43,
+            "style": {}
+          },
+          {
+            "start": 43,
+            "end": 44,
+            "style": {}
+          },
+          {
+            "start": 44,
+            "end": 45,
+            "style": {}
+          }
+        ]
+      },
+      {
+        "line": 3,
+        "segments": [
+          {
+            "start": 0,
+            "end": 1,
+            "style": {}
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "style": {}
+          },
+          {
+            "start": 2,
+            "end": 3,
+            "style": {}
+          },
+          {
+            "start": 3,
+            "end": 8,
+            "style": {}
+          },
+          {
+            "start": 8,
+            "end": 9,
+            "style": {}
+          },
+          {
+            "start": 9,
+            "end": 10,
+            "style": {}
+          },
+          {
+            "start": 10,
+            "end": 11,
+            "style": {}
+          },
+          {
+            "start": 11,
+            "end": 16,
+            "style": {}
+          },
+          {
+            "start": 16,
+            "end": 17,
+            "style": {}
+          },
+          {
+            "start": 17,
+            "end": 18,
+            "style": {}
+          },
+          {
+            "start": 18,
+            "end": 19,
+            "style": {}
+          },
+          {
+            "start": 19,
+            "end": 20,
+            "style": {}
+          },
+          {
+            "start": 20,
+            "end": 21,
+            "style": {}
+          },
+          {
+            "start": 21,
+            "end": 22,
+            "style": {}
+          },
+          {
+            "start": 22,
+            "end": 23,
+            "style": {}
+          },
+          {
+            "start": 23,
+            "end": 24,
+            "style": {}
+          },
+          {
+            "start": 24,
+            "end": 25,
+            "style": {}
+          },
+          {
+            "start": 25,
+            "end": 26,
+            "style": {}
+          },
+          {
+            "start": 26,
+            "end": 27,
+            "style": {}
+          },
+          {
+            "start": 27,
+            "end": 28,
+            "style": {}
+          },
+          {
+            "start": 28,
+            "end": 29,
+            "style": {}
+          },
+          {
+            "start": 29,
+            "end": 30,
+            "style": {}
+          },
+          {
+            "start": 30,
+            "end": 31,
+            "style": {}
+          },
+          {
+            "start": 31,
+            "end": 32,
+            "style": {}
+          },
+          {
+            "start": 32,
+            "end": 33,
+            "style": {}
+          },
+          {
+            "start": 33,
+            "end": 34,
+            "style": {}
+          },
+          {
+            "start": 34,
+            "end": 35,
+            "style": {}
+          },
+          {
+            "start": 35,
+            "end": 36,
+            "style": {}
+          },
+          {
+            "start": 36,
+            "end": 39,
+            "style": {}
+          },
+          {
+            "start": 39,
+            "end": 40,
+            "style": {}
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 42,
+            "style": {}
+          },
+          {
+            "start": 42,
+            "end": 45,
+            "style": {}
+          }
+        ]
+      },
+      {
+        "line": 4,
+        "segments": [
+          {
+            "start": 0,
+            "end": 1,
+            "style": {}
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "style": {}
+          },
+          {
+            "start": 2,
+            "end": 3,
+            "style": {}
+          },
+          {
+            "start": 3,
+            "end": 8,
+            "style": {}
+          },
+          {
+            "start": 8,
+            "end": 9,
+            "style": {}
+          },
+          {
+            "start": 9,
+            "end": 10,
+            "style": {}
+          },
+          {
+            "start": 10,
+            "end": 11,
+            "style": {}
+          },
+          {
+            "start": 11,
+            "end": 16,
+            "style": {}
+          },
+          {
+            "start": 16,
+            "end": 17,
+            "style": {}
+          },
+          {
+            "start": 17,
+            "end": 18,
+            "style": {}
+          },
+          {
+            "start": 18,
+            "end": 19,
+            "style": {}
+          },
+          {
+            "start": 19,
+            "end": 20,
+            "style": {}
+          },
+          {
+            "start": 20,
+            "end": 21,
+            "style": {}
+          },
+          {
+            "start": 21,
+            "end": 22,
+            "style": {}
+          },
+          {
+            "start": 22,
+            "end": 23,
+            "style": {}
+          },
+          {
+            "start": 23,
+            "end": 24,
+            "style": {}
+          },
+          {
+            "start": 24,
+            "end": 25,
+            "style": {}
+          },
+          {
+            "start": 25,
+            "end": 26,
+            "style": {}
+          },
+          {
+            "start": 26,
+            "end": 27,
+            "style": {}
+          },
+          {
+            "start": 27,
+            "end": 28,
+            "style": {}
+          },
+          {
+            "start": 28,
+            "end": 29,
+            "style": {}
+          },
+          {
+            "start": 29,
+            "end": 30,
+            "style": {}
+          },
+          {
+            "start": 30,
+            "end": 31,
+            "style": {}
+          },
+          {
+            "start": 31,
+            "end": 32,
+            "style": {}
+          },
+          {
+            "start": 32,
+            "end": 33,
+            "style": {}
+          },
+          {
+            "start": 33,
+            "end": 34,
+            "style": {}
+          },
+          {
+            "start": 34,
+            "end": 35,
+            "style": {}
+          },
+          {
+            "start": 35,
+            "end": 36,
+            "style": {}
+          },
+          {
+            "start": 36,
+            "end": 39,
+            "style": {}
+          },
+          {
+            "start": 39,
+            "end": 40,
+            "style": {}
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 42,
+            "style": {}
+          },
+          {
+            "start": 42,
+            "end": 45,
+            "style": {}
+          }
+        ]
+      },
+      {
+        "line": 5,
+        "segments": [
+          {
+            "start": 0,
+            "end": 1,
+            "style": {}
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "style": {}
+          },
+          {
+            "start": 2,
+            "end": 3,
+            "style": {}
+          },
+          {
+            "start": 3,
+            "end": 4,
+            "style": {}
+          },
+          {
+            "start": 4,
+            "end": 5,
+            "style": {}
+          },
+          {
+            "start": 5,
+            "end": 6,
+            "style": {}
+          },
+          {
+            "start": 6,
+            "end": 7,
+            "style": {}
+          },
+          {
+            "start": 7,
+            "end": 8,
+            "style": {}
+          },
+          {
+            "start": 8,
+            "end": 9,
+            "style": {}
+          },
+          {
+            "start": 9,
+            "end": 10,
+            "style": {}
+          },
+          {
+            "start": 10,
+            "end": 11,
+            "style": {}
+          },
+          {
+            "start": 11,
+            "end": 12,
+            "style": {}
+          },
+          {
+            "start": 12,
+            "end": 13,
+            "style": {}
+          },
+          {
+            "start": 13,
+            "end": 14,
+            "style": {}
+          },
+          {
+            "start": 14,
+            "end": 15,
+            "style": {}
+          },
+          {
+            "start": 15,
+            "end": 16,
+            "style": {}
+          },
+          {
+            "start": 16,
+            "end": 17,
+            "style": {}
+          },
+          {
+            "start": 17,
+            "end": 18,
+            "style": {}
+          },
+          {
+            "start": 18,
+            "end": 19,
+            "style": {}
+          },
+          {
+            "start": 19,
+            "end": 25,
+            "style": {}
+          },
+          {
+            "start": 25,
+            "end": 26,
+            "style": {}
+          },
+          {
+            "start": 26,
+            "end": 27,
+            "style": {}
+          },
+          {
+            "start": 27,
+            "end": 28,
+            "style": {}
+          },
+          {
+            "start": 28,
+            "end": 30,
+            "style": {}
+          },
+          {
+            "start": 30,
+            "end": 31,
+            "style": {}
+          },
+          {
+            "start": 31,
+            "end": 32,
+            "style": {}
+          },
+          {
+            "start": 32,
+            "end": 33,
+            "style": {}
+          },
+          {
+            "start": 33,
+            "end": 34,
+            "style": {}
+          },
+          {
+            "start": 34,
+            "end": 35,
+            "style": {}
+          },
+          {
+            "start": 35,
+            "end": 36,
+            "style": {}
+          },
+          {
+            "start": 36,
+            "end": 39,
+            "style": {}
+          },
+          {
+            "start": 39,
+            "end": 40,
+            "style": {}
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 42,
+            "style": {}
+          },
+          {
+            "start": 42,
+            "end": 45,
+            "style": {}
+          }
+        ]
+      },
+      {
+        "line": 6,
+        "segments": [
+          {
+            "start": 0,
+            "end": 1,
+            "style": {}
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "style": {}
+          },
+          {
+            "start": 2,
+            "end": 3,
+            "style": {}
+          },
+          {
+            "start": 3,
+            "end": 4,
+            "style": {}
+          },
+          {
+            "start": 4,
+            "end": 5,
+            "style": {}
+          },
+          {
+            "start": 5,
+            "end": 6,
+            "style": {}
+          },
+          {
+            "start": 6,
+            "end": 7,
+            "style": {}
+          },
+          {
+            "start": 7,
+            "end": 8,
+            "style": {}
+          },
+          {
+            "start": 8,
+            "end": 9,
+            "style": {}
+          },
+          {
+            "start": 9,
+            "end": 10,
+            "style": {}
+          },
+          {
+            "start": 10,
+            "end": 11,
+            "style": {}
+          },
+          {
+            "start": 11,
+            "end": 12,
+            "style": {}
+          },
+          {
+            "start": 12,
+            "end": 13,
+            "style": {}
+          },
+          {
+            "start": 13,
+            "end": 14,
+            "style": {}
+          },
+          {
+            "start": 14,
+            "end": 15,
+            "style": {}
+          },
+          {
+            "start": 15,
+            "end": 16,
+            "style": {}
+          },
+          {
+            "start": 16,
+            "end": 17,
+            "style": {}
+          },
+          {
+            "start": 17,
+            "end": 18,
+            "style": {}
+          },
+          {
+            "start": 18,
+            "end": 24,
+            "style": {}
+          },
+          {
+            "start": 24,
+            "end": 25,
+            "style": {}
+          },
+          {
+            "start": 25,
+            "end": 26,
+            "style": {}
+          },
+          {
+            "start": 26,
+            "end": 27,
+            "style": {}
+          },
+          {
+            "start": 27,
+            "end": 29,
+            "style": {}
+          },
+          {
+            "start": 29,
+            "end": 30,
+            "style": {}
+          },
+          {
+            "start": 30,
+            "end": 31,
+            "style": {}
+          },
+          {
+            "start": 31,
+            "end": 32,
+            "style": {}
+          },
+          {
+            "start": 32,
+            "end": 33,
+            "style": {}
+          },
+          {
+            "start": 33,
+            "end": 34,
+            "style": {}
+          },
+          {
+            "start": 34,
+            "end": 35,
+            "style": {}
+          },
+          {
+            "start": 35,
+            "end": 38,
+            "style": {}
+          },
+          {
+            "start": 38,
+            "end": 39,
+            "style": {}
+          },
+          {
+            "start": 39,
+            "end": 40,
+            "style": {}
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 44,
+            "style": {}
+          }
+        ]
+      },
+      {
+        "line": 8,
+        "segments": [
+          {
+            "start": 0,
+            "end": 34,
+            "style": {
+              "italic": true
+            }
+          }
+        ]
+      },
+      {
+        "line": 9,
+        "segments": [
+          {
+            "start": 0,
+            "end": 6,
+            "style": {
+              "foreground": "brightBlack"
+            }
+          }
+        ]
+      },
+      {
+        "line": 11,
+        "segments": [
+          {
+            "start": 0,
+            "end": 22,
+            "style": {
+              "bold": true
+            }
+          }
+        ]
+      },
+      {
+        "line": 13,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 67,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 14,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 79,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 15,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 64,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 16,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 67,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 17,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 60,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 18,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 72,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 19,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 72,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 21,
+        "segments": [
+          {
+            "start": 0,
+            "end": 21,
+            "style": {
+              "bold": true
+            }
+          }
+        ]
+      },
+      {
+        "line": 23,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 78,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 24,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 74,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 25,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 74,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 26,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 82,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 27,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 70,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 28,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 75,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 30,
+        "segments": [
+          {
+            "start": 0,
+            "end": 18,
+            "style": {
+              "bold": true
+            }
+          }
+        ]
+      },
+      {
+        "line": 32,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 66,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 33,
+        "segments": [
+          {
+            "start": 0,
+            "end": 52,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 52,
+            "end": 53,
+            "style": {}
+          },
+          {
+            "start": 53,
+            "end": 79,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 34,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 65,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 35,
+        "segments": [
+          {
+            "start": 0,
+            "end": 40,
+            "style": {
+              "foreground": "cyan"
+            }
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "style": {}
+          },
+          {
+            "start": 41,
+            "end": 78,
+            "style": {
+              "foreground": "white"
+            }
+          }
+        ]
+      },
+      {
+        "line": 37,
+        "segments": [
+          {
+            "start": 0,
+            "end": 28,
+            "style": {
+              "foreground": "magenta"
+            }
+          }
+        ]
+      },
+      {
+        "line": 40,
+        "segments": [
+          {
+            "start": 0,
+            "end": 1,
+            "style": {
+              "foreground": "magenta"
+            }
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "style": {}
+          },
+          {
+            "start": 2,
+            "end": 18,
+            "style": {
+              "bold": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "bun run cli-kit"
+    },
+    "content": "\n \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m      \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m  \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\n\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╔\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m╝\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m      \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╔\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m\u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╔\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m\n\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╔\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \n\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m\u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╔\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \n\u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m      \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m  \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \n \u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m╝\u001b[0m\u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m╝\u001b[0m\u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m╝\u001b[0m      \u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m  \u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m\u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m   \u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m   \n\n                    \u001b[96m\u001b[3mThe Ultimate Terminal UI Framework\u001b[0m\n                             \u001b[90mv1.0.0\u001b[0m\n\n\u001b[33m\u001b[1m📸 Screenshot Commands\u001b[0m\n\n  \u001b[36mscreenshot list                         \u001b[0m \u001b[37mList all saved screenshots\u001b[0m\n  \u001b[36mscreenshot quick <cmd>                  \u001b[0m \u001b[37mQuick capture with auto-generated name\u001b[0m\n  \u001b[36mscreenshot create <name>                \u001b[0m \u001b[37mCreate named screenshot\u001b[0m\n  \u001b[36mscreenshot show <name>                  \u001b[0m \u001b[37mDisplay a saved screenshot\u001b[0m\n  \u001b[36mscreenshot delete <name>                \u001b[0m \u001b[37mDelete a screenshot\u001b[0m\n  \u001b[36mscreenshot export <name> <file>         \u001b[0m \u001b[37mExport to file (json/text/ansi)\u001b[0m\n  \u001b[36mscreenshot multi                        \u001b[0m \u001b[37mBatch capture multiple commands\u001b[0m\n\n\u001b[33m\u001b[1m🎨 Screenshot Options\u001b[0m\n\n  \u001b[36m--pty                                   \u001b[0m \u001b[37mUse PTY mode for interactive commands\u001b[0m\n  \u001b[36m--duration <ms>                         \u001b[0m \u001b[37mSet capture duration for PTY mode\u001b[0m\n  \u001b[36m--raw                                   \u001b[0m \u001b[37mInclude raw ANSI codes in capture\u001b[0m\n  \u001b[36m-s, --show                              \u001b[0m \u001b[37mShow screenshot immediately after capture\u001b[0m\n  \u001b[36m-d, --description                       \u001b[0m \u001b[37mAdd description to screenshot\u001b[0m\n  \u001b[36m-f, --format                            \u001b[0m \u001b[37mExport format: json, text, or ansi\u001b[0m\n\n\u001b[33m\u001b[1m🚀 Getting Started\u001b[0m\n\n  \u001b[36mcli-kit ss quick 'ls -la'               \u001b[0m \u001b[37mCapture directory listing\u001b[0m\n  \u001b[36mcli-kit ss create demo --command 'echo Hello' --show\u001b[0m \u001b[37mNamed capture with preview\u001b[0m\n  \u001b[36mcli-kit ss multi --examples             \u001b[0m \u001b[37mCapture CLI-KIT examples\u001b[0m\n  \u001b[36mcli-kit create my-app                   \u001b[0m \u001b[37mCreate new CLI-KIT app (coming soon!)\u001b[0m\n\n\u001b[35mBuilt with ❤️  using CLI-KIT\u001b[0m\n\n\n\u001b[0m\u001b[2m\u001b[35m$\u001b[0m \u001b[2m\u001b[1m./bin/cli-kit.ts\u001b[0m\n"
+  },
+  "raw": {
+    "ansiCodes": "\n \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m      \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m  \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\n\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╔\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m╝\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m      \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╔\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m\u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╔\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m\n\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╔\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \n\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m     \u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m\u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╔\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \n\u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m╗\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m█\u001b[0m\u001b[38;2;255;0;255m║\u001b[0m      \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m  \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m╗\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m█\u001b[0m\u001b[38;2;0;255;255m║\u001b[0m   \n \u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m╝\u001b[0m\u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m╝\u001b[0m\u001b[38;2;255;0;255m╚\u001b[0m\u001b[38;2;255;0;255m═\u001b[0m\u001b[38;2;255;0;255m╝\u001b[0m      \u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m  \u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m\u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m   \u001b[38;2;0;255;255m╚\u001b[0m\u001b[38;2;0;255;255m═\u001b[0m\u001b[38;2;0;255;255m╝\u001b[0m   \n\n                    \u001b[96m\u001b[3mThe Ultimate Terminal UI Framework\u001b[0m\n                             \u001b[90mv1.0.0\u001b[0m\n\n\u001b[33m\u001b[1m📸 Screenshot Commands\u001b[0m\n\n  \u001b[36mscreenshot list                         \u001b[0m \u001b[37mList all saved screenshots\u001b[0m\n  \u001b[36mscreenshot quick <cmd>                  \u001b[0m \u001b[37mQuick capture with auto-generated name\u001b[0m\n  \u001b[36mscreenshot create <name>                \u001b[0m \u001b[37mCreate named screenshot\u001b[0m\n  \u001b[36mscreenshot show <name>                  \u001b[0m \u001b[37mDisplay a saved screenshot\u001b[0m\n  \u001b[36mscreenshot delete <name>                \u001b[0m \u001b[37mDelete a screenshot\u001b[0m\n  \u001b[36mscreenshot export <name> <file>         \u001b[0m \u001b[37mExport to file (json/text/ansi)\u001b[0m\n  \u001b[36mscreenshot multi                        \u001b[0m \u001b[37mBatch capture multiple commands\u001b[0m\n\n\u001b[33m\u001b[1m🎨 Screenshot Options\u001b[0m\n\n  \u001b[36m--pty                                   \u001b[0m \u001b[37mUse PTY mode for interactive commands\u001b[0m\n  \u001b[36m--duration <ms>                         \u001b[0m \u001b[37mSet capture duration for PTY mode\u001b[0m\n  \u001b[36m--raw                                   \u001b[0m \u001b[37mInclude raw ANSI codes in capture\u001b[0m\n  \u001b[36m-s, --show                              \u001b[0m \u001b[37mShow screenshot immediately after capture\u001b[0m\n  \u001b[36m-d, --description                       \u001b[0m \u001b[37mAdd description to screenshot\u001b[0m\n  \u001b[36m-f, --format                            \u001b[0m \u001b[37mExport format: json, text, or ansi\u001b[0m\n\n\u001b[33m\u001b[1m🚀 Getting Started\u001b[0m\n\n  \u001b[36mcli-kit ss quick 'ls -la'               \u001b[0m \u001b[37mCapture directory listing\u001b[0m\n  \u001b[36mcli-kit ss create demo --command 'echo Hello' --show\u001b[0m \u001b[37mNamed capture with preview\u001b[0m\n  \u001b[36mcli-kit ss multi --examples             \u001b[0m \u001b[37mCapture CLI-KIT examples\u001b[0m\n  \u001b[36mcli-kit create my-app                   \u001b[0m \u001b[37mCreate new CLI-KIT app (coming soon!)\u001b[0m\n\n\u001b[35mBuilt with ❤️  using CLI-KIT\u001b[0m\n\n\n\u001b[0m\u001b[2m\u001b[35m$\u001b[0m \u001b[2m\u001b[1m./bin/cli-kit.ts\u001b[0m\n"
+  }
+}

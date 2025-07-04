@@ -12,8 +12,8 @@
 
 import { Effect, Stream, Schedule } from "effect"
 import { runApp } from "@/index.ts"
-import { vstack, hstack, text, box } from "@/core/view.ts"
-import type { Component, Cmd, AppServices, RuntimeConfig, KeyEvent } from "@/core/types.ts"
+import { vstack, hstack, text, styledText, box } from "@/core/view.ts"
+import type { Component, Cmd, AppServices, AppOptions, KeyEvent } from "@/core/types.ts"
 import { style, Colors, Borders } from "@/styling/index.ts"
 import { InputService } from "@/services/index.ts"
 import { 
@@ -445,19 +445,19 @@ const logViewer: Component<Model, Msg> = {
   },
   
   view(model: Model) {
-    const title = text("Log Viewer 📝", style(Colors.BrightYellow).bold())
-    const subtitle = text(`${model.filteredLogs.length}/${model.logs.length} entries • Auto-scroll: ${model.autoScroll ? 'ON' : 'OFF'}`, style(Colors.Gray))
+    const title = styledText("Log Viewer 📝", style().foreground(Colors.brightYellow).bold())
+    const subtitle = styledText(`${model.filteredLogs.length}/${model.logs.length} entries • Auto-scroll: ${model.autoScroll ? 'ON' : 'OFF'}`, style().foreground(Colors.gray))
     
     // Create a spacer that maintains the same height as a box
     const spacer = (width: number, height: number) => {
       const lines = Array(height).fill(' '.repeat(width))
-      return text(lines.join('\n'), style())
+      return styledText(lines.join('\n'), style())
     }
     
     // Search bar (if in search mode) - always maintain height
     const searchBar = model.isSearching ? box(
       vstack(
-        text("Search:", style(Colors.BrightCyan)),
+        styledText("Search:", style().foreground(Colors.brightCyan)),
         textInput({ placeholder: "Search logs...", width: 40 }).view(model.searchInput)
       )
     ) : spacer(50, 4) // Same dimensions as the search box
@@ -465,21 +465,21 @@ const logViewer: Component<Model, Msg> = {
     // Filter panel (if showing filters)
     const filterPanel = model.showFilters ? box(
       vstack(
-        text("Log Level Filters:", style(Colors.BrightMagenta)),
-        text("", style()),
+        styledText("Log Level Filters:", style().foreground(Colors.brightMagenta)),
+        styledText("", style()),
         hstack(
-          text(`[${model.levelFilter.has('ERROR') ? '✓' : ' '}] ERROR`, 
-               model.levelFilter.has('ERROR') ? style(Colors.BrightRed) : style(Colors.Gray)),
-          text("  ", style()),
-          text(`[${model.levelFilter.has('WARN') ? '✓' : ' '}] WARN`, 
-               model.levelFilter.has('WARN') ? style(Colors.BrightYellow) : style(Colors.Gray))
+          styledText(`[${model.levelFilter.has('ERROR') ? '✓' : ' '}] ERROR`, 
+               model.levelFilter.has('ERROR') ? style().foreground(Colors.brightRed) : style().foreground(Colors.gray)),
+          styledText("  ", style()),
+          styledText(`[${model.levelFilter.has('WARN') ? '✓' : ' '}] WARN`, 
+               model.levelFilter.has('WARN') ? style().foreground(Colors.brightYellow) : style().foreground(Colors.gray))
         ),
         hstack(
-          text(`[${model.levelFilter.has('INFO') ? '✓' : ' '}] INFO`, 
-               model.levelFilter.has('INFO') ? style(Colors.BrightGreen) : style(Colors.Gray)),
-          text("  ", style()),
-          text(`[${model.levelFilter.has('DEBUG') ? '✓' : ' '}] DEBUG`, 
-               model.levelFilter.has('DEBUG') ? style(Colors.BrightBlue) : style(Colors.Gray))
+          styledText(`[${model.levelFilter.has('INFO') ? '✓' : ' '}] INFO`, 
+               model.levelFilter.has('INFO') ? style().foreground(Colors.brightGreen) : style().foreground(Colors.gray)),
+          styledText("  ", style()),
+          styledText(`[${model.levelFilter.has('DEBUG') ? '✓' : ' '}] DEBUG`, 
+               model.levelFilter.has('DEBUG') ? style().foreground(Colors.brightBlue) : style().foreground(Colors.gray))
         )
       )
     ) : spacer(40, 6) // Same dimensions as the filter box
@@ -491,10 +491,10 @@ const logViewer: Component<Model, Msg> = {
       const isSelected = globalIndex === model.selectedIndex
       
       const levelStyle = {
-        'ERROR': style(Colors.BrightRed),
-        'WARN': style(Colors.BrightYellow),
-        'INFO': style(Colors.BrightGreen),
-        'DEBUG': style(Colors.BrightBlue)
+        'ERROR': style().foreground(Colors.brightRed),
+        'WARN': style().foreground(Colors.brightYellow),
+        'INFO': style().foreground(Colors.brightGreen),
+        'DEBUG': style().foreground(Colors.brightBlue)
       }[log.level]
       
       const logLine = model.viewMode === 'list' 
@@ -502,50 +502,50 @@ const logViewer: Component<Model, Msg> = {
         : `${log.timestamp}\n[${log.level}] Source: ${log.source}\nMessage: ${highlightText(log.message, model.searchTerm)}${log.details ? `\nDetails: ${log.details}` : ''}`
       
       const lineStyle = isSelected 
-        ? levelStyle.background(Colors.DarkGray)
+        ? levelStyle.background(Colors.gray)
         : levelStyle
       
-      return text(logLine, lineStyle)
+      return styledText(logLine, lineStyle)
     })
     
     const logPanel = box(
       vstack(
-        text("Log Entries", style(Colors.BrightWhite)),
-        text("", style()),
+        styledText("Log Entries", style().foreground(Colors.brightWhite)),
+        styledText("", style()),
         ...logLines
       )
     )
     
     // Status bar
     const statusBar = box(
-      text(model.statusMessage, style(Colors.White))
+      styledText(model.statusMessage, style().foreground(Colors.white))
     )
     
     // Keybindings help
     const help = vstack(
-      text("Keybindings:", style(Colors.Yellow)),
-      text("↑↓: Navigate  |  /: Search  |  F: Filters  |  A: Auto-scroll  |  V: View mode", style(Colors.Gray)),
-      text("1-4: Toggle log levels  |  E: Export  |  Ctrl+C: Exit", style(Colors.Gray))
+      styledText("Keybindings:", style().foreground(Colors.yellow)),
+      styledText("↑↓: Navigate  |  /: Search  |  F: Filters  |  A: Auto-scroll  |  V: View mode", style().foreground(Colors.gray)),
+      styledText("1-4: Toggle log levels  |  E: Export  |  Ctrl+C: Exit", style().foreground(Colors.gray))
     )
     
     const topRow = model.isSearching && model.showFilters 
-      ? hstack(searchBar, text("  ", style()), filterPanel)
+      ? hstack(searchBar, styledText("  ", style()), filterPanel)
       : model.isSearching 
-        ? hstack(searchBar, text("  ", style()), spacer(40, 6))
+        ? hstack(searchBar, styledText("  ", style()), spacer(40, 6))
         : model.showFilters 
-          ? hstack(spacer(50, 4), text("  ", style()), filterPanel)
-          : hstack(spacer(50, 4), text("  ", style()), spacer(40, 6))
+          ? hstack(spacer(50, 4), styledText("  ", style()), filterPanel)
+          : hstack(spacer(50, 4), styledText("  ", style()), spacer(40, 6))
     
     return vstack(
       title,
       subtitle,
-      text("", style()),
+      text(""),
       topRow,
-      text("", style()),
+      text(""),
       logPanel,
-      text("", style()),
+      text(""),
       statusBar,
-      text("", style()),
+      text(""),
       help
     )
   },
@@ -578,13 +578,11 @@ const logViewer: Component<Model, Msg> = {
 // Main
 // =============================================================================
 
-const config: RuntimeConfig = {
+const config: AppOptions = {
   fps: 30,
   debug: false,
-  quitOnEscape: true,
-  quitOnCtrlC: true,
-  enableMouse: false,
-  fullscreen: true
+  mouse: false,
+  alternateScreen: true
 }
 
 console.log("Starting Log Viewer...")
@@ -596,7 +594,7 @@ const program = runApp(logViewer, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error(error)
     process.exit(1)
   })

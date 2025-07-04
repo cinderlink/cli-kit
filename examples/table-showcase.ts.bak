@@ -4,7 +4,7 @@
 
 import { Effect, Stream } from "effect"
 import { runApp } from "@/index.ts"
-import { vstack, hstack, text, styledText, box } from "@/core/view.ts"
+import { vstack, hstack, text, box } from "@/core/view.ts"
 import type { Component, Cmd, AppServices, AppOptions } from "@/core/types.ts"
 import { style, Colors, Borders } from "@/styling/index.ts"
 import { 
@@ -213,8 +213,8 @@ const showcaseComponent: Component<Model, Msg> = {
   },
   
   view(model: Model) {
-    const title = styledText("Table Component Showcase", style().foreground(Colors.brightWhite))
-    const subtitle = styledText("Navigate with arrows, Space to select, Enter to toggle", style().foreground(Colors.gray))
+    const title = text("Table Component Showcase", style().foreground(Colors.brightWhite))
+    const subtitle = text("Navigate with arrows, Space to select, Enter to toggle", style().foreground(Colors.gray))
     
     // Table view
     const userTableComponent = createUserTable()
@@ -222,24 +222,24 @@ const showcaseComponent: Component<Model, Msg> = {
     
     // Controls
     const controls = [
-      styledText("Controls:", style().foreground(Colors.yellow)),
-      styledText("↑/↓ Navigate rows  |  Space/Enter Select row  |  PgUp/PgDn Page navigation", style().foreground(Colors.gray)),
-      styledText("Ctrl+A Select all  |  Esc Clear selection  |  Click column headers to sort", style().foreground(Colors.gray)),
-      styledText("F Filter rows  |  C Clear filters", style().foreground(Colors.gray))
+      text("Controls:", style().foreground(Colors.yellow)),
+      text("↑/↓ Navigate rows  |  Space/Enter Select row  |  PgUp/PgDn Page navigation", style().foreground(Colors.gray)),
+      text("Ctrl+A Select all  |  Esc Clear selection  |  Click column headers to sort", style().foreground(Colors.gray)),
+      text("F Filter rows  |  C Clear filters", style().foreground(Colors.gray))
     ]
     
     // Filter interface (if showing)
     const filterUI = model.showingFilters ? [
-      text(""),
+      text("", style()),
       box(
         vstack(
-          styledText("Filter Options", style().foreground(Colors.yellow)),
-          text(""),
-          styledText(`Column: ${model.filterColumn}`, style().foreground(Colors.white)),
-          styledText(`Value: ${model.filterValue}`, style().foreground(Colors.white)),
-          text(""),
-          styledText("Available columns: name, email, role, status", style().foreground(Colors.gray)),
-          styledText("Press Enter to apply filter, Esc to cancel", style().foreground(Colors.gray))
+          text("Filter Options", style().foreground(Colors.yellow)),
+          text("", style()),
+          text(`Column: ${model.filterColumn}`, style().foreground(Colors.white)),
+          text(`Value: ${model.filterValue}`, style().foreground(Colors.white)),
+          text("", style()),
+          text("Available columns: name, email, role, status", style().foreground(Colors.gray)),
+          text("Press Enter to apply filter, Esc to cancel", style().foreground(Colors.gray))
         ),
         {
           width: 50,
@@ -253,34 +253,34 @@ const showcaseComponent: Component<Model, Msg> = {
     
     // Active filters display
     const activeFilters = model.userTable.filters.length > 0 ? [
-      text(""),
-      styledText("Active Filters:", style().foreground(Colors.yellow)),
+      text("", style()),
+      text("Active Filters:", style().foreground(Colors.yellow)),
       ...model.userTable.filters.map(filter =>
-        styledText(`• ${filter.column} contains "${filter.value}"`, style().foreground(Colors.cyan))
+        text(`• ${filter.column} contains "${filter.value}"`, style().foreground(Colors.cyan))
       )
     ] : []
     
     // Sample data info
     const dataInfo = [
-      styledText("Sample Data:", style().foreground(Colors.yellow)),
-      styledText("10 users with various roles and statuses", style().foreground(Colors.gray)),
-      styledText("Try sorting by clicking column names, filtering, and selecting rows", style().foreground(Colors.gray))
+      text("Sample Data:", style().foreground(Colors.yellow)),
+      text("10 users with various roles and statuses", style().foreground(Colors.gray)),
+      text("Try sorting by clicking column names, filtering, and selecting rows", style().foreground(Colors.gray))
     ]
     
     return vstack(
       title,
       subtitle,
-      text(""),
+      text("", style()),
       tableView,
-      text(""),
+      text("", style()),
       ...activeFilters,
-      text(""),
+      text("", style()),
       vstack(...controls),
-      text(""),
+      text("", style()),
       vstack(...dataInfo),
       ...filterUI,
-      text(""),
-      styledText("Press Ctrl+C to exit", style().foreground(Colors.gray))
+      text("", style()),
+      text("Press Ctrl+C to exit", style().foreground(Colors.gray))
     )
   }
 }
@@ -292,8 +292,10 @@ const showcaseComponent: Component<Model, Msg> = {
 const config: AppOptions = {
   fps: 30,
   debug: false,
-  mouse: false,
-  alternateScreen: true
+  quitOnEscape: true,
+  quitOnCtrlC: true,
+  enableMouse: false,
+  fullscreen: true
 }
 
 const program = runApp(showcaseComponent, config).pipe(
@@ -302,7 +304,7 @@ const program = runApp(showcaseComponent, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error: unknown) => {
+  .catch((error) => {
     console.error(error)
     process.exit(1)
   })

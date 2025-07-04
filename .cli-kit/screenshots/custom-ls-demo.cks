@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T01:10:13.295Z",
+    "name": "custom-ls-demo",
+    "description": "Directory listing example",
+    "app": "ls -la | head -10",
+    "dimensions": {
+      "width": 80,
+      "height": 11
+    }
+  },
+  "visual": {
+    "lines": [
+      "total 144",
+      "drwxr-xr-x@ 18 aewing  staff    576 Jul  3 00:47 __tests__",
+      "drwxr-xr-x@ 26 aewing  staff    832 Jul  3 17:52 .",
+      "drwxr-xr-x@  9 aewing  staff    288 Jun 25 00:02 ..",
+      "drwxr-xr-x@  3 aewing  staff     96 Jul  3 17:52 .cli-kit",
+      "drwxr-xr-x@  3 aewing  staff     96 Jun 25 00:02 .cursor",
+      "drwxr-xr-x@ 12 aewing  staff    384 Jul  3 03:23 .git",
+      "-rw-r--r--@  1 aewing  staff    471 Jun 30 19:31 .gitignore",
+      "-rw-r--r--@  1 aewing  staff   5102 Jul  3 17:39 auto-font-test.ts",
+      "drwxr-xr-x@  3 aewing  staff     96 Jul  3 17:50 bin",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "ls -la | head -10"
+    },
+    "content": "total 144\ndrwxr-xr-x@ 18 aewing  staff    576 Jul  3 00:47 __tests__\ndrwxr-xr-x@ 26 aewing  staff    832 Jul  3 17:52 .\ndrwxr-xr-x@  9 aewing  staff    288 Jun 25 00:02 ..\ndrwxr-xr-x@  3 aewing  staff     96 Jul  3 17:52 .cli-kit\ndrwxr-xr-x@  3 aewing  staff     96 Jun 25 00:02 .cursor\ndrwxr-xr-x@ 12 aewing  staff    384 Jul  3 03:23 .git\n-rw-r--r--@  1 aewing  staff    471 Jun 30 19:31 .gitignore\n-rw-r--r--@  1 aewing  staff   5102 Jul  3 17:39 auto-font-test.ts\ndrwxr-xr-x@  3 aewing  staff     96 Jul  3 17:50 bin\n"
+  }
+}

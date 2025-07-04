@@ -462,6 +462,8 @@ const cleanup = (terminal: TerminalService, config: RuntimeConfig) =>
       yield* _(input.disableMouse)
     }
     
+    // Reset terminal state to normal
+    yield* _(terminal.write('\x1b[0m')) // Reset all styling
     yield* _(terminal.showCursor)
     yield* _(terminal.setRawMode(false))
     if (config.fullscreen ?? true) {

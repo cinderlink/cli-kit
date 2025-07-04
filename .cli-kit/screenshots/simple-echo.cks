@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T00:53:25.684Z",
+    "name": "simple-echo",
+    "description": "Simple echo test",
+    "app": "echo 'Hello CLI-KIT\\!'",
+    "dimensions": {
+      "width": 80,
+      "height": 2
+    }
+  },
+  "visual": {
+    "lines": [
+      "Hello CLI-KIT\\!",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "echo 'Hello CLI-KIT\\!'"
+    },
+    "content": "Hello CLI-KIT\\!\n"
+  }
+}

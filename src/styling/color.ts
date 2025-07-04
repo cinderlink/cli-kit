@@ -148,6 +148,91 @@ export const Colors = {
   // Aliases
   gray: Color.ANSI(8),
   grey: Color.ANSI(8),
+  
+  // ==========================================================================
+  // Extended RGB Color Palette
+  // ==========================================================================
+  
+  // Orange shades
+  orange: Color.RGB(255, 140, 0),
+  deepOrange: Color.RGB(255, 87, 34),
+  lightOrange: Color.RGB(255, 183, 77),
+  darkOrange: Color.RGB(230, 81, 0),
+  
+  // Purple shades
+  purple: Color.RGB(128, 0, 128),
+  deepPurple: Color.RGB(103, 58, 183),
+  lightPurple: Color.RGB(186, 104, 200),
+  darkPurple: Color.RGB(74, 20, 140),
+  indigo: Color.RGB(63, 81, 181),
+  violet: Color.RGB(238, 130, 238),
+  
+  // Pink shades
+  pink: Color.RGB(233, 30, 99),
+  lightPink: Color.RGB(244, 143, 177),
+  deepPink: Color.RGB(255, 20, 147),
+  hotPink: Color.RGB(255, 105, 180),
+  
+  // Teal and cyan variants
+  teal: Color.RGB(0, 150, 136),
+  lightTeal: Color.RGB(77, 182, 172),
+  darkTeal: Color.RGB(0, 77, 64),
+  aqua: Color.RGB(0, 255, 255),
+  turquoise: Color.RGB(64, 224, 208),
+  
+  // Brown shades
+  brown: Color.RGB(121, 85, 72),
+  lightBrown: Color.RGB(161, 136, 127),
+  darkBrown: Color.RGB(62, 39, 35),
+  
+  // Green variants
+  lime: Color.RGB(205, 220, 57),
+  lightGreen: Color.RGB(139, 195, 74),
+  darkGreen: Color.RGB(27, 94, 32),
+  forest: Color.RGB(34, 139, 34),
+  mint: Color.RGB(152, 251, 152),
+  olive: Color.RGB(128, 128, 0),
+  
+  // Blue variants
+  lightBlue: Color.RGB(3, 169, 244),
+  darkBlue: Color.RGB(13, 71, 161),
+  navy: Color.RGB(0, 0, 128),
+  royal: Color.RGB(65, 105, 225),
+  sky: Color.RGB(135, 206, 235),
+  steel: Color.RGB(70, 130, 180),
+  
+  // Red variants
+  crimson: Color.RGB(220, 20, 60),
+  scarlet: Color.RGB(255, 36, 0),
+  maroon: Color.RGB(128, 0, 0),
+  coral: Color.RGB(255, 127, 80),
+  
+  // Yellow variants
+  gold: Color.RGB(255, 215, 0),
+  amber: Color.RGB(255, 193, 7),
+  lemon: Color.RGB(255, 244, 67),
+  
+  // Gray variants
+  lightGray: Color.RGB(189, 189, 189),
+  darkGray: Color.RGB(66, 66, 66),
+  silver: Color.RGB(192, 192, 192),
+  charcoal: Color.RGB(54, 69, 79),
+  
+  // Neon colors
+  neonGreen: Color.RGB(57, 255, 20),
+  neonBlue: Color.RGB(0, 149, 255),
+  neonPink: Color.RGB(255, 16, 240),
+  neonYellow: Color.RGB(255, 255, 0),
+  neonOrange: Color.RGB(255, 128, 0),
+  neonPurple: Color.RGB(177, 3, 252),
+  
+  // Pastel colors
+  pastelPink: Color.RGB(255, 209, 220),
+  pastelBlue: Color.RGB(174, 198, 207),
+  pastelGreen: Color.RGB(162, 210, 162),
+  pastelYellow: Color.RGB(255, 254, 162),
+  pastelPurple: Color.RGB(221, 160, 221),
+  pastelOrange: Color.RGB(255, 179, 71),
 } as const
 
 // =============================================================================

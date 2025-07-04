@@ -4,7 +4,7 @@
 
 import { Effect, Stream } from "effect"
 import { runApp } from "@/index.ts"
-import { vstack, hstack, text, styledText, box } from "@/core/view.ts"
+import { vstack, hstack, text, box } from "@/core/view.ts"
 import type { Component, Cmd, AppServices, AppOptions } from "@/core/types.ts"
 import { style, Colors, Borders } from "@/styling/index.ts"
 import { 
@@ -41,7 +41,7 @@ Key Features:
 - Dynamic tab switching
 - Disabled state support
 - Focus management
-- Mouse interaction support
+- Mouse interaction (planned)
 - Flexible content rendering`
   },
   {
@@ -209,8 +209,8 @@ const showcaseComponent: Component<Model, Msg> = {
   },
   
   view(model: Model) {
-    const title = styledText("Tabs Component Showcase", style().foreground(Colors.brightWhite))
-    const subtitle = styledText("Navigate between tabs to see different content", style().foreground(Colors.gray))
+    const title = text("Tabs Component Showcase", style().foreground(Colors.brightWhite))
+    const subtitle = text("Navigate between tabs to see different content", style().foreground(Colors.gray))
     
     // Tabs view
     const tabsComp = createTabsComponent()
@@ -218,32 +218,32 @@ const showcaseComponent: Component<Model, Msg> = {
     
     // Instructions
     const instructions = [
-      styledText("Navigation Instructions:", style().foreground(Colors.yellow)),
-      styledText("← → Arrow keys  |  Tab/Shift+Tab  |  Number keys (1-5)  |  Ctrl+C to exit", style().foreground(Colors.gray))
+      text("Navigation Instructions:", style().foreground(Colors.yellow)),
+      text("← → Arrow keys  |  Tab/Shift+Tab  |  Number keys (1-5)  |  Ctrl+C to exit", style().foreground(Colors.gray))
     ]
     
     // Current tab info
     const activeTab = sampleTabs.find(tab => tab.id === model.tabsComponent.activeTabId)
     const tabInfo = activeTab ? [
-      styledText("", style()),
-      styledText(`Active Tab: ${activeTab.icon || ""} ${activeTab.title}${activeTab.badge ? ` (${activeTab.badge})` : ""}`, style().foreground(Colors.cyan))
+      text("", style()),
+      text(`Active Tab: ${activeTab.icon || ""} ${activeTab.title}${activeTab.badge ? ` (${activeTab.badge})` : ""}`, style().foreground(Colors.cyan))
     ] : []
     
     // Features demonstration
     const features = [
-      styledText("Component Features:", style().foreground(Colors.yellow)),
-      styledText("✓ Multiple content types", style().foreground(Colors.green)),
-      styledText("✓ Icons and badges", style().foreground(Colors.green)),
-      styledText("✓ Keyboard navigation", style().foreground(Colors.green)),
-      styledText("✓ Number key shortcuts", style().foreground(Colors.green)),
-      styledText("✓ Focus management", style().foreground(Colors.green)),
-      styledText("○ Mouse support (planned)", style().foreground(Colors.gray))
+      text("Component Features:", style().foreground(Colors.yellow)),
+      text("✓ Multiple content types", style().foreground(Colors.green)),
+      text("✓ Icons and badges", style().foreground(Colors.green)),
+      text("✓ Keyboard navigation", style().foreground(Colors.green)),
+      text("✓ Number key shortcuts", style().foreground(Colors.green)),
+      text("✓ Focus management", style().foreground(Colors.green)),
+      text("○ Mouse support (planned)", style().foreground(Colors.gray))
     ]
     
     return vstack(
       title,
       subtitle,
-      styledText("", style()),
+      text("", style()),
       box(
         tabsView,
         {
@@ -255,9 +255,9 @@ const showcaseComponent: Component<Model, Msg> = {
         }
       ),
       ...tabInfo,
-      styledText("", style()),
+      text("", style()),
       vstack(...instructions),
-      styledText("", style()),
+      text("", style()),
       vstack(...features)
     )
   },
@@ -295,8 +295,10 @@ const showcaseComponent: Component<Model, Msg> = {
 const config: AppOptions = {
   fps: 30,
   debug: true,
-  mouse: true,
-  alternateScreen: true
+  quitOnEscape: true,
+  quitOnCtrlC: true,
+  enableMouse: false,
+  fullscreen: true
 }
 
 const program = runApp(showcaseComponent, config).pipe(
@@ -305,7 +307,7 @@ const program = runApp(showcaseComponent, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error: unknown) => {
+  .catch((error) => {
     console.error(error)
     process.exit(1)
   })

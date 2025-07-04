@@ -31,7 +31,7 @@ import {
   runApp,
   View,
   type Component,
-  type RuntimeConfig,
+  type AppOptions,
   type Cmd
 } from "../src/index.ts"
 import { LiveServices } from "../src/services/impl/index.ts"
@@ -298,13 +298,11 @@ export const LayoutShowcaseComponent: Component<LayoutShowcaseModel, LayoutShowc
 // Main Application
 // =============================================================================
 
-const config: RuntimeConfig = {
+const config: AppOptions = {
   fps: 30,
   debug: false,
-  quitOnEscape: false,
-  quitOnCtrlC: true,  // Enable Ctrl+C handling by default
-  enableMouse: false,
-  fullscreen: true
+  mouse: false,
+  alternateScreen: true
 }
 
 const program = runApp(LayoutShowcaseComponent, config).pipe(
@@ -313,7 +311,7 @@ const program = runApp(LayoutShowcaseComponent, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error(error)
     process.exit(1)
   })

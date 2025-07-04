@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T01:13:29.843Z",
+    "name": "batch-help-screen",
+    "description": "CLI-KIT help screen",
+    "app": "./bin/cli-kit.ts --help",
+    "dimensions": {
+      "width": 80,
+      "height": 13
+    }
+  },
+  "visual": {
+    "lines": [
+      "Usage: cli-kit [options] [command]",
+      "",
+      "CLI-KIT Framework Tools",
+      "",
+      "Options:",
+      "  -V, --version            output the version number",
+      "  -h, --help               display help for command",
+      "",
+      "Commands:",
+      "  screenshot|ss            Screenshot management for CLI apps",
+      "  create [options] <name>  Create a new CLI-KIT app from a template",
+      "  help [command]           display help for command",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "./bin/cli-kit.ts --help"
+    },
+    "content": "Usage: cli-kit [options] [command]\n\nCLI-KIT Framework Tools\n\nOptions:\n  -V, --version            output the version number\n  -h, --help               display help for command\n\nCommands:\n  screenshot|ss            Screenshot management for CLI apps\n  create [options] <name>  Create a new CLI-KIT app from a template\n  help [command]           display help for command\n"
+  }
+}

@@ -120,3 +120,61 @@ export {
   viewTabs,
   defaultTabStyles
 } from "./Tabs.ts"
+
+// Modal component
+export {
+  type ModalConfig,
+  type ModalModel,
+  type ModalMsg,
+  modal,
+  createInfoModal,
+  createConfirmModal,
+  createErrorModal,
+  createLoadingModal
+} from "./Modal.ts"
+
+// Viewport component  
+export {
+  type ViewportConfig,
+  type ViewportModel,
+  type ViewportMsg,
+  viewport,
+  createTextContent,
+  createGridContent,
+  createNumberedContent
+} from "./Viewport.ts"
+
+// FilePicker component
+export {
+  type FileItem,
+  type FilePickerConfig,
+  type FilePickerModel,
+  type FilePickerMsg,
+  filePicker
+} from "./FilePicker.ts"
+
+// Help component
+export {
+  type KeyBinding,
+  type HelpSection,
+  type HelpConfig,
+  type HelpModel,
+  type HelpMsg,
+  help,
+  getDefaultKeybindings,
+  createHelpModal,
+  createHelpPanel,
+  createContextHelp
+} from "./Help.ts"
+
+// LargeText components
+export {
+  type LargeTextOptions,
+  type LargeGradientTextOptions,
+  type LargeAnimatedGradientTextOptions,
+  type GradientConfig,
+  largeText,
+  largeGradientText,
+  largeAnimatedGradientText,
+  gradientPresets
+} from "./LargeText.ts"

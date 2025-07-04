@@ -10,7 +10,7 @@
 
 import { Effect, Stream, Schedule } from "effect"
 import { runApp } from "@/index.ts"
-import { vstack, hstack, text, styledText, box } from "@/core/view.ts"
+import { vstack, hstack, text, box } from "@/core/view.ts"
 import type { Component, Cmd, AppServices, AppOptions, KeyEvent } from "@/core/types.ts"
 import { style, Colors, Borders } from "@/styling/index.ts"
 import { InputService } from "@/services/index.ts"
@@ -171,7 +171,7 @@ const processMonitor: Component<Model, Msg> = {
   },
   
   view(model: Model) {
-    const title = styledText("Process Monitor 📊", style().foreground(Colors.brightGreen).bold())
+    const title = text("Process Monitor 📊", style().foreground(Colors.brightGreen).bold())
     const subtitle = text(
       `${model.systemStats.processCount} processes • CPU: ${model.systemStats.cpuUsage.toFixed(1)}% • MEM: ${model.systemStats.memoryUsage.toFixed(1)}%`,
       style().foreground(Colors.gray)
@@ -198,7 +198,7 @@ const processMonitor: Component<Model, Msg> = {
       
       const rowText = `${isSelected ? '►' : ' '} ${pidStr}  ${nameStr}  ${userStr}  ${cpuStr}%  ${memStr}%  ${statusStr}`
       
-      return styledText(rowText, style().foreground(fg).background(bg))
+      return text(rowText, style().foreground(fg).background(bg))
     })
     
     const processTable = vstack(
@@ -212,7 +212,7 @@ const processMonitor: Component<Model, Msg> = {
       style().foreground(Colors.gray)
     )
     
-    const statusText = styledText(model.statusMessage, style().foreground(Colors.yellow))
+    const statusText = text(model.statusMessage, style().foreground(Colors.yellow))
     
     return vstack(
       title,
@@ -250,15 +250,15 @@ const processMonitor: Component<Model, Msg> = {
         switch (key.key) {
           case 'up':
           case 'k':
-            return { tag: "moveUp" } as const
+            return { tag: "moveUp" }
           case 'down':
           case 'j':
-            return { tag: "moveDown" } as const
+            return { tag: "moveDown" }
           case 'x':
           case 'delete':
-            return { tag: "kill" } as const
+            return { tag: "kill" }
           case 'r':
-            return { tag: "refresh" } as const
+            return { tag: "refresh" }
           default:
             return null
         }
@@ -270,8 +270,9 @@ const processMonitor: Component<Model, Msg> = {
 
 const config: AppOptions = {
   fps: 30,
-  alternateScreen: true,
-  mouse: false
+  quitOnCtrlC: true,
+  fullscreen: true,
+  enableMouse: false
 }
 
 console.log("Starting Process Monitor...")
@@ -283,7 +284,7 @@ const program = runApp(processMonitor, config).pipe(
 
 Effect.runPromise(program)
   .then(() => process.exit(0))
-  .catch((error: unknown) => {
+  .catch((error) => {
     console.error("Process Monitor error:", error)
     process.exit(1)
   })

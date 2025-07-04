@@ -82,9 +82,13 @@ describe("Style", () => {
 describe("Colors", () => {
   test("predefined colors", () => {
     expect(Colors.red._tag).toBe("ANSI")
-    expect(Colors.red.code).toBe(1)
+    if (Colors.red._tag === "ANSI") {
+      expect(Colors.red.code).toBe(1)
+    }
     expect(Colors.brightRed._tag).toBe("ANSI")
-    expect(Colors.brightRed.code).toBe(9)
+    if (Colors.brightRed._tag === "ANSI") {
+      expect(Colors.brightRed.code).toBe(9)
+    }
   })
   
   test("hex color validation", () => {
@@ -112,8 +116,10 @@ describe("Colors", () => {
   test("adaptive colors", () => {
     const adaptive = Colors.adaptive(Colors.black, Colors.white)
     expect(adaptive._tag).toBe("Adaptive")
-    expect(adaptive.light).toEqual(Colors.black)
-    expect(adaptive.dark).toEqual(Colors.white)
+    if (adaptive._tag === "Adaptive") {
+      expect(adaptive.light).toEqual(Colors.black)
+      expect(adaptive.dark).toEqual(Colors.white)
+    }
   })
 })
 

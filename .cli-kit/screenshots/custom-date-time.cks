@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-07-04T01:10:13.319Z",
+    "name": "custom-date-time",
+    "description": "Current date and time",
+    "app": "date",
+    "dimensions": {
+      "width": 80,
+      "height": 2
+    }
+  },
+  "visual": {
+    "lines": [
+      "Thu Jul  3 18:10:13 MST 2025",
+      ""
+    ],
+    "styles": []
+  },
+  "components": {
+    "type": "custom",
+    "props": {
+      "source": "external",
+      "command": "date"
+    },
+    "content": "Thu Jul  3 18:10:13 MST 2025\n"
+  }
+}
