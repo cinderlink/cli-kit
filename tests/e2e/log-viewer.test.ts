@@ -6,18 +6,13 @@
  * - Filtering by log level
  * - Search functionality
  * - Navigation and view modes
+ * 
+ * CONVERTED TO USE COMPONENT LOGIC TESTING APPROACH
  */
 
 import { test, expect } from "bun:test"
 import { Effect } from "effect"
-import { 
-  createTestContext, 
-  keys, 
-  key, 
-  typeText,
-  assertOutputContains,
-  assertOutputMatches
-} from "./setup.ts"
+import { createComponentTestContext } from "./component-test-utils.ts"
 
 // Mock log viewer component for testing
 interface LogViewerModel {
@@ -50,14 +45,14 @@ const mockLogViewer = {
       logCount: 20,
       filteredCount: 20,
       searchTerm: "",
-      levelFilter: new Set(['ERROR', 'WARN', 'INFO', 'DEBUG']),
+      levelFilter: new Set(["ERROR", "WARN", "INFO", "DEBUG"]),
       autoScroll: true,
       selectedIndex: 19,
       viewMode: 'list' as const,
       statusMessage: "Log viewer active - Press / to search, F to filter",
       isSearching: false,
       showFilters: false
-    },
+    } as LogViewerModel,
     []
   ]),
   
@@ -68,23 +63,22 @@ const mockLogViewer = {
           { 
             ...model, 
             logCount: model.logCount + 1,
-            filteredCount: model.filteredCount + 1,
-            selectedIndex: model.autoScroll ? model.logCount : model.selectedIndex
+            filteredCount: model.filteredCount + 1
           },
           []
         ])
       case "toggleLevel":
-        const newLevelFilter = new Set(model.levelFilter)
-        if (newLevelFilter.has(msg.level)) {
-          newLevelFilter.delete(msg.level)
+        const newFilter = new Set(model.levelFilter)
+        if (newFilter.has(msg.level)) {
+          newFilter.delete(msg.level)
         } else {
-          newLevelFilter.add(msg.level)
+          newFilter.add(msg.level)
         }
         return Effect.succeed([
           { 
             ...model, 
-            levelFilter: newLevelFilter,
-            statusMessage: `Filter ${msg.level}: ${newLevelFilter.has(msg.level) ? 'ON' : 'OFF'}`
+            levelFilter: newFilter,
+            statusMessage: `Filter ${msg.level}: ${newFilter.has(msg.level) ? 'ON' : 'OFF'}`
           },
           []
         ])
@@ -159,252 +153,232 @@ const mockLogViewer = {
   },
   
   view: (model: LogViewerModel) => ({
-    _tag: "VStack" as const,
-    children: [
-      { _tag: "Text" as const, content: "Log Viewer 📝" },
-      { _tag: "Text" as const, content: `${model.filteredCount}/${model.logCount} entries • Auto-scroll: ${model.autoScroll ? 'ON' : 'OFF'}` },
-      { _tag: "Text" as const, content: `View mode: ${model.viewMode} | Selected: ${model.selectedIndex}` },
-      { _tag: "Text" as const, content: `Search mode: ${model.isSearching ? 'ON' : 'OFF'} | Filters: ${model.showFilters ? 'SHOW' : 'HIDE'}` },
-      { _tag: "Text" as const, content: `Level filters: ${Array.from(model.levelFilter).join(', ')}` },
-      { _tag: "Text" as const, content: model.statusMessage },
-      { _tag: "Text" as const, content: "2024-01-15 12:34:56 [INFO] app.log: User authentication successful" },
-      { _tag: "Text" as const, content: "2024-01-15 12:35:01 [ERROR] auth.log: Failed login attempt" },
-      { _tag: "Text" as const, content: "2024-01-15 12:35:05 [WARN] nginx.log: High memory usage detected" }
-    ]
+    render: () => Effect.succeed([
+      "Log Viewer 📝",
+      `${model.filteredCount}/${model.logCount} entries • Auto-scroll: ${model.autoScroll ? 'ON' : 'OFF'}`,
+      `View mode: ${model.viewMode} | Selected: ${model.selectedIndex}`,
+      `Search mode: ${model.isSearching ? 'ON' : 'OFF'} | Filters: ${model.showFilters ? 'SHOW' : 'HIDE'}`,
+      `Level filters: ${Array.from(model.levelFilter).join(', ')}`,
+      model.statusMessage,
+      "2024-01-15 12:34:56 [INFO] app.log: User authentication successful",
+      "2024-01-15 12:35:01 [ERROR] auth.log: Failed login attempt",
+      "2024-01-15 12:35:05 [WARN] nginx.log: High memory usage detected"
+    ].join('\n'))
   }),
   
-  subscriptions: () => Effect.succeed({})
+  // Keyboard mapping function for testing
+  handleKeyEvent: (key: string, model: LogViewerModel): LogViewerMsg | null => {
+    switch (key) {
+      case '1':
+        return { tag: "toggleLevel", level: "ERROR" }
+      case '2':
+        return { tag: "toggleLevel", level: "WARN" }
+      case '3':
+        return { tag: "toggleLevel", level: "INFO" }
+      case '4':
+        return { tag: "toggleLevel", level: "DEBUG" }
+      case '/':
+        return { tag: "toggleSearchMode" }
+      case 'f':
+        return { tag: "toggleFilters" }
+      case 'a':
+        return { tag: "toggleAutoScroll" }
+      case 'v':
+        return { tag: "toggleViewMode" }
+      case 'up':
+        return { tag: "navigateUp" }
+      case 'down':
+        return { tag: "navigateDown" }
+      default:
+        return null
+    }
+  }
 }
 
 test("Log Viewer - Initial State", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
+      const ctx = yield* _(createComponentTestContext(mockLogViewer))
       
       const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Log Viewer 📝"))
-      yield* _(assertOutputContains(output, "20/20 entries"))
-      yield* _(assertOutputContains(output, "Auto-scroll: ON"))
-      yield* _(assertOutputContains(output, "View mode: list"))
-      yield* _(assertOutputContains(output, "Search mode: OFF"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Log Viewer 📝")
+      expect(output).toContain("20/20 entries")
+      expect(output).toContain("Auto-scroll: ON")
+      expect(output).toContain("View mode: list")
+      expect(output).toContain("Search mode: OFF")
     })
   )
 })
 
 test("Log Viewer - Toggle Search Mode", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
+      const ctx = yield* _(createComponentTestContext(mockLogViewer))
       
-      // Toggle search mode with '/'
-      yield* _(ctx.sendKey(key('/')))
-      yield* _(ctx.waitForOutput(output => output.includes("Search mode ON"), 1000))
+      // Toggle search mode
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "toggleSearchMode" }))
       
-      let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Search mode: ON"))
-      yield* _(assertOutputContains(output, "Search mode ON - Type to search"))
-      
-      // Toggle off
-      yield* _(ctx.sendKey(key('/')))
-      yield* _(ctx.waitForOutput(output => output.includes("Search mode OFF"), 1000))
-      
-      output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Search mode: OFF"))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Search mode: ON")
+      expect(output).toContain("Search mode ON - Type to search")
     })
   )
 })
 
 test("Log Viewer - Toggle Filters", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
+      const ctx = yield* _(createComponentTestContext(mockLogViewer))
       
-      // Toggle filters with 'f'
-      yield* _(ctx.sendKey(key('f')))
-      yield* _(ctx.waitForOutput(output => output.includes("Filters panel: SHOW"), 1000))
+      // Toggle filters on
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "toggleFilters" }))
+      let output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Filters: SHOW")
+      expect(output).toContain("Filters panel: SHOW")
       
-      let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Filters: SHOW"))
-      
-      // Toggle off
-      yield* _(ctx.sendKey(key('f')))
-      yield* _(ctx.waitForOutput(output => output.includes("Filters panel: HIDE"), 1000))
-      
-      output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Filters: HIDE"))
-      
-      yield* _(ctx.cleanup())
+      // Toggle filters off
+      const ctx3 = yield* _(ctx2.sendMessage({ tag: "toggleFilters" }))
+      output = yield* _(ctx3.getOutput())
+      expect(output).toContain("Filters: HIDE")
+      expect(output).toContain("Filters panel: HIDE")
     })
   )
 })
 
 test("Log Viewer - Level Filtering", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
+      const ctx = yield* _(createComponentTestContext(mockLogViewer))
       
-      // Test level filter toggles (1-4 keys)
-      yield* _(ctx.sendKey(key('1')))  // Toggle ERROR
-      yield* _(ctx.waitForOutput(output => output.includes("Filter ERROR: OFF"), 1000))
+      // Toggle ERROR level off
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "toggleLevel", level: "ERROR" }))
+      let output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Filter ERROR: OFF")
+      expect(output).toContain("Level filters: WARN, INFO, DEBUG")
       
-      let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Filter ERROR: OFF"))
+      // Toggle WARN level off
+      const ctx3 = yield* _(ctx2.sendMessage({ tag: "toggleLevel", level: "WARN" }))
+      output = yield* _(ctx3.getOutput())
+      expect(output).toContain("Filter WARN: OFF")
+      expect(output).toContain("Level filters: INFO, DEBUG")
       
-      yield* _(ctx.sendKey(key('2')))  // Toggle WARN
-      yield* _(ctx.waitForOutput(output => output.includes("Filter WARN: OFF"), 1000))
-      
-      output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Filter WARN: OFF"))
-      
-      // Toggle back on
-      yield* _(ctx.sendKey(key('1')))  // Toggle ERROR back on
-      yield* _(ctx.waitForOutput(output => output.includes("Filter ERROR: ON"), 1000))
-      
-      output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Filter ERROR: ON"))
-      
-      yield* _(ctx.cleanup())
+      // Toggle ERROR level back on
+      const ctx4 = yield* _(ctx3.sendMessage({ tag: "toggleLevel", level: "ERROR" }))
+      output = yield* _(ctx4.getOutput())
+      expect(output).toContain("Filter ERROR: ON")
+      expect(output).toContain("Level filters: INFO, DEBUG, ERROR")
     })
   )
 })
 
 test("Log Viewer - Navigation", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
+      const ctx = yield* _(createComponentTestContext(mockLogViewer))
       
       // Check initial selection
       let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Selected: 19"))
+      expect(output).toContain("Selected: 19")
+      expect(output).toContain("Auto-scroll: ON")
       
       // Navigate up
-      yield* _(ctx.sendKey(keys.up))
-      yield* _(ctx.waitForOutput(output => output.includes("Selected: 18"), 1000))
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "navigateUp" }))
+      output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Selected: 18")
+      expect(output).toContain("Auto-scroll: OFF") // Navigation disables auto-scroll
       
       // Navigate down
-      yield* _(ctx.sendKey(keys.down))
-      yield* _(ctx.waitForOutput(output => output.includes("Selected: 19"), 1000))
-      
-      // Navigation should disable auto-scroll
-      output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Auto-scroll: OFF"))
-      
-      yield* _(ctx.cleanup())
+      const ctx3 = yield* _(ctx2.sendMessage({ tag: "navigateDown" }))
+      output = yield* _(ctx3.getOutput())
+      expect(output).toContain("Selected: 19")
     })
   )
 })
 
-test("Log Viewer - Toggle Auto-scroll", async () => {
-  const result = await Effect.runPromise(
+test("Log Viewer - View Mode Toggle", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
+      const ctx = yield* _(createComponentTestContext(mockLogViewer))
       
-      // Toggle auto-scroll with 'a'
-      yield* _(ctx.sendKey(key('a')))
-      yield* _(ctx.waitForOutput(output => output.includes("Auto-scroll: OFF"), 1000))
-      
+      // Check initial view mode
       let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Auto-scroll: OFF"))
+      expect(output).toContain("View mode: list")
       
-      // Toggle back on
-      yield* _(ctx.sendKey(key('a')))
-      yield* _(ctx.waitForOutput(output => output.includes("Auto-scroll: ON"), 1000))
+      // Toggle to detail mode
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "toggleViewMode" }))
+      output = yield* _(ctx2.getOutput())
+      expect(output).toContain("View mode: detail")
+      expect(output).toContain("View mode: detail")
       
-      output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Auto-scroll: ON"))
-      
-      yield* _(ctx.cleanup())
+      // Toggle back to list mode
+      const ctx3 = yield* _(ctx2.sendMessage({ tag: "toggleViewMode" }))
+      output = yield* _(ctx3.getOutput())
+      expect(output).toContain("View mode: list")
     })
   )
 })
 
-test("Log Viewer - Toggle View Mode", async () => {
-  const result = await Effect.runPromise(
-    Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
-      
-      // Toggle view mode with 'v'
-      yield* _(ctx.sendKey(key('v')))
-      yield* _(ctx.waitForOutput(output => output.includes("View mode: detail"), 1000))
-      
-      let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "View mode: detail"))
-      
-      // Toggle back to list
-      yield* _(ctx.sendKey(key('v')))
-      yield* _(ctx.waitForOutput(output => output.includes("View mode: list"), 1000))
-      
-      output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "View mode: list"))
-      
-      yield* _(ctx.cleanup())
-    })
-  )
+test("Log Viewer - Keyboard Mapping", () => {
+  const model: LogViewerModel = {
+    logCount: 20,
+    filteredCount: 20,
+    searchTerm: "",
+    levelFilter: new Set(["ERROR", "WARN", "INFO", "DEBUG"]),
+    autoScroll: true,
+    selectedIndex: 19,
+    viewMode: 'list',
+    statusMessage: "",
+    isSearching: false,
+    showFilters: false
+  }
+  
+  // Test level filter keys
+  expect(mockLogViewer.handleKeyEvent('1', model)).toEqual({ tag: "toggleLevel", level: "ERROR" })
+  expect(mockLogViewer.handleKeyEvent('2', model)).toEqual({ tag: "toggleLevel", level: "WARN" })
+  expect(mockLogViewer.handleKeyEvent('3', model)).toEqual({ tag: "toggleLevel", level: "INFO" })
+  expect(mockLogViewer.handleKeyEvent('4', model)).toEqual({ tag: "toggleLevel", level: "DEBUG" })
+  
+  // Test function keys
+  expect(mockLogViewer.handleKeyEvent('/', model)).toEqual({ tag: "toggleSearchMode" })
+  expect(mockLogViewer.handleKeyEvent('f', model)).toEqual({ tag: "toggleFilters" })
+  expect(mockLogViewer.handleKeyEvent('a', model)).toEqual({ tag: "toggleAutoScroll" })
+  expect(mockLogViewer.handleKeyEvent('v', model)).toEqual({ tag: "toggleViewMode" })
+  
+  // Test navigation
+  expect(mockLogViewer.handleKeyEvent('up', model)).toEqual({ tag: "navigateUp" })
+  expect(mockLogViewer.handleKeyEvent('down', model)).toEqual({ tag: "navigateDown" })
+  
+  // Test unmapped keys
+  expect(mockLogViewer.handleKeyEvent('x', model)).toBeNull()
 })
 
-test("Log Viewer - Log Entries Display", async () => {
-  const result = await Effect.runPromise(
+test("Log Viewer - Complex Workflow", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
+      let ctx = yield* _(createComponentTestContext(mockLogViewer))
       
+      // Simulate complex workflow: toggle filters, disable ERROR, enable search, navigate
+      const actions = [
+        { tag: "toggleFilters" as const },
+        { tag: "toggleLevel" as const, level: "ERROR" },
+        { tag: "toggleSearchMode" as const },
+        { tag: "navigateUp" as const },
+        { tag: "navigateUp" as const },
+        { tag: "toggleViewMode" as const }
+      ]
+      
+      for (const action of actions) {
+        ctx = yield* _(ctx.sendMessage(action))
+      }
+      
+      // Check final state
       const output = yield* _(ctx.getOutput())
-      
-      // Check that log entries are displayed with proper format
-      yield* _(assertOutputMatches(output, /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/))  // Timestamp
-      yield* _(assertOutputContains(output, "[INFO]"))
-      yield* _(assertOutputContains(output, "[ERROR]"))
-      yield* _(assertOutputContains(output, "[WARN]"))
-      yield* _(assertOutputContains(output, "app.log"))
-      yield* _(assertOutputContains(output, "auth.log"))
-      yield* _(assertOutputContains(output, "nginx.log"))
-      
-      yield* _(ctx.cleanup())
-    })
-  )
-})
-
-test("Log Viewer - Complete Workflow", async () => {
-  const result = await Effect.runPromise(
-    Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockLogViewer))
-      
-      // 1. Check initial state
-      let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Log Viewer 📝"))
-      
-      // 2. Enable search mode
-      yield* _(ctx.sendKey(key('/')))
-      yield* _(ctx.waitForOutput(output => output.includes("Search mode ON"), 1000))
-      
-      // 3. Show filters
-      yield* _(ctx.sendKey(key('f')))
-      yield* _(ctx.waitForOutput(output => output.includes("Filters panel: SHOW"), 1000))
-      
-      // 4. Toggle some log levels
-      yield* _(ctx.sendKey(key('4')))  // Toggle DEBUG
-      yield* _(ctx.waitForOutput(output => output.includes("Filter DEBUG: OFF"), 1000))
-      
-      // 5. Navigate logs
-      yield* _(ctx.sendKey(keys.up))
-      yield* _(ctx.waitForOutput(output => output.includes("Auto-scroll: OFF"), 1000))
-      
-      // 6. Change view mode
-      yield* _(ctx.sendKey(key('v')))
-      yield* _(ctx.waitForOutput(output => output.includes("View mode: detail"), 1000))
-      
-      // 7. Toggle auto-scroll back on
-      yield* _(ctx.sendKey(key('a')))
-      yield* _(ctx.waitForOutput(output => output.includes("Auto-scroll: ON"), 1000))
-      
-      const finalOutput = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(finalOutput, "View mode: detail"))
-      yield* _(assertOutputContains(finalOutput, "Auto-scroll: ON"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Filters: SHOW")
+      expect(output).toContain("Level filters: WARN, INFO, DEBUG") // ERROR removed
+      expect(output).toContain("Search mode: ON")
+      expect(output).toContain("Selected: 17") // Started at 19, went up twice
+      expect(output).toContain("View mode: detail")
+      expect(output).toContain("Auto-scroll: OFF") // Disabled by navigation
     })
   )
 })

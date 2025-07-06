@@ -123,3 +123,13 @@ export const panel = (
     padding: props.padding || 2
   })
 }
+
+/**
+ * Horizontal box layout - alias for ViewUtils.hstack
+ */
+export const hbox = ViewUtils.hstack
+
+/**
+ * Vertical box layout - alias for ViewUtils.vstack
+ */
+export const vbox = ViewUtils.vstack

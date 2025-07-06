@@ -247,6 +247,69 @@ export type AppError =
   | ValidationError
 
 /**
+ * Error codes for categorizing errors
+ */
+export enum ErrorCode {
+  // Terminal errors
+  TERMINAL_INIT_FAILED = "TERMINAL_INIT_FAILED",
+  TERMINAL_WRITE_FAILED = "TERMINAL_WRITE_FAILED",
+  TERMINAL_READ_FAILED = "TERMINAL_READ_FAILED",
+  
+  // Input errors
+  INPUT_DEVICE_ERROR = "INPUT_DEVICE_ERROR",
+  INPUT_PARSE_ERROR = "INPUT_PARSE_ERROR",
+  INPUT_TIMEOUT = "INPUT_TIMEOUT",
+  
+  // Render errors
+  RENDER_FAILED = "RENDER_FAILED",
+  LAYOUT_FAILED = "LAYOUT_FAILED",
+  
+  // Storage errors
+  STORAGE_READ_FAILED = "STORAGE_READ_FAILED",
+  STORAGE_WRITE_FAILED = "STORAGE_WRITE_FAILED",
+  
+  // Config errors
+  CONFIG_INVALID = "CONFIG_INVALID",
+  CONFIG_MISSING = "CONFIG_MISSING",
+  
+  // Component errors
+  COMPONENT_INIT_FAILED = "COMPONENT_INIT_FAILED",
+  COMPONENT_UPDATE_FAILED = "COMPONENT_UPDATE_FAILED",
+  
+  // Application errors
+  APPLICATION_STARTUP_FAILED = "APPLICATION_STARTUP_FAILED",
+  APP_RUNTIME_ERROR = "APP_RUNTIME_ERROR",
+  
+  // Validation errors
+  VALIDATION_FAILED = "VALIDATION_FAILED",
+  
+  // General
+  UNKNOWN = "UNKNOWN"
+}
+
+/**
+ * Type guard to check if a value is an AppError
+ */
+export function isAppError(value: unknown): value is AppError {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    '_tag' in value &&
+    typeof (value as any)._tag === 'string' &&
+    [
+      'TerminalError',
+      'InputError', 
+      'RenderError',
+      'StorageError',
+      'ConfigError',
+      'ComponentError',
+      'ApplicationError',
+      'ValidationError'
+    ].includes((value as any)._tag)
+  )
+}
+
+/**
  * Critical errors that should terminate the application.
  */
 export type CriticalError = TerminalError | ApplicationError
@@ -497,8 +560,10 @@ export const ErrorUtils = {
    * Get debug information from an error.
    */
   getDebugInfo: (error: AppError): Record<string, unknown> => ({
+    tag: error._tag,
     type: error._tag,
     message: error.message,
+    operation: (error as any).operation,
     timestamp: error.timestamp.toISOString(),
     component: error.component,
     context: error.context,

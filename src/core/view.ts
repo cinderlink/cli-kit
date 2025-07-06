@@ -23,6 +23,32 @@ export const text = (content: string): View => ({
 export const empty: View = text('')
 
 /**
+ * Alias for text() to match test expectations
+ */
+export const createView = text
+
+/**
+ * Check if an object is a View
+ */
+export const isView = (obj: any): obj is View => {
+  return obj && typeof obj.render === 'function'
+}
+
+/**
+ * Measure a view's dimensions
+ */
+export const measureView = (view: View) => 
+  Effect.succeed({
+    width: view.width || 0,
+    height: view.height || 0
+  })
+
+/**
+ * Render a view to string
+ */
+export const renderView = (view: View) => view.render()
+
+/**
  * Combine multiple views vertically
  */
 export const vstack = (...views: View[]): View => ({

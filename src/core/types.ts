@@ -1,11 +1,12 @@
 /**
- * Core types for the @cinderlink/cli-kit TUI framework
+ * Core types for the TUIX TUI framework
  * 
  * This module defines the fundamental types that implement the Model-View-Update (MVU) 
  * pattern enhanced with Effect.ts for robust error handling and resource management.
  */
 
 import { Effect, Stream, Context, Data } from "effect"
+import type { KeyEvent } from "./keys"
 
 // =============================================================================
 // Core MVU Types

@@ -1,14 +1,14 @@
 {
-  "name": "@cinderlink/cli-kit",
-  "version": "0.1.0",
-  "description": "A performant TUI framework for Bun inspired by bubbletea",
+  "name": "tuix",
+  "version": "1.0.0-rc.1",
+  "description": "A performant TUI framework for Bun with JSX and reactive state management",
   "main": "dist/index.js",
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "cli-kit": "./bin/cli-kit.ts",
+    "tuix": "./bin/tuix.ts",
     "build": "bun build src/index.ts --outdir dist --format esm",
-    "build:compile": "bun build --compile --minify --bytecode --target bun-linux-x64 --outfile dist/cli-kit src/index.ts",
+    "build:compile": "bun build --compile --minify --bytecode --target bun-linux-x64 --outfile dist/tuix src/index.ts",
     "dev": "bun --watch run src/index.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
@@ -20,7 +20,24 @@
     "test:e2e:all": "bun tests/e2e/run-tests.ts",
     "test:perf": "bun test __tests__/performance",
     "test:update-snapshots": "bun test -u",
-    "typecheck": "tsc --noEmit",
+    
+    "test:core": "bun test __tests__/unit/core __tests__/core.test.ts __tests__/simple.test.ts",
+    "test:layout": "bun test __tests__/unit/layout",
+    "test:styling": "bun test __tests__/unit/styling",
+    "test:components": "bun test __tests__/unit/components",
+    "test:cli": "bun test __tests__/unit/cli",
+    "test:reactivity": "bun test __tests__/unit/reactivity",
+    "test:jsx": "bun test __tests__/unit/jsx",
+    "test:services": "bun test __tests__/unit/services",
+    "test:utils": "bun test __tests__/unit/utils",
+    "test:optimization": "bun test __tests__/unit/optimization",
+    "test:testing": "bun test __tests__/unit/testing",
+    
+    "test:fast": "bun test __tests__/unit/core/view.test.ts __tests__/unit/layout/join-comprehensive.test.ts __tests__/unit/layout/box.test.ts __tests__/unit/styling/color-actual.test.ts __tests__/unit/simple-router.test.ts __tests__/unit/debug-router.test.ts",
+    "test:core-coverage": "bun test __tests__/unit/core __tests__/core.test.ts __tests__/simple.test.ts --coverage",
+    "test:layout-coverage": "bun test __tests__/unit/layout --coverage",
+    "test:styling-coverage": "bun test __tests__/unit/styling --coverage",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.tuix.json --noEmit",
     "lint": "echo 'No linter configured yet'",
     "clean": "rm -rf dist coverage",
     "check": "bun run typecheck && bun test",
@@ -39,24 +56,60 @@
     "example:table-showcase": "bun examples/table-showcase.ts",
     "example:mouse-demo": "bun examples/mouse-demo.ts",
     "example:loading-screen": "bun examples/loading-screen.ts",
+    "example:jsx-demo": "bun examples/cli/jsx-demo.tsx",
+    "example:bindable-demo": "bun examples/bindable-demo.tuix",
+    "example:showcase-runes": "bun examples/showcase-runes.tuix",
+    "example:runes-demo": "bun examples/runes-demo.tuix",
+    "example:simple-tuix": "bun examples/simple-tuix-demo.tuix",
+    "example:performance-demo": "bun examples/cli/performance-demo.ts",
+    "example:optimization-comparison": "bun examples/cli/optimization-comparison.ts",
     "examples": "bun scripts/show-examples.ts",
     "examples:test": "bun scripts/test-examples.ts",
-    "screenshot:list": "./bin/cli-kit.ts screenshot list",
-    "screenshot:examples": "./bin/cli-kit.ts screenshot multi",
-    "screenshot:clean": "rm -rf .cli-kit/screenshots"
+    "screenshot:list": "./bin/tuix.ts screenshot list",
+    "screenshot:examples": "./bin/tuix.ts screenshot multi",
+    "screenshot:clean": "rm -rf .tuix/screenshots"
   },
-  "keywords": ["tui", "terminal", "cli", "bun", "typescript", "mvU", "effect"],
+  "keywords": ["tui", "tuix", "terminal", "cli", "bun", "typescript", "jsx", "runes", "effect"],
   "author": "Cinderlink",
   "license": "MIT",
   "bin": {
-    "cli-kit": "./bin/cli-kit.ts"
+    "tuix": "./bin/tuix.ts"
   },
   "files": [
     "dist",
     "src",
     "bin",
-    "README.md"
+    "README.md",
+    "cli.ts",
+    "jsx-runtime.ts",
+    "jsx-dev-runtime.ts"
   ],
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./cli": {
+      "import": "./cli.ts",
+      "types": "./cli.ts"
+    },
+    "./components": {
+      "import": "./src/components/index.ts",
+      "types": "./src/components/index.ts"
+    },
+    "./jsx-runtime": {
+      "import": "./jsx-runtime.ts",
+      "types": "./jsx-runtime.ts"
+    },
+    "./jsx-dev-runtime": {
+      "import": "./jsx-dev-runtime.ts",
+      "types": "./jsx-dev-runtime.ts"
+    },
+    "./runes": {
+      "import": "./src/runes.ts",
+      "types": "./src/runes.ts"
+    }
+  },
   "dependencies": {
     "@types/figlet": "^1.7.0",
     "commander": "^11.1.0",

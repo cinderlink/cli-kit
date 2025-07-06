@@ -23,9 +23,27 @@ export const Right: Position = 1.0
  * Join views horizontally with vertical alignment
  */
 export const joinHorizontal = (
-  position: Position,
-  ...views: View[]
+  views: View[],
+  options: JoinOptions = {}
 ): View => {
+  const spacing = options.spacing ?? 0
+  let position = Center
+  
+  // Handle string alignment values
+  if (typeof options.align === 'string') {
+    switch (options.align) {
+      case 'top': position = Top; break
+      case 'middle': position = Center; break
+      case 'bottom': position = Bottom; break
+      case 'center': position = Center; break
+      default: position = Center
+    }
+  } else if (typeof options.align === 'number') {
+    position = options.align
+  } else {
+    position = Center
+  }
+  
   if (views.length === 0) {
     return { render: () => Effect.succeed(""), width: 0, height: 0 }
   }
@@ -68,12 +86,13 @@ export const joinHorizontal = (
           // Pad to view width
           return line.padEnd(viewWidth)
         })
-        result.push(lineParts.join(''))
+        const spacer = ' '.repeat(spacing)
+        result.push(lineParts.join(spacer))
       }
       
       return result.join('\n')
     }),
-    width: views.reduce((sum, v) => sum + (v.width || 0), 0),
+    width: views.reduce((sum, v) => sum + (v.width || 0), 0) + spacing * (views.length - 1),
     height: Math.max(...views.map(v => v.height || 0))
   }
 }
@@ -82,9 +101,23 @@ export const joinHorizontal = (
  * Join views vertically with horizontal alignment
  */
 export const joinVertical = (
-  position: Position,
-  ...views: View[]
+  views: View[],
+  options: JoinOptions = {}
 ): View => {
+  const spacing = options.spacing ?? 0
+  let position = Center
+  
+  // Handle string alignment values
+  if (typeof options.align === 'string') {
+    switch (options.align) {
+      case 'left': position = Left; break
+      case 'center': position = Center; break
+      case 'right': position = Right; break
+      default: position = Center
+    }
+  } else if (typeof options.align === 'number') {
+    position = options.align
+  }
   if (views.length === 0) {
     return { render: () => Effect.succeed(""), width: 0, height: 0 }
   }
@@ -115,11 +148,23 @@ export const joinVertical = (
         )
       })
       
-      // Join all lines
+      // Join all views with spacing
+      if (spacing > 0) {
+        const spacerLines = Array(spacing).fill(' '.repeat(maxWidth))
+        const result: string[] = []
+        aligned.forEach((lines, i) => {
+          result.push(...lines)
+          if (i < aligned.length - 1) {
+            result.push(...spacerLines)
+          }
+        })
+        return result.join('\n')
+      }
+      
       return aligned.flat().join('\n')
     }),
     width: Math.max(...views.map(v => v.width || 0)),
-    height: views.reduce((sum, v) => sum + (v.height || 0), 0)
+    height: views.reduce((sum, v) => sum + (v.height || 0), 0) + spacing * (views.length - 1)
   }
 }
 
@@ -171,5 +216,66 @@ export const place = (
     }),
     width,
     height
+  }
+}
+
+/**
+ * Options for joining views
+ */
+export interface JoinOptions {
+  spacing?: number
+  align?: Position | 'top' | 'middle' | 'bottom' | 'left' | 'center' | 'right'
+}
+
+/**
+ * Join views in a grid layout
+ */
+export const joinGrid = (
+  views: View[][],
+  options: JoinOptions = {}
+): View => {
+  const { spacing = 0, align = Center } = options
+  
+  if (views.length === 0 || views[0].length === 0) {
+    return { render: () => Effect.succeed(""), width: 0, height: 0 }
+  }
+  
+  return {
+    render: () => Effect.gen(function* (_) {
+      // First, create horizontal rows
+      const rows = yield* _(
+        Effect.forEach(views, row => {
+          // Add spacing views between columns
+          const spacedRow: View[] = []
+          row.forEach((view, i) => {
+            spacedRow.push(view)
+            if (i < row.length - 1 && spacing > 0) {
+              spacedRow.push({
+                render: () => Effect.succeed(' '.repeat(spacing)),
+                width: spacing,
+                height: 1
+              })
+            }
+          })
+          return joinHorizontal(spacedRow, { align: typeof align === 'number' ? align : 'center' }).render()
+        })
+      )
+      
+      // Then join rows vertically with spacing
+      if (spacing > 0) {
+        const spacedRows: string[] = []
+        rows.forEach((row, i) => {
+          spacedRows.push(row)
+          if (i < rows.length - 1) {
+            spacedRows.push('') // Empty line for vertical spacing
+          }
+        })
+        return spacedRows.join('\n')
+      }
+      
+      return rows.join('\n')
+    }),
+    width: 0, // Calculated dynamically
+    height: 0 // Calculated dynamically
   }
 }

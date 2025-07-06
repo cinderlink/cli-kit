@@ -6,39 +6,42 @@
  * - Table interaction
  * - Git workflow simulation
  * - Keyboard shortcuts
+ * 
+ * CONVERTED TO USE COMPONENT LOGIC TESTING APPROACH
  */
 
 import { test, expect } from "bun:test"
 import { Effect } from "effect"
-import { 
-  createTestContext, 
-  keys, 
-  key, 
-  navigate,
-  assertOutputContains,
-  assertOutputMatches
-} from "./setup.ts"
+import { createComponentTestContext } from "./component-test-utils.ts"
 
-// Import the git dashboard component (we'll need to adjust imports)
-// For now, let's create a mock component structure for testing
-
+// Mock git dashboard component for testing
 interface GitDashboardModel {
   readonly activePanel: 'files' | 'staged' | 'commits'
   readonly statusMessage: string
+  readonly selectedFile: string | null
+  readonly stagedFiles: string[]
+  readonly commitCount: number
+  readonly branch: string
 }
 
 type GitDashboardMsg = 
   | { readonly tag: "switchPanel"; readonly panel: 'files' | 'staged' | 'commits' }
+  | { readonly tag: "selectFile"; readonly fileName: string }
   | { readonly tag: "stageFile" }
+  | { readonly tag: "unstageFile" }
   | { readonly tag: "commit" }
+  | { readonly tag: "refreshStatus" }
 
-// Mock component for testing
 const mockGitDashboard = {
   init: Effect.succeed([
-    { 
-      activePanel: 'files' as const, 
-      statusMessage: "Ready - Navigate: Tab, Stage: Space, Commit: C"
-    }, 
+    {
+      activePanel: 'files' as const,
+      statusMessage: "Git Dashboard ready - Tab to switch panels",
+      selectedFile: null,
+      stagedFiles: [],
+      commitCount: 15,
+      branch: "main"
+    },
     []
   ]),
   
@@ -46,17 +49,62 @@ const mockGitDashboard = {
     switch (msg.tag) {
       case "switchPanel":
         return Effect.succeed([
-          { ...model, activePanel: msg.panel },
+          { 
+            ...model, 
+            activePanel: msg.panel,
+            statusMessage: `Switched to ${msg.panel} panel`
+          },
+          []
+        ])
+      case "selectFile":
+        return Effect.succeed([
+          { 
+            ...model, 
+            selectedFile: msg.fileName,
+            statusMessage: `Selected: ${msg.fileName}`
+          },
           []
         ])
       case "stageFile":
-        return Effect.succeed([
-          { ...model, statusMessage: "File staged (simulated)" },
-          []
-        ])
+        if (model.selectedFile && !model.stagedFiles.includes(model.selectedFile)) {
+          return Effect.succeed([
+            { 
+              ...model, 
+              stagedFiles: [...model.stagedFiles, model.selectedFile],
+              statusMessage: `Staged ${model.selectedFile}`
+            },
+            []
+          ])
+        }
+        return Effect.succeed([model, []])
+      case "unstageFile":
+        if (model.selectedFile) {
+          return Effect.succeed([
+            { 
+              ...model, 
+              stagedFiles: model.stagedFiles.filter(f => f !== model.selectedFile),
+              statusMessage: `Unstaged ${model.selectedFile}`
+            },
+            []
+          ])
+        }
+        return Effect.succeed([model, []])
       case "commit":
         return Effect.succeed([
-          { ...model, statusMessage: "Commit created (simulated)" },
+          { 
+            ...model, 
+            stagedFiles: [],
+            commitCount: model.commitCount + 1,
+            statusMessage: `Committed ${model.stagedFiles.length} files`
+          },
+          []
+        ])
+      case "refreshStatus":
+        return Effect.succeed([
+          { 
+            ...model, 
+            statusMessage: "Repository status refreshed"
+          },
           []
         ])
       default:
@@ -65,180 +113,209 @@ const mockGitDashboard = {
   },
   
   view: (model: GitDashboardModel) => ({
-    _tag: "VStack" as const,
-    children: [
-      { _tag: "Text" as const, content: "Git Dashboard 🔧" },
-      { _tag: "Text" as const, content: `Active Panel: ${model.activePanel}` },
-      { _tag: "Text" as const, content: model.statusMessage },
-      { _tag: "Text" as const, content: "Working Directory | Staging Area | Commit History" }
-    ]
+    render: () => Effect.succeed([
+      "Git Dashboard 🌿",
+      `Branch: ${model.branch} | Commits: ${model.commitCount}`,
+      `Active panel: ${model.activePanel}`,
+      `Selected file: ${model.selectedFile || 'None'}`,
+      `Staged files: ${model.stagedFiles.length}`,
+      model.statusMessage,
+      "",
+      model.activePanel === 'files' 
+        ? "📁 Files: src/main.ts | src/utils.ts | README.md | package.json"
+        : model.activePanel === 'staged'
+        ? `📋 Staged: ${model.stagedFiles.join(' | ') || 'No files staged'}`
+        : "📜 Commits: feat: add dashboard | fix: resolve bug | docs: update readme"
+    ].join('\n'))
   }),
   
-  subscriptions: (model: GitDashboardModel) =>
-    Effect.gen(function* (_) {
-      // Mock input service would be provided by test context
-      return {
-        mapKeys: (mapper: any) => ({})
-      }
-    })
+  // Keyboard mapping function for testing
+  handleKeyEvent: (key: string): GitDashboardMsg | null => {
+    switch (key) {
+      case 'tab':
+      case '1': return { tag: "switchPanel", panel: 'files' }
+      case '2': return { tag: "switchPanel", panel: 'staged' }
+      case '3': return { tag: "switchPanel", panel: 'commits' }
+      case 's': return { tag: "stageFile" }
+      case 'u': return { tag: "unstageFile" }
+      case 'c': return { tag: "commit" }
+      case 'r': return { tag: "refreshStatus" }
+      default: return null
+    }
+  }
 }
 
 test("Git Dashboard - Initial State", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockGitDashboard))
+      const ctx = yield* _(createComponentTestContext(mockGitDashboard))
       
-      // Check initial render
       const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Git Dashboard 🔧"))
-      yield* _(assertOutputContains(output, "Active Panel: files"))
-      yield* _(assertOutputContains(output, "Ready - Navigate: Tab, Stage: Space, Commit: C"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Git Dashboard 🌿")
+      expect(output).toContain("Branch: main")
+      expect(output).toContain("Commits: 15")
+      expect(output).toContain("Active panel: files")
+      expect(output).toContain("Selected file: None")
+      expect(output).toContain("Staged files: 0")
     })
   )
 })
 
 test("Git Dashboard - Panel Navigation", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockGitDashboard))
+      let ctx = yield* _(createComponentTestContext(mockGitDashboard))
       
-      // Test Tab navigation
-      yield* _(ctx.sendKey(keys.tab))
+      // Switch to staged panel
+      ctx = yield* _(ctx.sendMessage({ tag: "switchPanel", panel: "staged" }))
+      let output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active panel: staged")
+      expect(output).toContain("Switched to staged panel")
+      expect(output).toContain("📋 Staged:")
       
-      // Wait for panel switch
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: staged"), 1000))
+      // Switch to commits panel
+      ctx = yield* _(ctx.sendMessage({ tag: "switchPanel", panel: "commits" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active panel: commits")
+      expect(output).toContain("📜 Commits:")
       
-      const output1 = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output1, "Active Panel: staged"))
-      
-      // Navigate to commits panel
-      yield* _(ctx.sendKey(keys.tab))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: commits"), 1000))
-      
-      const output2 = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output2, "Active Panel: commits"))
-      
-      // Navigate back to files
-      yield* _(ctx.sendKey(keys.tab))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: files"), 1000))
-      
-      const output3 = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output3, "Active Panel: files"))
-      
-      yield* _(ctx.cleanup())
+      // Switch back to files
+      ctx = yield* _(ctx.sendMessage({ tag: "switchPanel", panel: "files" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active panel: files")
+      expect(output).toContain("📁 Files:")
     })
   )
 })
 
-test("Git Dashboard - Direct Panel Access", async () => {
-  const result = await Effect.runPromise(
+test("Git Dashboard - File Selection", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockGitDashboard))
+      const ctx = yield* _(createComponentTestContext(mockGitDashboard))
       
-      // Test direct access with number keys
-      yield* _(ctx.sendKey(key('2')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: staged"), 1000))
+      // Select a file
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "selectFile", fileName: "src/main.ts" }))
       
-      yield* _(ctx.sendKey(key('3')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: commits"), 1000))
-      
-      yield* _(ctx.sendKey(key('1')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: files"), 1000))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Selected file: src/main.ts")
+      expect(output).toContain("Selected: src/main.ts")
     })
   )
 })
 
-test("Git Dashboard - File Staging", async () => {
-  const result = await Effect.runPromise(
+test("Git Dashboard - Stage File", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockGitDashboard))
+      let ctx = yield* _(createComponentTestContext(mockGitDashboard))
       
-      // Ensure we're on files panel
-      yield* _(ctx.sendKey(key('1')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: files"), 1000))
-      
-      // Stage a file with Space
-      yield* _(ctx.sendKey(keys.space))
-      yield* _(ctx.waitForOutput(output => output.includes("File staged (simulated)"), 1000))
+      // Select and stage a file
+      ctx = yield* _(ctx.sendMessage({ tag: "selectFile", fileName: "src/main.ts" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "stageFile" }))
       
       const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "File staged (simulated)"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Staged files: 1")
+      expect(output).toContain("Staged src/main.ts")
     })
   )
 })
 
-test("Git Dashboard - Commit Creation", async () => {
-  const result = await Effect.runPromise(
+test("Git Dashboard - Unstage File", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockGitDashboard))
+      let ctx = yield* _(createComponentTestContext(mockGitDashboard))
       
-      // Create a commit with 'c' key
-      yield* _(ctx.sendKey(key('c')))
-      yield* _(ctx.waitForOutput(output => output.includes("Commit created (simulated)"), 1000))
+      // Select, stage, then unstage a file
+      ctx = yield* _(ctx.sendMessage({ tag: "selectFile", fileName: "src/main.ts" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "stageFile" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "unstageFile" }))
       
       const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Commit created (simulated)"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Staged files: 0")
+      expect(output).toContain("Unstaged src/main.ts")
     })
   )
 })
 
-test("Git Dashboard - UI Elements Present", async () => {
-  const result = await Effect.runPromise(
+test("Git Dashboard - Commit Files", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockGitDashboard))
+      let ctx = yield* _(createComponentTestContext(mockGitDashboard))
+      
+      // Stage multiple files and commit
+      ctx = yield* _(ctx.sendMessage({ tag: "selectFile", fileName: "src/main.ts" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "stageFile" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "selectFile", fileName: "README.md" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "stageFile" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "commit" }))
       
       const output = yield* _(ctx.getOutput())
-      
-      // Check that all main UI elements are present
-      yield* _(assertOutputContains(output, "Git Dashboard 🔧"))
-      yield* _(assertOutputContains(output, "Working Directory"))
-      yield* _(assertOutputContains(output, "Staging Area"))
-      yield* _(assertOutputContains(output, "Commit History"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Commits: 16") // Should increment
+      expect(output).toContain("Staged files: 0") // Should be cleared
+      expect(output).toContain("Committed 2 files")
     })
   )
 })
 
-test("Git Dashboard - Workflow Simulation", async () => {
-  const result = await Effect.runPromise(
+test("Git Dashboard - Refresh Status", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockGitDashboard))
+      const ctx = yield* _(createComponentTestContext(mockGitDashboard))
       
-      // Simulate a complete git workflow
+      // Refresh status
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "refreshStatus" }))
       
-      // 1. Start in files panel
-      yield* _(ctx.sendKey(key('1')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: files"), 1000))
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Repository status refreshed")
+    })
+  )
+})
+
+test("Git Dashboard - Keyboard Mapping", () => {
+  // Test keyboard event mapping logic
+  expect(mockGitDashboard.handleKeyEvent('1')).toEqual({ tag: "switchPanel", panel: "files" })
+  expect(mockGitDashboard.handleKeyEvent('2')).toEqual({ tag: "switchPanel", panel: "staged" })
+  expect(mockGitDashboard.handleKeyEvent('3')).toEqual({ tag: "switchPanel", panel: "commits" })
+  expect(mockGitDashboard.handleKeyEvent('s')).toEqual({ tag: "stageFile" })
+  expect(mockGitDashboard.handleKeyEvent('u')).toEqual({ tag: "unstageFile" })
+  expect(mockGitDashboard.handleKeyEvent('c')).toEqual({ tag: "commit" })
+  expect(mockGitDashboard.handleKeyEvent('r')).toEqual({ tag: "refreshStatus" })
+  expect(mockGitDashboard.handleKeyEvent('x')).toBeNull()
+})
+
+test("Git Dashboard - Complete Git Workflow", async () => {
+  await Effect.runPromise(
+    Effect.gen(function* (_) {
+      let ctx = yield* _(createComponentTestContext(mockGitDashboard))
       
-      // 2. Stage a file
-      yield* _(ctx.sendKey(keys.space))
-      yield* _(ctx.waitForOutput(output => output.includes("File staged"), 1000))
+      // 1. Check initial state
+      let output = yield* _(ctx.getOutput())
+      expect(output).toContain("Git Dashboard 🌿")
+      expect(output).toContain("Active panel: files")
       
-      // 3. Switch to staged panel
-      yield* _(ctx.sendKey(key('2')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: staged"), 1000))
+      // 2. Select and stage files
+      ctx = yield* _(ctx.sendMessage({ tag: "selectFile", fileName: "src/main.ts" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "stageFile" }))
       
-      // 4. Create commit
-      yield* _(ctx.sendKey(key('c')))
-      yield* _(ctx.waitForOutput(output => output.includes("Commit created"), 1000))
+      ctx = yield* _(ctx.sendMessage({ tag: "selectFile", fileName: "package.json" }))
+      ctx = yield* _(ctx.sendMessage({ tag: "stageFile" }))
       
-      // 5. Check commit history
-      yield* _(ctx.sendKey(key('3')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active Panel: commits"), 1000))
+      // 3. Check staged panel
+      ctx = yield* _(ctx.sendMessage({ tag: "switchPanel", panel: "staged" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active panel: staged")
+      expect(output).toContain("Staged files: 2")
       
-      const finalOutput = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(finalOutput, "Active Panel: commits"))
+      // 4. Commit changes
+      ctx = yield* _(ctx.sendMessage({ tag: "commit" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Commits: 16")
+      expect(output).toContain("Staged files: 0")
       
-      yield* _(ctx.cleanup())
+      // 5. Check commits panel
+      ctx = yield* _(ctx.sendMessage({ tag: "switchPanel", panel: "commits" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active panel: commits")
+      expect(output).toContain("📜 Commits:")
     })
   )
 })

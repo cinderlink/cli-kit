@@ -377,7 +377,7 @@ export const toAnsiSequence = (
         return toAnsiSequence(Color.ANSI256(code), profile, background)
       } else if (profile === ColorProfile.ANSI) {
         const code = rgbToAnsi(r, g, b)
-        return toAnsiSequence(Color.ANSI({ code }), profile, background)
+        return toAnsiSequence(Color.ANSI(code), profile, background)
       }
       return ""
     }
@@ -471,3 +471,25 @@ export const gradient = (start: Color, end: Color, steps: number): ReadonlyArray
   
   return result
 }
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Create an RGB color string
+ */
+export const rgb = (r: number, g: number, b: number): string => 
+  `rgb(${r}, ${g}, ${b})`
+
+/**
+ * Create or validate a hex color string
+ */
+export const hex = (value: string): string => 
+  value.startsWith("#") ? value : `#${value}`
+
+/**
+ * Create an HSL color string
+ */
+export const hsl = (h: number, s: number, l: number): string => 
+  `hsl(${h}, ${s}%, ${l}%)`

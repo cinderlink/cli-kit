@@ -1,3 +1,11 @@
+# Bun configuration for CLI-Kit
+
+# JSX/TSX/TUIX configuration
+[jsx]
+factory = "jsx"
+fragment = "Fragment"
+importSource = "@cinderlink/cli-kit/jsx-runtime"
+
 [test]
 # Preload setup files (uncomment when setup.ts is created)
 # preload = ["./src/testing/setup.ts"]
@@ -8,10 +16,17 @@ coverageDirectory = "./coverage"
 coverageReporter = ["text", "lcov"]
 
 # Set test timeout (in milliseconds)
-timeout = 10000
+timeout = 5000
 
 # Test file patterns
 root = "./"
 
+# Exclude node_modules and other directories from testing
+ignore = ["node_modules/**", "dist/**", ".git/**"]
+
 # Exclude files from coverage
 coverageSkipTestFiles = true
+
+# File extension mappings for .tuix files
+[loader]
+".tuix" = "tsx"

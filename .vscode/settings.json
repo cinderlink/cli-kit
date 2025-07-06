@@ -1,0 +1,14 @@
+{
+  "files.associations": {
+    "*.tuix": "typescriptreact"
+  },
+  "emmet.includeLanguages": {
+    "tuix": "javascriptreact"
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.autoImports": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[tuix]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

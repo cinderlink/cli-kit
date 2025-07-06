@@ -185,7 +185,7 @@ export const createMockTerminalService = (
 /**
  * Mock input service for testing.
  */
-export const createMockInputService = () => {
+export const createMockInputService = (): Layer.Layer<InputService, never, never> => {
   const keyQueue = Queue.unbounded<KeyEvent>()
   const mouseQueue = Queue.unbounded<MouseEvent>()
   const resizeQueue = Queue.unbounded<WindowSize>()
@@ -247,7 +247,7 @@ export const createMockInputService = () => {
 /**
  * Mock renderer service for testing.
  */
-export const createMockRendererService = () => {
+export const createMockRendererService = (): Layer.Layer<RendererService, never, never> => {
   const renderedViews = Ref.unsafeMake<ReadonlyArray<string>>([])
   const viewport = Ref.unsafeMake<Viewport>({ x: 0, y: 0, width: 80, height: 24 })
   const stats = Ref.unsafeMake({
@@ -361,7 +361,7 @@ export const createMockRendererService = () => {
 /**
  * Mock storage service for testing.
  */
-export const createMockStorageService = () => {
+export const createMockStorageService = (): Layer.Layer<StorageService, never, never> => {
   const storage = Ref.unsafeMake<Map<string, unknown>>(new Map())
 
   return Layer.succeed(
@@ -595,3 +595,37 @@ export const TUIAssert = {
     }
   }
 } as const
+
+// =============================================================================
+// Comprehensive Service Mocks
+// =============================================================================
+
+/**
+ * Create all mock services for integration testing
+ */
+export const createMockAppServices = () => {
+  const terminal = createMockTerminalService()
+  const input = createMockInputService()
+  const renderer = createMockRendererService()
+  const storage = createMockStorageService()
+  
+  return {
+    terminal,
+    input, 
+    renderer,
+    storage,
+    // Provide combined layer
+    layer: Layer.mergeAll(terminal, input, renderer, storage)
+  }
+}
+
+
+/**
+ * Create a comprehensive test harness with all services
+ */
+export const withMockServices = <R, E, A>(
+  effect: Effect.Effect<A, E, R>
+): Effect.Effect<A, E, Exclude<R, TerminalService | InputService | RendererService | StorageService>> => {
+  const services = createMockAppServices()
+  return Effect.provide(effect, services.layer)
+}

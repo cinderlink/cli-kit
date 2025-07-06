@@ -6,7 +6,7 @@
  * hit testing, and converts mouse events to component messages.
  */
 
-import { Effect, Context, Ref, Array as EffectArray, HashMap } from "effect"
+import { Effect, Context, Ref, Array as EffectArray, HashMap, Option } from "effect"
 import type { MouseEvent } from "@/core/types.ts"
 import { HitTestService, type ComponentBounds, createBounds } from "./hit-test.js"
 
@@ -128,8 +128,9 @@ export const MouseRouterServiceLive = Effect.gen(function* (_) {
         if (!hitResult) return null
         
         // Get handler for this component
-        const handler = HashMap.get(handlers, hitResult.componentId)
-        if (!handler) return null
+        const handlerOption = HashMap.get(handlers, hitResult.componentId)
+        if (Option.isNone(handlerOption)) return null
+        const handler = handlerOption.value
         
         // Call handler with local coordinates
         const message = handler(mouseEvent, hitResult.localX, hitResult.localY)

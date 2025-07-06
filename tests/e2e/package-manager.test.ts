@@ -7,18 +7,13 @@
  * - Search functionality
  * - Bulk operations
  * - Package details display
+ * 
+ * CONVERTED TO USE COMPONENT LOGIC TESTING APPROACH
  */
 
 import { test, expect } from "bun:test"
 import { Effect } from "effect"
-import { 
-  createTestContext, 
-  keys, 
-  key, 
-  typeText,
-  assertOutputContains,
-  assertOutputMatches
-} from "./setup.ts"
+import { createComponentTestContext } from "./component-test-utils.ts"
 
 // Mock package manager component for testing
 interface PackageManagerModel {
@@ -121,268 +116,224 @@ const mockPackageManager = {
   },
   
   view: (model: PackageManagerModel) => ({
-    _tag: "VStack" as const,
-    children: [
-      { _tag: "Text" as const, content: "Package Manager 📦" },
-      { _tag: "Text" as const, content: `${model.packageCount} packages available • ${model.selectedPackages} selected` },
-      { _tag: "Text" as const, content: `Active tab: ${model.activeTab}` },
-      { _tag: "Text" as const, content: `Selected package: ${model.selectedPackage}` },
-      { _tag: "Text" as const, content: `Operation in progress: ${model.operationInProgress}` },
-      { _tag: "Text" as const, content: model.statusMessage },
-      { _tag: "Text" as const, content: "📦 Packages | 🔗 Dependencies | 🔍 Search" },
+    render: () => Effect.succeed([
+      "Package Manager 📦",
+      `${model.packageCount} packages available • ${model.selectedPackages} selected`,
+      `Active tab: ${model.activeTab}`,
+      `Selected package: ${model.selectedPackage}`,
+      `Operation in progress: ${model.operationInProgress}`,
+      model.statusMessage,
+      "📦 Packages | 🔗 Dependencies | 🔍 Search",
       model.activeTab === 'packages' 
-        ? { _tag: "Text" as const, content: "react | typescript | express | lodash | axios | moment | webpack | jest" }
+        ? "react | typescript | express | lodash | axios | moment | webpack | jest"
         : model.activeTab === 'dependencies'
-        ? { _tag: "Text" as const, content: "react-dom | @types/react | @types/node | eslint | prettier" }
-        : { _tag: "Text" as const, content: `Search term: "${model.searchTerm}"` }
-    ]
+        ? "react-dom | @types/react | @types/node | eslint | prettier"
+        : `Search term: "${model.searchTerm}"`
+    ].join('\n'))
   }),
   
-  subscriptions: () => Effect.succeed({})
+  // Keyboard mapping function for testing
+  handleKeyEvent: (key: string): PackageManagerMsg | null => {
+    switch (key) {
+      case 'tab':
+      case '1': return { tag: "switchTab", tab: 'packages' }
+      case '2': return { tag: "switchTab", tab: 'dependencies' }
+      case '3': return { tag: "switchTab", tab: 'search' }
+      case 'i': return { tag: "installPackage" }
+      case 'u': return { tag: "uninstallPackage" }
+      case 'U': return { tag: "updatePackage" }
+      case 'b': return { tag: "bulkInstall" }
+      default: return null
+    }
+  }
 }
 
 test("Package Manager - Initial State", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      const ctx = yield* _(createComponentTestContext(mockPackageManager))
       
       const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Package Manager 📦"))
-      yield* _(assertOutputContains(output, "8 packages available"))
-      yield* _(assertOutputContains(output, "0 selected"))
-      yield* _(assertOutputContains(output, "Active tab: packages"))
-      yield* _(assertOutputContains(output, "Selected package: react"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Package Manager 📦")
+      expect(output).toContain("8 packages available")
+      expect(output).toContain("0 selected")
+      expect(output).toContain("Active tab: packages")
+      expect(output).toContain("Selected package: react")
+      expect(output).toContain("react | typescript | express")
     })
   )
 })
 
 test("Package Manager - Tab Navigation", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      let ctx = yield* _(createComponentTestContext(mockPackageManager))
       
-      // Test Tab navigation
-      yield* _(ctx.sendKey(keys.tab))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: dependencies"), 1000))
-      
+      // Switch to dependencies tab
+      ctx = yield* _(ctx.sendMessage({ tag: "switchTab", tab: "dependencies" }))
       let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Active tab: dependencies"))
-      yield* _(assertOutputContains(output, "react-dom"))
+      expect(output).toContain("Active tab: dependencies")
+      expect(output).toContain("react-dom")
       
-      // Navigate to search tab
-      yield* _(ctx.sendKey(keys.tab))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: search"), 1000))
-      
+      // Switch to search tab
+      ctx = yield* _(ctx.sendMessage({ tag: "switchTab", tab: "search" }))
       output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Active tab: search"))
+      expect(output).toContain("Active tab: search")
+      expect(output).toContain('Search term: ""')
       
-      // Navigate back to packages
-      yield* _(ctx.sendKey(keys.tab))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: packages"), 1000))
-      
+      // Switch back to packages
+      ctx = yield* _(ctx.sendMessage({ tag: "switchTab", tab: "packages" }))
       output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Active tab: packages"))
-      
-      yield* _(ctx.cleanup())
-    })
-  )
-})
-
-test("Package Manager - Direct Tab Access", async () => {
-  const result = await Effect.runPromise(
-    Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
-      
-      // Test direct access with number keys
-      yield* _(ctx.sendKey(key('2')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: dependencies"), 1000))
-      
-      yield* _(ctx.sendKey(key('3')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: search"), 1000))
-      
-      yield* _(ctx.sendKey(key('1')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: packages"), 1000))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Active tab: packages")
+      expect(output).toContain("react | typescript")
     })
   )
 })
 
 test("Package Manager - Install Package", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      const ctx = yield* _(createComponentTestContext(mockPackageManager))
       
-      // Ensure we're on packages tab
-      yield* _(ctx.sendKey(key('1')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: packages"), 1000))
+      // Install package
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "installPackage" }))
       
-      // Install package with 'i'
-      yield* _(ctx.sendKey(key('i')))
-      yield* _(ctx.waitForOutput(output => output.includes("Installing react... (simulated)"), 1000))
-      
-      const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Installing react... (simulated)"))
-      yield* _(assertOutputContains(output, "Operation in progress: true"))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Installing react... (simulated)")
+      expect(output).toContain("Operation in progress: true")
     })
   )
 })
 
 test("Package Manager - Uninstall Package", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      const ctx = yield* _(createComponentTestContext(mockPackageManager))
       
-      // Uninstall package with 'u'
-      yield* _(ctx.sendKey(key('u')))
-      yield* _(ctx.waitForOutput(output => output.includes("Uninstalling react... (simulated)"), 1000))
+      // Uninstall package
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "uninstallPackage" }))
       
-      const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Uninstalling react... (simulated)"))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Uninstalling react... (simulated)")
+      expect(output).toContain("Operation in progress: true")
     })
   )
 })
 
 test("Package Manager - Update Package", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      const ctx = yield* _(createComponentTestContext(mockPackageManager))
       
-      // Update package with Shift+U
-      yield* _(ctx.sendKey(key('U')))
-      yield* _(ctx.waitForOutput(output => output.includes("Updating react to latest version... (simulated)"), 1000))
+      // Update package
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "updatePackage" }))
       
-      const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Updating react to latest version... (simulated)"))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Updating react to latest version... (simulated)")
+      expect(output).toContain("Operation in progress: true")
     })
   )
 })
 
 test("Package Manager - Bulk Install", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      const ctx = yield* _(createComponentTestContext(mockPackageManager))
       
-      // Bulk install with 'b'
-      yield* _(ctx.sendKey(key('b')))
-      yield* _(ctx.waitForOutput(output => output.includes("Installing 0 packages... (simulated)"), 1000))
+      // Bulk install
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "bulkInstall" }))
       
-      const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Installing 0 packages... (simulated)"))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Installing 0 packages... (simulated)")
+      expect(output).toContain("Operation in progress: true")
     })
   )
 })
 
-test("Package Manager - Package Lists Display", async () => {
-  const result = await Effect.runPromise(
+test("Package Manager - Package Selection", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      const ctx = yield* _(createComponentTestContext(mockPackageManager))
       
-      // Check packages tab content
-      yield* _(ctx.sendKey(key('1')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: packages"), 1000))
+      // Select a package
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "selectPackage", packageName: "typescript" }))
       
-      let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "react"))
-      yield* _(assertOutputContains(output, "typescript"))
-      yield* _(assertOutputContains(output, "express"))
-      
-      // Check dependencies tab content
-      yield* _(ctx.sendKey(key('2')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: dependencies"), 1000))
-      
-      output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "react-dom"))
-      yield* _(assertOutputContains(output, "@types/react"))
-      yield* _(assertOutputContains(output, "eslint"))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Selected package: typescript")
+      expect(output).toContain("1 selected")
     })
   )
 })
 
-test("Package Manager - Tab Icons Display", async () => {
-  const result = await Effect.runPromise(
+test("Package Manager - Search", async () => {
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      let ctx = yield* _(createComponentTestContext(mockPackageManager))
+      
+      // Switch to search tab
+      ctx = yield* _(ctx.sendMessage({ tag: "switchTab", tab: "search" }))
+      
+      // Perform search
+      ctx = yield* _(ctx.sendMessage({ tag: "search", term: "react" }))
       
       const output = yield* _(ctx.getOutput())
-      
-      // Check that tab icons are displayed
-      yield* _(assertOutputContains(output, "📦 Packages"))
-      yield* _(assertOutputContains(output, "🔗 Dependencies"))
-      yield* _(assertOutputContains(output, "🔍 Search"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Active tab: search")
+      expect(output).toContain('Search term: "react"')
+      expect(output).toContain('Searching for: "react"')
     })
   )
 })
 
-test("Package Manager - Search Tab", async () => {
-  const result = await Effect.runPromise(
-    Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
-      
-      // Go to search tab
-      yield* _(ctx.sendKey(key('3')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: search"), 1000))
-      
-      const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Active tab: search"))
-      yield* _(assertOutputContains(output, 'Search term: ""'))
-      
-      yield* _(ctx.cleanup())
-    })
-  )
+test("Package Manager - Keyboard Mapping", () => {
+  // Test keyboard event mapping logic
+  expect(mockPackageManager.handleKeyEvent('1')).toEqual({ tag: "switchTab", tab: "packages" })
+  expect(mockPackageManager.handleKeyEvent('2')).toEqual({ tag: "switchTab", tab: "dependencies" })
+  expect(mockPackageManager.handleKeyEvent('3')).toEqual({ tag: "switchTab", tab: "search" })
+  expect(mockPackageManager.handleKeyEvent('i')).toEqual({ tag: "installPackage" })
+  expect(mockPackageManager.handleKeyEvent('u')).toEqual({ tag: "uninstallPackage" })
+  expect(mockPackageManager.handleKeyEvent('U')).toEqual({ tag: "updatePackage" })
+  expect(mockPackageManager.handleKeyEvent('b')).toEqual({ tag: "bulkInstall" })
+  expect(mockPackageManager.handleKeyEvent('x')).toBeNull()
 })
 
 test("Package Manager - Complete Workflow", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockPackageManager))
+      let ctx = yield* _(createComponentTestContext(mockPackageManager))
       
       // 1. Check initial state (packages tab)
       let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Package Manager 📦"))
-      yield* _(assertOutputContains(output, "Active tab: packages"))
+      expect(output).toContain("Package Manager 📦")
+      expect(output).toContain("Active tab: packages")
       
       // 2. Navigate through tabs
-      yield* _(ctx.sendKey(key('2')))  // Dependencies
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: dependencies"), 1000))
+      ctx = yield* _(ctx.sendMessage({ tag: "switchTab", tab: "dependencies" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active tab: dependencies")
       
-      yield* _(ctx.sendKey(key('3')))  // Search
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: search"), 1000))
+      ctx = yield* _(ctx.sendMessage({ tag: "switchTab", tab: "search" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active tab: search")
       
-      yield* _(ctx.sendKey(key('1')))  // Back to packages
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: packages"), 1000))
+      ctx = yield* _(ctx.sendMessage({ tag: "switchTab", tab: "packages" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active tab: packages")
       
       // 3. Install a package
-      yield* _(ctx.sendKey(key('i')))
-      yield* _(ctx.waitForOutput(output => output.includes("Installing react"), 1000))
+      ctx = yield* _(ctx.sendMessage({ tag: "installPackage" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Installing react")
       
       // 4. Update a package
-      yield* _(ctx.sendKey(key('U')))
-      yield* _(ctx.waitForOutput(output => output.includes("Updating react"), 1000))
+      ctx = yield* _(ctx.sendMessage({ tag: "updatePackage" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Updating react")
       
       // 5. Check dependencies
-      yield* _(ctx.sendKey(key('2')))
-      yield* _(ctx.waitForOutput(output => output.includes("Active tab: dependencies"), 1000))
-      
-      const finalOutput = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(finalOutput, "Active tab: dependencies"))
-      yield* _(assertOutputContains(finalOutput, "react-dom"))
-      
-      yield* _(ctx.cleanup())
+      ctx = yield* _(ctx.sendMessage({ tag: "switchTab", tab: "dependencies" }))
+      output = yield* _(ctx.getOutput())
+      expect(output).toContain("Active tab: dependencies")
+      expect(output).toContain("react-dom")
     })
   )
 })

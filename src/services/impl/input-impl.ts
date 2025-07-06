@@ -18,7 +18,7 @@ import type { KeyEvent, MouseEvent, WindowSize } from "@/core/types.ts"
  */
 const parseMouseEvent = (sequence: string): MouseEvent | null => {
   // SGR extended mode: ESC [ < btn ; x ; y ; M/m
-  let match = sequence.match(/^\x1b\[<(\d+);(\d+);(\d+)([Mm])/)
+  let match = sequence.match(/^\x1b\[<(\d+);(-?\d+);(-?\d+)([Mm])/)
   if (match) {
     const info = parseInt(match[1])
     const x = parseInt(match[2])

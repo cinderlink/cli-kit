@@ -113,3 +113,13 @@ export {
   createMatrixEffect,
   createHologramEffect
 } from "./advanced.ts"
+
+// Convenience exports for test compatibility
+export const rgb = (r: number, g: number, b: number): string => 
+  `rgb(${r}, ${g}, ${b})`
+
+export const hex = (value: string): string => 
+  value.startsWith("#") ? value : `#${value}`
+
+export const hsl = (h: number, s: number, l: number): string =>
+  `hsl(${h}, ${s}%, ${l}%)`

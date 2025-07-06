@@ -3,7 +3,72 @@
  * 
  * This module exports ready-to-use components that follow the
  * Bubbletea-inspired patterns and integrate with the styling system.
+ * 
+ * Also includes simplified component builders for easier usage.
  */
+
+// Simplified Component API (Svelte 5-inspired)
+export {
+  // Component creation
+  createComponent,
+  wrapComponent,
+  functional,
+  reactive,
+  
+  // Reactivity primitives
+  $state,
+  $derived,
+  $effect,
+  $memo,
+  $debounced,
+  $throttled,
+  createStore,
+  batch,
+  
+  // Lifecycle hooks
+  onMount,
+  onDestroy,
+  beforeUpdate,
+  afterUpdate,
+  useInterval,
+  useTimeout,
+  useAsyncEffect,
+  usePrevious,
+  tick,
+  
+  // Simplified component builders
+  Panel,
+  HeaderPanel,
+  InfoPanel,
+  SuccessPanel,
+  WarningPanel,
+  ErrorPanel,
+  Card,
+  Sidebar,
+  StatusPanel,
+  CollapsiblePanel,
+  ThemedPanel,
+  FloatingPanel,
+  
+  // Button builders (aliased to avoid conflict with Button component)
+  Button as SimpleButton,
+  PrimaryButton,
+  SecondaryButton,
+  SuccessButton,
+  DangerButton,
+  WarningButton,
+  InfoButton,
+  GhostButton,
+  IconButton,
+  SmallButton,
+  LargeButton,
+  DisabledButton,
+  LoadingButton,
+  FullWidthButton,
+  ButtonGroup,
+  SubmitCancelButtons,
+  YesNoButtons
+} from "./builders/index"
 
 // Base component types and utilities
 export {
@@ -22,18 +87,35 @@ export {
   createDefaultStyles
 } from "./base.ts"
 
-// TextInput component
+// Box component
+export {
+  type BoxModel,
+  type BoxMsg,
+  Box
+} from "./Box.ts"
+
+// Text component  
+export {
+  type TextModel,
+  type TextMsg,
+  Text
+} from "./Text.ts"
+
+// TextInput component - unified with rune support
 export {
   type TextInputModel,
   type TextInputMsg,
   type TextInputOptions,
   type TextInputStyles,
   TextInput,
+  TextInputComponent,
   EchoMode,
+  CursorStyle,
   textInput,
   emailInput,
-  passwordInput
-} from "./TextInput-clean.ts"
+  passwordInput,
+  numberInput
+} from "./TextInput.ts"
 
 // Button component
 export {
@@ -155,7 +237,7 @@ export {
 
 // Help component
 export {
-  type KeyBinding,
+  type KeyBinding as HelpKeyBinding, // Aliased to avoid conflict with base.ts
   type HelpSection,
   type HelpConfig,
   type HelpModel,

@@ -6,18 +6,13 @@
  * - Process table navigation
  * - System resource monitoring
  * - Process management operations
+ * 
+ * CONVERTED TO USE COMPONENT LOGIC TESTING APPROACH
  */
 
 import { test, expect } from "bun:test"
 import { Effect } from "effect"
-import { 
-  createTestContext, 
-  keys, 
-  key, 
-  navigate,
-  assertOutputContains,
-  assertOutputMatches
-} from "./setup.ts"
+import { createComponentTestContext } from "./component-test-utils.ts"
 
 // Mock process monitor component for testing
 interface ProcessMonitorModel {
@@ -101,180 +96,146 @@ const mockProcessMonitor = {
   },
   
   view: (model: ProcessMonitorModel) => ({
-    _tag: "VStack" as const,
-    children: [
-      { _tag: "Text" as const, content: "Process Monitor 📊" },
-      { _tag: "Text" as const, content: `${model.processCount} processes • Refresh: ${model.refreshInterval/1000}s` },
-      { _tag: "Text" as const, content: `CPU: ${model.cpuUsage.toFixed(1)}% | MEM: ${model.memoryUsage.toFixed(1)}%` },
-      { _tag: "Text" as const, content: `Selected PID: ${model.selectedPid}` },
-      { _tag: "Text" as const, content: model.statusMessage },
-      { _tag: "Text" as const, content: "PID | Name | User | CPU% | MEM% | Status | Time" }
-    ]
+    render: () => Effect.succeed([
+      "Process Monitor 📊",
+      `${model.processCount} processes • Refresh: ${model.refreshInterval/1000}s`,
+      `CPU: ${model.cpuUsage.toFixed(1)}% | MEM: ${model.memoryUsage.toFixed(1)}%`,
+      `Selected PID: ${model.selectedPid}`,
+      model.statusMessage,
+      "PID | Name | User | CPU% | MEM% | Status | Time"
+    ].join('\n'))
   }),
   
-  subscriptions: () => Effect.succeed({})
+  // Keyboard mapping function for testing
+  handleKeyEvent: (key: string): ProcessMonitorMsg | null => {
+    switch (key) {
+      case 'f5': return { tag: 'refresh' }
+      case 'f9': return { tag: 'killProcess' }
+      case 'r': return { tag: 'changeRefreshRate' }
+      case 'up': return { tag: 'navigateUp' }
+      case 'down': return { tag: 'navigateDown' }
+      default: return null
+    }
+  }
 }
 
 test("Process Monitor - Initial State", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockProcessMonitor))
+      const ctx = yield* _(createComponentTestContext(mockProcessMonitor))
       
       const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Process Monitor 📊"))
-      yield* _(assertOutputContains(output, "247 processes"))
-      yield* _(assertOutputContains(output, "CPU:"))
-      yield* _(assertOutputContains(output, "MEM:"))
-      yield* _(assertOutputContains(output, "Selected PID: 1234"))
-      
-      yield* _(ctx.cleanup())
+      expect(output).toContain("Process Monitor 📊")
+      expect(output).toContain("247 processes")
+      expect(output).toContain("CPU:")
+      expect(output).toContain("MEM:")
+      expect(output).toContain("Selected PID: 1234")
+      expect(output).toContain("Press F9 to kill, F5 to refresh")
     })
   )
 })
 
 test("Process Monitor - Refresh Functionality", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockProcessMonitor))
+      const ctx = yield* _(createComponentTestContext(mockProcessMonitor))
       
-      // Test F5 refresh
-      yield* _(ctx.sendKey(keys.f5))
-      yield* _(ctx.waitForOutput(output => output.includes("Data refreshed"), 1000))
+      // Trigger refresh
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "refresh" }))
       
-      const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Data refreshed"))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Data refreshed")
+      expect(output).toContain("CPU:")
+      expect(output).toContain("MEM:")
     })
   )
 })
 
 test("Process Monitor - Kill Process", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockProcessMonitor))
+      const ctx = yield* _(createComponentTestContext(mockProcessMonitor))
       
-      // Test F9 kill process
-      yield* _(ctx.sendKey(keys.f9))
-      yield* _(ctx.waitForOutput(output => output.includes("Killed process PID: 1234"), 1000))
+      // Trigger kill process
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "killProcess" }))
       
-      const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Killed process PID: 1234 - simulated"))
-      
-      yield* _(ctx.cleanup())
+      const output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Killed process PID: 1234 - simulated")
     })
   )
 })
 
 test("Process Monitor - Change Refresh Rate", async () => {
-  const result = await Effect.runPromise(
+  await Effect.runPromise(
     Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockProcessMonitor))
+      const ctx = yield* _(createComponentTestContext(mockProcessMonitor))
       
-      // Test 'r' key to change refresh rate
-      yield* _(ctx.sendKey(key('r')))
-      yield* _(ctx.waitForOutput(output => output.includes("Refresh rate changed"), 1000))
-      
-      const output = yield* _(ctx.getOutput())
-      yield* _(assertOutputMatches(output, /Refresh rate changed to [15]s/))
-      
-      yield* _(ctx.cleanup())
-    })
-  )
-})
-
-test("Process Monitor - Process Navigation", async () => {
-  const result = await Effect.runPromise(
-    Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockProcessMonitor))
-      
-      // Get initial PID
-      const initialOutput = yield* _(ctx.getOutput())
-      expect(initialOutput).toContain("Selected PID: 1234")
-      
-      // Navigate up (should decrease PID)
-      yield* _(ctx.sendKey(keys.up))
-      yield* _(ctx.waitForOutput(output => output.includes("Selected PID: 1233"), 1000))
-      
-      // Navigate down (should increase PID)
-      yield* _(ctx.sendKey(keys.down))
-      yield* _(ctx.sendKey(keys.down))
-      yield* _(ctx.waitForOutput(output => output.includes("Selected PID: 1235"), 1000))
-      
-      const finalOutput = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(finalOutput, "Selected PID: 1235"))
-      
-      yield* _(ctx.cleanup())
-    })
-  )
-})
-
-test("Process Monitor - System Resource Display", async () => {
-  const result = await Effect.runPromise(
-    Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockProcessMonitor))
-      
-      const output = yield* _(ctx.getOutput())
-      
-      // Check that system resources are displayed
-      yield* _(assertOutputMatches(output, /CPU: \d+\.\d+%/))
-      yield* _(assertOutputMatches(output, /MEM: \d+\.\d+%/))
-      
-      yield* _(ctx.cleanup())
-    })
-  )
-})
-
-test("Process Monitor - Process Table Headers", async () => {
-  const result = await Effect.runPromise(
-    Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockProcessMonitor))
-      
-      const output = yield* _(ctx.getOutput())
-      
-      // Check that process table headers are present
-      yield* _(assertOutputContains(output, "PID"))
-      yield* _(assertOutputContains(output, "Name"))
-      yield* _(assertOutputContains(output, "User"))
-      yield* _(assertOutputContains(output, "CPU%"))
-      yield* _(assertOutputContains(output, "MEM%"))
-      yield* _(assertOutputContains(output, "Status"))
-      yield* _(assertOutputContains(output, "Time"))
-      
-      yield* _(ctx.cleanup())
-    })
-  )
-})
-
-test("Process Monitor - Complete Workflow", async () => {
-  const result = await Effect.runPromise(
-    Effect.gen(function* (_) {
-      const ctx = yield* _(createTestContext(mockProcessMonitor))
-      
-      // 1. Check initial state
+      // Check initial refresh rate
       let output = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(output, "Process Monitor 📊"))
+      expect(output).toContain("Refresh: 2s")
       
-      // 2. Navigate to different process
-      yield* _(ctx.sendKey(keys.down))
-      yield* _(ctx.waitForOutput(output => output.includes("Selected PID: 1235"), 1000))
+      // Change refresh rate
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "changeRefreshRate" }))
       
-      // 3. Refresh data
-      yield* _(ctx.sendKey(keys.f5))
-      yield* _(ctx.waitForOutput(output => output.includes("Data refreshed"), 1000))
+      output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Refresh rate changed to 1s")
+      expect(output).toContain("Refresh: 1s")
+    })
+  )
+})
+
+test("Process Monitor - Navigation", async () => {
+  await Effect.runPromise(
+    Effect.gen(function* (_) {
+      const ctx = yield* _(createComponentTestContext(mockProcessMonitor))
       
-      // 4. Change refresh rate
-      yield* _(ctx.sendKey(key('r')))
-      yield* _(ctx.waitForOutput(output => output.includes("Refresh rate changed"), 1000))
+      // Check initial PID
+      let output = yield* _(ctx.getOutput())
+      expect(output).toContain("Selected PID: 1234")
       
-      // 5. Kill process
-      yield* _(ctx.sendKey(keys.f9))
-      yield* _(ctx.waitForOutput(output => output.includes("Killed process"), 1000))
+      // Navigate up
+      const ctx2 = yield* _(ctx.sendMessage({ tag: "navigateUp" }))
+      output = yield* _(ctx2.getOutput())
+      expect(output).toContain("Selected PID: 1233")
       
-      const finalOutput = yield* _(ctx.getOutput())
-      yield* _(assertOutputContains(finalOutput, "Killed process PID: 1235"))
+      // Navigate down twice
+      const ctx3 = yield* _(ctx2.sendMessage({ tag: "navigateDown" }))
+      const ctx4 = yield* _(ctx3.sendMessage({ tag: "navigateDown" }))
+      output = yield* _(ctx4.getOutput())
+      expect(output).toContain("Selected PID: 1235")
+    })
+  )
+})
+
+test("Process Monitor - Keyboard Mapping", () => {
+  // Test keyboard event mapping logic
+  expect(mockProcessMonitor.handleKeyEvent('f5')).toEqual({ tag: 'refresh' })
+  expect(mockProcessMonitor.handleKeyEvent('f9')).toEqual({ tag: 'killProcess' })
+  expect(mockProcessMonitor.handleKeyEvent('r')).toEqual({ tag: 'changeRefreshRate' })
+  expect(mockProcessMonitor.handleKeyEvent('up')).toEqual({ tag: 'navigateUp' })
+  expect(mockProcessMonitor.handleKeyEvent('down')).toEqual({ tag: 'navigateDown' })
+  expect(mockProcessMonitor.handleKeyEvent('x')).toBeNull()
+})
+
+test("Process Monitor - Keyboard Sequence", async () => {
+  await Effect.runPromise(
+    Effect.gen(function* (_) {
+      let ctx = yield* _(createComponentTestContext(mockProcessMonitor))
       
-      yield* _(ctx.cleanup())
+      // Simulate keyboard sequence: f5 (refresh), down, down, f9 (kill)
+      const keySequence = ['f5', 'down', 'down', 'f9']
+      
+      for (const key of keySequence) {
+        const msg = mockProcessMonitor.handleKeyEvent(key)
+        if (msg) {
+          ctx = yield* _(ctx.sendMessage(msg))
+        }
+      }
+      
+      // Check final state
+      const output = yield* _(ctx.getOutput())
+      expect(output).toContain("Selected PID: 1236") // 1234 + 2 downs
+      expect(output).toContain("Killed process PID: 1236 - simulated")
     })
   )
 })

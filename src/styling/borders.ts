@@ -297,6 +297,13 @@ export const Borders = {
   Hidden: createUniformBorder("\x00")
 } as const
 
+// Aliases for common border styles
+Object.defineProperty(Borders, 'Single', {
+  value: Borders.Normal,
+  enumerable: true,
+  configurable: false
+})
+
 // =============================================================================
 // Border Utilities
 // =============================================================================

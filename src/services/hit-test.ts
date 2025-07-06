@@ -6,7 +6,7 @@
  * mouse coordinate.
  */
 
-import { Effect, Context, Ref, Array as EffectArray } from "effect"
+import { Effect, Context, Ref, Array as EffectArray, Layer } from "effect"
 import type { MouseEvent } from "@/core/types.ts"
 
 // =============================================================================
@@ -24,6 +24,11 @@ export interface ComponentBounds {
   readonly height: number
   readonly zIndex: number // Higher values are on top
 }
+
+/**
+ * Alias for ComponentBounds for backward compatibility
+ */
+export type MouseRegion = ComponentBounds
 
 /**
  * Result of a hit test
@@ -177,3 +182,8 @@ export const mouseEventHitsComponent = (
   mouseEvent: MouseEvent,
   bounds: ComponentBounds
 ): boolean => pointInRect(mouseEvent.x, mouseEvent.y, bounds)
+
+/**
+ * Create a layer with the HitTestService implementation
+ */
+export const createHitTestService = () => Layer.effect(HitTestService, HitTestServiceLive)

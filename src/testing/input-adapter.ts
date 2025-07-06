@@ -121,7 +121,7 @@ export class TestInputAdapter {
 /**
  * Create a test input service with programmatic control
  */
-export const createTestInputService = () => {
+export const createTestInputService = (): Layer.Layer<InputService, never, never> => {
   return Layer.effect(
     InputService,
     Effect.gen(function* (_) {

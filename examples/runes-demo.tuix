@@ -1,0 +1,163 @@
+#!/usr/bin/env bun
+
+/**
+ * Runes Demo - Svelte-inspired reactivity with $bindable
+ * 
+ * Demonstrates two-way data binding with the $bindable rune
+ */
+
+import { Effect } from "effect"
+import { runApp } from "../src/core/runtime"
+import { LiveServices } from "../src/services/impl"
+import type { Component, RuntimeConfig } from "../src/core/types"
+import { $bindable, $derived } from "../src/reactivity"
+import { Text, TextInput, Button, Box } from "../src/components"
+
+interface Model {
+  name: ReturnType<typeof $bindable<string>>
+  email: ReturnType<typeof $bindable<string>>
+  age: ReturnType<typeof $bindable<number>>
+  submitted: boolean
+}
+
+type Msg = 
+  | { tag: "submit" }
+  | { tag: "reset" }
+  | { tag: "quit" }
+
+const app: Component<Model, Msg> = {
+  init: Effect.succeed([
+    {
+      name: $bindable(''),
+      email: $bindable('', {
+        validate: (value) => 
+          !value || value.includes('@') || 'Please enter a valid email'
+      }),
+      age: $bindable(0, {
+        transform: (value) => Math.max(0, Math.min(120, value))
+      }),
+      submitted: false
+    },
+    []
+  ]),
+  
+  update: (msg: Msg, model: Model) => {
+    switch (msg.tag) {
+      case "submit":
+        return Effect.succeed([
+          { ...model, submitted: true },
+          []
+        ])
+        
+      case "reset":
+        model.name.$set('')
+        model.email.$set('')
+        model.age.$set(0)
+        return Effect.succeed([
+          { ...model, submitted: false },
+          []
+        ])
+        
+      case "quit":
+        return Effect.succeed([
+          model,
+          [Effect.succeed({ _tag: "Quit" as const })]
+        ])
+        
+      default:
+        return Effect.succeed([model, []])
+    }
+  },
+  
+  view: (model: Model) => {
+    // Derived values
+    const isValid = model.name() && model.email() && model.email().includes('@')
+    
+    return (
+      <Box border="rounded" padding={2} width={60}>
+        <Text bold>Runes Demo - Svelte-inspired Reactivity</Text>
+        <Text color="gray">Press Tab to navigate, Enter to submit</Text>
+        <div gap={1}>
+          <div>
+            <Text>Name:</Text>
+            <TextInput 
+              bind:value={model.name}
+              placeholder="Enter your name..."
+              width={40}
+            />
+          </div>
+          
+          <div>
+            <Text>Email:</Text>
+            <TextInput 
+              bind:value={model.email}
+              placeholder="email@example.com"
+              width={40}
+            />
+          </div>
+          
+          <div>
+            <Text>Age:</Text>
+            <TextInput 
+              bind:value={model.age}
+              placeholder="0"
+              width={20}
+            />
+          </div>
+          
+          <div gap={1}>
+            <Button 
+              variant={isValid ? "primary" : "secondary"}
+              disabled={!isValid}
+              onClick={() => ({ tag: "submit" })}
+            >
+              Submit
+            </Button>
+            
+            <Button 
+              variant="secondary"
+              onClick={() => ({ tag: "reset" })}
+            >
+              Reset
+            </Button>
+          </div>
+          
+          {model.submitted && (
+            <Box border="single" padding={1}>
+              <Text color="green" bold>Form Submitted!</Text>
+              <Text>Name: {model.name()}</Text>
+              <Text>Email: {model.email()}</Text>
+              <Text>Age: {model.age()}</Text>
+            </Box>
+          )}
+          
+          <Text color="gray" faint>
+            Press 'q' to quit
+          </Text>
+        </div>
+      </Box>
+    )
+  },
+  
+  subscriptions: (model: Model) =>
+    Effect.gen(function* (_) {
+      const input = yield* _(InputService)
+      return input.mapKeys(key => {
+        if (key.key === 'q') return { tag: "quit" }
+        return null
+      })
+    })
+}
+
+const config: RuntimeConfig = {
+  fps: 30,
+  quitOnCtrlC: true,
+  fullscreen: true
+}
+
+Effect.runPromise(
+  runApp(app, config).pipe(
+    Effect.provide(LiveServices),
+    Effect.catchAll(() => Effect.void)
+  )
+)

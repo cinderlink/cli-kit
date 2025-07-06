@@ -374,7 +374,7 @@ const handleAutomaticQuitKeys = <Msg>(
   })
 
 /**
- * Handle subscriptions
+ * Handle subscriptions - properly manages dynamic subscriptions that depend on model state
  */
 const handleSubscriptions = <Model, Msg>(
   component: Component<Model, Msg>,
@@ -384,20 +384,70 @@ const handleSubscriptions = <Model, Msg>(
   Effect.gen(function* (_) {
     if (!component.subscriptions) return
     
-    // Start subscription once with initial model
-    const initialState = yield* _(Ref.get(state))
-    const sub = yield* _(component.subscriptions(initialState.model))
+    // Track current subscription fiber to restart when model changes
+    let currentSubFiber: Fiber.Fiber<never, never> | null = null
+    let lastModel: Model | null = null
     
-    // Run the subscription and keep it running
-    // Don't restart unless the app is shutting down
+    // Function to start/restart subscriptions
+    const startSubscription = (model: Model) =>
+      Effect.gen(function* (_) {
+        // Interrupt existing subscription if running
+        if (currentSubFiber) {
+          yield* _(Fiber.interrupt(currentSubFiber))
+        }
+        
+        // Create new subscription with current model
+        const sub = yield* _(component.subscriptions!(model))
+        
+        // Start new subscription fiber
+        currentSubFiber = yield* _(
+          sub.pipe(
+            Stream.takeWhile(() => Effect.gen(function* (_) {
+              const currentState = yield* _(Ref.get(state))
+              return currentState.running
+            })),
+            Stream.runForEach(msg => 
+              Queue.offer(msgQueue, { _tag: "UserMsg" as const, msg })
+            )
+          ).pipe(
+            Effect.fork
+          )
+        )
+        
+        lastModel = model
+      })
+    
+    // Start initial subscription
+    const initialState = yield* _(Ref.get(state))
+    yield* _(startSubscription(initialState.model))
+    
+    // Monitor state changes and restart subscriptions when model changes
     yield* _(
-      sub.pipe(
-        Stream.takeWhile(() => Effect.gen(function* (_) {
+      Effect.repeat(
+        Effect.gen(function* (_) {
           const currentState = yield* _(Ref.get(state))
-          return currentState.running
-        })),
-        Stream.runForEach(msg => 
-          Queue.offer(msgQueue, { _tag: "UserMsg" as const, msg })
+          
+          if (!currentState.running) {
+            // App is shutting down, interrupt subscription and exit
+            if (currentSubFiber) {
+              yield* _(Fiber.interrupt(currentSubFiber))
+            }
+            return
+          }
+          
+          // Check if model has changed (using referential equality for performance)
+          if (currentState.model !== lastModel) {
+            yield* _(startSubscription(currentState.model))
+          }
+          
+          // Small delay to avoid busy waiting
+          yield* _(Effect.sleep(16)) // ~60fps model checking
+        }),
+        Schedule.whileEffect(() => 
+          Effect.gen(function* (_) {
+            const currentState = yield* _(Ref.get(state))
+            return currentState.running
+          })
         )
       )
     )

@@ -1,34 +1,81 @@
-# CLI-Kit 🎨
+# TUIX 🎨
 
-A modern, Effect-powered Terminal User Interface (TUI) framework for building rich command-line applications in TypeScript. Inspired by [Bubbletea](https://github.com/charmbracelet/bubbletea) but built with functional programming principles using [Effect](https://effect.website/).
+A comprehensive TypeScript framework for building modern command-line applications and terminal user interfaces. Built with [Effect.ts](https://effect.website/) for functional programming and featuring JSX support with Svelte-inspired reactivity through runes.
 
 ## ✨ Features
 
-- 🎯 **Type-Safe**: Full TypeScript support with strict typing
-- 🧩 **Component-Based**: Reusable UI components with state management
-- 🎨 **Rich Styling**: Advanced text styling with colors, backgrounds, and borders
-- ⌨️ **Input Handling**: Keyboard and mouse event processing
-- 📱 **Responsive**: Adaptive layouts that work in any terminal size
-- 🔄 **Reactive**: Built on Effect streams for real-time updates
-- 🏗️ **Extensible**: Easy to create custom components and styles
+- 🎯 **Type-Safe CLI Framework**: Full TypeScript support with Zod validation
+- 🧩 **JSX Terminal Components**: Svelte-inspired syntax with runes for reactive terminal UIs
+- 🎨 **Rich Styling System**: Colors, gradients, borders, and advanced styling
+- ⌨️ **Input & Mouse Handling**: Comprehensive event processing
+- 🔌 **Plugin System**: Extensible architecture with hooks and middleware
+- ⚡ **Performance Optimized**: Lazy loading, caching, and efficient rendering
+- 📱 **Responsive Layouts**: Adaptive designs for any terminal size
+- 🔄 **Effect.ts Integration**: Functional programming with proper error handling
 
 ## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-bun install
+bun add tuix
 ```
 
-### Hello World
+### Create Your First CLI
+
+```typescript
+import { createCLI, z } from 'tuix'
+
+const cli = createCLI({
+  name: 'my-app',
+  version: '1.0.0',
+  commands: {
+    hello: {
+      description: 'Say hello to someone',
+      args: {
+        name: z.string().describe('Name to greet')
+      },
+      handler: (args) => `Hello, ${args.name}!`
+    }
+  }
+})
+
+await cli.run(process.argv.slice(2))
+```
+
+### JSX Terminal UI with Runes
+
+```tsx
+import { Text, Button, Box } from 'tuix/components'
+
+const MyComponent = ({ name }: { name: string }) => {
+  let clickCount = $state(0)
+  
+  return (
+    <Box border="rounded" padding={2}>
+      <Text color="cyan" bold>
+        Welcome to CLI-Kit, {name}! 🎉
+      </Text>
+      <Text>Clicked {clickCount} times</Text>
+      <Button 
+        variant="primary" 
+        onClick={() => clickCount++}
+      >
+        Get Started
+      </Button>
+    </Box>
+  )
+}
+```
+
+### Advanced TUI Application
 
 ```typescript
 import { Effect } from "effect"
-import { runApp } from "@/index.ts"
-import { text, vstack } from "@/core/view.ts"
-import { style, Colors } from "@/styling/index.ts"
-import { InputService } from "@/services/index.ts"
-import type { Component, RuntimeConfig } from "@/core/types.ts"
+import { runApp } from "tuix"
+import { text, vstack } from "tuix"
+import { style, Colors } from "tuix/styling"
+import type { Component } from "tuix"
 
 interface Model {
   readonly count: number
@@ -36,7 +83,7 @@ interface Model {
 
 type Msg = { readonly tag: "increment" }
 
-const app: Component<Model, Msg> = {
+const counterApp: Component<Model, Msg> = {
   init: Effect.succeed([{ count: 0 }, []]),
   
   update: (msg: Msg, model: Model) => {
@@ -46,46 +93,44 @@ const app: Component<Model, Msg> = {
     }
   },
   
-  view: (model: Model) => {
-    return vstack(
-      text("Hello CLI-Kit! 👋", style(Colors.BrightCyan)),
-      text(`Count: ${model.count}`, style(Colors.White)),
-      text("Press Space to increment, Ctrl+C to exit", style(Colors.Gray))
-    )
-  },
-  
-  subscriptions: (model: Model) =>
-    Effect.gen(function* (_) {
-      const input = yield* _(InputService)
-      return input.mapKeys(key => {
-        if (key.key === ' ') return { tag: "increment" }
-        return null
-      })
-    })
+  view: (model: Model) => (
+    <div>
+      <Text color="cyan" bold>CLI-Kit Counter 🎯</Text>
+      <Text>Count: {model.count}</Text>
+      <Text color="gray">Press Space to increment, Ctrl+C to exit</Text>
+    </div>
+  )
 }
 
-const config: RuntimeConfig = {
-  fps: 30,
-  quitOnCtrlC: true,
-  fullscreen: true
-}
-
-Effect.runPromise(runApp(app, config))
+runApp(counterApp)
 ```
 
 ## 🏗️ Architecture
 
-CLI-Kit follows the **Model-View-Update (MVU)** pattern:
+TUIX provides two complementary approaches:
 
-- **Model**: Your application state
-- **View**: Pure functions that render the model to terminal output
-- **Update**: Functions that transform the model based on messages
-- **Subscriptions**: Streams of events (keyboard, mouse, timers) that generate messages
+### 1. CLI Framework
+Type-safe command-line applications with argument parsing, validation, and plugins:
+
+```
+┌─────────────┐    Parse     ┌─────────────┐    Route     ┌─────────────┐
+│   Raw Args  │ ──────────► │ Parsed Args │ ──────────► │   Handler   │
+└─────────────┘             └─────────────┘             └─────────────┘
+                                   │                            │
+                                   ▼                            ▼
+                            ┌─────────────┐            ┌─────────────┐
+                            │ Validation  │            │   Result    │
+                            │  (Zod)      │            │ (Any Type)  │
+                            └─────────────┘            └─────────────┘
+```
+
+### 2. TUI Framework  
+Interactive terminal applications following the **Model-View-Update (MVU)** pattern:
 
 ```
 ┌─────────────┐    Messages    ┌─────────────┐
-│             │ ──────────────► │             │
-│    View     │                 │   Update    │
+│    View     │ ──────────────► │   Update    │
+│   (JSX)     │                 │ (Pure Fn)   │
 │             │ ◄────────────── │             │
 └─────────────┘    New Model   └─────────────┘
        │                              │
@@ -93,7 +138,7 @@ CLI-Kit follows the **Model-View-Update (MVU)** pattern:
        ▼                              ▼
 ┌─────────────┐                ┌─────────────┐
 │   Render    │                │    Model    │
-│  Terminal   │                │    State    │
+│  Terminal   │                │   State     │
 └─────────────┘                └─────────────┘
                                       │
                                       │
@@ -103,80 +148,213 @@ CLI-Kit follows the **Model-View-Update (MVU)** pattern:
 └─────────────┘
 ```
 
-## 🧩 Built-in Components
+Both frameworks are powered by **Effect.ts** for functional programming, error handling, and resource management, with **Svelte runes** providing reactive state management.
 
-### Form Controls
+## 🧩 JSX Components
 
-- **TextInput**: Single and multi-line text input with validation
-- **Button**: Clickable buttons with multiple variants
-- **List**: Selectable lists with single/multi-select modes
+### Core Elements
+
+```tsx
+// Text rendering with styling
+<Text color="blue" bold italic>Styled text</Text>
+
+// Layout containers
+<Box border="rounded" padding={2} width={40}>
+  <div>Content goes here</div>
+</Box>
+
+// Flexible layouts
+<div style={{ display: 'flex', flexDirection: 'column' }}>
+  <Text>Item 1</Text>
+  <Text>Item 2</Text>
+</div>
+```
+
+### Interactive Components
+
+```tsx
+// Reactive state with runes (planned)
+let count = $state(0)
+let inputValue = $state('')
+let selectedIndex = $state(0)
+
+// Buttons with reactive callbacks
+<Button variant="primary" onClick={() => count++}>
+  Clicked {count} times
+</Button>
+
+// Text input with callback handlers
+<TextInput 
+  value={inputValue}
+  onChange={(value) => inputValue = value}
+  placeholder="Enter text..."
+  validate={(value) => value.length > 0}
+/>
+
+// Selectable lists with callback handlers
+<List 
+  items={['Option 1', 'Option 2', 'Option 3']}
+  selected={selectedIndex}
+  onSelect={(index) => selectedIndex = index}
+/>
+```
 
 ### Data Display
 
-- **Table**: Sortable, filterable tables with pagination
-- **Tabs**: Multi-view interfaces with tab navigation
-- **ProgressBar**: Progress indicators (determinate/indeterminate)
-- **Spinner**: Loading animations with multiple styles
+```tsx
+// Reactive data with runes (planned)
+let tableData = $state([...])
+let currentTab = $state(0)
+let progress = $state(75)
 
-### Layout
+// Tables with callback handlers
+<Table 
+  data={tableData}
+  columns={[
+    { key: 'name', title: 'Name', sortable: true },
+    { key: 'value', title: 'Value', sortable: true }
+  ]}
+  onSort={(column) => /* handle sorting */}
+  onFilter={(column) => /* handle filtering */}
+/>
 
-- **Box**: Container with borders, padding, and styling
-- **VStack/HStack**: Vertical and horizontal layout containers
+// Tab navigation with callback handlers
+<Tabs 
+  activeTab={currentTab}
+  onTabChange={(index) => currentTab = index}
+>
+  <Tab title="Tab 1">Content 1</Tab>
+  <Tab title="Tab 2">Content 2</Tab>
+</Tabs>
 
-### Feedback
+// Progress indicators
+<ProgressBar value={progress} max={100} />
+<Spinner variant="dots" />
+```
+
+### Advanced Components
 
 - **Modal**: Dialog boxes with backdrop (coming soon)
-- **Help**: Keybinding help displays (coming soon)
+- **FilePicker**: File and directory selection (coming soon)
+- **Help**: Keybinding help system (coming soon)
+- **Viewport**: Scrollable content areas (coming soon)
 
 ## 🎨 Styling System
 
-CLI-Kit includes a powerful styling system for text and layout:
+CLI-Kit provides a comprehensive styling system with multiple approaches:
+
+### JSX Style Props
+
+```tsx
+// Direct style props
+<Text 
+  color="blue" 
+  backgroundColor="white"
+  bold 
+  italic 
+  underline
+>
+  Styled text
+</Text>
+
+// CSS-like styling
+<div style={{
+  color: 'rgb(255, 100, 100)',
+  backgroundColor: '#1a1a1a',
+  border: '1px solid cyan',
+  padding: '2px 4px',
+  margin: '1px',
+  textAlign: 'center'
+}}>
+  CSS-styled content
+</div>
+```
+
+### Advanced Color System
+
+```tsx
+// Standard colors
+<Text color="red">Red text</Text>
+<Text color="brightCyan">Bright cyan text</Text>
+
+// RGB colors
+<Text color="rgb(255, 100, 50)">Custom RGB</Text>
+
+// Hex colors  
+<Text color="#ff6432">Hex color</Text>
+
+// Gradients
+<Text gradient="linear-gradient(90deg, red, blue)">
+  Gradient text
+</Text>
+```
+
+### Layout and Borders
+
+```tsx
+// Border styles
+<Box border="single">Single border</Box>
+<Box border="double">Double border</Box>
+<Box border="rounded">Rounded border</Box>
+<Box border="thick">Thick border</Box>
+
+// Padding and margins
+<Box padding={2} margin={1}>
+  Spaced content
+</Box>
+
+// Flexible layouts
+<div style={{ 
+  display: 'flex', 
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center' 
+}}>
+  <Text>Left</Text>
+  <Text>Right</Text>
+</div>
+```
+
+### Programmatic Styling
 
 ```typescript
-import { style, Colors, Borders } from "@/styling/index.ts"
+import { style, Colors, createGradient } from 'tuix/styling'
 
-// Text styling
-const styledText = text("Hello", 
-  style(Colors.BrightWhite)
-    .background(Colors.Blue)
-    .bold()
-    .italic()
-)
+// Function-based styling
+const myStyle = style()
+  .color(Colors.blue)
+  .backgroundColor(Colors.white)
+  .bold()
+  .padding(2)
 
-// Borders and boxes
-const borderedBox = box(content, {
-  border: Borders.rounded,
-  borderStyle: style(Colors.Cyan),
-  padding: { top: 1, right: 2, bottom: 1, left: 2 },
-  width: 40,
-  height: 10
+// Gradient creation
+const gradient = createGradient({
+  type: 'linear',
+  angle: 90,
+  stops: [
+    { color: Colors.red, position: 0 },
+    { color: Colors.blue, position: 100 }
+  ]
 })
 ```
 
 ### Available Colors
 
 ```typescript
-// Standard colors
-Colors.Black, Colors.Red, Colors.Green, Colors.Yellow
-Colors.Blue, Colors.Magenta, Colors.Cyan, Colors.White
+// Standard ANSI colors
+'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'
 
 // Bright variants
-Colors.BrightBlack, Colors.BrightRed, Colors.BrightGreen
-Colors.BrightYellow, Colors.BrightBlue, Colors.BrightMagenta
-Colors.BrightCyan, Colors.BrightWhite
+'brightBlack', 'brightRed', 'brightGreen', 'brightYellow'
+'brightBlue', 'brightMagenta', 'brightCyan', 'brightWhite'
 
 // Extended colors
-Colors.Gray, Colors.DarkGray
-```
+'gray', 'darkGray', 'lightGray'
 
-### Border Styles
-
-```typescript
-Borders.none       // No border
-Borders.single     // ┌─┐ style
-Borders.double     // ╔═╗ style  
-Borders.rounded    // ╭─╮ style
-Borders.thick      // ┏━┓ style
+// True color support
+'rgb(255, 100, 50)'
+'#ff6432'
+'hsl(120, 50%, 75%)'
 ```
 
 ## ⌨️ Input Handling
@@ -229,7 +407,7 @@ Mouse events are captured but coordinate-to-component routing is still in develo
 
 ## 📝 Examples
 
-Check out the `examples/` directory for real-world TUI applications:
+Check out the `examples/` directory for real-world TUIX applications:
 
 ### Real-World Applications
 - **Git Dashboard** - Multi-panel git repository management (inspired by lazygit)
@@ -311,8 +489,8 @@ const config: RuntimeConfig = {
 ### Development Setup
 
 ```bash
-git clone <repository>
-cd cli-kit
+git clone https://github.com/cinderlink/tuix
+cd tuix
 bun install
 ```
 
@@ -364,29 +542,31 @@ interface Component<Model, Msg> {
 This is an active development project. Some features are still being implemented:
 
 ### ✅ Completed
-- Core runtime and MVU architecture
-- Basic styling system with colors and borders
-- Text input components with validation
-- Button components with multiple variants
-- List components with selection
-- Table components with sorting and filtering
-- Tabs components for multi-view interfaces
-- Progress bars and spinners
-- Mouse event capture infrastructure
+- ✅ **CLI Framework**: Complete command parsing, routing, and validation
+- ✅ **JSX Runtime**: Full JSX support with Svelte-inspired runes for reactive terminal UIs
+- ✅ **Plugin System**: Extensible architecture with hooks and middleware
+- ✅ **Performance Optimizations**: Lazy loading, caching, and efficient rendering
+- ✅ **Core Components**: Text, Button, Box, List, Table, Tabs, ProgressBar, Spinner
+- ✅ **Advanced Styling**: Colors, gradients, borders, layouts, and CSS-like styling
+- ✅ **Type Safety**: Full TypeScript support with proper generics and Effect.ts integration
+- ✅ **Input & Mouse Handling**: Comprehensive event processing system
+- ✅ **Testing Framework**: Comprehensive test utilities and coverage
 
-### 🚧 In Progress
-- Comprehensive documentation
-- Coordinate-to-component mouse routing
-- Input handling fixes for complex components
+### 🚧 In Progress  
+- 🔧 **Documentation**: Comprehensive guides and API reference
+- 🔧 **Mouse Routing**: Coordinate-to-component mouse event routing
+- 🔧 **Examples**: Real-world application examples and tutorials
 
 ### 📋 Planned
-- Modal/Dialog components
-- Viewport for scrollable content
-- File picker components
-- Help system for keybindings
-- Advanced styling utilities (gradients, etc.)
-- Performance optimizations
+- 📋 **Modal/Dialog**: Overlay components with backdrop
+- 📋 **Viewport**: Scrollable content areas for large datasets  
+- 📋 **FilePicker**: File and directory selection components
+- 📋 **Help System**: Interactive keybinding help and documentation
+- 📋 **Themes**: Comprehensive theming system and presets
+- 📋 **Animation**: Smooth transitions and loading animations
 
 ---
 
 **Built with Bun and Effect for modern TypeScript development**
+
+*TUIX is a play on "Twix" candy, referencing our .tuix file extension for reactive terminal UI components*

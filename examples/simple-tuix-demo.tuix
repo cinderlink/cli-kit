@@ -1,0 +1,55 @@
+#!/usr/bin/env bun
+
+/**
+ * Simple TUIX Demo - Demonstrates .tuix file support
+ * 
+ * Run with: bun examples/simple-tuix-demo.tuix
+ */
+
+import { $bindable } from "../src/runes"
+
+// Simple function component using JSX syntax
+function SimpleApp() {
+  const name = $bindable("World")
+  const count = $bindable(0)
+  
+  // Log changes
+  name.$subscribe(value => console.log('Name changed:', value))
+  count.$subscribe(value => console.log('Count changed:', value))
+  
+  // Return JSX using supported elements
+  return (
+    <div>
+      <bold>🎉 TUIX Demo - Terminal UI Extensions</bold>
+      <div>
+        <text>Hello, {name.$value}!</text>
+        <text>Count: {count.$value}</text>
+      </div>
+      <div>
+        <success>✅ .tuix files are working!</success>
+        <info>💡 This demonstrates JSX syntax in .tuix files</info>
+      </div>
+    </div>
+  )
+}
+
+// Demo the reactive features
+console.log("=== TUIX File Demo ===\n")
+
+// Create the app
+const app = SimpleApp()
+console.log("Created app with JSX:", app)
+
+// Test the reactive values
+const nameTest = $bindable("Alice")
+const countTest = $bindable(42)
+
+console.log("\nTesting reactivity:")
+nameTest.$set("Bob")
+countTest.$update(c => c + 1)
+
+console.log("\nFinal values:")
+console.log("Name:", nameTest.$value)
+console.log("Count:", countTest.$value)
+
+console.log("\n🎊 TUIX demo complete!")

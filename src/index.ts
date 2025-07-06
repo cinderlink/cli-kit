@@ -1,12 +1,12 @@
 /**
- * @cinderlink/cli-kit - A performant TUI framework for Bun
+ * TUIX - A performant TUI framework for Bun
  * 
- * Inspired by BubbleTea but built for TypeScript with Effect.ts integration
- * and optimized for Bun's performance characteristics.
+ * Built for TypeScript with JSX support, reactive state management via runes,
+ * and Effect.ts integration, optimized for Bun's performance characteristics.
  * 
  * @example
  * ```typescript
- * import { Component, Effect, runTUIApp } from "@cinderlink/cli-kit"
+ * import { Component, Effect, runTUIApp } from "tuix"
  * 
  * const MyApp: Component<Model, Msg> = {
  *   init: Effect.succeed([initialModel, []]),
@@ -29,19 +29,34 @@ export {
   StorageService
 } from "./services/index.ts"
 
-// Testing utilities are exported separately - import from "@cinderlink/cli-kit/testing"
+// Testing utilities are exported separately - import from "tuix/testing"
 
 // View system
 export * as View from "./core/view.ts"
 
+// Reactivity system - Svelte-inspired runes
+export * from "./reactivity/index.ts"
+
+// JSX runtime
+export * from "./jsx-runtime.ts"
+
+// Components
+export * from "./components/index.ts"
+
+// Styling
+export * from "./styling/index.ts"
+
+// CLI framework
+export * from "./cli/index.ts"
+
 // Version information
-export const VERSION = "0.1.0" as const
+export const VERSION = "1.0.0-rc.1" as const
 
 // Framework metadata
 export const FRAMEWORK_INFO = {
-  name: "@cinderlink/cli-kit",
+  name: "tuix",
   version: VERSION,
-  description: "A performant TUI framework for Bun inspired by bubbletea",
-  repository: "https://github.com/cinderlink/cli-kit",
+  description: "A performant TUI framework for Bun with JSX and reactive state management",
+  repository: "https://github.com/cinderlink/tuix",
   license: "MIT"
 } as const

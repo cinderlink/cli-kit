@@ -97,8 +97,8 @@ describe("Core Types", () => {
     
     // System messages should not change the model
     const [newModel] = await tester.testUpdate({ _tag: 'KeyPress', key: {
-      key: 'Enter',
-      code: 'Enter',
+      type: 'enter' as any,
+      key: 'enter',
       ctrl: false,
       alt: false,
       shift: false,

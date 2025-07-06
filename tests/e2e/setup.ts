@@ -8,10 +8,17 @@
  * - Managing test timeouts
  */
 
-import { Effect, Fiber, Queue, Ref, Stream, Schedule, pipe } from "effect"
+import { Effect, Fiber, Queue, Ref, Stream, Schedule, pipe, Layer, Option } from "effect"
 import { runApp } from "@/index.ts"
 import type { Component, RuntimeConfig } from "@/core/types.ts"
-import { LiveServices } from "../../src/services/impl/index.ts"
+import { 
+  TerminalService,
+  InputService,
+  RendererService,
+  StorageService,
+  MouseRouterService,
+  HitTestService
+} from "@/services/index.ts"
 
 // =============================================================================
 // Test Types
@@ -43,28 +50,62 @@ export const createTestContext = <Model, Msg>(
   config: Partial<RuntimeConfig> = {}
 ): Effect.Effect<TestContext<Model, Msg>, Error, never> =>
   Effect.gen(function* (_) {
-    // Captured output
+    // Captured output and model state
     const outputRef = yield* _(Ref.make<string>(""))
     const modelRef = yield* _(Ref.make<Model | null>(null))
     const keyQueue = yield* _(Queue.unbounded<TestKeyEvent>())
     
+    // For now, let's use a simpler approach - the issue is not multiple consumers
+    // but that the subscription stream isn't being consumed properly
+    
     // Mock terminal service that captures output
     const mockTerminal = {
-      getSize: () => Effect.succeed({ width: 80, height: 24 }),
-      clear: () => Effect.succeed(undefined),
-      hideCursor: () => Effect.succeed(undefined),
-      showCursor: () => Effect.succeed(undefined),
-      enableAlternateScreen: () => Effect.succeed(undefined),
-      disableAlternateScreen: () => Effect.succeed(undefined)
+      getSize: Effect.succeed({ width: 80, height: 24 }),
+      clear: Effect.succeed(undefined),
+      hideCursor: Effect.succeed(undefined),
+      showCursor: Effect.succeed(undefined),
+      write: (text: string) => Effect.succeed(undefined),
+      writeLine: (text: string) => Effect.succeed(undefined),
+      moveCursor: (x: number, y: number) => Effect.succeed(undefined),
+      moveCursorRelative: (dx: number, dy: number) => Effect.succeed(undefined),
+      setRawMode: (enabled: boolean) => Effect.succeed(undefined),
+      setAlternateScreen: (enabled: boolean) => Effect.succeed(undefined),
+      saveCursor: Effect.succeed(undefined),
+      restoreCursor: Effect.succeed(undefined),
+      getCapabilities: Effect.succeed({
+        colors: true,
+        unicode: true,
+        mouse: false
+      }),
+      isColorSupported: Effect.succeed(true),
+      setTitle: (title: string) => Effect.succeed(undefined),
+      bell: Effect.succeed(undefined),
+      scrollUp: (lines: number) => Effect.succeed(undefined),
+      scrollDown: (lines: number) => Effect.succeed(undefined),
+      clearLine: Effect.succeed(undefined),
+      clearLineAfter: Effect.succeed(undefined),
+      clearLineBefore: Effect.succeed(undefined),
+      clearScreenAfter: Effect.succeed(undefined),
+      clearScreenBefore: Effect.succeed(undefined)
     }
     
-    // Mock renderer that captures output instead of writing to terminal
+    // Mock renderer that captures output and model
     const mockRenderer = {
       render: (view: any) => 
         Effect.gen(function* (_) {
-          const output = renderToString(view)
+          let output: string
+          if (view && view.render && typeof view.render === 'function') {
+            // This is a View object with render method
+            output = yield* _(view.render())
+          } else {
+            // This is a simple view structure
+            output = renderToString(view)
+          }
           yield* _(Ref.set(outputRef, output))
-        })
+        }),
+      beginFrame: Effect.succeed(undefined),
+      endFrame: Effect.succeed(undefined),
+      clear: Effect.succeed(undefined)
     }
     
     // Mock input service that reads from our queue
@@ -79,6 +120,40 @@ export const createTestContext = <Model, Msg>(
         }))
       ),
       mouseEvents: Stream.empty,
+      resizeEvents: Stream.empty,
+      pasteEvents: Stream.empty,
+      focusEvents: Stream.empty,
+      enableMouse: Effect.succeed(undefined),
+      disableMouse: Effect.succeed(undefined),
+      enableMouseMotion: Effect.succeed(undefined),
+      disableMouseMotion: Effect.succeed(undefined),
+      enableBracketedPaste: Effect.succeed(undefined),
+      disableBracketedPaste: Effect.succeed(undefined),
+      enableFocusTracking: Effect.succeed(undefined),
+      disableFocusTracking: Effect.succeed(undefined),
+      readKey: Queue.take(keyQueue).pipe(
+        Effect.map(testKey => ({
+          key: testKey.key,
+          ctrl: testKey.ctrl || false,
+          shift: testKey.shift || false,
+          alt: testKey.alt || false,
+          meta: testKey.meta || false
+        }))
+      ),
+      readLine: Effect.succeed(""),
+      inputAvailable: Effect.succeed(false),
+      flushInput: Effect.succeed(undefined),
+      filterKeys: (predicate: any) => 
+        Stream.fromQueue(keyQueue).pipe(
+          Stream.map(testKey => ({
+            key: testKey.key,
+            ctrl: testKey.ctrl || false,
+            shift: testKey.shift || false,
+            alt: testKey.alt || false,
+            meta: testKey.meta || false
+          })),
+          Stream.filter(predicate)
+        ),
       mapKeys: (mapper: any) => 
         Stream.fromQueue(keyQueue).pipe(
           Stream.map(testKey => ({
@@ -89,17 +164,17 @@ export const createTestContext = <Model, Msg>(
             meta: testKey.meta || false
           })),
           Stream.filterMap(mapper)
-        ),
-      enableMouse: Effect.succeed(undefined),
-      disableMouse: Effect.succeed(undefined)
+        )
     }
     
     // Mock storage service
     const mockStorage = {
-      save: () => Effect.succeed(undefined),
-      load: () => Effect.succeed(null),
-      remove: () => Effect.succeed(undefined),
-      clear: () => Effect.succeed(undefined)
+      save: (key: string, value: unknown) => Effect.succeed(undefined),
+      load: (key: string) => Effect.succeed(null),
+      remove: (key: string) => Effect.succeed(undefined),
+      clear: Effect.succeed(undefined),
+      list: Effect.succeed([]),
+      exists: (key: string) => Effect.succeed(false)
     }
     
     // Mock mouse router
@@ -112,13 +187,17 @@ export const createTestContext = <Model, Msg>(
     }
     
     // Create mock services layer
-    const MockServices = {
-      TerminalService: mockTerminal,
-      RendererService: mockRenderer,
-      InputService: mockInput,
-      StorageService: mockStorage,
-      MouseRouterService: mockMouseRouter
-    }
+    const MockServices = Layer.mergeAll([
+      Layer.succeed(TerminalService, TerminalService.of(mockTerminal)),
+      Layer.succeed(RendererService, RendererService.of(mockRenderer)),
+      Layer.succeed(InputService, InputService.of(mockInput)),
+      Layer.succeed(StorageService, StorageService.of(mockStorage)),
+      Layer.succeed(MouseRouterService, MouseRouterService.of(mockMouseRouter)),
+      Layer.succeed(HitTestService, HitTestService.of({
+        hitTest: () => Effect.succeed(null),
+        findComponentAt: () => Effect.succeed(null)
+      }))
+    ])
     
     // Test configuration
     const testConfig: RuntimeConfig = {
@@ -131,15 +210,34 @@ export const createTestContext = <Model, Msg>(
       ...config
     }
     
+    // Create a test-specific component wrapper that captures the model
+    const wrappedComponent: Component<Model, Msg> = {
+      init: Effect.gen(function* (_) {
+        const [initialModel, cmds] = yield* _(component.init)
+        // Capture the initial model for testing
+        yield* _(Ref.set(modelRef, initialModel))
+        return [initialModel, cmds]
+      }),
+      update: (msg: Msg, model: Model) => 
+        Effect.gen(function* (_) {
+          const [newModel, cmds] = yield* _(component.update(msg, model))
+          // Capture the new model for testing
+          yield* _(Ref.set(modelRef, newModel))
+          return [newModel, cmds]
+        }),
+      view: component.view,
+      subscriptions: component.subscriptions
+    }
+    
     // Start the application in the background
     const appFiber = yield* _(
-      runApp(component, testConfig).pipe(
+      runApp(wrappedComponent, testConfig).pipe(
         Effect.provide(MockServices),
         Effect.fork
       )
     )
     
-    // Wait a bit for the app to initialize
+    // Wait a bit for the app to initialize and capture initial model
     yield* _(Effect.sleep(100))
     
     return {

@@ -6,6 +6,7 @@
     "module": "Preserve",
     "moduleDetection": "force",
     "jsx": "react-jsx",
+    "jsxImportSource": "@cinderlink/cli-kit",
     "allowJs": true,
 
     // Bundler mode
@@ -40,7 +41,8 @@
   "include": [
     "src/**/*",
     "examples/**/*",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "**/*.tuix"
   ],
   "exclude": [
     "node_modules",

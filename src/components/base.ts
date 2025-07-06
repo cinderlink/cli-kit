@@ -149,8 +149,30 @@ export const matchKeyBinding = <Msg>(
     if (!binding || binding.disabled) continue
     
     for (const k of binding.keys) {
-      if (key.key === k || (key.runes && key.runes === k)) {
+      // Check exact key match
+      if (key.key === k) {
         return binding.msg
+      }
+      // Check runes match (for single character keys)
+      if (key.runes && key.runes === k) {
+        return binding.msg
+      }
+      // Check composite key match (e.g., ctrl+s matches "s" with ctrl=true)
+      if (k.includes('+')) {
+        const parts = k.split('+')
+        const mainKey = parts[parts.length - 1]
+        const hasCtrl = parts.includes('ctrl')
+        const hasAlt = parts.includes('alt')
+        const hasShift = parts.includes('shift')
+        const hasMeta = parts.includes('meta')
+        
+        if ((key.key === mainKey || key.runes === mainKey) &&
+            key.ctrl === hasCtrl &&
+            key.alt === hasAlt &&
+            key.shift === hasShift &&
+            key.meta === hasMeta) {
+          return binding.msg
+        }
       }
     }
   }
@@ -214,4 +236,26 @@ export const createDefaultStyles = (overrides?: Partial<ComponentStyles>): Compo
   }
   
   return defaults
+}
+
+/**
+ * Merge multiple component styles
+ */
+export const mergeStyles = (...styles: (ComponentStyles | undefined)[]): ComponentStyles => {
+  return styles.reduce((merged, style) => ({
+    ...merged,
+    ...style
+  }), createDefaultStyles())
+}
+
+/**
+ * Create a key map from an array of key bindings
+ */
+export const createKeyMap = <Msg>(bindings: KeyBinding<Msg>[]): KeyMap<Msg> => {
+  const map: KeyMap<Msg> = {}
+  bindings?.forEach(binding => {
+    // Use help.key as the map key since that's the primary identifier
+    map[binding.help.key.toLowerCase()] = binding
+  })
+  return map
 }

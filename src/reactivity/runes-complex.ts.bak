@@ -1,0 +1,346 @@
+/**
+ * Svelte-inspired Runes for Reactive State Management
+ * 
+ * Provides reactive primitives for terminal UI components
+ */
+
+import { Effect } from "effect"
+
+/**
+ * Base interface for all runes
+ */
+export interface Rune<T> {
+  (): T
+  readonly $type: string
+}
+
+/**
+ * Internal subscriber type
+ */
+type Subscriber<T = void> = (value: T) => void
+
+/**
+ * Internal interface for trackable runes
+ */
+interface TrackableRune<T> extends StateRune<T> {
+  $subscribe(callback: Subscriber<T>): () => void
+}
+
+/**
+ * Internal interface for tracking dependencies
+ */
+interface DependencyTracker {
+  $trackDependency(dep: TrackableRune<any>): void
+}
+
+/**
+ * State rune for reactive values
+ */
+export interface StateRune<T> extends Rune<T> {
+  readonly $type: 'state'
+  $set(value: T): void
+  $update(fn: (current: T) => T): void
+}
+
+/**
+ * Bindable rune for two-way data binding
+ */
+export interface BindableRune<T> extends StateRune<T> {
+  readonly $type: 'bindable'
+  readonly $bindable: true
+  $subscribe(callback: (value: T) => void): () => void
+  $validate?: (value: T) => boolean | string
+  $transform?: (value: T) => T
+}
+
+/**
+ * Derived rune for computed values
+ */
+export interface DerivedRune<T> extends Rune<T> {
+  readonly $type: 'derived'
+  $subscribe(callback: (value: T) => void): () => void
+}
+
+/**
+ * Options for creating bindable runes
+ */
+export interface BindableOptions<T> {
+  validate?: (value: T) => boolean | string
+  transform?: (value: T) => T
+}
+
+// Track currently executing derived computation
+let currentComputation: (DerivedRune<any> & DependencyTracker) | null = null
+
+// Recursion detection
+const computationStack = new Set<any>()
+const MAX_RECURSION_DEPTH = 100
+let recursionDepth = 0
+
+/**
+ * Creates a reactive state value
+ */
+export function $state<T>(initial: T): StateRune<T> {
+  let value = initial
+  const subscribers = new Set<Subscriber<T>>()
+  
+  // Create the trackable rune interface
+  interface InternalStateRune extends StateRune<T>, TrackableRune<T> {}
+  
+  const rune = (() => {
+    // If we're in a derived computation, track this dependency
+    if (currentComputation) {
+      currentComputation.$trackDependency(rune as InternalStateRune)
+    }
+    return value
+  }) as InternalStateRune
+  
+  rune.$type = 'state' as const
+  
+  rune.$set = (newValue: T) => {
+    if (value !== newValue) {
+      value = newValue
+      subscribers.forEach(fn => fn(newValue))
+    }
+  }
+  
+  rune.$update = (fn: (current: T) => T) => {
+    rune.$set(fn(value))
+  }
+  
+  // Internal subscription mechanism
+  rune.$subscribe = (callback: Subscriber<T>) => {
+    subscribers.add(callback)
+    return () => subscribers.delete(callback)
+  }
+  
+  return rune as StateRune<T>
+}
+
+/**
+ * Creates a bindable reactive value with two-way data binding support
+ */
+export function $bindable<T>(initial: T, options?: BindableOptions<T>): BindableRune<T> {
+  const { validate, transform } = options || {}
+  
+  // Apply initial transform if provided
+  let value = transform ? transform(initial) : initial
+  const subscribers = new Set<(newValue: T) => void>()
+  
+  // Create internal bindable rune with trackable interface
+  interface InternalBindableRune extends BindableRune<T>, TrackableRune<T> {}
+  
+  const rune = (() => {
+    // If we're in a derived computation, track this dependency
+    if (currentComputation) {
+      currentComputation.$trackDependency(rune as InternalBindableRune)
+    }
+    return value
+  }) as InternalBindableRune
+  
+  rune.$type = 'bindable' as const
+  rune.$bindable = true as const
+  rune.$validate = validate
+  rune.$transform = transform
+  
+  rune.$set = (newValue: T) => {
+    // Apply transform if provided
+    if (transform) {
+      newValue = transform(newValue)
+    }
+    
+    // Validate if validator provided
+    if (validate) {
+      const result = validate(newValue)
+      if (result === false) {
+        return // Reject the change silently
+      }
+      if (typeof result === 'string') {
+        console.error(`Validation error: ${result}`)
+        return // Reject with error message
+      }
+    }
+    
+    if (value !== newValue) {
+      value = newValue
+      subscribers.forEach(fn => fn(newValue))
+    }
+  }
+  
+  rune.$update = (fn: (current: T) => T) => {
+    rune.$set(fn(value))
+  }
+  
+  rune.$subscribe = (callback: (value: T) => void) => {
+    subscribers.add(callback)
+    return () => subscribers.delete(callback)
+  }
+  
+  return rune
+}
+
+/**
+ * Creates a derived value that automatically updates when dependencies change
+ */
+export function $derived<T>(fn: () => T): DerivedRune<T> {
+  let cached: T
+  let isDirty = true
+  const subscribers = new Set<(value: T) => void>()
+  const dependencies = new Set<TrackableRune<unknown>>()
+  const unsubscribers = new Map<TrackableRune<unknown>, () => void>()
+  
+  // Create internal derived rune with dependency tracking
+  interface InternalDerivedRune extends DerivedRune<T>, DependencyTracker {}
+  
+  // Track dependencies and compute value
+  const compute = () => {
+    // Recursion protection
+    if (computationStack.has(rune)) {
+      console.error('Infinite recursion detected in $derived computation')
+      return cached // Return cached value to break cycle
+    }
+    
+    if (recursionDepth >= MAX_RECURSION_DEPTH) {
+      console.error('Maximum recursion depth exceeded in $derived computation')
+      return cached
+    }
+    
+    computationStack.add(rune)
+    recursionDepth++
+    
+    // Clear old dependencies only on first run or explicit recomputation
+    if (isDirty) {
+      unsubscribers.forEach(unsub => unsub())
+      unsubscribers.clear()
+      dependencies.clear()
+    }
+    
+    // Set current computation for dependency tracking
+    const prevComputation = currentComputation
+    currentComputation = rune
+    
+    try {
+      const newValue = fn()
+      if (newValue !== cached || isDirty) {
+        cached = newValue
+        isDirty = false
+        // Don't notify subscribers during computation to prevent cycles
+        if (recursionDepth === 1) {
+          subscribers.forEach(cb => cb(newValue))
+        }
+      }
+      return newValue
+    } finally {
+      currentComputation = prevComputation
+      computationStack.delete(rune)
+      recursionDepth--
+    }
+  }
+  
+  const rune: InternalDerivedRune = (() => {
+    if (isDirty) {
+      return compute()
+    }
+    return cached
+  }) as InternalDerivedRune
+  
+  rune.$type = 'derived' as const
+  
+  rune.$subscribe = (callback: (value: T) => void) => {
+    subscribers.add(callback)
+    return () => subscribers.delete(callback)
+  }
+  
+  // Track dependency and invalidate when it changes
+  rune.$trackDependency = (dep: TrackableRune<unknown>) => {
+    if (!dependencies.has(dep)) {
+      dependencies.add(dep)
+      const unsub = dep.$subscribe(() => {
+        if (!isDirty && !computationStack.has(rune)) { // Only recompute if not already dirty or computing
+          isDirty = true
+          // Recompute synchronously but with protection
+          if (recursionDepth < MAX_RECURSION_DEPTH) {
+            compute()
+          }
+        }
+      })
+      unsubscribers.set(dep, unsub)
+    }
+  }
+  
+  // Initial computation
+  compute()
+  
+  return rune as DerivedRune<T>
+}
+
+/**
+ * Creates an effect that runs when dependencies change
+ */
+export function $effect(fn: () => void | (() => void)): void {
+  // Run the effect immediately
+  const cleanup = fn()
+  
+  // Set up cleanup (simplified - in real implementation would track deps)
+  if (typeof cleanup === 'function') {
+    // Store cleanup for later
+  }
+}
+
+/**
+ * Type guard to check if a value is a rune
+ */
+export function isRune(value: any): value is Rune<any> {
+  return value && typeof value === 'function' && '$type' in value
+}
+
+/**
+ * Type guard to check if a value is a state rune
+ */
+export function isStateRune(value: any): value is StateRune<any> {
+  return isRune(value) && value.$type === 'state'
+}
+
+/**
+ * Type guard to check if a value is a bindable rune
+ */
+export function isBindableRune(value: any): value is BindableRune<any> {
+  return isRune(value) && value.$type === 'bindable' && value.$bindable === true
+}
+
+/**
+ * Type guard to check if a value is a derived rune
+ */
+export function isDerivedRune(value: any): value is DerivedRune<any> {
+  return isRune(value) && value.$type === 'derived'
+}
+
+/**
+ * Utility to get the current value from any rune or regular value
+ */
+export function getValue<T>(runeOrValue: T | Rune<T>): T {
+  if (isRune(runeOrValue)) {
+    return runeOrValue()
+  }
+  return runeOrValue
+}
+
+/**
+ * Utility to create a bindable prop from various input types
+ */
+export function toBindable<T>(
+  value: T | StateRune<T> | BindableRune<T>,
+  options?: BindableOptions<T>
+): BindableRune<T> {
+  if (isBindableRune(value)) {
+    return value
+  }
+  
+  if (isStateRune(value)) {
+    // Convert state rune to bindable
+    return $bindable(value(), options)
+  }
+  
+  // Create new bindable from value
+  return $bindable(value, options)
+}

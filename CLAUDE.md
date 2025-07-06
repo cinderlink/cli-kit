@@ -119,16 +119,24 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
    - Run `bun run tsc --noEmit` to check for TypeScript errors
    - Address failing tests immediately - do not leave broken tests
 
-2. **Test-Driven Development**
+2. **Test Strategy (See docs/TESTING.md for details)**
+   - **Prefer Component Logic Testing**: Use `tests/e2e/component-test-utils.ts` for most component testing
+   - **Use Integration Testing**: Only when testing service interactions with `tests/e2e/setup.ts`
+   - **Avoid Full Runtime Testing**: Complex, slow, and unreliable - use sparingly
    - Write tests for new features before implementation when possible
    - Ensure test coverage meets thresholds (80% lines, functions, statements; 70% branches)
-   - Use the test utilities in `src/testing/test-utils.ts` for consistent testing
 
 3. **Test Organization**
-   - Unit tests: Test individual functions and components in isolation
-   - Integration tests: Test interactions between components and services
-   - E2E tests: Test complete user workflows
+   - Component logic tests: `*-component.test.ts` (preferred for most scenarios)
+   - Integration tests: `*.test.ts` (service interaction testing)
+   - Unit tests: `tests/unit/**/*.test.ts` (individual functions and modules)
    - Performance tests: Use Bun's bench functionality for performance-critical code
+
+4. **Testing Best Practices**
+   - Component tests should be fast (~1-10ms each) and deterministic
+   - Use `testInteraction()` for multi-step component workflows
+   - Always clean up resources in integration tests
+   - Avoid timing-dependent assertions - prefer deterministic approaches
 
 ## Documentation Requirements
 

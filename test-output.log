@@ -1,0 +1,2204 @@
+bun test v1.2.17 (282dda62)
+
+__tests__/core.test.ts:
+(pass) Core Types > Component interface should be properly typed [11.69ms]
+(pass) Core Types > Component update should handle messages correctly [4.71ms]
+(pass) Core Types > Component view should render correctly [1.20ms]
+(pass) Core Types > Component should handle system messages [0.67ms]
+(pass) Error System > TerminalError should be properly structured [0.54ms]
+(pass) Error System > InputError should be properly structured [0.06ms]
+(pass) Error System > RenderError should be properly structured [0.02ms]
+(pass) Error System > ErrorUtils.isCritical should classify errors correctly [0.04ms]
+(pass) Error System > ErrorUtils.fromUnknown should handle various error types [0.09ms]
+(pass) Error System > ErrorUtils.getUserMessage should provide user-friendly messages [0.04ms]
+(pass) Error Boundaries > withErrorBoundary should catch and handle errors [0.50ms]
+(pass) Error Boundaries > withErrorBoundary should pass through successful effects [0.08ms]
+(pass) Error Boundaries > Recovery strategies should work correctly [1.00ms]
+(pass) Framework Integration > Component should work with mock services [3.23ms]
+(pass) Framework Integration > Multiple components should not interfere [3.09ms]
+(pass) Framework Integration > Error handling should work end-to-end [1.73ms]
+
+tests/e2e/process-monitor.test.ts:
+(pass) Process Monitor - Initial State [0.33ms]
+(pass) Process Monitor - Refresh Functionality [0.22ms]
+(pass) Process Monitor - Kill Process [0.13ms]
+(pass) Process Monitor - Change Refresh Rate [0.13ms]
+(pass) Process Monitor - Navigation [0.26ms]
+(pass) Process Monitor - Keyboard Mapping [0.06ms]
+(pass) Process Monitor - Keyboard Sequence [0.17ms]
+
+tests/e2e/log-viewer.test.ts:
+(pass) Log Viewer - Initial State [0.38ms]
+(pass) Log Viewer - Toggle Search Mode [0.17ms]
+(pass) Log Viewer - Toggle Filters [0.20ms]
+(pass) Log Viewer - Level Filtering [0.23ms]
+(pass) Log Viewer - Navigation [0.18ms]
+(pass) Log Viewer - View Mode Toggle [0.17ms]
+(pass) Log Viewer - Keyboard Mapping [0.06ms]
+(pass) Log Viewer - Complex Workflow [0.20ms]
+
+tests/e2e/recommended-approach.test.ts:
+(pass) Editor - Component Logic [0.42ms]
+(pass) Editor - Keyboard Mapping [0.07ms]
+(pass) Editor - Keyboard Sequence [0.23ms]
+(pass) Editor - Subscription Logic [0.04ms]
+
+tests/e2e/log-viewer-component.test.ts:
+(pass) Log Viewer Component - Initial State [0.41ms]
+(pass) Log Viewer Component - Toggle Search Mode [0.25ms]
+(pass) Log Viewer Component - Toggle Auto-scroll [0.22ms]
+(pass) Log Viewer Component - Level Filtering [0.08ms]
+(pass) Log Viewer Component - Navigation [0.09ms]
+(pass) Log Viewer Component - Toggle View Mode [0.04ms]
+(pass) Log Viewer Component - Toggle Filters [0.06ms]
+(pass) Log Viewer Component - Complex Workflow [0.10ms]
+
+tests/e2e/package-manager.test.ts:
+(pass) Package Manager - Initial State
+(pass) Package Manager - Tab Navigation [0.54ms]
+(pass) Package Manager - Install Package [0.08ms]
+(pass) Package Manager - Uninstall Package [0.12ms]
+(pass) Package Manager - Update Package [0.05ms]
+(pass) Package Manager - Bulk Install [0.13ms]
+(pass) Package Manager - Package Selection [0.06ms]
+(pass) Package Manager - Search [0.08ms]
+(pass) Package Manager - Keyboard Mapping [0.09ms]
+(pass) Package Manager - Complete Workflow [0.29ms]
+
+tests/e2e/git-dashboard.test.ts:
+(pass) Git Dashboard - Initial State [0.45ms]
+(pass) Git Dashboard - Panel Navigation [0.26ms]
+(pass) Git Dashboard - File Selection [0.11ms]
+(pass) Git Dashboard - Stage File [0.12ms]
+(pass) Git Dashboard - Unstage File [0.16ms]
+(pass) Git Dashboard - Commit Files [0.15ms]
+(pass) Git Dashboard - Refresh Status [0.07ms]
+(pass) Git Dashboard - Keyboard Mapping [0.05ms]
+(pass) Git Dashboard - Complete Git Workflow [0.27ms]
+
+__tests__/unit/debug-router.test.ts:
+(pass) Debug Router > imports router correctly [0.84ms]
+(pass) Debug Router > creates router instance [0.07ms]
+
+__tests__/performance/rendering.bench.test.ts:
+Simple text: 0.55ms total, 0.0006ms avg (1000 iterations)
+(pass) Rendering Performance > simple text rendering [0.81ms]
+Styled text: 5.10ms total, 0.0051ms avg (1000 iterations)
+(pass) Rendering Performance > styled text rendering [5.15ms]
+VStack 10 items: 6.38ms total, 0.0064ms avg (1000 iterations)
+(pass) Rendering Performance > vstack with 10 items [6.60ms]
+VStack 100 items: 1.92ms total, 0.0192ms avg (100 iterations)
+(pass) Rendering Performance > vstack with 100 items [2.15ms]
+Nested layout: 89.24ms total, 0.0892ms avg (1000 iterations)
+(pass) Rendering Performance > nested layout rendering [89.32ms]
+Panel: 11.73ms total, 0.0117ms avg (1000 iterations)
+(pass) Rendering Performance > panel rendering [12.45ms]
+
+__tests__/performance/cli-startup.bench.test.ts:
+Minimal config parsing: 0.28ms total, 0.0028ms avg (100 iterations)
+(pass) CLI Startup Performance > minimal config parsing [0.47ms]
+Complex config parsing: 2.03ms total, 0.0203ms avg (100 iterations)
+(pass) CLI Startup Performance > complex config parsing [2.08ms]
+Router init (minimal): 0.06ms total, 0.0006ms avg (100 iterations)
+(pass) CLI Startup Performance > router initialization - minimal [0.11ms]
+Router init (complex): 0.03ms total, 0.0003ms avg (100 iterations)
+(pass) CLI Startup Performance > router initialization - complex [0.05ms]
+Help generation (minimal): 0.15ms total, 0.0015ms avg (100 iterations)
+(pass) CLI Startup Performance > help generation - minimal [0.17ms]
+Help generation (complex): 0.68ms total, 0.0137ms avg (50 iterations)
+(pass) CLI Startup Performance > help generation - complex [0.68ms]
+
+__tests__/performance/optimization.bench.test.ts:
+String width (ASCII):
+  Original: 3.71ms
+  Optimized: 1.42ms
+  Improvement: 61.7%
+(pass) Performance Optimizations > string width calculation - ASCII [5.31ms]
+String width (Unicode):
+  Original: 13.73ms
+  Optimized: 2.29ms
+  Improvement: 83.4%
+(pass) Performance Optimizations > string width calculation - Unicode [16.11ms]
+Style rendering:
+  Original: 4.48ms
+  Optimized: 1.06ms
+  Improvement: 76.4%
+(pass) Performance Optimizations > style rendering [5.68ms]
+Styled text creation:
+  Original: 247.63ms
+  Optimized: 60.10ms
+  Improvement: 75.7%
+(pass) Performance Optimizations > styled text creation [307.92ms]
+View caching:
+  Uncached: 0.65ms
+  Cached: 0.38ms
+  Improvement: 40.5%
+(pass) Performance Optimizations > view caching [1.50ms]
+Large layout rendering:
+  Original: 9.64ms
+  Optimized: 9.73ms
+  Improvement: -0.9%
+(pass) Performance Optimizations > large layout rendering [20.10ms]
+Repeated string width:
+  Original: 0.73ms
+  Optimized: 0.10ms
+  Improvement: 86.9%
+(pass) Performance Optimizations > repeated string operations [0.92ms]
+
+__tests__/e2e/button-showcase.test.ts:
+(pass) Button Showcase - Initial State [0.76ms]
+(pass) Button Showcase - Navigation Down [0.23ms]
+(pass) Button Showcase - Navigation Up [0.13ms]
+(pass) Button Showcase - Button Activation [0.14ms]
+(pass) Button Showcase - Disabled Button Handling [0.10ms]
+(pass) Button Showcase - Direct Button Click [0.11ms]
+(pass) Button Showcase - Clear Message [0.13ms]
+(pass) Button Showcase - Navigation Bounds [0.19ms]
+
+__tests__/e2e/layout-patterns.test.ts:
+(pass) Layout Patterns - Initial State [0.37ms]
+(pass) Layout Patterns - Next Layout Navigation [0.10ms]
+(pass) Layout Patterns - Previous Layout Navigation [0.04ms]
+(pass) Layout Patterns - Wrap Around Navigation [0.09ms]
+(pass) Layout Patterns - Reverse Wrap Around [0.17ms]
+(pass) Layout Patterns - All Layout Names [0.14ms]
+(pass) Layout Patterns - Navigation Instructions [0.07ms]
+(pass) Layout Patterns - Rapid Navigation [0.16ms]
+
+__tests__/unit/core/errors.test.ts:
+(pass) Error Classes > TerminalError > creates terminal error with required fields [0.04ms]
+(pass) Error Classes > TerminalError > includes cause and context [0.05ms]
+(pass) Error Classes > InputError > creates input error for different devices [0.02ms]
+(pass) Error Classes > InputError > handles error without operation [0.01ms]
+(pass) Error Classes > RenderError > creates render error [0.02ms]
+(pass) Error Classes > RenderError > handles error without operation [0.01ms]
+(pass) Error Classes > StorageError > creates storage error with path [0.06ms]
+(pass) Error Classes > StorageError > creates storage error without path [0.02ms]
+(pass) Error Classes > ConfigError > creates config error with key and expected [0.02ms]
+(pass) Error Classes > ConfigError > creates config error without key [0.01ms]
+(pass) Error Classes > ComponentError > creates component error [0.02ms]
+(pass) Error Classes > ApplicationError > creates application error [0.02ms]
+(pass) Error Classes > ApplicationError > handles error without operation
+(pass) Error Classes > ValidationError > creates validation error [0.04ms]
+(pass) Error Classes > ValidationError > creates validation error with multiple fields [0.02ms]
+(pass) Error Utilities > isAppError > identifies app errors [0.04ms]
+(pass) Error Utilities > ErrorCode enum > has all error codes [0.02ms]
+(pass) Recovery Strategies > retry strategy > creates retry strategy [0.04ms]
+(pass) Recovery Strategies > retry strategy > has default values [0.01ms]
+(pass) Recovery Strategies > fallback strategy > uses fallback value on error [0.03ms]
+(pass) Recovery Strategies > ignore strategy > ignores error and returns null [0.09ms]
+(pass) Recovery Strategies > restoreTerminal strategy > can recover non-fatal terminal errors [0.03ms]
+(pass) Recovery Strategies > restoreTerminal strategy > cannot recover fatal terminal errors [0.01ms]
+(pass) Error Boundaries > withErrorBoundary > handles errors with fallback [0.05ms]
+(pass) Error Boundaries > withErrorBoundary > calls onError handler [0.09ms]
+(pass) Error Boundaries > withRecovery > applies recovery strategy [0.07ms]
+(pass) ErrorUtils > isRecoverable > identifies recoverable errors [0.07ms]
+(pass) ErrorUtils > isCritical > identifies critical errors [0.03ms]
+(pass) ErrorUtils > getUserMessage > converts errors to user-friendly messages [0.03ms]
+(pass) ErrorUtils > getDebugInfo > returns debug information [0.05ms]
+(pass) ErrorUtils > fromUnknown > returns AppError if already an AppError [0.02ms]
+(pass) ErrorUtils > fromUnknown > wraps Error in ApplicationError [0.02ms]
+(pass) ErrorUtils > fromUnknown > wraps unknown value in ApplicationError [0.03ms]
+(pass) ErrorUtils > logError > logs error with debug info [0.01ms]
+
+__tests__/unit/core/view-cache.test.ts:
+(pass) View Cache System > CacheEntry interface > defines cache entry structure
+(pass) View Cache System > ViewCache class > constructor > creates cache with default options
+(pass) View Cache System > ViewCache class > constructor > accepts custom maxSize option [0.02ms]
+(pass) View Cache System > ViewCache class > constructor > accepts custom maxAge option
+(pass) View Cache System > ViewCache class > constructor > accepts both custom options
+(pass) View Cache System > ViewCache class > renderCached > renders and caches new view [0.04ms]
+(pass) View Cache System > ViewCache class > renderCached > returns cached result on second call [0.03ms]
+(pass) View Cache System > ViewCache class > renderCached > increments access count on cache hit [0.03ms]
+(pass) View Cache System > ViewCache class > renderCached > handles async render functions [10.42ms]
+(pass) View Cache System > ViewCache class > renderCached > renders different results for different keys [0.09ms]
+(pass) View Cache System > ViewCache class > renderCached > overwrites expired cache entries [5.71ms]
+(pass) View Cache System > ViewCache class > generateKey > generates consistent keys for same view [0.07ms]
+(pass) View Cache System > ViewCache class > generateKey > generates different keys for different views [0.16ms]
+(pass) View Cache System > ViewCache class > generateKey > includes props in key generation [0.02ms]
+(pass) View Cache System > ViewCache class > generateKey > handles views without props [0.02ms]
+(pass) View Cache System > ViewCache class > generateKey > includes view dimensions in key [0.02ms]
+(pass) View Cache System > ViewCache class > generateKey > handles views with type property [0.03ms]
+(pass) View Cache System > ViewCache class > generateKey > handles complex nested props [0.06ms]
+(pass) View Cache System > ViewCache class > clear > removes all cache entries [0.03ms]
+(pass) View Cache System > ViewCache class > getStats > returns cache statistics [0.08ms]
+(pass) View Cache System > ViewCache class > getStats > calculates total access correctly [0.05ms]
+(pass) View Cache System > ViewCache class > getStats > calculates average age [10.24ms]
+(pass) View Cache System > ViewCache class > cache eviction > evicts expired entries [16.21ms]
+(pass) View Cache System > ViewCache class > cache eviction > evicts least accessed entries when size limit exceeded [0.12ms]
+(pass) View Cache System > globalViewCache > provides global cache instance [0.05ms]
+(pass) View Cache System > globalViewCache > can be used across modules [0.03ms]
+(pass) View Cache System > memoizeRender > creates memoized render function [0.02ms]
+(pass) View Cache System > memoizeRender > caches render results [0.07ms]
+(pass) View Cache System > memoizeRender > uses custom key function when provided [0.03ms]
+(pass) View Cache System > memoizeRender > handles render errors appropriately [0.96ms]
+(pass) View Cache System > memoizeRender > works with async render functions [5.55ms]
+(pass) View Cache System > integration scenarios > handles high-frequency rendering [0.28ms]
+(pass) View Cache System > integration scenarios > maintains performance under memory pressure [0.26ms]
+(pass) View Cache System > integration scenarios > handles complex view hierarchies [0.17ms]
+(pass) View Cache System > integration scenarios > works with memoized render functions in real scenarios [0.15ms]
+(pass) View Cache System > performance characteristics > provides faster access for cached items [20.67ms]
+(pass) View Cache System > performance characteristics > handles large cache sizes efficiently [5.87ms]
+
+__tests__/unit/core/types.test.ts:
+(pass) Core Types > View Interface > creates a valid view with render function
+(pass) Core Types > View Interface > creates view with only render function [0.02ms]
+(pass) Core Types > View Interface > view render returns Effect [0.07ms]
+(pass) Core Types > Component Interface > has required component methods
+(pass) Core Types > Component Interface > init returns model and commands [0.04ms]
+(pass) Core Types > Component Interface > update processes messages correctly [0.05ms]
+(pass) Core Types > Component Interface > view renders model [0.05ms]
+(pass) Core Types > Component Interface > handles component with subscriptions [0.02ms]
+(pass) Core Types > System Messages > creates KeyPress system message [0.01ms]
+(pass) Core Types > System Messages > creates MouseEvent system message [0.01ms]
+(pass) Core Types > System Messages > creates WindowResize system message [0.02ms]
+(pass) Core Types > System Messages > creates other system messages [0.01ms]
+(pass) Core Types > Component Messages > combines system and custom messages [0.02ms]
+(pass) Core Types > Input Events > creates MouseEvent [0.01ms]
+(pass) Core Types > Input Events > creates WindowSize
+(pass) Core Types > Application Configuration > creates AppOptions with all properties [0.02ms]
+(pass) Core Types > Application Configuration > creates minimal AppOptions
+(pass) Core Types > Application Configuration > creates Viewport [0.01ms]
+(pass) Core Types > Application Configuration > creates TerminalCapabilities [0.02ms]
+(pass) Core Types > Error Types > creates TerminalError [0.11ms]
+(pass) Core Types > Error Types > creates TerminalError without cause [0.02ms]
+(pass) Core Types > Error Types > creates InputError with all device types [0.03ms]
+(pass) Core Types > Error Types > creates RenderError with all phases [0.02ms]
+(pass) Core Types > Error Types > creates StorageError with all operations [0.04ms]
+(pass) Core Types > Error Types > error types can be used in union [0.02ms]
+(pass) Core Types > Error Types > errors inherit from Error class [0.01ms]
+(pass) Core Types > Error Types > errors can be thrown and caught [0.06ms]
+(pass) Core Types > Utility Types > extracts model type
+(pass) Core Types > Utility Types > extracts message type
+(pass) Core Types > Utility Types > creates Program [0.01ms]
+(pass) Core Types > Utility Types > creates RuntimeState [0.01ms]
+(pass) Core Types > Effect and Stream Types > creates Cmd type
+(pass) Core Types > Effect and Stream Types > creates Sub type
+(pass) Core Types > Effect and Stream Types > runs command effect [0.02ms]
+(pass) Core Types > Type Guards and Validation > validates View structure [0.01ms]
+(pass) Core Types > Type Guards and Validation > validates Component structure [0.01ms]
+(pass) Core Types > Complex Component Scenarios > handles complex state updates [0.06ms]
+(pass) Core Types > Complex Component Scenarios > renders complex state correctly [0.13ms]
+(pass) Core Types > Complex Component Scenarios > renders loading state [0.02ms]
+
+__tests__/unit/core/keys.test.ts:
+(pass) Core Keys > KeyType enum > has all expected key types
+(pass) Core Keys > KeyType enum > has navigation keys [0.11ms]
+(pass) Core Keys > KeyType enum > has function keys [0.01ms]
+(pass) Core Keys > KeyType enum > has control keys
+(pass) Core Keys > KeyType enum > has modified navigation keys [0.02ms]
+(pass) Core Keys > ANSI_SEQUENCES > maps basic arrow keys [0.02ms]
+(pass) Core Keys > ANSI_SEQUENCES > maps VT sequences [0.01ms]
+(pass) Core Keys > ANSI_SEQUENCES > maps modified arrows with shift [0.01ms]
+(pass) Core Keys > ANSI_SEQUENCES > maps modified arrows with alt [0.01ms]
+(pass) Core Keys > ANSI_SEQUENCES > maps modified arrows with ctrl
+(pass) Core Keys > ANSI_SEQUENCES > maps function keys
+(pass) Core Keys > ANSI_SEQUENCES > maps navigation keys [0.02ms]
+(pass) Core Keys > ANSI_SEQUENCES > maps special keys [0.02ms]
+(pass) Core Keys > ANSI_SEQUENCES > maps shift+tab [0.01ms]
+(pass) Core Keys > getKeyName > returns key for special keys [0.04ms]
+(pass) Core Keys > getKeyName > builds key name for runes without modifiers [0.02ms]
+(pass) Core Keys > getKeyName > builds key name for runes with ctrl [0.02ms]
+(pass) Core Keys > getKeyName > builds key name for runes with alt
+(pass) Core Keys > getKeyName > builds key name for runes with shift [0.01ms]
+(pass) Core Keys > getKeyName > builds key name for runes with meta
+(pass) Core Keys > getKeyName > builds key name with multiple modifiers in correct order [0.01ms]
+(pass) Core Keys > getKeyName > does not include shift for lowercase runes
+(pass) Core Keys > parseChar > parses regular character [0.05ms]
+(pass) Core Keys > parseChar > parses character with modifiers [0.02ms]
+(pass) Core Keys > parseChar > parses control character [0.02ms]
+(pass) Core Keys > parseChar > parses unknown control character as runes [0.01ms]
+(pass) Core Keys > parseChar > handles edge cases [0.02ms]
+(pass) Core Keys > KeyUtils > matches > matches key event against patterns [0.03ms]
+(pass) Core Keys > KeyUtils > matches > works with multiple patterns [0.01ms]
+(pass) Core Keys > KeyUtils > binding > creates a key binding [0.03ms]
+(pass) Core Keys > KeyUtils > binding > key binding matches function works [0.03ms]
+(pass) Core Keys > KeyUtils > binding > creates binding without help [0.02ms]
+(pass) Core Keys > KeyUtils > common bindings > has quit binding
+(pass) Core Keys > KeyUtils > common bindings > has help binding
+(pass) Core Keys > KeyUtils > common bindings > has navigation bindings [0.01ms]
+(pass) Core Keys > KeyUtils > common bindings > has action bindings
+(pass) Core Keys > KeyUtils > common bindings > all bindings have help text [0.03ms]
+(pass) Core Keys > KeyEvent interface > creates a valid key event [0.02ms]
+(pass) Core Keys > KeyEvent interface > handles optional properties [0.01ms]
+(pass) Core Keys > Integration scenarios > handles complex key combinations [0.01ms]
+(pass) Core Keys > Integration scenarios > processes ANSI sequences correctly
+(pass) Core Keys > Integration scenarios > matches key bindings in real usage [0.02ms]
+
+__tests__/unit/core/view.test.ts:
+(pass) Core View System > text > creates a simple text view
+(pass) Core View System > text > handles multi-line text [0.30ms]
+(pass) Core View System > text > handles empty text [0.03ms]
+(pass) Core View System > text > calculates width correctly for varying line lengths [0.02ms]
+(pass) Core View System > text > handles unicode characters [0.03ms]
+(pass) Core View System > empty > creates an empty view [0.02ms]
+(pass) Core View System > createView > is an alias for text function [0.04ms]
+(pass) Core View System > isView > identifies valid view objects [0.01ms]
+(pass) Core View System > isView > rejects non-view objects [0.03ms]
+(pass) Core View System > isView > identifies objects with render function [0.01ms]
+(pass) Core View System > measureView > measures view dimensions [0.04ms]
+(pass) Core View System > measureView > handles undefined dimensions [0.03ms]
+(pass) Core View System > measureView > measures empty view [0.02ms]
+(pass) Core View System > renderView > renders a view to string [0.03ms]
+(pass) Core View System > renderView > handles multi-line content [0.03ms]
+(pass) Core View System > styledText > creates styled text using new styling system [0.04ms]
+(pass) Core View System > styledText > respects style dimensions [0.10ms]
+(pass) Core View System > styledText > handles multi-line content [0.02ms]
+(pass) Core View System > styledText > handles style without dimensions [0.02ms]
+(pass) Core View System > vstack > stacks views vertically [0.06ms]
+(pass) Core View System > vstack > handles empty views in stack [0.04ms]
+(pass) Core View System > vstack > handles single view [0.04ms]
+(pass) Core View System > vstack > handles no views [0.03ms]
+(pass) Core View System > vstack > handles multi-line views [0.05ms]
+(pass) Core View System > hstack > stacks views horizontally [0.05ms]
+(pass) Core View System > hstack > handles different height views [0.03ms]
+(pass) Core View System > hstack > pads shorter views to match height [0.05ms]
+(pass) Core View System > hstack > pads lines to view width [0.04ms]
+(pass) Core View System > hstack > handles empty views [0.04ms]
+(pass) Core View System > hstack > handles no views [0.03ms]
+(pass) Core View System > hstack > handles multiple multi-line views [0.05ms]
+(pass) Core View System > box > creates a box around a view [0.12ms]
+(pass) Core View System > box > handles multi-line content [0.06ms]
+(pass) Core View System > box > handles empty content [0.05ms]
+(pass) Core View System > box > handles varying line widths [0.04ms]
+(pass) Core View System > center > centers a view within given width [0.02ms]
+(pass) Core View System > center > handles odd padding [0.10ms]
+(pass) Core View System > center > handles multi-line content [0.03ms]
+(pass) Core View System > center > handles content wider than total width [0.03ms]
+(pass) Core View System > center > handles zero width [0.03ms]
+(pass) Core View System > center > handles empty content [0.03ms]
+(pass) Core View System > styled > applies ANSI styling to a view [0.06ms]
+(pass) Core View System > styled > preserves view dimensions [0.04ms]
+(pass) Core View System > style shortcuts > applies bold styling [0.03ms]
+(pass) Core View System > style shortcuts > applies dim styling [0.02ms]
+(pass) Core View System > style shortcuts > applies italic styling [0.02ms]
+(pass) Core View System > style shortcuts > applies underline styling [0.03ms]
+(pass) Core View System > color shortcuts > applies red color [0.02ms]
+(pass) Core View System > color shortcuts > applies green color [0.03ms]
+(pass) Core View System > color shortcuts > applies yellow color [0.02ms]
+(pass) Core View System > color shortcuts > applies blue color [0.02ms]
+(pass) Core View System > color shortcuts > applies magenta color [0.04ms]
+(pass) Core View System > color shortcuts > applies cyan color [0.02ms]
+(pass) Core View System > color shortcuts > applies white color [0.02ms]
+(pass) Core View System > complex compositions > combines multiple operations [0.06ms]
+(pass) Core View System > complex compositions > nests horizontal and vertical stacks [0.05ms]
+(pass) Core View System > complex compositions > centers a boxed view [0.06ms]
+(pass) Core View System > edge cases > handles views with undefined dimensions [0.02ms]
+(pass) Core View System > edge cases > handles string width calculation edge cases [0.02ms]
+(pass) Core View System > edge cases > handles very large content [0.03ms]
+(pass) Core View System > edge cases > handles deeply nested stacks [0.03ms]
+(pass) Core View System > performance > handles large stacks efficiently [0.15ms]
+(pass) Core View System > performance > handles large horizontal stacks efficiently [0.21ms]
+
+__tests__/unit/core/runtime.test.ts:
+(pass) Core Runtime > SystemMsg type > defines window resize message [0.37ms]
+(pass) Core Runtime > SystemMsg type > defines key press message [0.02ms]
+(pass) Core Runtime > SystemMsg type > defines mouse event message [0.02ms]
+(pass) Core Runtime > SystemMsg type > defines tick message [0.01ms]
+(pass) Core Runtime > SystemMsg type > defines user message
+(pass) Core Runtime > SystemMsg type > defines quit message
+(pass) Core Runtime > RuntimeConfig interface > allows empty config
+(pass) Core Runtime > RuntimeConfig interface > allows fps configuration
+(pass) Core Runtime > RuntimeConfig interface > allows debug configuration [0.01ms]
+(pass) Core Runtime > RuntimeConfig interface > allows quit key configurations
+(pass) Core Runtime > RuntimeConfig interface > allows mouse and fullscreen configuration
+(pass) Core Runtime > RuntimeConfig interface > allows complete configuration [0.01ms]
+(pass) Core Runtime > Runtime class instantiation > creates runtime with component [0.04ms]
+(pass) Core Runtime > Runtime class instantiation > creates runtime with component and config [0.05ms]
+(pass) Core Runtime > Runtime class instantiation > applies default config values
+(pass) Core Runtime > Runtime class instantiation > merges user config with defaults
+(pass) Core Runtime > Runtime class instantiation > exercises all constructor config paths [0.05ms]
+(pass) Core Runtime > Runtime class instantiation > validates fps values [0.08ms]
+(pass) Core Runtime > Runtime class instantiation > handles boolean flags [0.03ms]
+(pass) Core Runtime > Runtime class instantiation > handles mixed configurations [0.01ms]
+(pass) Core Runtime > runApp helper > creates and runs runtime [0.03ms]
+(pass) Core Runtime > runApp helper > creates and runs runtime with config [0.01ms]
+(pass) Core Runtime > Component behavior simulation > handles component initialization [0.91ms]
+(pass) Core Runtime > Component behavior simulation > handles component updates [1.12ms]
+(pass) Core Runtime > Component behavior simulation > handles component rendering [0.07ms]
+(pass) Core Runtime > System message processing simulation > processes quit messages [0.02ms]
+(pass) Core Runtime > System message processing simulation > processes user messages [0.01ms]
+(pass) Core Runtime > System message processing simulation > processes window resize messages [0.01ms]
+(pass) Core Runtime > System message processing simulation > processes key events [0.01ms]
+(pass) Core Runtime > System message processing simulation > processes mouse events [0.01ms]
+(pass) Core Runtime > System message processing simulation > processes tick events [0.01ms]
+(pass) Core Runtime > Runtime state management simulation > tracks application state [0.07ms]
+(pass) Core Runtime > Runtime state management simulation > updates application state [0.05ms]
+(pass) Core Runtime > Runtime state management simulation > handles running state transitions [0.07ms]
+(pass) Core Runtime > Message queue simulation > creates and uses message queue [0.27ms]
+(pass) Core Runtime > Message queue simulation > handles multiple messages [0.14ms]
+(pass) Core Runtime > Message queue simulation > tests concurrent message processing [0.38ms]
+(pass) Core Runtime > Component subscription simulation > handles component subscriptions [1.87ms]
+(pass) Core Runtime > Component subscription simulation > handles empty subscriptions [0.44ms]
+(pass) Core Runtime > Command processing simulation > processes commands through message queue [0.13ms]
+(pass) Core Runtime > Component interaction simulation > handles complex component interactions [0.04ms]
+(pass) Core Runtime > Component interaction simulation > simulates application lifecycle [0.02ms]
+(pass) Core Runtime > Error handling simulation > handles component initialization errors [0.04ms]
+(pass) Core Runtime > Error handling simulation > handles update errors gracefully [0.07ms]
+(pass) Core Runtime > Runtime Effect structure validation > ensures runtime effects have proper structure [0.01ms]
+(pass) Core Runtime > Runtime Effect structure validation > validates runtime with various component configurations [0.05ms]
+
+__tests__/unit/core/errors-actual.test.ts:
+(pass) Error Types > creates TerminalError [0.22ms]
+(pass) Error Types > creates InputError with details [0.03ms]
+(pass) Error Types > creates RenderError with phase [0.04ms]
+(pass) Error Types > creates StorageError [0.02ms]
+(pass) Error Types > creates ConfigError [0.01ms]
+(pass) Error Types > creates ComponentError [0.02ms]
+(pass) Error Types > creates ApplicationError [0.02ms]
+(pass) Error Types > creates ValidationError [0.02ms]
+(pass) ErrorUtils > converts unknown errors [0.03ms]
+(pass) ErrorUtils > provides user messages [0.04ms]
+(pass) ErrorUtils > provides debug info [0.03ms]
+(pass) ErrorUtils > identifies app errors [0.02ms]
+(pass) Error Code > has all error codes [0.02ms]
+
+__tests__/unit/layout/join.test.ts:
+(pass) Join Layout Functions > Position constants > exports correct position values
+(pass) Join Layout Functions > joinHorizontal > joins views horizontally with default center alignment [0.18ms]
+(pass) Join Layout Functions > joinHorizontal > joins views with top alignment [0.23ms]
+(pass) Join Layout Functions > joinHorizontal > joins views with bottom alignment [0.04ms]
+(pass) Join Layout Functions > joinHorizontal > joins views with spacing [0.04ms]
+(pass) Join Layout Functions > joinHorizontal > handles empty views array [0.04ms]
+102 | 
+103 |       const joined = joinHorizontal([view1, view2], { align: 0.25 })
+104 |       const result = await Effect.runPromise(joined.render())
+105 | 
+106 |       // 0.25 position means 25% from top
+107 |       expect(result).toBe("A \nBX\nC ")
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: "A \nBX\nC "
+Received: "AX\nB \nC "
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/layout/join.test.ts:107:22)
+(fail) Join Layout Functions > joinHorizontal > handles numeric position alignment [0.17ms]
+(pass) Join Layout Functions > joinHorizontal > pads views to their declared width [0.02ms]
+123 |       const view3 = createView("1", 1, 1)
+124 | 
+125 |       const joined = joinHorizontal([view1, view2, view3], { align: 'middle' })
+126 |       const result = await Effect.runPromise(joined.render())
+127 | 
+128 |       expect(result).toBe(" X \nAY1\nBZ ")
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: " X \nAY1\nBZ "
+Received: "AX \nBY1\n Z "
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/layout/join.test.ts:128:22)
+(fail) Join Layout Functions > joinHorizontal > handles views with different heights [0.12ms]
+(pass) Join Layout Functions > joinVertical > joins views vertically with default center alignment [0.03ms]
+(pass) Join Layout Functions > joinVertical > joins views with left alignment [0.25ms]
+(pass) Join Layout Functions > joinVertical > joins views with right alignment [0.04ms]
+(pass) Join Layout Functions > joinVertical > joins views with spacing [0.05ms]
+(pass) Join Layout Functions > joinVertical > handles empty views array [0.02ms]
+188 | 
+189 |       const joined = joinVertical([view1, view2], { align: 0.75 })
+190 |       const result = await Effect.runPromise(joined.render())
+191 | 
+192 |       // 0.75 position means 75% from left (closer to right)
+193 |       expect(result).toBe("ABC\n  X")
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: "ABC\n  X"
+Received: "ABC\n X "
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/layout/join.test.ts:193:22)
+(fail) Join Layout Functions > joinVertical > handles numeric position alignment [0.07ms]
+198 |       const view2 = createView("X", 1, 1)
+199 | 
+200 |       const joined = joinVertical([view1, view2], { align: 'center' })
+201 |       const result = await Effect.runPromise(joined.render())
+202 | 
+203 |       expect(result).toBe("AB\nCD\n X")
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: "AB\nCD\n X"
+Received: "AB\nCD\nX "
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/layout/join.test.ts:203:22)
+(fail) Join Layout Functions > joinVertical > handles multi-line views [0.03ms]
+(pass) Join Layout Functions > joinVertical > preserves line content when aligning [0.06ms]
+(pass) Join Layout Functions > place > places view in center of box [0.05ms]
+(pass) Join Layout Functions > place > places view at top-left [0.10ms]
+(pass) Join Layout Functions > place > places view at bottom-right [0.05ms]
+(pass) Join Layout Functions > place > truncates content that exceeds box width [0.03ms]
+(pass) Join Layout Functions > place > truncates content that exceeds box height [0.05ms]
+(pass) Join Layout Functions > place > handles multi-line content [0.02ms]
+(pass) Join Layout Functions > place > handles custom positions [0.03ms]
+(pass) Join Layout Functions > place > fills remaining space with spaces [0.03ms]
+(pass) Join Layout Functions > joinGrid > joins views in a grid layout [0.15ms]
+(pass) Join Layout Functions > joinGrid > handles empty grid [0.02ms]
+(pass) Join Layout Functions > joinGrid > handles grid with spacing [0.05ms]
+(pass) Join Layout Functions > joinGrid > aligns cells in grid [0.09ms]
+(pass) Join Layout Functions > joinGrid > handles irregular grid [0.01ms]
+(pass) Join Layout Functions > Edge cases > handles views with zero dimensions [0.07ms]
+(pass) Join Layout Functions > Edge cases > handles views with undefined dimensions [0.02ms]
+(pass) Join Layout Functions > Edge cases > handles alignment with invalid string values [0.02ms]
+
+__tests__/unit/layout/spacer.test.ts:
+(pass) Layout Spacer > spacer > creates spacer with default size [0.40ms]
+(pass) Layout Spacer > spacer > creates spacer with custom size [0.06ms]
+(pass) Layout Spacer > spacer > creates spacer with flex property [0.02ms]
+(pass) Layout Spacer > spacer > creates spacer with both size and flex [0.03ms]
+(pass) Layout Spacer > hspace > creates horizontal spacer [0.03ms]
+(pass) Layout Spacer > hspace > creates zero-width horizontal spacer [0.04ms]
+(pass) Layout Spacer > vspace > creates vertical spacer [0.04ms]
+(pass) Layout Spacer > vspace > creates single line vertical spacer [0.03ms]
+(pass) Layout Spacer > flexSpacer > creates flexible spacer with default flex [0.01ms]
+(pass) Layout Spacer > flexSpacer > creates flexible spacer with custom flex [0.04ms]
+(pass) Layout Divider > divider > creates horizontal divider with defaults [0.08ms]
+(pass) Layout Divider > divider > creates horizontal divider with custom char [0.04ms]
+(pass) Layout Divider > divider > creates vertical divider [0.11ms]
+(pass) Layout Divider > divider > creates vertical divider with custom char [0.07ms]
+(pass) Layout Divider > divider > creates divider with custom style [0.02ms]
+(pass) Layout Divider > hdivider > creates horizontal divider [0.04ms]
+(pass) Layout Divider > hdivider > creates horizontal divider with custom char [0.03ms]
+(pass) Layout Divider > hdivider > creates horizontal divider with style [0.04ms]
+(pass) Layout Divider > vdivider > creates vertical divider [0.07ms]
+(pass) Layout Divider > vdivider > creates vertical divider with custom char [0.04ms]
+(pass) Layout Divider > styled dividers > creates dotted divider [0.02ms]
+(pass) Layout Divider > styled dividers > creates dashed divider [0.04ms]
+(pass) Layout Divider > styled dividers > creates double divider [0.03ms]
+(pass) Layout Divider > styled dividers > creates thick divider [0.03ms]
+(pass) Layout Divider > styled dividers > creates styled dividers with custom style [0.03ms]
+(pass) Layout Helpers > spaced > returns empty array for empty input [0.16ms]
+(pass) Layout Helpers > spaced > returns single view unchanged [0.03ms]
+(pass) Layout Helpers > spaced > adds vertical spacing between views
+(pass) Layout Helpers > spaced > adds horizontal spacing between views [0.06ms]
+(pass) Layout Helpers > spaced > adds spacing between multiple views [0.03ms]
+(pass) Layout Helpers > separated > returns empty array for empty input [0.02ms]
+(pass) Layout Helpers > separated > returns single view unchanged [0.02ms]
+(pass) Layout Helpers > separated > adds default divider between views [0.02ms]
+(pass) Layout Helpers > separated > adds custom divider between views [0.03ms]
+(pass) Layout Helpers > separated > adds dividers between multiple views [0.03ms]
+(pass) Integration scenarios > creates complex spaced layout [0.07ms]
+(pass) Integration scenarios > creates complex separated layout [0.02ms]
+(pass) Integration scenarios > combines spacers and dividers [0.08ms]
+(pass) Integration scenarios > handles edge cases [0.04ms]
+
+__tests__/unit/layout/join-comprehensive.test.ts:
+(pass) Layout Join System > joinHorizontal > joins views horizontally with default options [0.02ms]
+(pass) Layout Join System > joinHorizontal > handles views of different heights [0.08ms]
+(pass) Layout Join System > joinHorizontal > applies spacing between views [0.05ms]
+(pass) Layout Join System > joinHorizontal > handles top alignment [0.04ms]
+(pass) Layout Join System > joinHorizontal > handles middle alignment [0.04ms]
+(pass) Layout Join System > joinHorizontal > handles bottom alignment [0.04ms]
+(pass) Layout Join System > joinHorizontal > handles empty view arrays [0.04ms]
+(pass) Layout Join System > joinHorizontal > handles single view
+(pass) Layout Join System > joinVertical > joins views vertically with default options [0.04ms]
+(pass) Layout Join System > joinVertical > handles views of different widths [0.04ms]
+(pass) Layout Join System > joinVertical > applies spacing between views [0.04ms]
+(pass) Layout Join System > joinVertical > handles left alignment [0.05ms]
+(pass) Layout Join System > joinVertical > handles center alignment [0.06ms]
+(pass) Layout Join System > joinVertical > handles right alignment [0.07ms]
+(pass) Layout Join System > joinVertical > handles empty view arrays [0.02ms]
+(pass) Layout Join System > joinVertical > handles single view [0.02ms]
+(pass) Layout Join System > complex layouts > handles nested horizontal and vertical joins
+(pass) Layout Join System > complex layouts > handles mixed spacing and alignment [0.06ms]
+(pass) Layout Join System > complex layouts > handles large number of views [0.16ms]
+(pass) Layout Join System > edge cases > handles views with zero dimensions [0.07ms]
+(pass) Layout Join System > edge cases > handles very wide spacing [0.02ms]
+(pass) Layout Join System > edge cases > handles multiline views with spacing [0.02ms]
+(pass) Layout Join System > edge cases > handles views with ANSI codes [0.01ms]
+(pass) Layout Join System > edge cases > handles unicode characters [0.06ms]
+(pass) Layout Join System > performance > handles large grids efficiently [0.91ms]
+
+__tests__/unit/layout/box.test.ts:
+(pass) Box Layout System > styledBox basic functionality > creates box with default options [0.07ms]
+(pass) Box Layout System > styledBox basic functionality > adds padding to content [0.02ms]
+(pass) Box Layout System > styledBox basic functionality > handles minimum width [0.02ms]
+(pass) Box Layout System > styledBox basic functionality > handles minimum height [0.01ms]
+(pass) Box Layout System > borders > adds simple border [0.02ms]
+(pass) Box Layout System > borders > combines border with padding [0.02ms]
+(pass) Box Layout System > object padding > handles complex padding object [0.02ms]
+(pass) Box Layout System > styling > applies background color [0.03ms]
+(pass) Box Layout System > styling > applies foreground color [0.01ms]
+(pass) Box Layout System > styling > combines styling with borders [0.01ms]
+(pass) Box Layout System > size constraints > respects minimum width
+(pass) Box Layout System > size constraints > respects minimum height [0.01ms]
+(pass) Box Layout System > size constraints > handles both width and height constraints
+(pass) Box Layout System > complex content > handles multiline content [0.01ms]
+(pass) Box Layout System > complex content > handles wide content [0.02ms]
+(pass) Box Layout System > complex content > handles empty content [0.02ms]
+(pass) Box Layout System > rendering > renders simple box correctly [0.12ms]
+(pass) Box Layout System > rendering > renders border correctly [0.06ms]
+(pass) Box Layout System > edge cases > handles zero padding [0.02ms]
+(pass) Box Layout System > edge cases > handles very large padding [0.01ms]
+(pass) Box Layout System > edge cases > handles negative dimensions gracefully [0.02ms]
+(pass) Box Layout System > performance > handles large content efficiently [0.05ms]
+
+__tests__/unit/layout/grid.test.ts:
+(pass) Grid Layout > grid > creates grid with single item [0.93ms]
+(pass) Grid Layout > grid > creates grid with multiple items [0.07ms]
+(pass) Grid Layout > grid > creates grid with custom template [0.04ms]
+(pass) Grid Layout > grid > creates grid with gaps [0.07ms]
+(pass) Grid Layout > grid > creates grid with different column and row gaps [0.04ms]
+(pass) Grid Layout > grid > creates grid with padding [0.04ms]
+(pass) Grid Layout > grid > handles grid items vs plain views [0.05ms]
+(pass) Grid Layout > grid > renders empty grid [0.03ms]
+(pass) Grid Layout > grid > handles multiline content [0.06ms]
+(pass) Grid Layout > grid with explicit placement > places item at specific column [0.04ms]
+(pass) Grid Layout > grid with explicit placement > places item at specific row [0.07ms]
+(pass) Grid Layout > grid with explicit placement > handles column and row spans [0.07ms]
+(pass) Grid Layout > grid with explicit placement > handles explicit start/end placement [0.04ms]
+(pass) Grid Layout > columns helper > creates equal columns template [0.03ms]
+(pass) Grid Layout > columns helper > creates single column template [0.03ms]
+(pass) Grid Layout > columns helper > creates many columns template [0.03ms]
+(pass) Grid Layout > template helper > parses fraction columns [0.04ms]
+(pass) Grid Layout > template helper > parses fixed size columns [0.20ms]
+(pass) Grid Layout > template helper > parses auto columns [0.01ms]
+(pass) Grid Layout > template helper > parses mixed column types [0.02ms]
+(pass) Grid Layout > template helper > parses rows when provided [0.02ms]
+(pass) Grid Layout > template helper > uses auto rows when not provided
+(pass) Grid Layout > template helper > handles single column spec
+(pass) Grid Layout > template helper > handles fractional values [0.01ms]
+(pass) Grid Layout > gridItem helper > creates grid item with placement [0.01ms]
+(pass) Grid Layout > gridItem helper > creates grid item with complex placement [0.01ms]
+(pass) Grid Layout > span helper > creates spanning grid item [0.02ms]
+(pass) Grid Layout > span helper > creates column-only span [0.01ms]
+(pass) Grid Layout > span helper > handles single cell span [0.02ms]
+(pass) Grid Layout > Grid integration scenarios > creates complex grid layout [0.07ms]
+(pass) Grid Layout > Grid integration scenarios > handles auto-placement with mixed items [0.05ms]
+(pass) Grid Layout > Grid integration scenarios > handles different track types [0.05ms]
+(pass) Grid Layout > Grid integration scenarios > handles edge cases [0.12ms]
+(pass) Grid Layout > Grid integration scenarios > handles content that exceeds cell bounds [0.05ms]
+(pass) Grid Layout > Grid integration scenarios > calculates grid dimensions correctly [0.02ms]
+
+__tests__/unit/optimization/style-render-optimized.test.ts:
+(pass) Style Rendering Optimization > renderStyleOptimized > handles empty style
+(pass) Style Rendering Optimization > renderStyleOptimized > renders basic text decorations [0.08ms]
+(pass) Style Rendering Optimization > renderStyleOptimized > renders named colors [0.03ms]
+(pass) Style Rendering Optimization > renderStyleOptimized > renders background colors [0.02ms]
+(pass) Style Rendering Optimization > renderStyleOptimized > handles hex colors [0.03ms]
+(pass) Style Rendering Optimization > renderStyleOptimized > handles rgb colors [0.03ms]
+(pass) Style Rendering Optimization > renderStyleOptimized > combines multiple styles [0.03ms]
+(pass) Style Rendering Optimization > renderStyleOptimized > caches style calculations [0.04ms]
+(pass) Style Rendering Optimization > styledTextOptimized > returns plain text for empty style [0.01ms]
+(pass) Style Rendering Optimization > styledTextOptimized > returns empty string for empty text
+(pass) Style Rendering Optimization > styledTextOptimized > wraps text with style codes
+(pass) Style Rendering Optimization > styledTextOptimized > handles complex styling [0.03ms]
+(pass) Style Rendering Optimization > styledTextOptimized > handles Unicode text [0.01ms]
+(pass) Style Rendering Optimization > cache management > clears style cache [0.02ms]
+(pass) Style Rendering Optimization > cache management > provides cache statistics [0.02ms]
+(pass) Style Rendering Optimization > performance characteristics > fast style rendering [0.26ms]
+(pass) Style Rendering Optimization > performance characteristics > fast text styling [0.20ms]
+(pass) Style Rendering Optimization > edge cases > handles invalid color names gracefully [0.02ms]
+(pass) Style Rendering Optimization > edge cases > handles malformed hex colors [0.01ms]
+(pass) Style Rendering Optimization > edge cases > handles malformed rgb colors
+(pass) Style Rendering Optimization > edge cases > handles null/undefined styles [0.02ms]
+
+__tests__/unit/optimization/view-cache.test.ts:
+(pass) View Cache > ViewCache > caches render results [0.12ms]
+(pass) View Cache > ViewCache > respects cache TTL [60.19ms]
+(pass) View Cache > ViewCache > tracks access count [0.16ms]
+(pass) View Cache > ViewCache > evicts old entries when cache is full [0.12ms]
+(pass) View Cache > ViewCache > generates consistent cache keys [0.04ms]
+Note: Cache key generation may need content-based differentiation
+(pass) View Cache > ViewCache > generates different keys for different views [0.04ms]
+(pass) View Cache > ViewCache > includes props in cache key [0.05ms]
+(pass) View Cache > ViewCache > clears all entries [0.05ms]
+(pass) View Cache > ViewCache > provides cache statistics [1.10ms]
+(pass) View Cache > globalViewCache > provides global cache instance [0.09ms]
+(pass) View Cache > globalViewCache > can be cleared
+(pass) View Cache > memoizeRender > creates memoized render function [0.07ms]
+(pass) View Cache > memoizeRender > uses custom key function [0.04ms]
+(pass) View Cache > complex views > caches complex nested views [0.11ms]
+(pass) View Cache > complex views > handles view rendering errors [0.20ms]
+(pass) View Cache > performance > cache provides performance benefit [0.11ms]
+
+__tests__/unit/optimization/string-width-optimized.test.ts:
+(pass) String Width Optimization > stringWidthOptimized > handles ASCII strings [0.01ms]
+(pass) String Width Optimization > stringWidthOptimized > handles Unicode strings [0.03ms]
+(pass) String Width Optimization > stringWidthOptimized > handles mixed content [0.01ms]
+(pass) String Width Optimization > stringWidthOptimized > handles control characters [0.01ms]
+(pass) String Width Optimization > stringWidthOptimized > caches results [0.03ms]
+(pass) String Width Optimization > stringWidthNoAnsi > removes ANSI escape sequences [0.04ms]
+(pass) String Width Optimization > stringWidthNoAnsi > handles complex ANSI sequences [0.03ms]
+(pass) String Width Optimization > padStringOptimized > pads strings to width [0.03ms]
+(pass) String Width Optimization > padStringOptimized > handles Unicode content [0.02ms]
+(pass) String Width Optimization > padStringOptimized > uses custom padding character [0.01ms]
+(pass) String Width Optimization > truncateStringOptimized > truncates long strings [0.05ms]
+(pass) String Width Optimization > truncateStringOptimized > handles Unicode truncation [0.03ms]
+(pass) String Width Optimization > truncateStringOptimized > uses custom suffix
+(pass) String Width Optimization > truncateStringOptimized > handles edge cases [0.02ms]
+(pass) String Width Optimization > cache management > clears cache
+(pass) String Width Optimization > cache management > respects cache size limits [3.18ms]
+(pass) String Width Optimization > performance characteristics > ASCII fast path [0.09ms]
+(pass) String Width Optimization > performance characteristics > Unicode handling [0.02ms]
+
+__tests__/unit/utils/string-width.test.ts:
+(pass) String Width Calculations > stringWidth utility validation > ASCII characters [0.02ms]
+(pass) String Width Calculations > stringWidth utility validation > Common emojis [0.02ms]
+(pass) String Width Calculations > stringWidth utility validation > Emoji sequences [0.02ms]
+(pass) String Width Calculations > stringWidth utility validation > Mixed content
+(pass) String Width Calculations > stringWidth utility validation > Wide characters (CJK) [0.02ms]
+(pass) String Width Calculations > stringWidth utility validation > Zero-width characters
+(pass) String Width Calculations > stringWidth utility validation > Control characters [0.01ms]
+(pass) String Width Calculations > formatCell function > Basic alignment with ASCII [0.09ms]
+(pass) String Width Calculations > formatCell function > Alignment with emojis [0.02ms]
+(pass) String Width Calculations > formatCell function > Truncation with ASCII [1.08ms]
+(pass) String Width Calculations > formatCell function > Truncation with emojis [0.06ms]
+(pass) String Width Calculations > formatCell function > Mixed content formatting [0.01ms]
+(pass) String Width Calculations > formatCell function > Edge cases [0.06ms]
+(pass) String Width Calculations > Table rendering with Unicode > Column width calculations [0.03ms]
+(pass) String Width Calculations > Table rendering with Unicode > Row alignment with emojis [0.02ms]
+(pass) String Width Calculations > Border calculations > Box borders with emoji titles [0.03ms]
+(pass) String Width Calculations > truncateString function > Basic truncation [0.07ms]
+(pass) String Width Calculations > truncateString function > Truncation with emojis [0.05ms]
+(pass) String Width Calculations > truncateString function > Custom suffix [0.02ms]
+(pass) String Width Calculations > truncateString function > Edge cases
+(pass) String Width Calculations > padString function > Left padding [0.03ms]
+(pass) String Width Calculations > padString function > Right padding
+(pass) String Width Calculations > padString function > Center padding [0.02ms]
+(pass) String Width Calculations > padString function > Padding with emojis
+(pass) String Width Calculations > padString function > No padding needed
+
+__tests__/unit/utils/string-width-optimized.test.ts:
+(pass) String Width Optimized > stringWidthOptimized > measures empty strings [0.03ms]
+(pass) String Width Optimized > stringWidthOptimized > measures ASCII strings correctly [0.01ms]
+(pass) String Width Optimized > stringWidthOptimized > handles control characters [0.02ms]
+(pass) String Width Optimized > stringWidthOptimized > measures wide characters [0.01ms]
+(pass) String Width Optimized > stringWidthOptimized > measures emoji correctly [0.01ms]
+(pass) String Width Optimized > stringWidthOptimized > handles combining characters [0.01ms]
+(pass) String Width Optimized > stringWidthOptimized > measures mixed strings
+(pass) String Width Optimized > stringWidthOptimized > uses caching for performance [0.01ms]
+(pass) String Width Optimized > stringWidthOptimized > handles very long strings [0.02ms]
+(pass) String Width Optimized > stringWidthNoAnsi > strips ANSI escape sequences [0.02ms]
+(pass) String Width Optimized > stringWidthNoAnsi > handles complex ANSI sequences
+(pass) String Width Optimized > stringWidthNoAnsi > handles empty strings with ANSI [0.02ms]
+(pass) String Width Optimized > padStringOptimized > pads strings to target width [0.01ms]
+(pass) String Width Optimized > padStringOptimized > uses custom padding character [0.02ms]
+(pass) String Width Optimized > padStringOptimized > returns original string if already wide enough
+(pass) String Width Optimized > padStringOptimized > handles zero width
+(pass) String Width Optimized > padStringOptimized > handles wide characters in padding
+(pass) String Width Optimized > padStringOptimized > handles empty strings
+(pass) String Width Optimized > truncateStringOptimized > truncates long strings [0.01ms]
+(pass) String Width Optimized > truncateStringOptimized > returns original if within width
+(pass) String Width Optimized > truncateStringOptimized > uses custom suffix
+(pass) String Width Optimized > truncateStringOptimized > handles edge cases [0.02ms]
+(pass) String Width Optimized > truncateStringOptimized > handles very small widths
+(pass) String Width Optimized > truncateStringOptimized > handles wide characters
+(pass) String Width Optimized > truncateStringOptimized > handles suffix larger than max width [0.01ms]
+(pass) String Width Optimized > cache management > clears cache correctly [0.01ms]
+(pass) String Width Optimized > cache management > provides cache statistics [0.02ms]
+(pass) String Width Optimized > cache management > limits cache size [0.03ms]
+(pass) String Width Optimized > stringWidth alias > works as alias for first line without ANSI [0.04ms]
+(pass) String Width Optimized > stringWidth alias > handles multi-line strings [0.02ms]
+(pass) String Width Optimized > stringWidth alias > handles empty lines [0.01ms]
+(pass) String Width Optimized > performance characteristics > handles large ASCII strings efficiently [0.04ms]
+(pass) String Width Optimized > performance characteristics > handles repeated calls efficiently with caching [0.06ms]
+(pass) String Width Optimized > edge cases and error handling > handles special Unicode categories [0.01ms]
+(pass) String Width Optimized > edge cases and error handling > handles surrogate pairs [0.02ms]
+(pass) String Width Optimized > edge cases and error handling > handles malformed input gracefully [0.02ms]
+
+__tests__/unit/utils/string-width-comprehensive.test.ts:
+(pass) String Width Utilities > stringWidth > calculates width of ASCII strings
+(pass) String Width Utilities > stringWidth > calculates width of unicode characters [0.22ms]
+(pass) String Width Utilities > stringWidth > handles emoji overrides [0.02ms]
+(pass) String Width Utilities > stringWidth > handles empty and whitespace strings [0.02ms]
+(pass) String Width Utilities > stringWidth > handles mixed content [0.01ms]
+(pass) String Width Utilities > stringWidth > handles special characters
+(pass) String Width Utilities > truncateString > returns string unchanged when within width
+(pass) String Width Utilities > truncateString > truncates long strings with default suffix [0.08ms]
+(pass) String Width Utilities > truncateString > truncates with custom suffix [0.06ms]
+(pass) String Width Utilities > truncateString > handles suffix longer than max width [0.03ms]
+(pass) String Width Utilities > truncateString > handles zero and negative widths
+(pass) String Width Utilities > truncateString > handles empty strings
+(pass) String Width Utilities > truncateString > handles unicode characters correctly [0.04ms]
+(pass) String Width Utilities > truncateString > handles emoji override cases [0.02ms]
+(pass) String Width Utilities > truncateString > uses grapheme segmentation correctly [0.01ms]
+(pass) String Width Utilities > truncateString > handles edge case where only suffix fits [0.01ms]
+(pass) String Width Utilities > padString > left alignment (default) > pads strings to target width
+(pass) String Width Utilities > padString > left alignment (default) > returns string unchanged when already wide enough
+(pass) String Width Utilities > padString > left alignment (default) > handles empty strings
+(pass) String Width Utilities > padString > left alignment (default) > handles zero width
+(pass) String Width Utilities > padString > center alignment > centers strings with even padding [0.01ms]
+(pass) String Width Utilities > padString > center alignment > centers strings with odd padding [0.01ms]
+(pass) String Width Utilities > padString > center alignment > handles single character padding
+(pass) String Width Utilities > padString > center alignment > returns string when no padding needed
+(pass) String Width Utilities > padString > right alignment > right-aligns strings
+(pass) String Width Utilities > padString > right alignment > handles minimum width
+(pass) String Width Utilities > padString > right alignment > returns string when no padding needed
+(pass) String Width Utilities > padString > unicode handling > correctly pads unicode strings [0.01ms]
+(pass) String Width Utilities > padString > unicode handling > handles emoji correctly [0.01ms]
+(pass) String Width Utilities > padString > unicode handling > handles emoji overrides [0.01ms]
+(pass) String Width Utilities > padString > edge cases > handles zero width gracefully
+(pass) String Width Utilities > padString > edge cases > handles negative width gracefully
+(pass) String Width Utilities > padString > edge cases > handles empty strings with width [0.01ms]
+(pass) String Width Utilities > Integration scenarios > truncate and pad work together [0.03ms]
+(pass) String Width Utilities > Integration scenarios > handles complex unicode content [0.04ms]
+(pass) String Width Utilities > Integration scenarios > preserves emoji overrides through operations [0.03ms]
+(pass) String Width Utilities > Integration scenarios > handles real-world table scenarios [0.03ms]
+(pass) String Width Utilities > Integration scenarios > handles terminal column layout [0.06ms]
+
+__tests__/unit/cli/parser-comprehensive.test.ts:
+(pass) CLI Parser > Basic parsing > parses simple command [0.15ms]
+(pass) CLI Parser > Basic parsing > parses command with options [0.30ms]
+(pass) CLI Parser > Basic parsing > parses global options [0.12ms]
+(pass) CLI Parser > Argument parsing > parses multiple arguments [0.04ms]
+(pass) CLI Parser > Argument parsing > parses variadic arguments [0.16ms]
+(pass) CLI Parser > Argument parsing > handles optional arguments [0.09ms]
+(pass) CLI Parser > Option parsing > parses boolean flags [0.05ms]
+(pass) CLI Parser > Option parsing > parses string options [0.04ms]
+(pass) CLI Parser > Option parsing > parses array options [0.19ms]
+(pass) CLI Parser > Option parsing > handles option aliases [0.08ms]
+(pass) CLI Parser > Error handling > parses unknown command as positional arg [0.02ms]
+(pass) CLI Parser > Error handling > throws on missing required args [0.16ms]
+(pass) CLI Parser > Error handling > throws on invalid option values [0.20ms]
+(pass) CLI Parser > Special cases > handles empty args [0.10ms]
+(pass) CLI Parser > Special cases > stops parsing at -- [0.04ms]
+(pass) CLI Parser > Special cases > handles = in options [0.04ms]
+(pass) CLI Parser > Help generation > detects help flag [0.02ms]
+
+__tests__/unit/cli/plugin.test.ts:
+(pass) CLI Plugin System > createPlugin > creates a basic plugin [0.07ms]
+(pass) CLI Plugin System > createPlugin > creates plugin with commands [0.02ms]
+(pass) CLI Plugin System > createPlugin > creates plugin with hooks [0.01ms]
+(pass) CLI Plugin System > createPlugin > creates plugin with middleware
+(pass) CLI Plugin System > createPlugin > creates plugin with init function [0.02ms]
+(pass) CLI Plugin System > createPlugin > creates plugin with services
+(pass) CLI Plugin System > validatePlugin > validates a valid plugin [0.05ms]
+(pass) CLI Plugin System > validatePlugin > detects missing metadata [0.07ms]
+(pass) CLI Plugin System > validatePlugin > detects invalid metadata [0.01ms]
+(pass) CLI Plugin System > validatePlugin > validates command schemas [0.02ms]
+(pass) CLI Plugin System > composePlugins > composes multiple plugins [0.13ms]
+(pass) CLI Plugin System > composePlugins > merges hooks from multiple plugins [0.05ms]
+(pass) CLI Plugin System > composePlugins > composes plugins without middleware support [0.09ms]
+(pass) CLI Plugin System > PluginManager > manages plugin lifecycle [0.12ms]
+(pass) CLI Plugin System > PluginManager > handles plugin dependencies [0.14ms]
+(pass) CLI Plugin System > PluginManager > detects circular dependencies [0.13ms]
+(pass) CLI Plugin System > applyPluginTransforms > applies command extensions [0.09ms]
+(pass) CLI Plugin System > createMiddlewareChain > creates middleware chain [0.16ms]
+(pass) CLI Plugin System > createMiddlewareChain > handles middleware errors [0.03ms]
+(pass) CLI Plugin System > mergePluginConfigs > merges plugin configurations [0.05ms]
+(pass) CLI Plugin System > mergePluginConfigs > deep merges nested configs [0.07ms]
+(pass) CLI Plugin System > resolvePluginDependencies > resolves plugin load order [0.03ms]
+(pass) CLI Plugin System > resolvePluginDependencies > handles plugins without dependencies [0.02ms]
+(pass) CLI Plugin System > Plugin Events > emits and handles events [0.04ms]
+(pass) CLI Plugin System > Plugin Builder Pattern > uses builder pattern for complex plugins [0.05ms]
+
+__tests__/unit/cli/config-real.test.ts:
+(pass) CLI Configuration - Real Implementation > defineConfig > returns the config unchanged [0.38ms]
+(pass) CLI Configuration - Real Implementation > validateConfig > validates a minimal config [0.34ms]
+(pass) CLI Configuration - Real Implementation > validateConfig > validates config with commands [0.09ms]
+(pass) CLI Configuration - Real Implementation > validateConfig > throws on missing required fields [0.04ms]
+(pass) CLI Configuration - Real Implementation > validateConfig > validates nested commands [0.03ms]
+(pass) CLI Configuration - Real Implementation > mergeConfigs > merges multiple configs [0.03ms]
+(pass) CLI Configuration - Real Implementation > mergeConfigs > deep merges commands [0.08ms]
+(pass) CLI Configuration - Real Implementation > lazyLoad > creates a lazy handler [0.04ms]
+(pass) CLI Configuration - Real Implementation > lazyLoad > can be executed [0.06ms]
+(pass) CLI Configuration - Real Implementation > defineCommand > creates a command config with handler [0.06ms]
+(pass) CLI Configuration - Real Implementation > defineCommand > supports lazy handlers [0.02ms]
+(pass) CLI Configuration - Real Implementation > commonOptions > provides common option schemas [0.02ms]
+(pass) CLI Configuration - Real Implementation > commonOptions > schemas have descriptions [0.02ms]
+(pass) CLI Configuration - Real Implementation > commonArgs > provides common argument schemas [0.02ms]
+(pass) CLI Configuration - Real Implementation > commonArgs > path schema validates strings [0.01ms]
+(pass) CLI Configuration - Real Implementation > commonArgs > paths schema validates arrays [0.03ms]
+(pass) CLI Configuration - Real Implementation > Complex Configurations > handles config with all features [0.06ms]
+(pass) CLI Configuration - Real Implementation > Complex Configurations > merges complex nested structures [0.03ms]
+
+__tests__/unit/cli/plugin-implementation.test.ts:
+(pass) CLI Plugin Implementation > PluginBuilder > builds a plugin with metadata
+(pass) CLI Plugin Implementation > PluginBuilder > adds commands to plugin [0.08ms]
+(pass) CLI Plugin Implementation > PluginBuilder > adds hooks to plugin [0.03ms]
+(pass) CLI Plugin Implementation > PluginBuilder > adds middleware to plugin [0.03ms]
+(pass) CLI Plugin Implementation > PluginBuilder > adds services to plugin [0.03ms]
+(pass) CLI Plugin Implementation > PluginBuilder > adds extensions to plugin [0.02ms]
+(pass) CLI Plugin Implementation > PluginBuilder > sets init function [0.02ms]
+(pass) CLI Plugin Implementation > PluginBuilder > sets config schema [0.11ms]
+(pass) CLI Plugin Implementation > PluginBuilder > creates complete plugin [0.12ms]
+(pass) CLI Plugin Implementation > createPlugin function > creates plugin from config object [0.03ms]
+(pass) CLI Plugin Implementation > createPlugin function > validates metadata [0.01ms]
+(pass) CLI Plugin Implementation > Plugin lifecycle > initializes plugin with context [0.08ms]
+(pass) CLI Plugin Implementation > Plugin lifecycle > provides uninstall capability [0.04ms]
+(pass) CLI Plugin Implementation > Plugin interactions > extends existing commands [0.02ms]
+(pass) CLI Plugin Implementation > Plugin interactions > provides middleware wrapping [0.03ms]
+(pass) CLI Plugin Implementation > Plugin dependencies > declares dependencies [0.01ms]
+(pass) CLI Plugin Implementation > Plugin dependencies > declares peer dependencies [0.02ms]
+(pass) CLI Plugin Implementation > Plugin configuration > validates config with schema [0.42ms]
+
+__tests__/unit/cli/router-comprehensive.test.ts:
+(pass) CLI Router > Command registration > registers commands from config [0.75ms]
+(pass) CLI Router > Command registration > adds commands dynamically [0.09ms]
+(pass) CLI Router > Command registration > overwrites existing commands [0.04ms]
+(pass) CLI Router > Command execution > executes simple commands [0.05ms]
+(pass) CLI Router > Command execution > passes arguments to handler [0.15ms]
+(pass) CLI Router > Command execution > passes options to handler [0.08ms]
+(pass) CLI Router > Command execution > executes async handlers [11.05ms]
+(pass) CLI Router > Middleware > applies middleware in order [0.14ms]
+(pass) CLI Router > Middleware > allows middleware to modify args [0.24ms]
+(pass) CLI Router > Middleware > allows middleware to short-circuit [0.38ms]
+(pass) CLI Router > Command retrieval > gets command by name [0.08ms]
+(pass) CLI Router > Command retrieval > returns null for unknown command
+(pass) CLI Router > Command retrieval > lists all commands [0.02ms]
+(pass) CLI Router > Error handling > throws on unknown command execution [0.04ms]
+(pass) CLI Router > Error handling > propagates handler errors [0.05ms]
+(pass) CLI Router > Global options > merges global options with command options [0.03ms]
+
+__tests__/unit/cli/plugin-test-utils.test.ts:
+(pass) Plugin Test Utils > createMockPluginContext > creates default context [0.07ms]
+(pass) Plugin Test Utils > createMockPluginContext > accepts overrides
+(pass) Plugin Test Utils > testPluginInstall > calls install method [0.05ms]
+(pass) Plugin Test Utils > testPluginInstall > uses provided context [0.08ms]
+(pass) Plugin Test Utils > testPluginUninstall > calls uninstall method [0.05ms]
+(pass) Plugin Test Utils > testPluginCommand > executes command handler [0.09ms]
+(pass) Plugin Test Utils > testPluginCommand > executes nested command [0.05ms]
+(pass) Plugin Test Utils > testPluginCommand > throws for unknown command [0.04ms]
+(pass) Plugin Test Utils > testPluginHook > executes hook [0.05ms]
+(pass) Plugin Test Utils > testPluginHook > returns not called for missing hook [0.05ms]
+(pass) Plugin Test Utils > testPluginHook > captures hook errors [0.02ms]
+(pass) Plugin Test Utils > testPluginMiddleware > executes middleware [0.04ms]
+(pass) Plugin Test Utils > createTestCLI > merges plugin commands [0.07ms]
+(pass) Plugin Test Utils > createTestCLI > chains hooks [0.06ms]
+(pass) Plugin Test Utils > executeWithPlugins > executes command with plugins [0.30ms]
+(pass) Plugin Test Utils > executeWithPlugins > runs hooks [0.05ms]
+(pass) Plugin Test Utils > executeWithPlugins > handles command errors [0.09ms]
+(pass) Plugin Test Utils > testServiceRegistration > captures service registrations [0.03ms]
+(pass) Plugin Creation with createPlugin API > creates plugin with builder API [0.04ms]
+
+__tests__/unit/cli/config.test.ts:
+(pass) CLI Configuration > validateConfig > validates a minimal config
+(pass) CLI Configuration > validateConfig > validates a complete config [0.11ms]
+(pass) CLI Configuration > validateConfig > throws on invalid config [0.07ms]
+(pass) CLI Configuration > validateConfig > validates nested commands [0.05ms]
+(pass) CLI Configuration > mergeConfigs > merges two configs [0.03ms]
+(pass) CLI Configuration > mergeConfigs > deep merges commands [0.04ms]
+(pass) CLI Configuration > mergeConfigs > merges arrays correctly [0.02ms]
+(pass) CLI Configuration > parseEnvVars > parses environment variables [0.02ms]
+(pass) CLI Configuration > parseEnvVars > handles nested env vars [0.09ms]
+(pass) CLI Configuration > parseEnvVars > ignores invalid values [0.02ms]
+(pass) CLI Configuration > expandAliases > expands command aliases [0.04ms]
+(pass) CLI Configuration > expandAliases > expands nested command aliases [0.06ms]
+(pass) CLI Configuration > expandAliases > warns on conflicting aliases [0.02ms]
+(pass) CLI Configuration > loadConfig > loads config from file [0.02ms]
+(pass) CLI Configuration > resolveConfigPath > resolves config paths [0.07ms]
+(pass) CLI Configuration > createDefaultConfig > creates default config [0.02ms]
+(pass) CLI Configuration > normalizeCommand > normalizes command names [0.03ms]
+(pass) CLI Configuration > Complex Configuration Scenarios > handles deeply nested commands [0.06ms]
+(pass) CLI Configuration > Complex Configuration Scenarios > handles command inheritance [0.04ms]
+(pass) CLI Configuration > Complex Configuration Scenarios > validates plugin configuration [0.03ms]
+
+__tests__/unit/testing/test-utils-comprehensive.test.ts:
+(pass) Testing Utilities > createTestEnvironment > creates default test environment
+(pass) Testing Utilities > createTestEnvironment > creates test environment with overrides [0.25ms]
+(pass) Testing Utilities > Mock Terminal Service > provides terminal operations [1.08ms]
+(pass) Testing Utilities > Mock Terminal Service > tracks output correctly [0.28ms]
+(pass) Testing Utilities > Mock Terminal Service > handles all terminal operations [0.28ms]
+(pass) Testing Utilities > Mock Input Service > provides input operations [0.37ms]
+(pass) Testing Utilities > Mock Input Service > provides stream operations [0.24ms]
+(pass) Testing Utilities > Mock Renderer Service > provides render operations [1.27ms]
+(pass) Testing Utilities > Mock Storage Service > provides state operations [0.42ms]
+(pass) Testing Utilities > Mock Storage Service > provides cache operations [0.40ms]
+(pass) Testing Utilities > Mock Storage Service > provides file operations [0.23ms]
+(pass) Testing Utilities > createTestLayer > provides all services [0.90ms]
+(pass) Testing Utilities > createTestLayer > accepts environment overrides [0.54ms]
+(pass) Testing Utilities > testComponent > tests component initialization [0.38ms]
+(pass) Testing Utilities > testComponent > tests component update [1.02ms]
+(pass) Testing Utilities > testComponent > tests component view [1.29ms]
+(pass) Testing Utilities > testComponent > tests component subscriptions [0.51ms]
+(pass) Testing Utilities > testComponent > respects timeout option [101.48ms]
+(pass) Testing Utilities > TUIAssert > provides output assertions [0.13ms]
+(pass) Testing Utilities > TUIAssert > provides state assertions [0.06ms]
+(pass) Testing Utilities > TUIAssert > provides view size assertions [0.06ms]
+(pass) Testing Utilities > createMockAppServices > creates all services [0.10ms]
+(pass) Testing Utilities > createMockAppServices > provides working combined layer [0.84ms]
+(pass) Testing Utilities > withMockServices > provides all services to an effect [0.63ms]
+
+__tests__/unit/components/Table.test.ts:
+(pass) Table Component > Basic Table Creation > creates an empty table [0.61ms]
+(pass) Table Component > Basic Table Creation > creates a table with columns and rows [0.42ms]
+(pass) Table Component > Basic Table Creation > creates a table with custom options [0.25ms]
+(pass) Table Component > Simple Table Creation > creates a simple table from data array [0.42ms]
+(pass) Table Component > Simple Table Creation > creates a simple table with specific columns [0.59ms]
+(pass) Table Component > Table Navigation > navigates rows with keyboard [0.90ms]
+(pass) Table Component > Table Navigation > handles page navigation [0.97ms]
+(pass) Table Component > Table Selection > selects single row [0.99ms]
+(pass) Table Component > Table Selection > selects multiple rows [0.92ms]
+(pass) Table Component > Table Sorting > sorts by column [0.67ms]
+(pass) Table Component > Table Filtering > filters rows [0.50ms]
+(pass) Table Component > Keyboard Handling > handles keyboard navigation [0.23ms]
+
+__tests__/unit/components/base.test.ts:
+(pass) Base Component Utilities > keyBinding > creates a key binding [0.02ms]
+(pass) Base Component Utilities > keyBinding > handles single key [0.02ms]
+(pass) Base Component Utilities > matchKeyBinding > matches simple key [0.07ms]
+(pass) Base Component Utilities > matchKeyBinding > matches key combination [0.04ms]
+(pass) Base Component Utilities > matchKeyBinding > matches alternative keys [0.01ms]
+(pass) Base Component Utilities > matchKeyBinding > returns null for unmatched key [0.02ms]
+(pass) Base Component Utilities > matchKeyBinding > handles complex key combinations [0.02ms]
+(pass) Base Component Utilities > createKeyMap > creates an empty key map [0.04ms]
+(pass) Base Component Utilities > generateComponentId > generates unique component IDs [0.02ms]
+(pass) Base Component Utilities > generateComponentId > includes prefix in ID [0.03ms]
+(pass) Base Component Utilities > mergeStyles > merges two style objects [0.05ms]
+(pass) Base Component Utilities > mergeStyles > handles undefined overrides [0.06ms]
+(pass) Base Component Utilities > mergeStyles > deep merges nested properties [0.01ms]
+(pass) Base Component Utilities > createDefaultStyles > creates default component styles [0.03ms]
+(pass) Base Component Utilities > createDefaultStyles > has empty base style [0.01ms]
+(pass) Base Component Utilities > createDefaultStyles > provides focused style [0.01ms]
+(pass) Base Component Utilities > createDefaultStyles > provides disabled style
+(pass) Base Component Utilities > Key Binding Edge Cases > handles empty key map [0.02ms]
+(pass) Base Component Utilities > Key Binding Edge Cases > normalizes key strings [0.02ms]
+
+__tests__/unit/components/Box.test.ts:
+(pass) Box Component > Model and Messages > creates box with content [0.03ms]
+(pass) Box Component > Model and Messages > creates box without padding
+(pass) Box Component > Model and Messages > handles SetContent message [0.01ms]
+(pass) Box Component > Component Logic > initializes with empty content [0.08ms]
+(pass) Box Component > Component Logic > updates content through SetContent message [0.06ms]
+(pass) Box Component > Component Logic > preserves padding during content updates [0.04ms]
+(pass) Box Component > View Rendering > creates view with content [0.03ms]
+(pass) Box Component > View Rendering > renders view output [0.07ms]
+(pass) Box Component > View Rendering > handles empty content [0.03ms]
+(pass) Box Component > View Rendering > handles different padding values [0.04ms]
+(pass) Box Component > Component Integration > full workflow: init -> update -> view [0.03ms]
+(pass) Box Component > Component Integration > multiple content updates [0.09ms]
+(pass) Box Component > Edge Cases > handles very long content [0.06ms]
+(pass) Box Component > Edge Cases > handles multiline content [0.05ms]
+(pass) Box Component > Edge Cases > handles special characters [0.04ms]
+(pass) Box Component > Edge Cases > handles zero padding
+
+__tests__/unit/reactivity/runes.test.ts:
+(pass) Runes Reactivity System > State Runes > creates and updates state [0.05ms]
+(pass) Runes Reactivity System > State Runes > handles different value types [0.04ms]
+(pass) Runes Reactivity System > Bindable Runes > creates bindable values [0.06ms]
+(pass) Runes Reactivity System > Bindable Runes > supports validation [0.03ms]
+(pass) Runes Reactivity System > Bindable Runes > supports transformation [0.02ms]
+(pass) Runes Reactivity System > Derived Runes > computes simple derived values [0.03ms]
+(pass) Runes Reactivity System > Derived Runes > chains derived computations [0.03ms]
+(pass) Runes Reactivity System > Derived Runes > recalculates on each access (simple approach) [0.02ms]
+(pass) Runes Reactivity System > Integration Tests > combines state, derived, and bindable runes [0.02ms]
+(pass) Runes Reactivity System > Integration Tests > handles complex reactive chains [0.03ms]
+
+__tests__/unit/styling/color-comprehensive.test.ts:
+(pass) Color System > Color Constructors > creates NoColor
+(pass) Color System > Color Constructors > creates ANSI color
+(pass) Color System > Color Constructors > creates ANSI256 color [0.01ms]
+(pass) Color System > Color Constructors > creates Hex color
+(pass) Color System > Color Constructors > creates RGB color [0.01ms]
+(pass) Color System > Color Constructors > creates Adaptive color [0.01ms]
+(pass) Color System > Color Smart Constructors > creates hex colors with validation [0.05ms]
+(pass) Color System > Color Smart Constructors > creates RGB colors with validation [0.05ms]
+(pass) Color System > Color Smart Constructors > creates ANSI colors with validation [0.01ms]
+(pass) Color System > Color Smart Constructors > creates ANSI256 colors with validation [0.02ms]
+(pass) Color System > Color Smart Constructors > creates adaptive colors [0.02ms]
+(pass) Color System > Standard Colors > provides ANSI colors [0.02ms]
+(pass) Color System > Standard Colors > provides bright ANSI colors [0.02ms]
+(pass) Color System > Standard Colors > provides none color
+(pass) Color System > Standard Colors > provides common RGB colors
+(pass) Color System > Standard Colors > provides color aliases
+(pass) Color System > toAnsiSequence > converts NoColor to empty string [0.03ms]
+(pass) Color System > toAnsiSequence > converts ANSI color for foreground
+(pass) Color System > toAnsiSequence > converts ANSI color for background
+(pass) Color System > toAnsiSequence > converts ANSI256 color [0.01ms]
+(pass) Color System > toAnsiSequence > converts ANSI256 color for background
+(pass) Color System > toAnsiSequence > converts RGB color in TrueColor mode
+(pass) Color System > toAnsiSequence > converts RGB color for background in TrueColor mode [0.01ms]
+(pass) Color System > toAnsiSequence > converts Hex color [0.04ms]
+(pass) Color System > toAnsiSequence > handles NoColor profile
+(pass) Color System > toAnsiSequence > degrades RGB to ANSI256 [0.04ms]
+(pass) Color System > toAnsiSequence > degrades RGB to ANSI [0.05ms]
+(pass) Color System > toAnsiSequence > handles bright ANSI colors
+(pass) Color System > toAnsiSequence > degrades ANSI256 to ANSI [0.01ms]
+(pass) Color System > Color utility functions > isVisible > returns false for NoColor [0.01ms]
+(pass) Color System > Color utility functions > isVisible > returns true for visible colors [0.02ms]
+(pass) Color System > Color utility functions > blend > blends two RGB colors [0.03ms]
+(pass) Color System > Color utility functions > blend > handles alpha of 0 [0.01ms]
+(pass) Color System > Color utility functions > blend > handles alpha of 1
+(pass) Color System > Color utility functions > blend > returns NoColor when blending with NoColor
+(pass) Color System > Color utility functions > blend > blends non-RGB colors [0.01ms]
+(pass) Color System > Color utility functions > lighten > lightens RGB color [0.02ms]
+(pass) Color System > Color utility functions > lighten > doesn't exceed 255 [0.02ms]
+(pass) Color System > Color utility functions > lighten > returns NoColor for NoColor [0.02ms]
+(pass) Color System > Color utility functions > darken > darkens RGB color [0.02ms]
+(pass) Color System > Color utility functions > darken > doesn't go below 0
+(pass) Color System > Color utility functions > gradient > creates gradient between two colors [0.04ms]
+(pass) Color System > Color utility functions > gradient > handles single step
+(pass) Color System > Color utility functions > gradient > handles NoColor [0.01ms]
+(pass) Color System > Helper functions > rgb creates formatted string [0.01ms]
+(pass) Color System > Helper functions > hex ensures hash prefix
+(pass) Color System > Helper functions > hsl creates formatted string
+(pass) Color System > ColorProfile enum > has all profile values
+
+__tests__/unit/styling/color.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+1 | (function (entry, fetcher)
+              ^
+SyntaxError: Export named 'analogous' not found in module '/Users/aewing/Projects/cinderlink/cli-kit/src/styling/color.ts'.
+      at loadAndEvaluateModule (1:11)
+-------------------------------
+
+
+__tests__/unit/styling/borders.test.ts:
+(pass) Border System > BorderSide enum > has correct bitflag values [0.01ms]
+(pass) Border System > BorderSide enum > combines correctly [0.02ms]
+(pass) Border System > hasSide function > checks individual sides [0.01ms]
+(pass) Border System > hasSide function > works with combined sides [0.01ms]
+(pass) Border System > combineSides function > combines multiple sides [0.03ms]
+(pass) Border System > combineSides function > handles empty args [0.01ms]
+(pass) Border System > combineSides function > handles duplicates
+(pass) Border System > createBorder function > creates border with provided characters [0.03ms]
+(pass) Border System > createBorder function > uses space as default for missing characters [0.02ms]
+(pass) Border System > createBorder function > supports optional middle characters
+(pass) Border System > Predefined Borders > provides None border
+(pass) Border System > Predefined Borders > provides Normal border
+(pass) Border System > Predefined Borders > provides Rounded border
+(pass) Border System > Predefined Borders > provides Thick border
+(pass) Border System > Predefined Borders > provides Double border
+(pass) Border System > Predefined Borders > provides ASCII border
+(pass) Border System > Predefined Borders > provides Dotted border
+(pass) Border System > Predefined Borders > provides Dashed border
+(pass) Border System > Predefined Borders > provides Block border
+(pass) Border System > Predefined Borders > provides Minimal border
+(pass) Border System > Predefined Borders > provides Hidden border
+(pass) Border System > Predefined Borders > provides Single alias for Normal
+(pass) Border System > getBorderChar function > corner handling > handles topLeft corner [0.02ms]
+(pass) Border System > getBorderChar function > corner handling > handles topRight corner [0.02ms]
+(pass) Border System > getBorderChar function > corner handling > handles bottomLeft corner [0.01ms]
+(pass) Border System > getBorderChar function > corner handling > handles bottomRight corner [0.03ms]
+(pass) Border System > getBorderChar function > returns space when no sides enabled [0.01ms]
+(pass) Border System > getBorderChar function > returns correct character for enabled sides [0.01ms]
+(pass) Border System > getBorderChar function > handles middle characters [0.01ms]
+(pass) Border System > renderBox function > renders a simple box [0.03ms]
+(pass) Border System > renderBox function > handles empty content [0.02ms]
+(pass) Border System > renderBox function > handles content with different widths [0.02ms]
+(pass) Border System > renderBox function > respects specified width [0.02ms]
+(pass) Border System > renderBox function > renders partial borders [0.02ms]
+305 |       // Simulating colored text with ANSI codes
+306 |       const content = ["\x1b[31mRed Text\x1b[0m"]
+307 |       const result = renderBox(content, Borders.Normal)
+308 | 
+309 |       // The box should be sized based on visible characters only
+310 |       expect(result[0]).toBe("┌────────┐")
+                              ^
+error: expect(received).toBe(expected)
+
+Expected: "┌────────┐"
+Received: "┌─────────────────┐"
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/styling/borders.test.ts:310:25)
+(fail) Border System > renderBox function > handles ANSI escape sequences [0.05ms]
+(pass) Border System > renderBox function > renders with different border styles [0.08ms]
+(pass) Border System > mergeBorders function > merges two borders with overlay taking precedence [0.03ms]
+(pass) Border System > mergeBorders function > preserves all base values when overlay is empty [0.02ms]
+(pass) Border System > mergeBorders function > handles middle characters
+(pass) Border System > borderFromPattern function > creates border from 8-character pattern [0.03ms]
+(pass) Border System > borderFromPattern function > throws error for pattern too short [0.02ms]
+(pass) Border System > borderFromPattern function > ignores extra characters [0.02ms]
+(pass) Border System > Complex border scenarios > renders nested boxes [0.03ms]
+(pass) Border System > Complex border scenarios > handles Unicode characters in content [0.02ms]
+
+__tests__/unit/styling/advanced.test.ts:
+(pass) Advanced Styling > Shadow Effects > createDropShadow > creates drop shadow with positive offset [0.08ms]
+(pass) Advanced Styling > Shadow Effects > createDropShadow > creates drop shadow with negative x offset [0.02ms]
+(pass) Advanced Styling > Shadow Effects > createDropShadow > creates drop shadow with negative y offset [0.01ms]
+(pass) Advanced Styling > Shadow Effects > createDropShadow > handles zero offset [0.02ms]
+(pass) Advanced Styling > Shadow Effects > createDropShadow > handles empty content [0.01ms]
+(pass) Advanced Styling > Shadow Effects > createInnerShadow > creates inner shadow on edges [0.05ms]
+(pass) Advanced Styling > Shadow Effects > createInnerShadow > handles single line [0.02ms]
+(pass) Advanced Styling > Shadow Effects > createInnerShadow > handles empty content [0.01ms]
+(pass) Advanced Styling > Glow Effects > createGlow > creates glow around content [0.11ms]
+(pass) Advanced Styling > Glow Effects > createGlow > handles empty content [0.01ms]
+(pass) Advanced Styling > Glow Effects > createGlow > adjusts glow based on radius [0.03ms]
+(pass) Advanced Styling > Glow Effects > createGlow > handles different intensity levels [0.06ms]
+(pass) Advanced Styling > Pattern Effects > generatePattern > generates checkerboard pattern [0.06ms]
+(pass) Advanced Styling > Pattern Effects > generatePattern > generates stripe pattern [0.03ms]
+(pass) Advanced Styling > Pattern Effects > generatePattern > generates dots pattern [0.01ms]
+(pass) Advanced Styling > Pattern Effects > generatePattern > generates diagonal pattern
+(pass) Advanced Styling > Pattern Effects > generatePattern > generates cross pattern
+(pass) Advanced Styling > Pattern Effects > generatePattern > generates wave pattern [0.01ms]
+(pass) Advanced Styling > Pattern Effects > generatePattern > handles invalid pattern type [0.02ms]
+(pass) Advanced Styling > Pattern Effects > generatePattern > handles zero dimensions
+(pass) Advanced Styling > Pattern Effects > applyPattern > applies pattern to content spaces [0.02ms]
+(pass) Advanced Styling > Pattern Effects > applyPattern > preserves non-space characters [0.04ms]
+(pass) Advanced Styling > Pattern Effects > applyPattern > handles empty content [0.01ms]
+(pass) Advanced Styling > Border Styles > createStyledBorder > creates solid border [0.03ms]
+(pass) Advanced Styling > Border Styles > createStyledBorder > creates dashed border [0.04ms]
+(pass) Advanced Styling > Border Styles > createStyledBorder > creates dotted border [0.01ms]
+(pass) Advanced Styling > Border Styles > createStyledBorder > creates double border [0.01ms]
+(pass) Advanced Styling > Border Styles > createStyledBorder > handles minimum dimensions [0.01ms]
+(pass) Advanced Styling > Layer Effects > applyLayerEffect > applies overlay effect [0.07ms]
+(pass) Advanced Styling > Layer Effects > applyLayerEffect > applies multiply effect [0.06ms]
+(pass) Advanced Styling > Layer Effects > applyLayerEffect > applies screen effect [0.01ms]
+(pass) Advanced Styling > Layer Effects > applyLayerEffect > applies color-dodge effect [0.01ms]
+(pass) Advanced Styling > Layer Effects > applyLayerEffect > applies color-burn effect [0.01ms]
+(pass) Advanced Styling > Layer Effects > applyLayerEffect > handles unknown effect type
+(pass) Advanced Styling > Layer Effects > applyLayerEffect > works with ANSI colors [0.02ms]
+(pass) Advanced Styling > Layer Effects > applyLayerEffect > clamps RGB values to valid range [0.01ms]
+(pass) Advanced Styling > Animation Helpers > createPulse > creates pulse effect [0.03ms]
+(pass) Advanced Styling > Animation Helpers > createShake > creates shake effect [0.03ms]
+(pass) Advanced Styling > Animation Helpers > createShake > oscillates around base position [0.02ms]
+(pass) Advanced Styling > Animation Helpers > createBounce > creates bounce effect [0.02ms]
+(pass) Advanced Styling > Animation Helpers > createBounce > repeats after duration [0.02ms]
+(pass) Advanced Styling > Text Effects > createTypewriter > reveals text progressively [0.02ms]
+(pass) Advanced Styling > Text Effects > createTypewriter > handles text longer than visible [0.02ms]
+(pass) Advanced Styling > Text Effects > createTypewriter > handles empty text
+(pass) Advanced Styling > Text Effects > createWaveText > creates wave offsets for each character [0.03ms]
+(pass) Advanced Styling > Text Effects > createWaveText > handles empty text [0.03ms]
+(pass) Advanced Styling > Text Effects > createRainbowText > assigns colors to each character [0.03ms]
+(pass) Advanced Styling > Text Effects > createRainbowText > cycles through colors [0.03ms]
+(pass) Advanced Styling > Text Effects > createRainbowText > handles empty text
+(pass) Advanced Styling > Composite Effects > createNeonEffect > creates neon sign effect [0.03ms]
+(pass) Advanced Styling > Composite Effects > createNeonEffect > flicker intensity varies with time [0.02ms]
+(pass) Advanced Styling > Composite Effects > createMatrixEffect > creates matrix rain drops [0.03ms]
+(pass) Advanced Styling > Composite Effects > createMatrixEffect > density affects number of drops [0.04ms]
+(pass) Advanced Styling > Composite Effects > createMatrixEffect > handles zero dimensions
+(pass) Advanced Styling > Composite Effects > createHologramEffect > creates hologram effects [0.02ms]
+(pass) Advanced Styling > Composite Effects > createHologramEffect > scanline moves with time [0.02ms]
+(pass) Advanced Styling > Edge Cases > handles very large dimensions [0.57ms]
+(pass) Advanced Styling > Edge Cases > handles extreme shadow offsets [0.13ms]
+(pass) Advanced Styling > Edge Cases > handles extreme layer effect values [0.02ms]
+(pass) Advanced Styling > Performance > handles large text efficiently [0.26ms]
+(pass) Advanced Styling > Performance > handles large matrix effect efficiently [0.06ms]
+
+__tests__/unit/styling/gradients.test.ts:
+(pass) Gradients > GradientConfig and Types > creates valid gradient config [0.25ms]
+(pass) Gradients > GradientConfig and Types > validates gradient stop structure [0.23ms]
+(pass) Gradients > textGradient > creates text gradient with simple text [0.05ms]
+(pass) Gradients > textGradient > handles empty text [0.21ms]
+(pass) Gradients > textGradient > handles single character [0.01ms]
+(pass) Gradients > textGradient > preserves spaces when requested [0.03ms]
+(pass) Gradients > textGradient > skips spaces when not preserving [0.02ms]
+(pass) Gradients > textGradient > handles different gradient directions [0.06ms]
+(pass) Gradients > backgroundGradient > creates background gradient pattern [0.05ms]
+(pass) Gradients > backgroundGradient > uses custom character [0.02ms]
+(pass) Gradients > backgroundGradient > handles zero dimensions
+(pass) Gradients > backgroundGradient > handles single pixel [0.01ms]
+(pass) Gradients > backgroundGradient > handles different gradient directions [0.02ms]
+(pass) Gradients > borderGradient > applies gradient to border characters [0.06ms]
+(pass) Gradients > borderGradient > handles empty border string [0.01ms]
+(pass) Gradients > borderGradient > handles single character [0.01ms]
+(pass) Gradients > Preset Gradients > creates rainbow gradient [0.01ms]
+(pass) Gradients > Preset Gradients > creates rainbow gradient with custom direction
+(pass) Gradients > Preset Gradients > creates sunset gradient [0.02ms]
+(pass) Gradients > Preset Gradients > creates ocean gradient [0.03ms]
+(pass) Gradients > Preset Gradients > creates forest gradient [0.02ms]
+(pass) Gradients > Preset Gradients > creates fire gradient [0.01ms]
+(pass) Gradients > Preset Gradients > creates pastel gradient [0.03ms]
+(pass) Gradients > Preset Gradients > creates monochrome gradient [0.03ms]
+(pass) Gradients > Preset Gradients > creates monochrome gradient with custom direction [0.01ms]
+(pass) Gradients > createGradient > creates gradient from color array [0.02ms]
+(pass) Gradients > createGradient > handles empty color array [0.03ms]
+(pass) Gradients > createGradient > handles single color
+(pass) Gradients > createGradient > accepts custom direction and interpolation
+(pass) Gradients > Gradient Utilities > reverses gradient [0.03ms]
+(pass) Gradients > Gradient Utilities > shifts gradient [0.03ms]
+(pass) Gradients > Gradient Utilities > shifts gradient with negative offset [0.01ms]
+(pass) Gradients > Gradient Utilities > scales gradient [0.03ms]
+(pass) Gradients > Animation Helpers > creates animated gradient [0.02ms]
+(pass) Gradients > Animation Helpers > creates animated gradient with custom speed [0.01ms]
+(pass) Gradients > Animation Helpers > creates pulsing gradient [0.02ms]
+(pass) Gradients > Animation Helpers > creates pulsing gradient with custom intensity [0.02ms]
+(pass) Gradients > Color Interpolation > interpolates between gradient stops [0.02ms]
+(pass) Gradients > Color Interpolation > handles different interpolation types [0.04ms]
+(pass) Gradients > Color Interpolation > handles single stop gradient [0.04ms]
+(pass) Gradients > Color Interpolation > handles unsorted stops [0.02ms]
+(pass) Gradients > Edge Cases > handles extreme position values [0.02ms]
+(pass) Gradients > Edge Cases > handles duplicate positions [0.02ms]
+(pass) Gradients > Edge Cases > handles very long text [1.23ms]
+(pass) Gradients > Edge Cases > handles large background dimensions [0.26ms]
+(pass) Gradients > Performance > handles large gradients efficiently [0.10ms]
+(pass) Gradients > Color Space Conversion > converts RGB colors correctly [0.07ms]
+(pass) Gradients > Color Space Conversion > converts ANSI colors correctly [0.02ms]
+(pass) Gradients > Color Space Conversion > converts ANSI colors with unknown code [0.01ms]
+(pass) Gradients > Color Space Conversion > converts Hex colors correctly [0.03ms]
+(pass) Gradients > Color Space Conversion > converts Hex colors without hash [0.01ms]
+(pass) Gradients > Color Space Conversion > converts ANSI256 colors in standard range [0.02ms]
+(pass) Gradients > Color Space Conversion > converts ANSI256 colors in cube range [0.03ms]
+(pass) Gradients > Color Space Conversion > converts ANSI256 colors in grayscale range [0.03ms]
+(pass) Gradients > Color Space Conversion > converts NoColor type [0.01ms]
+(pass) Gradients > Color Space Conversion > interpolates with NoColor producing correct RGB values [0.02ms]
+(pass) Gradients > Color Space Conversion > converts Adaptive colors [0.03ms]
+(pass) Gradients > Color Space Conversion > handles invalid color type with default [0.02ms]
+(pass) Gradients > Color Interpolation Algorithms > interpolates RGB colors correctly [0.02ms]
+(pass) Gradients > Color Interpolation Algorithms > applies linear interpolation correctly [0.01ms]
+(pass) Gradients > Color Interpolation Algorithms > applies ease-in interpolation correctly [0.02ms]
+(pass) Gradients > Color Interpolation Algorithms > applies ease-out interpolation correctly [0.02ms]
+(pass) Gradients > Color Interpolation Algorithms > applies ease-in-out interpolation correctly [0.02ms]
+(pass) Gradients > Color Interpolation Algorithms > handles invalid interpolation type [0.02ms]
+(pass) Gradients > Gradient Color Calculation Edge Cases > handles empty stops array [0.02ms]
+(pass) Gradients > Gradient Color Calculation Edge Cases > handles position exactly at first stop [0.01ms]
+(pass) Gradients > Gradient Color Calculation Edge Cases > handles position exactly at last stop [0.01ms]
+(pass) Gradients > Gradient Color Calculation Edge Cases > handles multiple stops with same position [0.01ms]
+(pass) Gradients > Gradient Color Calculation Edge Cases > handles stops in reverse order [0.02ms]
+(pass) Gradients > Complex Color Interpolation > interpolates between different color formats [0.02ms]
+(pass) Gradients > Complex Color Interpolation > handles nested adaptive colors [0.02ms]
+(pass) Gradients > Complex Color Interpolation > handles extreme RGB values [0.02ms]
+(pass) Gradients > Advanced Animation Features > creates smooth animated transitions [0.03ms]
+(pass) Gradients > Advanced Animation Features > handles pulsing with extreme intensities [0.02ms]
+(pass) Gradients > Advanced Animation Features > handles pulsing with negative sine values [0.02ms]
+(pass) Gradients > Advanced Animation Features > handles color overflow in pulsing [0.02ms]
+(pass) Gradients > Performance and Memory > handles very large text efficiently [6.55ms]
+(pass) Gradients > Performance and Memory > handles extreme background dimensions [14.39ms]
+(pass) Gradients > Performance and Memory > handles complex gradient with many stops [0.96ms]
+
+__tests__/unit/styling/style-complete.test.ts:
+(pass) Style System > Style Creation > creates empty style
+(pass) Style System > Style Creation > creates style from properties [0.06ms]
+(pass) Style System > Color Methods > sets foreground color [0.03ms]
+(pass) Style System > Color Methods > sets background color [0.01ms]
+(pass) Style System > Border Methods > sets border with default sides [0.04ms]
+(pass) Style System > Border Methods > sets border with specific sides [0.02ms]
+(pass) Style System > Border Methods > sets border sides independently [4.62ms]
+(pass) Style System > Border Methods > enables/disables individual border sides [0.07ms]
+(pass) Style System > Border Methods > sets border colors [0.14ms]
+(pass) Style System > Spacing Methods > padding > sets all sides with single value [0.04ms]
+(pass) Style System > Spacing Methods > padding > sets vertical/horizontal with two values [0.01ms]
+(pass) Style System > Spacing Methods > padding > sets top/horizontal/bottom with three values [0.01ms]
+(pass) Style System > Spacing Methods > padding > sets all four sides individually
+(pass) Style System > Spacing Methods > padding > sets individual padding sides [0.04ms]
+(pass) Style System > Spacing Methods > padding > sets padding with explicit sides [0.03ms]
+(pass) Style System > Spacing Methods > margin > sets all sides with single value [0.03ms]
+(pass) Style System > Spacing Methods > margin > sets vertical/horizontal with two values [0.05ms]
+(pass) Style System > Spacing Methods > margin > sets top/horizontal/bottom with three values
+(pass) Style System > Spacing Methods > margin > sets all four sides individually
+(pass) Style System > Spacing Methods > margin > sets individual margin sides [0.03ms]
+(pass) Style System > Spacing Methods > margin > sets margin with explicit sides [0.03ms]
+(pass) Style System > Text Decoration Methods > sets bold [0.01ms]
+(pass) Style System > Text Decoration Methods > sets italic [0.02ms]
+(pass) Style System > Text Decoration Methods > sets underline [0.02ms]
+(pass) Style System > Text Decoration Methods > sets strikethrough
+(pass) Style System > Text Decoration Methods > sets inverse/reverse [0.02ms]
+(pass) Style System > Text Decoration Methods > sets blink [0.02ms]
+(pass) Style System > Text Decoration Methods > sets faint/dim [0.02ms]
+(pass) Style System > Text Decoration Methods > sets hidden
+(pass) Style System > Text Decoration Methods > sets inline
+(pass) Style System > Dimension Methods > sets width
+(pass) Style System > Dimension Methods > sets height
+(pass) Style System > Dimension Methods > sets minimum dimensions [0.02ms]
+(pass) Style System > Dimension Methods > sets maximum dimensions [0.02ms]
+(pass) Style System > Alignment Methods > sets horizontal alignment [0.02ms]
+(pass) Style System > Alignment Methods > sets vertical alignment [0.01ms]
+(pass) Style System > Alignment Methods > centers content [0.01ms]
+(pass) Style System > Alignment Methods > middles content
+(pass) Style System > Transform Methods > sets text transform [0.01ms]
+(pass) Style System > Transform Methods > sets uppercase transform [0.01ms]
+(pass) Style System > Transform Methods > sets lowercase transform [0.02ms]
+(pass) Style System > Transform Methods > sets capitalize transform [0.02ms]
+(pass) Style System > Transform Methods > sets text transform with string [0.02ms]
+(pass) Style System > Overflow Methods > sets overflow [0.01ms]
+(pass) Style System > Overflow Methods > sets word break [0.01ms]
+(pass) Style System > Overflow Methods > enables word wrap [0.02ms]
+(pass) Style System > Overflow Methods > sets position [0.03ms]
+(pass) Style System > Composition Methods > inherits from parent style [0.03ms]
+(pass) Style System > Composition Methods > merges styles [0.08ms]
+(pass) Style System > Composition Methods > copies style [0.03ms]
+(pass) Style System > Composition Methods > resets style [0.02ms]
+(pass) Style System > Property Access > checks if property exists [0.01ms]
+(pass) Style System > Property Access > gets property value [0.01ms]
+(pass) Style System > Property Access > converts to JSON [0.02ms]
+(pass) Style System > Style Immutability > maintains immutability [0.02ms]
+(pass) Style System > Predefined Styles > provides base style [0.01ms]
+(pass) Style System > Predefined Styles > provides text decoration styles
+(pass) Style System > Predefined Styles > provides centered style [0.02ms]
+(pass) Style System > Predefined Styles > provides hidden style
+(pass) Style System > Complex Scenarios > handles deep inheritance chain [0.03ms]
+(pass) Style System > Complex Scenarios > handles complex border configuration [0.03ms]
+(pass) Style System > Complex Scenarios > chains multiple style operations [0.04ms]
+
+__tests__/unit/styling/advanced-comprehensive.test.ts:
+(pass) Advanced Styling - Comprehensive Coverage > Shadow Effects - Additional Edge Cases > handles mixed positive/negative offsets
+(pass) Advanced Styling - Comprehensive Coverage > Shadow Effects - Additional Edge Cases > handles content with empty lines [0.10ms]
+(pass) Advanced Styling - Comprehensive Coverage > Shadow Effects - Additional Edge Cases > handles single character content [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Shadow Effects - Additional Edge Cases > handles negative x offset larger than content [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Shadow Effects - Additional Edge Cases > handles negative x offset exactly matching content length [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Shadow Effects - Additional Edge Cases > handles inner shadow with single character [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Shadow Effects - Additional Edge Cases > handles inner shadow with empty lines [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Glow Effects - Additional Edge Cases > handles zero radius glow [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Glow Effects - Additional Edge Cases > handles fractional radius [0.03ms]
+(pass) Advanced Styling - Comprehensive Coverage > Glow Effects - Additional Edge Cases > handles very high intensity [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Glow Effects - Additional Edge Cases > handles zero intensity [0.03ms]
+(pass) Advanced Styling - Comprehensive Coverage > Glow Effects - Additional Edge Cases > handles content with different line lengths [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Glow Effects - Additional Edge Cases > handles content with spaces [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Pattern Effects - Additional Edge Cases > handles fractional scale [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Pattern Effects - Additional Edge Cases > handles very large scale [0.03ms]
+(pass) Advanced Styling - Comprehensive Coverage > Pattern Effects - Additional Edge Cases > handles pattern with dimension 1 [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Pattern Effects - Additional Edge Cases > applies pattern to content with varying line lengths [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Pattern Effects - Additional Edge Cases > applies pattern to content with only spaces [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Pattern Effects - Additional Edge Cases > applies pattern to mixed content [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Border Styles - Additional Edge Cases > handles gradient border type [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Border Styles - Additional Edge Cases > handles pattern border type
+(pass) Advanced Styling - Comprehensive Coverage > Border Styles - Additional Edge Cases > handles very wide border [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Border Styles - Additional Edge Cases > handles border with zero width
+(pass) Advanced Styling - Comprehensive Coverage > Border Styles - Additional Edge Cases > handles all border types explicitly [0.03ms]
+(pass) Advanced Styling - Comprehensive Coverage > Layer Effects - Additional Edge Cases > handles color-dodge with zero denominator [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Layer Effects - Additional Edge Cases > handles color-burn with zero denominator [0.03ms]
+(pass) Advanced Styling - Comprehensive Coverage > Layer Effects - Additional Edge Cases > handles extreme RGB values [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Layer Effects - Additional Edge Cases > handles ANSI color with unknown code [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Layer Effects - Additional Edge Cases > handles unknown color type [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Animation Helpers - Additional Edge Cases > handles createShake with zero amplitude [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Animation Helpers - Additional Edge Cases > handles createShake with negative amplitude [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Animation Helpers - Additional Edge Cases > handles createBounce with zero height
+(pass) Advanced Styling - Comprehensive Coverage > Animation Helpers - Additional Edge Cases > handles createBounce with negative height
+(pass) Advanced Styling - Comprehensive Coverage > Animation Helpers - Additional Edge Cases > handles createBounce with zero duration
+(pass) Advanced Styling - Comprehensive Coverage > Animation Helpers - Additional Edge Cases > handles createBounce with very large time
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createTypewriter with zero speed
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createTypewriter with negative speed
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createTypewriter with fractional speed
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createWaveText with zero amplitude [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createWaveText with negative amplitude [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createWaveText with zero frequency [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createRainbowText with zero speed [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createRainbowText with negative speed [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createRainbowText with single character [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Text Effects - Additional Edge Cases > handles createRainbowText with very long text [0.05ms]
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createNeonEffect with zero time [0.03ms]
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createNeonEffect with negative time [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createNeonEffect with very large time [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createMatrixEffect with zero density
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createMatrixEffect with density > 1 [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createMatrixEffect with dimension 1
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createHologramEffect with zero speed [0.01ms]
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createHologramEffect with negative speed
+(pass) Advanced Styling - Comprehensive Coverage > Composite Effects - Additional Edge Cases > handles createHologramEffect with very large speed
+(pass) Advanced Styling - Comprehensive Coverage > Stress Tests > handles extremely large patterns [0.16ms]
+(pass) Advanced Styling - Comprehensive Coverage > Stress Tests > handles very complex glow calculation [2.00ms]
+(pass) Advanced Styling - Comprehensive Coverage > Stress Tests > handles matrix effect with high density [0.09ms]
+(pass) Advanced Styling - Comprehensive Coverage > Integration Tests > combines multiple effects [0.04ms]
+(pass) Advanced Styling - Comprehensive Coverage > Integration Tests > applies pattern then border [0.12ms]
+(pass) Advanced Styling - Comprehensive Coverage > Integration Tests > chains animation effects [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Error Handling > handles invalid pattern type gracefully [0.03ms]
+(pass) Advanced Styling - Comprehensive Coverage > Error Handling > handles undefined content gracefully [0.02ms]
+(pass) Advanced Styling - Comprehensive Coverage > Error Handling > handles NaN values in calculations [0.02ms]
+
+__tests__/unit/styling/color-actual.test.ts:
+(pass) Actual Color System > Color constructors > creates NoColor [0.28ms]
+(pass) Actual Color System > Color constructors > creates ANSI colors [0.32ms]
+(pass) Actual Color System > Color constructors > creates ANSI256 colors [0.01ms]
+(pass) Actual Color System > Color constructors > creates RGB colors [0.01ms]
+(pass) Actual Color System > Color constructors > creates Hex colors [0.01ms]
+(pass) Actual Color System > Color constructors > creates adaptive colors
+(pass) Actual Color System > predefined Colors > provides ANSI color constants [0.01ms]
+(pass) Actual Color System > predefined Colors > has correct ANSI codes for standard colors [0.01ms]
+(pass) Actual Color System > predefined Colors > provides bright ANSI colors [0.01ms]
+(pass) Actual Color System > utility functions > creates hex colors with validation [0.01ms]
+(pass) Actual Color System > utility functions > rejects invalid hex colors
+(pass) Actual Color System > utility functions > creates RGB colors with validation [0.01ms]
+(pass) Actual Color System > utility functions > rejects invalid RGB values
+(pass) Actual Color System > utility functions > creates adaptive colors [0.01ms]
+(pass) Actual Color System > edge cases > handles boundary RGB values
+(pass) Actual Color System > edge cases > handles short hex colors [0.01ms]
+(pass) Actual Color System > edge cases > normalizes hex values
+
+__tests__/unit/styling/style.test.ts:
+(pass) Style > creates empty style [0.02ms]
+(pass) Style > chainable API [0.04ms]
+(pass) Style > immutability [0.02ms]
+(pass) Style > style inheritance [0.04ms]
+(pass) Style > style merging [0.02ms]
+(pass) Colors > predefined colors [0.02ms]
+(pass) Colors > hex color validation [0.02ms]
+(pass) Colors > rgb color validation [0.02ms]
+(pass) Colors > adaptive colors [0.02ms]
+(pass) Borders > border styles [0.02ms]
+(pass) Borders > border side flags [0.01ms]
+(pass) Rendering > simple text [0.04ms]
+(pass) Rendering > text with padding [0.05ms]
+(pass) Rendering > text with border [0.05ms]
+(pass) Rendering > text alignment [0.11ms]
+(pass) Rendering > text transformation [0.07ms]
+
+__tests__/unit/styling/render.test.ts:
+(pass) Style Rendering > renderStyled > renders plain text without modifications [0.10ms]
+(pass) Style Rendering > renderStyled > applies bold text decoration [0.04ms]
+(pass) Style Rendering > renderStyled > applies italic text decoration [0.05ms]
+(pass) Style Rendering > renderStyled > applies underline text decoration [0.06ms]
+(pass) Style Rendering > renderStyled > applies faint text decoration [0.04ms]
+(pass) Style Rendering > renderStyled > applies foreground color [0.03ms]
+(pass) Style Rendering > renderStyled > applies background color [0.05ms]
+(pass) Style Rendering > renderStyled > combines multiple decorations [0.04ms]
+(pass) Style Rendering > renderStyledSync > renders synchronously [0.03ms]
+(pass) Style Rendering > renderStyledSync > handles empty text [0.01ms]
+(pass) Style Rendering > renderStyledSync > handles plain text [0.02ms]
+(pass) Style Rendering > text transformation > applies uppercase transformation [0.03ms]
+(pass) Style Rendering > text transformation > applies lowercase transformation [0.02ms]
+(pass) Style Rendering > text transformation > applies capitalize transformation [0.03ms]
+(pass) Style Rendering > text transformation > applies custom transformation [0.04ms]
+(pass) Style Rendering > text transformation > applies no transformation [0.04ms]
+(pass) Style Rendering > text transformation > applies text transformations through Style properties [0.03ms]
+(pass) Style Rendering > horizontal alignment > applies left alignment [0.04ms]
+(pass) Style Rendering > horizontal alignment > applies right alignment [0.02ms]
+(pass) Style Rendering > horizontal alignment > applies center alignment [0.04ms]
+(pass) Style Rendering > horizontal alignment > applies justify alignment [0.03ms]
+(pass) Style Rendering > horizontal alignment > handles justify with single word [0.03ms]
+(pass) Style Rendering > horizontal alignment > handles text wider than alignment width [0.04ms]
+(pass) Style Rendering > vertical alignment > applies top alignment [0.07ms]
+(pass) Style Rendering > vertical alignment > applies bottom alignment [0.03ms]
+(pass) Style Rendering > vertical alignment > applies middle alignment [0.02ms]
+(pass) Style Rendering > vertical alignment > handles middle alignment with convenience method [0.04ms]
+(pass) Style Rendering > vertical alignment > handles content taller than height [0.03ms]
+(pass) Style Rendering > padding > applies padding methods [0.04ms]
+(pass) Style Rendering > padding > applies specific padding [0.04ms]
+(pass) Style Rendering > margin > applies margin methods [0.04ms]
+(pass) Style Rendering > word wrapping > wraps long text to specified width [0.04ms]
+(pass) Style Rendering > word wrapping > handles single words longer than width [0.02ms]
+(pass) Style Rendering > color profiles > respects color profile setting [0.03ms]
+(pass) Style Rendering > color profiles > works with true color profile [0.05ms]
+(pass) Style Rendering > additional text decorations > applies blink decoration [0.03ms]
+(pass) Style Rendering > additional text decorations > applies inverse decoration [0.02ms]
+(pass) Style Rendering > additional text decorations > applies strikethrough decoration [0.02ms]
+(pass) Style Rendering > additional text decorations > applies reverse decoration (alias for inverse) [0.02ms]
+(pass) Style Rendering > additional text decorations > applies dim decoration (alias for faint) [0.01ms]
+(pass) Style Rendering > additional text decorations > combines all decorations [0.05ms]
+(pass) Style Rendering > color profiles > handles NoColor profile [0.04ms]
+(pass) Style Rendering > color profiles > handles ANSI profile [0.02ms]
+(pass) Style Rendering > color profiles > handles ANSI256 profile [0.03ms]
+(pass) Style Rendering > color profiles > handles TrueColor profile [0.02ms]
+(pass) Style Rendering > padding and margin > applies complex padding [0.03ms]
+(pass) Style Rendering > padding and margin > applies complex margin [0.02ms]
+(pass) Style Rendering > padding and margin > handles zero padding [0.03ms]
+(pass) Style Rendering > word wrapping edge cases > handles empty string with wrapping [0.02ms]
+(pass) Style Rendering > word wrapping edge cases > handles single character with wrapping
+(pass) Style Rendering > word wrapping edge cases > handles multiple spaces in text [0.01ms]
+(pass) Style Rendering > edge cases > handles empty text [0.01ms]
+(pass) Style Rendering > edge cases > handles newlines in text [0.03ms]
+(pass) Style Rendering > edge cases > handles text with existing ANSI codes [0.02ms]
+(pass) Style Rendering > edge cases > handles very wide text [0.02ms]
+(pass) Style Rendering > edge cases > handles zero dimensions [0.02ms]
+(pass) Style Rendering > edge cases > handles null/undefined style properties [0.03ms]
+(pass) Style Rendering > edge cases > handles inline styles [0.02ms]
+(pass) Style Rendering > complex styles > combines all style features [0.03ms]
+(pass) Style Rendering > border rendering > applies normal border [0.06ms]
+(pass) Style Rendering > border rendering > applies rounded border [0.05ms]
+(pass) Style Rendering > border rendering > applies thick border [0.04ms]
+(pass) Style Rendering > border rendering > applies double border [0.04ms]
+(pass) Style Rendering > border rendering > applies partial borders [0.04ms]
+(pass) Style Rendering > border rendering > handles no border [0.03ms]
+(pass) Style Rendering > border rendering > handles BorderSide.None [0.03ms]
+(pass) Style Rendering > style composition and inheritance > combines padding and borders [0.03ms]
+(pass) Style Rendering > style composition and inheritance > combines margin and borders [0.02ms]
+(pass) Style Rendering > style composition and inheritance > combines styling with dimensions [0.06ms]
+(pass) Style Rendering > style composition and inheritance > handles chained style methods [0.05ms]
+(pass) Style Rendering > style composition and inheritance > handles maximum width constraints [0.02ms]
+(pass) Style Rendering > style composition and inheritance > handles options override style settings [0.02ms]
+
+__tests__/unit/jsx/jsx-runtime.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+1 | (function (entry, fetcher)
+              ^
+SyntaxError: Export named 'isStateRune' not found in module '/Users/aewing/Projects/cinderlink/cli-kit/src/reactivity/runes.ts'.
+      at loadAndEvaluateModule (1:11)
+-------------------------------
+
+
+__tests__/unit/jsx/tuix-integration.test.ts:
+(pass) TUIX Integration > imports work with .tuix extension [0.03ms]
+1 | (function (entry, fetcher)
+              ^
+SyntaxError: Export named 'isStateRune' not found in module '/Users/aewing/Projects/cinderlink/cli-kit/src/reactivity/runes.ts'.
+      at loadAndEvaluateModule (1:11)
+(fail) TUIX Integration > JSX runtime is properly configured [0.32ms]
+(pass) TUIX Integration > tuix types are available [0.09ms]
+
+__tests__/unit/services/input-impl.test.ts:
+(pass) Input Service Implementation > Layer Creation > should create InputServiceLive layer successfully [1.75ms]
+(pass) Input Service Implementation > Layer Creation > should configure stdin properly [0.29ms]
+(pass) Input Service Implementation > Layer Creation > should handle non-TTY stdin [0.26ms]
+(pass) Input Service Implementation > Mouse Control Operations > should enable mouse tracking [0.10ms]
+(pass) Input Service Implementation > Mouse Control Operations > should disable mouse tracking [0.04ms]
+(pass) Input Service Implementation > Mouse Control Operations > should enable mouse motion tracking [0.06ms]
+(pass) Input Service Implementation > Mouse Control Operations > should disable mouse motion tracking [0.16ms]
+(pass) Input Service Implementation > Mouse Control Operations > should handle mouse control errors [0.26ms]
+(pass) Input Service Implementation > Echo Control > should set echo off [0.04ms]
+(pass) Input Service Implementation > Echo Control > should set echo on
+221 |         )
+222 |       )
+223 | 
+224 |       // Should not throw for non-TTY
+225 |       await Effect.runPromise(service.setEcho(false))
+226 |       expect(nonTTYStdin.setRawMode).not.toHaveBeenCalled()
+                                               ^
+error: expect(received).not.toHaveBeenCalled()
+
+Expected number of calls: 0
+Received number of calls: 2
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-impl.test.ts:226:42)
+(fail) Input Service Implementation > Echo Control > should handle echo errors for non-TTY [0.25ms]
+(pass) Input Service Implementation > Resize Events > should handle resize events [12.28ms]
+(pass) Input Service Implementation > Stream Operations > should filter keys correctly
+(pass) Input Service Implementation > Stream Operations > should map keys correctly
+(pass) Input Service Implementation > Stream Operations > should debounce keys [0.12ms]
+(pass) Input Service Implementation > ANSI Sequence Parsing > should parse known ANSI sequences [0.08ms]
+340 |     })
+341 | 
+342 |     it("should return null for unknown sequences", async () => {
+343 |       const result = await Effect.runPromise(service.parseAnsiSequence("\x1b[Z"))
+344 | 
+345 |       expect(result).toBeNull()
+                           ^
+error: expect(received).toBeNull()
+
+Received: {
+  type: "shift+tab",
+  key: "shift+tab",
+  runes: undefined,
+  ctrl: false,
+  alt: false,
+  shift: true,
+  meta: false,
+  sequence: "\u001B[Z",
+}
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-impl.test.ts:345:22)
+(fail) Input Service Implementation > ANSI Sequence Parsing > should return null for unknown sequences
+(pass) Input Service Implementation > ANSI Sequence Parsing > should handle function keys
+(pass) Input Service Implementation > ANSI Sequence Parsing > should handle modified arrow keys
+(pass) Input Service Implementation > Raw Input Stream > should provide raw input stream
+(pass) Input Service Implementation > Paste Events > should provide empty paste events stream [0.29ms]
+(pass) Input Service Implementation > Synchronous Operations > should provide waitForKey operation
+(pass) Input Service Implementation > Synchronous Operations > should provide waitForMouse operation
+(pass) Input Service Implementation > Synchronous Operations > should provide clearInputBuffer operation [0.06ms]
+
+__tests__/unit/services/terminal.test.ts:
+(pass) TerminalService > Basic Terminal Operations > clears the terminal [1.01ms]
+(pass) TerminalService > Basic Terminal Operations > writes text without newline [0.20ms]
+(pass) TerminalService > Basic Terminal Operations > writes text with newline [0.16ms]
+(pass) TerminalService > Cursor Management > moves cursor to absolute position [0.21ms]
+(pass) TerminalService > Cursor Management > moves cursor relative to current position [0.16ms]
+(pass) TerminalService > Cursor Management > hides and shows cursor [0.16ms]
+(pass) TerminalService > Cursor Management > saves and restores cursor position [0.07ms]
+(pass) TerminalService > Terminal State > gets terminal size [0.04ms]
+(pass) TerminalService > Terminal State > sets raw mode [0.14ms]
+(pass) TerminalService > Terminal State > sets alternate screen [0.27ms]
+(pass) TerminalService > Terminal Capabilities > detects terminal capabilities [0.04ms]
+(pass) TerminalService > Terminal Capabilities > checks color support [0.21ms]
+(pass) TerminalService > Terminal Capabilities > checks unicode support [0.13ms]
+(pass) TerminalService > Screen Management > clears lines [0.19ms]
+(pass) TerminalService > Screen Management > clears screen regions [0.05ms]
+(pass) TerminalService > Screen Management > scrolls screen [0.13ms]
+(pass) TerminalService > Advanced Features > sets terminal title [0.24ms]
+(pass) TerminalService > Advanced Features > rings terminal bell [0.10ms]
+(pass) TerminalService > Advanced Features > gets cursor position [0.16ms]
+(pass) TerminalService > Advanced Features > sets cursor shape [0.11ms]
+(pass) TerminalService > Advanced Features > sets cursor blink [0.12ms]
+(pass) TerminalService > Error Handling > handles write errors [0.23ms]
+(pass) TerminalService > Error Handling > handles clear errors [0.12ms]
+(pass) TerminalService > Error Handling > handles moveCursor errors [0.09ms]
+(pass) TerminalService > Error Handling > handles getSize errors [0.20ms]
+(pass) TerminalService > Error Handling > handles getCapabilities errors [0.13ms]
+(pass) TerminalService > Advanced Screen Operations > performs advanced clearing operations [0.21ms]
+(pass) TerminalService > Advanced Screen Operations > handles scrolling operations [0.13ms]
+(pass) TerminalService > Terminal Title and Bell > sets terminal title [0.04ms]
+(pass) TerminalService > Terminal Title and Bell > rings terminal bell [0.16ms]
+(pass) TerminalService > Cursor Shape and Blinking > sets cursor shape [0.19ms]
+(pass) TerminalService > Cursor Shape and Blinking > sets cursor blinking [0.13ms]
+(pass) TerminalService > Capability Variations > handles different color support levels [0.20ms]
+(pass) TerminalService > Capability Variations > handles unicode support variations [0.18ms]
+(pass) TerminalService > Capability Variations > returns complete capabilities object [0.13ms]
+(pass) TerminalService > Edge Cases and Input Validation > handles empty text input [0.04ms]
+(pass) TerminalService > Edge Cases and Input Validation > handles negative cursor movements [0.13ms]
+(pass) TerminalService > Edge Cases and Input Validation > handles zero scroll amounts [0.13ms]
+(pass) TerminalService > Edge Cases and Input Validation > handles multiple cursor operations [0.12ms]
+(pass) TerminalService > Complex Sequences > handles complex terminal operations sequence [0.20ms]
+(pass) TerminalService Integration > provides correct service type [0.24ms]
+
+__tests__/unit/services/terminal-impl.test.ts:
+(pass) Terminal Implementation Behavior > ANSI Escape Sequences > uses correct escape sequences for basic operations [0.02ms]
+(pass) Terminal Implementation Behavior > ANSI Escape Sequences > generates correct cursor movement sequences
+(pass) Terminal Implementation Behavior > ANSI Escape Sequences > generates correct clearing sequences
+(pass) Terminal Implementation Behavior > ANSI Escape Sequences > generates correct scrolling sequences
+(pass) Terminal Implementation Behavior > Capability Detection > detects truecolor support from COLORTERM [0.05ms]
+(pass) Terminal Implementation Behavior > Capability Detection > detects 256 color support from TERM [0.04ms]
+(pass) Terminal Implementation Behavior > Capability Detection > detects unicode support based on platform [0.02ms]
+(pass) Terminal Implementation Behavior > Capability Detection > detects terminal emulator specific features [0.02ms]
+(pass) Terminal Implementation Behavior > Terminal Size Detection > gets size from stdout properties [0.02ms]
+(pass) Terminal Implementation Behavior > Terminal Size Detection > uses fallback values when size unavailable [0.01ms]
+(pass) Terminal Implementation Behavior > Raw Mode Handling > checks TTY status before setting raw mode [0.02ms]
+(pass) Terminal Implementation Behavior > Error Handling Patterns > creates proper TerminalError instances [0.03ms]
+(pass) Terminal Implementation Behavior > Error Handling Patterns > handles write operation errors [0.04ms]
+(pass) Terminal Implementation Behavior > State Management > tracks raw mode state changes [0.02ms]
+(pass) Terminal Implementation Behavior > State Management > tracks alternate screen state [0.02ms]
+(pass) Terminal Implementation Behavior > Cursor Movement Logic > handles relative cursor movements [0.04ms]
+(pass) Terminal Implementation Behavior > Color Support Logic > determines color support levels correctly [0.02ms]
+(pass) Terminal Implementation Behavior > Color Support Logic > validates color support queries [0.02ms]
+(pass) Terminal Implementation Behavior > Terminal Title Handling > generates window title escape sequence [0.02ms]
+(pass) Terminal Implementation Behavior > Bell Handling > generates bell escape sequence
+(pass) Terminal Implementation Behavior > Cursor Position Queries > generates cursor position request sequence
+(pass) Terminal Implementation Behavior > Cursor Position Queries > parses cursor position response [0.05ms]
+(pass) Terminal Implementation Behavior > Cursor Shape Control > generates cursor shape sequences [0.03ms]
+(pass) Terminal Implementation Behavior > Cursor Shape Control > generates cursor blink sequences
+(pass) Terminal Implementation Behavior > Integration Patterns > combines multiple escape sequences correctly [0.01ms]
+(pass) Terminal Implementation Behavior > Integration Patterns > restores terminal state correctly [0.02ms]
+(pass) Terminal Implementation Coverage > covers all ANSI sequence constants [0.11ms]
+
+__tests__/unit/services/input-buffer.test.ts:
+(pass) Input Buffer Parsing > Character Parsing > parses regular characters [0.57ms]
+(pass) Input Buffer Parsing > Character Parsing > parses numbers [0.08ms]
+(pass) Input Buffer Parsing > Character Parsing > parses special characters [0.01ms]
+(pass) Input Buffer Parsing > Character Parsing > parses Unicode characters [0.01ms]
+(pass) Input Buffer Parsing > Character Parsing > handles control characters
+(pass) Input Buffer Parsing > Character Parsing > handles other control characters
+(pass) Input Buffer Parsing > Edge Cases > handles empty string [0.01ms]
+(pass) Input Buffer Parsing > Edge Cases > handles whitespace
+(pass) Input Buffer Parsing > Edge Cases > returns consistent structure [0.01ms]
+
+__tests__/unit/services/input-simple.test.ts:
+(pass) Input Service Implementation Coverage > should create service and test basic functionality [0.67ms]
+(pass) Input Service Implementation Coverage > should handle mouse control errors [0.06ms]
+143 |   })
+144 | 
+145 |   it("should handle setRawMode errors through setEcho", async () => {
+146 |     const mockStdin = {
+147 |       isTTY: true,
+148 |       setRawMode: mock(() => { throw new Error("Raw mode failed") }),
+                                               ^
+(FiberFailure) Error: Raw mode failed
+ effect/Runtime/FiberFailure: Symbol(effect/Runtime/FiberFailure),
+ effect/Runtime/FiberFailure/Cause: {
+  _tag: "Die",
+  defect: 143 |   })
+144 | 
+145 |   it("should handle setRawMode errors through setEcho", async () => {
+146 |     const mockStdin = {
+147 |       isTTY: true,
+148 |       setRawMode: mock(() => { throw new Error("Raw mode failed") }),
+                                               ^
+error: Raw mode failed
+      at /Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-simple.test.ts:148:42
+,
+  [Symbol(effect/Cause)]: [Object ...],
+  [Symbol(effect/Hash)]: [Function],
+  [Symbol(effect/Equal)]: [Function],
+  pipe: [Function: pipe],
+  toJSON: [Function: toJSON],
+  toString: [Function: toString],
+  [Symbol(nodejs.util.inspect.custom)]: [Function],
+},
+
+      at /Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-simple.test.ts:148:42
+(fail) Input Service Implementation Coverage > should handle setRawMode errors through setEcho [0.81ms]
+(pass) Input Service Implementation Coverage > should test all supported ANSI sequences [0.36ms]
+(pass) Input Service Implementation Coverage > should test parseBuffer through data events [0.14ms]
+329 |           InputService.pipe(Effect.provide(InputServiceLive))
+330 |         )
+331 |       )
+332 | 
+333 |       // Test that resize handler is set up
+334 |       expect(mockStdout.on).toHaveBeenCalledWith('resize', expect.any(Function))
+                                  ^
+error: expect(received).toHaveBeenCalledWith(expected)
+
+Number of calls: 0
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-simple.test.ts:334:29)
+(fail) Input Service Implementation Coverage > should handle resize events [0.21ms]
+(pass) Input Service Implementation Coverage > should handle TTY stdin setup [0.17ms]
+(pass) Input Service Implementation Coverage > should test paste events (empty stream) [0.23ms]
+(pass) Input Service Implementation Coverage > should test control character sequences [0.25ms]
+
+__tests__/unit/services/renderer.test.ts:
+(pass) RendererService > Core Rendering > renders a view [0.46ms]
+(pass) RendererService > Core Rendering > manages frame lifecycle [0.22ms]
+(pass) RendererService > Core Rendering > throws error when ending frame without beginning [0.17ms]
+(pass) RendererService > Core Rendering > forces complete redraw [0.13ms]
+(pass) RendererService > Viewport Management > sets and gets viewport [0.12ms]
+(pass) RendererService > Viewport Management > pushes and pops viewport [0.07ms]
+(pass) RendererService > Viewport Management > handles empty viewport stack error [0.23ms]
+(pass) RendererService > Buffer Management > tracks dirty regions [0.21ms]
+(pass) RendererService > Buffer Management > clears dirty regions [0.15ms]
+(pass) RendererService > Buffer Management > adds dirty regions when rendering [0.13ms]
+(pass) RendererService > Advanced Rendering Features > renders at specific position [0.17ms]
+(pass) RendererService > Advanced Rendering Features > renders batch of views [0.22ms]
+(pass) RendererService > Advanced Rendering Features > sets and clears clip region [0.14ms]
+(pass) RendererService > Advanced Rendering Features > saves and restores rendering state [0.26ms]
+(pass) RendererService > Advanced Rendering Features > handles restore state error when no saved state [0.13ms]
+(pass) RendererService > Performance Monitoring > tracks render statistics [0.14ms]
+(pass) RendererService > Performance Monitoring > resets statistics [0.17ms]
+(pass) RendererService > Text Operations > measures text correctly [0.41ms]
+(pass) RendererService > Text Operations > wraps text to specified width [0.23ms]
+(pass) RendererService > Text Operations > wraps text with break long words option [0.12ms]
+(pass) RendererService > Text Operations > wraps text preserving indentation [0.14ms]
+(pass) RendererService > Text Operations > truncates text with ellipsis [0.26ms]
+(pass) RendererService > Layer Management > creates and manages layers [0.10ms]
+(pass) RendererService > Layer Management > handles duplicate layer creation error [0.19ms]
+(pass) RendererService > Layer Management > removes layers [0.26ms]
+(pass) RendererService > Layer Management > handles remove non-existent layer error [0.13ms]
+(pass) RendererService > Layer Management > renders to layer [0.10ms]
+(pass) RendererService > Layer Management > handles render to non-existent layer error [0.22ms]
+(pass) RendererService > Layer Management > sets layer visibility [0.23ms]
+(pass) RendererService > Layer Management > handles set visibility on non-existent layer error [0.13ms]
+(pass) RendererService > Layer Management > composites layers in correct z-order [0.22ms]
+(pass) RendererService > Layer Management > composites only visible layers [0.26ms]
+(pass) RendererService > Dirty Region Optimization > optimizes overlapping dirty regions [0.18ms]
+(pass) RendererService > Dirty Region Optimization > preserves non-overlapping dirty regions [0.20ms]
+(pass) RendererService > Dirty Region Optimization > handles complex overlapping scenarios [0.21ms]
+(pass) RendererService > Profiling and Statistics > enables and disables profiling [0.05ms]
+(pass) RendererService > Profiling and Statistics > provides detailed frame statistics [0.28ms]
+(pass) RenderUtils > emptyView > creates an empty view with specified dimensions [0.06ms]
+(pass) RenderUtils > emptyView > handles zero dimensions [0.05ms]
+(pass) RenderUtils > textView > creates a view from simple string [0.03ms]
+(pass) RenderUtils > textView > handles empty string [0.03ms]
+(pass) RenderUtils > textView > handles multi-line string [0.02ms]
+(pass) RenderUtils > joinHorizontal > joins multiple views horizontally [0.05ms]
+(pass) RenderUtils > joinHorizontal > handles views with different heights [0.14ms]
+(pass) RenderUtils > joinHorizontal > handles empty views array [0.04ms]
+(pass) RenderUtils > joinHorizontal > handles single view [0.03ms]
+(pass) RenderUtils > joinVertical > joins multiple views vertically [0.03ms]
+(pass) RenderUtils > joinVertical > handles views with newlines [0.08ms]
+(pass) RenderUtils > joinVertical > handles empty views array [0.02ms]
+(pass) RenderUtils > addPadding > adds padding around a view [0.04ms]
+(pass) RenderUtils > addPadding > handles zero padding [0.14ms]
+(pass) RenderUtils > addPadding > handles view without width/height [0.03ms]
+(pass) RenderUtils > clipView > clips a view to specified dimensions [0.04ms]
+(pass) RenderUtils > clipView > handles view smaller than clip dimensions [0.08ms]
+(pass) RenderUtils > clipView > handles single line view [0.02ms]
+(pass) RenderUtils > clipView > handles empty view [0.03ms]
+(pass) RenderUtils > clipView > handles zero clip dimensions [0.03ms]
+
+__tests__/unit/services/input.test.ts:
+(pass) Input Service Interface > should handle key events stream [1.37ms]
+(pass) Input Service Interface > should handle mouse events stream [0.49ms]
+(pass) Input Service Interface > should handle resize events stream [0.44ms]
+(pass) Input Service Interface > should handle paste events stream [0.40ms]
+(pass) Input Service Interface > should handle focus events stream [0.11ms]
+(pass) Input Service Interface > should handle mouse control operations [0.36ms]
+(pass) Input Service Interface > should handle paste control operations [0.17ms]
+(pass) Input Service Interface > should handle focus tracking operations [0.13ms]
+(pass) Input Service Interface > should handle synchronous input operations [0.21ms]
+(pass) Input Service Interface > should handle key filtering and mapping [0.58ms]
+(pass) Input Service Interface > should handle ANSI sequence parsing [0.18ms]
+(pass) Input Service Interface > should handle raw input stream [0.43ms]
+(pass) KeyUtils > isPrintable > should identify printable characters [0.06ms]
+(pass) KeyUtils > isPrintable > should reject non-printable characters [0.01ms]
+(pass) KeyUtils > isNavigation > should identify navigation keys [0.04ms]
+(pass) KeyUtils > isNavigation > should reject non-navigation keys [0.02ms]
+(pass) KeyUtils > isFunctionKey > should identify function keys [0.04ms]
+(pass) KeyUtils > isFunctionKey > should reject non-function keys [0.02ms]
+(pass) KeyUtils > isModifierOnly > should identify modifier-only keys [0.02ms]
+(pass) KeyUtils > isModifierOnly > should reject non-modifier keys [0.02ms]
+(pass) KeyUtils > matches > should match simple keys [0.04ms]
+(pass) KeyUtils > matches > should match keys by code [0.02ms]
+(pass) KeyUtils > matches > should match modifier combinations [0.02ms]
+(pass) KeyUtils > matches > should match complex modifier combinations [0.01ms]
+(pass) KeyUtils > format > should format simple keys [0.01ms]
+(pass) KeyUtils > format > should format keys with modifiers [0.03ms]
+(pass) KeyUtils > format > should format keys with multiple modifiers [0.02ms]
+(pass) MouseUtils > isClick > should identify click events [0.02ms]
+(pass) MouseUtils > isDrag > should identify drag events [0.02ms]
+(pass) MouseUtils > isWheel > should identify wheel events [0.02ms]
+(pass) MouseUtils > getScrollDirection > should get scroll direction from wheel events [0.02ms]
+(pass) MouseUtils > isWithinBounds > should check if mouse position is within bounds [0.04ms]
+(pass) MouseUtils > isWithinBounds > should handle edge cases [0.02ms]
+
+__tests__/unit/services/input-parsing.test.ts:
+ 96 | describe("Mouse Event Parsing", () => {
+ 97 |   describe("SGR Extended Mode", () => {
+ 98 |     it("should parse SGR left button press", () => {
+ 99 |       const result = parseMouseEvent("\x1b[<0;10;20;M")
+100 | 
+101 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "press",
+  button: "left",
+  x: 10,
+  y: 20,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:101:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should parse SGR left button press [0.21ms]
+110 |     })
+111 | 
+112 |     it("should parse SGR left button release", () => {
+113 |       const result = parseMouseEvent("\x1b[<0;10;20;m")
+114 | 
+115 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "release",
+  button: "left",
+  x: 10,
+  y: 20,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:115:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should parse SGR left button release [0.04ms]
+124 |     })
+125 | 
+126 |     it("should parse SGR right button press", () => {
+127 |       const result = parseMouseEvent("\x1b[<2;15;25;M")
+128 | 
+129 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "press",
+  button: "right",
+  x: 15,
+  y: 25,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:129:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should parse SGR right button press [0.03ms]
+138 |     })
+139 | 
+140 |     it("should parse SGR middle button press", () => {
+141 |       const result = parseMouseEvent("\x1b[<1;5;10;M")
+142 | 
+143 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "press",
+  button: "middle",
+  x: 5,
+  y: 10,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:143:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should parse SGR middle button press [0.04ms]
+153 | 
+154 |     it("should parse SGR with modifiers", () => {
+155 |       // Button 0 (left) with Shift (bit 2) and Ctrl (bit 4)
+156 |       const result = parseMouseEvent("\x1b[<20;30;40;M") // 20 = 0 + 4 (shift) + 16 (ctrl)
+157 | 
+158 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "press",
+  button: "left",
+  x: 30,
+  y: 40,
+  ctrl: true,
+  alt: false,
+  shift: true,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:158:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should parse SGR with modifiers [0.03ms]
+168 | 
+169 |     it("should parse SGR with Alt modifier", () => {
+170 |       // Button 0 (left) with Alt (bit 3)
+171 |       const result = parseMouseEvent("\x1b[<8;10;20;M") // 8 = 0 + 8 (alt)
+172 | 
+173 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "press",
+  button: "left",
+  x: 10,
+  y: 20,
+  ctrl: false,
+  alt: true,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:173:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should parse SGR with Alt modifier [0.04ms]
+183 | 
+184 |     it("should parse SGR wheel up", () => {
+185 |       // Wheel up: bit 6 set (64) + bit 0 clear
+186 |       const result = parseMouseEvent("\x1b[<64;10;20;M")
+187 | 
+188 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "wheel",
+  button: "wheel-up",
+  x: 10,
+  y: 20,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:188:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should parse SGR wheel up [0.04ms]
+198 | 
+199 |     it("should parse SGR wheel down", () => {
+200 |       // Wheel down: bit 6 set (64) + bit 0 set (1)
+201 |       const result = parseMouseEvent("\x1b[<65;10;20;M")
+202 | 
+203 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "wheel",
+  button: "wheel-down",
+  x: 10,
+  y: 20,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:203:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should parse SGR wheel down [0.03ms]
+212 |     })
+213 | 
+214 |     it("should handle large coordinates", () => {
+215 |       const result = parseMouseEvent("\x1b[<0;999;999;M")
+216 | 
+217 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "press",
+  button: "left",
+  x: 999,
+  y: 999,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:217:22)
+(fail) Mouse Event Parsing > SGR Extended Mode > should handle large coordinates [0.04ms]
+(pass) Mouse Event Parsing > X10 Mouse Protocol > should parse X10 left button press [0.02ms]
+(pass) Mouse Event Parsing > X10 Mouse Protocol > should parse X10 right button press [0.01ms]
+262 | 
+263 |     it("should parse X10 middle button press", () => {
+264 |       // Middle button = 1, so button+32 = 33 (ASCII '!')
+265 |       const result = parseMouseEvent("\x1b[M!*4")
+266 | 
+267 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+  {
+    alt: false,
++   button: "none",
+-   button: "middle",
+    ctrl: false,
+    shift: false,
++   type: "release",
+-   type: "press",
+    x: 10,
+    y: 20,
+  }
+
+- Expected  - 2
++ Received  + 2
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:267:22)
+(fail) Mouse Event Parsing > X10 Mouse Protocol > should parse X10 middle button press [0.04ms]
+(pass) Mouse Event Parsing > X10 Mouse Protocol > should parse X10 with modifiers [0.01ms]
+(pass) Mouse Event Parsing > X10 Mouse Protocol > should parse X10 motion event
+(pass) Mouse Event Parsing > X10 Mouse Protocol > should parse X10 release event
+(pass) Mouse Event Parsing > X10 Mouse Protocol > should handle edge coordinates
+(pass) Mouse Event Parsing > Invalid Mouse Sequences > should return null for invalid SGR sequences [0.01ms]
+(pass) Mouse Event Parsing > Invalid Mouse Sequences > should return null for invalid X10 sequences [0.02ms]
+(pass) Mouse Event Parsing > Invalid Mouse Sequences > should return null for non-mouse sequences
+(pass) Input Buffer Parsing Integration > should be tested through service integration
+(pass) ANSI Sequence Edge Cases > Malformed Sequences > should handle incomplete escape sequences [0.05ms]
+(pass) ANSI Sequence Edge Cases > Malformed Sequences > should handle invalid parameter formats [0.02ms]
+415 | 
+416 |   describe("Boundary Values", () => {
+417 |     it("should handle maximum coordinate values", () => {
+418 |       const result = parseMouseEvent("\x1b[<0;65535;65535;M")
+419 | 
+420 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "press",
+  button: "left",
+  x: 65535,
+  y: 65535,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:420:22)
+(fail) ANSI Sequence Edge Cases > Boundary Values > should handle maximum coordinate values [0.03ms]
+430 | 
+431 |     it("should handle negative coordinates from parseInt", () => {
+432 |       // While unlikely in practice, test what happens with negative values
+433 |       const result = parseMouseEvent("\x1b[<0;-10;-20;M")
+434 | 
+435 |       expect(result).toEqual({
+                           ^
+error: expect(received).toEqual(expected)
+
+Expected: [32m{
+  type: "press",
+  button: "left",
+  x: -10,
+  y: -20,
+  ctrl: false,
+  alt: false,
+  shift: false,
+}[0m
+Received: [31mnull[0m
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:435:22)
+(fail) ANSI Sequence Edge Cases > Boundary Values > should handle negative coordinates from parseInt [0.03ms]
+446 |     it("should handle large button values", () => {
+447 |       // Test with button values that have multiple bits set
+448 |       const result = parseMouseEvent("\x1b[<255;10;20;M")
+449 | 
+450 |       expect(result).toBeDefined()
+451 |       expect(result!.x).toBe(10)
+                   ^
+TypeError: null is not an object (evaluating 'result.x')
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-parsing.test.ts:451:14)
+(fail) ANSI Sequence Edge Cases > Boundary Values > should handle large button values [0.02ms]
+(pass) Character Encoding Edge Cases > X10 Character Encoding > should handle high ASCII characters in X10 mode [0.04ms]
+(pass) Character Encoding Edge Cases > X10 Character Encoding > should handle null characters in X10 mode [0.01ms]
+
+__tests__/unit/services/input-edge-cases.test.ts:
+113 |       setTimeout(() => simulateStdinData("[A"), 10)
+114 | 
+115 |       const result = await keyPromise
+116 |       const keys = Array.from(result)
+117 | 
+118 |       expect(keys).toHaveLength(1)
+                         ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 1
+Received length: 2
+
+      at <anonymous> (/Users/aewing/Projects/cinderlink/cli-kit/__tests__/unit/services/input-edge-cases.test.ts:118:20)
+(fail) Input Service Edge Cases > Malformed ANSI Sequences > should handle incomplete escape sequences at buffer end [11.74ms]
+error: Test "should handle truncated CSI sequences" timed out after 5000ms
+(fail) Input Service Edge Cases > Malformed ANSI Sequences > should handle truncated CSI sequences [5000.05ms]
+error: Test "should handle unknown function key sequences" timed out after 5000ms
+(fail) Input Service Edge Cases > Malformed ANSI Sequences > should handle unknown function key sequences [5000.05ms]

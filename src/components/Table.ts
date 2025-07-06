@@ -690,3 +690,13 @@ export const simpleTable = <T extends Record<string, any>>(
   
   return table({ columns, rows })
 }
+
+/**
+ * Alias for table - creates a basic table component
+ */
+export const createTable = table
+
+/**
+ * Creates a data table from an array of objects
+ */
+export const createDataTable = simpleTable
