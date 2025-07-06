@@ -50,7 +50,7 @@ export * from "./styling/index.ts"
 export * from "./cli/index.ts"
 
 // Version information
-export const VERSION = "1.0.0-rc.1" as const
+export const VERSION = "1.0.0-rc.2" as const
 
 // Framework metadata
 export const FRAMEWORK_INFO = {
