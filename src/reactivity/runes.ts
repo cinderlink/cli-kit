@@ -129,3 +129,24 @@ export function $derived<T>(fn: () => T): DerivedRune<T> {
   
   return rune
 }
+
+/**
+ * Type guard to check if a value is a state rune
+ */
+export function isStateRune<T>(value: any): value is StateRune<T> {
+  return value && typeof value === 'function' && value.$type === 'state'
+}
+
+/**
+ * Type guard to check if a value is a bindable rune
+ */
+export function isBindableRune<T>(value: any): value is BindableRune<T> {
+  return value && typeof value === 'function' && value.$type === 'bindable' && value.$bindable === true
+}
+
+/**
+ * Type guard to check if a value is a derived rune
+ */
+export function isDerivedRune<T>(value: any): value is DerivedRune<T> {
+  return value && typeof value === 'function' && value.$type === 'derived'
+}
