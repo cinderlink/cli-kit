@@ -1,11 +1,11 @@
 # TUIX 🎨
 
-A comprehensive TypeScript framework for building modern command-line applications and terminal user interfaces. Built with [Effect.ts](https://effect.website/) for functional programming and featuring JSX support with Svelte-inspired reactivity through runes.
+A comprehensive TypeScript framework for building modern command-line applications and terminal user interfaces. Built with [Effect.ts](https://effect.website/) for functional programming and featuring JSX support with [Svelte](https://svelte.dev/)-inspired reactive state management through runes.
 
 ## ✨ Features
 
 - 🎯 **Type-Safe CLI Framework**: Full TypeScript support with Zod validation
-- 🧩 **JSX Terminal Components**: Svelte-inspired syntax with runes for reactive terminal UIs
+- 🧩 **JSX Terminal Components**: React-like syntax with [Svelte](https://svelte.dev/)-inspired runes for reactive terminal UIs
 - 🎨 **Rich Styling System**: Colors, gradients, borders, and advanced styling
 - ⌨️ **Input & Mouse Handling**: Comprehensive event processing
 - 🔌 **Plugin System**: Extensible architecture with hooks and middleware
@@ -54,7 +54,7 @@ const MyComponent = ({ name }: { name: string }) => {
   return (
     <Box border="rounded" padding={2}>
       <Text color="cyan" bold>
-        Welcome to CLI-Kit, {name}! 🎉
+        Welcome to TUIX, {name}! 🎉
       </Text>
       <Text>Clicked {clickCount} times</Text>
       <Button 
@@ -95,7 +95,7 @@ const counterApp: Component<Model, Msg> = {
   
   view: (model: Model) => (
     <div>
-      <Text color="cyan" bold>CLI-Kit Counter 🎯</Text>
+      <Text color="cyan" bold>TUIX Counter 🎯</Text>
       <Text>Count: {model.count}</Text>
       <Text color="gray">Press Space to increment, Ctrl+C to exit</Text>
     </div>
@@ -148,7 +148,7 @@ Interactive terminal applications following the **Model-View-Update (MVU)** patt
 └─────────────┘
 ```
 
-Both frameworks are powered by **Effect.ts** for functional programming, error handling, and resource management, with **Svelte runes** providing reactive state management.
+Both frameworks are powered by **Effect.ts** for functional programming, error handling, and resource management, with **[Svelte](https://svelte.dev/)-inspired runes** providing reactive state management.
 
 ## 🧩 JSX Components
 
@@ -173,7 +173,7 @@ Both frameworks are powered by **Effect.ts** for functional programming, error h
 ### Interactive Components
 
 ```tsx
-// Reactive state with runes (planned)
+// Reactive state with Svelte-inspired runes
 let count = $state(0)
 let inputValue = $state('')
 let selectedIndex = $state(0)
@@ -202,7 +202,7 @@ let selectedIndex = $state(0)
 ### Data Display
 
 ```tsx
-// Reactive data with runes (planned)
+// Reactive data with Svelte-inspired runes
 let tableData = $state([...])
 let currentTab = $state(0)
 let progress = $state(75)
@@ -241,7 +241,7 @@ let progress = $state(75)
 
 ## 🎨 Styling System
 
-CLI-Kit provides a comprehensive styling system with multiple approaches:
+TUIX provides a comprehensive styling system with multiple approaches:
 
 ### JSX Style Props
 
@@ -356,6 +356,55 @@ const gradient = createGradient({
 '#ff6432'
 'hsl(120, 50%, 75%)'
 ```
+
+## 🔄 Reactive State with Runes
+
+TUIX features a reactive state management system inspired by [Svelte 5's runes](https://svelte.dev/docs/svelte/what-are-runes). This provides a simple, powerful way to manage reactive state in terminal applications.
+
+### Svelte-Inspired Runes
+
+```typescript
+import { $state, $derived, $bindable } from 'tuix/runes'
+
+// Reactive state (like Svelte's $state)
+let count = $state(0)
+let name = $state('World')
+
+// Derived values (like Svelte's $derived)
+let greeting = $derived(() => `Hello, ${name()}!`)
+let doubled = $derived(() => count() * 2)
+
+// Bindable values for two-way data binding (like Svelte's $bindable)
+let inputValue = $bindable('', {
+  validate: (value) => value.length > 0 || 'Value cannot be empty',
+  transform: (value) => value.trim()
+})
+
+// Use in components
+const MyComponent = () => {
+  return (
+    <div>
+      <Text>{greeting()}</Text>
+      <Text>Count: {count()}, Doubled: {doubled()}</Text>
+      <Button onClick={() => count(count() + 1)}>
+        Increment
+      </Button>
+    </div>
+  )
+}
+```
+
+### Why Svelte-Inspired?
+
+[Svelte's rune system](https://svelte.dev/docs/svelte/what-are-runes) provides an elegant approach to reactivity that works perfectly for terminal UIs:
+
+- **Simple**: No complex state management boilerplate
+- **Reactive**: Values automatically update when dependencies change  
+- **Type-Safe**: Full TypeScript support with proper inference
+- **Performance**: Efficient updates only when values actually change
+- **Familiar**: Similar syntax to Svelte for web developers
+
+Unlike web Svelte which compiles away the runes, TUIX implements them as runtime functions that work naturally with Effect.ts and the terminal environment.
 
 ## ⌨️ Input Handling
 
@@ -542,26 +591,29 @@ interface Component<Model, Msg> {
 This is an active development project. Some features are still being implemented:
 
 ### ✅ Completed
-- ✅ **CLI Framework**: Complete command parsing, routing, and validation
-- ✅ **JSX Runtime**: Full JSX support with Svelte-inspired runes for reactive terminal UIs
+- ✅ **CLI Framework**: Complete command parsing, routing, and validation with Zod
+- ✅ **JSX Runtime**: Full JSX support with [Svelte](https://svelte.dev/)-inspired runes for reactive terminal UIs
 - ✅ **Plugin System**: Extensible architecture with hooks and middleware
-- ✅ **Performance Optimizations**: Lazy loading, caching, and efficient rendering
-- ✅ **Core Components**: Text, Button, Box, List, Table, Tabs, ProgressBar, Spinner
+- ✅ **Performance Optimizations**: Lazy loading, caching, view caching, and efficient rendering
+- ✅ **Core Components**: Text, Button, Box, List, Table, Tabs, ProgressBar, Spinner, TextInput
 - ✅ **Advanced Styling**: Colors, gradients, borders, layouts, and CSS-like styling
 - ✅ **Type Safety**: Full TypeScript support with proper generics and Effect.ts integration
-- ✅ **Input & Mouse Handling**: Comprehensive event processing system
-- ✅ **Testing Framework**: Comprehensive test utilities and coverage
+- ✅ **Input & Mouse Handling**: Comprehensive keyboard and mouse event processing
+- ✅ **Testing Framework**: Comprehensive test utilities, E2E testing, and performance benchmarks
+- ✅ **Documentation**: Comprehensive guides and API reference in `/docs` directory
+- ✅ **Examples**: 20+ real-world application examples including git dashboard, process monitor, log viewer
+- ✅ **Runes Reactivity**: [Svelte](https://svelte.dev/)-inspired reactive state management with `$state`, `$derived`, `$bindable`
+- ✅ **TUIX Files**: Support for `.tuix` files with JSX compilation
+- ✅ **Hit Testing**: Component boundary detection and coordinate mapping
 
 ### 🚧 In Progress  
-- 🔧 **Documentation**: Comprehensive guides and API reference
-- 🔧 **Mouse Routing**: Coordinate-to-component mouse event routing
-- 🔧 **Examples**: Real-world application examples and tutorials
+- 🔧 **Mouse Routing**: Fine-grained coordinate-to-component mouse event routing (basic hit testing works)
 
 ### 📋 Planned
-- 📋 **Modal/Dialog**: Overlay components with backdrop
-- 📋 **Viewport**: Scrollable content areas for large datasets  
-- 📋 **FilePicker**: File and directory selection components
-- 📋 **Help System**: Interactive keybinding help and documentation
+- 📋 **Modal/Dialog**: Overlay components with backdrop (demo exists, needs integration)
+- 📋 **Viewport**: Scrollable content areas for large datasets (demo exists, needs integration)
+- 📋 **FilePicker**: File and directory selection components (demo exists, needs integration)
+- 📋 **Help System**: Interactive keybinding help and documentation (demo exists, needs integration)
 - 📋 **Themes**: Comprehensive theming system and presets
 - 📋 **Animation**: Smooth transitions and loading animations
 

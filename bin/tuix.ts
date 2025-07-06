@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 
 /**
- * CLI-KIT Command Line Tool
+ * TUIX Command Line Tool
  * 
- * Main binary for CLI-KIT framework utilities
+ * Main binary for TUIX framework utilities
  */
 
 import { Effect } from "effect"
@@ -83,7 +83,7 @@ async function handleScreenshot(subcommand: string | undefined, args: string[], 
     case 'q':
       if (args.length === 0) {
         console.error("Error: Command required for quick screenshot")
-        console.log("Usage: cli-kit screenshot quick <command>")
+        console.log("Usage: tuix screenshot quick <command>")
         process.exit(1)
       }
       await quickScreenshot(args.join(' '), options)
@@ -93,7 +93,7 @@ async function handleScreenshot(subcommand: string | undefined, args: string[], 
     case 'new':
       if (args.length === 0) {
         console.error("Error: Name required for screenshot")
-        console.log("Usage: cli-kit screenshot create <name> --command <cmd>")
+        console.log("Usage: tuix screenshot create <name> --command <cmd>")
         process.exit(1)
       }
       await createScreenshot(args[0], options)
@@ -103,7 +103,7 @@ async function handleScreenshot(subcommand: string | undefined, args: string[], 
     case 'view':
       if (args.length === 0) {
         console.error("Error: Name required")
-        console.log("Usage: cli-kit screenshot show <name>")
+        console.log("Usage: tuix screenshot show <name>")
         process.exit(1)
       }
       await showScreenshot(args[0], options)
