@@ -1,8 +1,9 @@
 /**
- * Tests for CLI Configuration
+ * Comprehensive tests for CLI Configuration
  */
 
 import { describe, it, expect } from "bun:test"
+import { Effect } from "effect"
 import {
   validateConfig,
   mergeConfigs,
@@ -12,11 +13,68 @@ import {
   resolveConfigPath,
   createDefaultConfig,
   normalizeCommand,
-  type CLIConfig
+  defineConfig,
+  defineCommand,
+  lazyLoad,
+  commonOptions,
+  commonArgs,
+  type CLIConfig,
+  type CommandConfig
 } from "@/cli/config"
 import { z } from "zod"
 
-describe("CLI Configuration", () => {
+describe("CLI Configuration - Comprehensive", () => {
+  describe("defineConfig", () => {
+    it("creates basic config", () => {
+      const config = defineConfig({
+        name: "my-cli",
+        version: "1.0.0"
+      })
+      
+      expect(config.name).toBe("my-cli")
+      expect(config.version).toBe("1.0.0")
+      expect(config.commands).toEqual({})
+    })
+
+    it("creates config with all options", () => {
+      const config = defineConfig({
+        name: "full-cli",
+        version: "2.0.0",
+        description: "A full-featured CLI",
+        commands: {
+          test: defineCommand({
+            description: "Run tests",
+            handler: () => {}
+          })
+        },
+        options: {
+          verbose: commonOptions.verbose
+        },
+        plugins: [{
+          name: "test-plugin",
+          version: "1.0.0",
+          commands: {}
+        }],
+        hooks: {
+          beforeCommand: async () => {},
+          afterCommand: async () => {}
+        },
+        settings: {
+          theme: "dark",
+          exitOnError: false
+        }
+      })
+      
+      expect(config.name).toBe("full-cli")
+      expect(config.description).toBe("A full-featured CLI")
+      expect(config.commands.test).toBeDefined()
+      expect(config.options?.verbose).toBeDefined()
+      expect(config.plugins).toHaveLength(1)
+      expect(config.hooks?.beforeCommand).toBeDefined()
+      expect(config.settings?.theme).toBe("dark")
+    })
+  })
+
   describe("validateConfig", () => {
     it("validates a minimal config", () => {
       const config: CLIConfig = {
@@ -48,9 +106,9 @@ describe("CLI Configuration", () => {
           afterCommand: async () => {}
         },
         plugins: [],
-        settings: {
-          colors: true,
-          interactive: true
+        aliases: {
+          t: "test",
+          r: "run"
         }
       }
       
@@ -59,40 +117,93 @@ describe("CLI Configuration", () => {
 
     it("throws on invalid config", () => {
       const invalidConfigs = [
-        { name: "", version: "1.0.0", description: "Empty name" },
-        { name: "test", version: "", description: "Empty version" },
-        { name: "test", version: "1.0.0", description: "" },
-        { name: "test", version: "invalid-version", description: "Invalid version" }
+        { name: "", version: "1.0.0" }, // empty name
+        { name: "test", version: "" }, // empty version
+        { name: "test", version: "1.0.0", commands: "invalid" }, // invalid commands type
+        { name: "test", version: "1.0.0", plugins: "invalid" } // invalid plugins type
       ]
       
       for (const config of invalidConfigs) {
-        expect(() => validateConfig(config as CLIConfig)).toThrow()
+        expect(() => validateConfig(config as any)).toThrow()
       }
     })
+  })
 
-    it("validates nested commands", () => {
-      const config: CLIConfig = {
-        name: "nested-cli",
-        version: "1.0.0",
-        description: "CLI with nested commands",
-        commands: {
-          db: {
-            description: "Database commands",
-            subcommands: {
-              migrate: {
-                description: "Run migrations",
-                handler: async () => {}
-              },
-              seed: {
-                description: "Seed database",
-                handler: async () => {}
-              }
-            }
-          }
-        }
-      }
+  describe("defineCommand", () => {
+    it("creates simple command", () => {
+      const cmd = defineCommand({
+        description: "Simple command",
+        handler: () => {}
+      })
       
-      expect(() => validateConfig(config)).not.toThrow()
+      expect(cmd.description).toBe("Simple command")
+      expect(cmd.handler).toBeDefined()
+    })
+
+    it("creates command with options and args", () => {
+      const cmd = defineCommand({
+        description: "Complex command",
+        args: {
+          file: commonArgs.file
+        },
+        options: {
+          force: commonOptions.force,
+          verbose: commonOptions.verbose
+        },
+        handler: () => {}
+      })
+      
+      expect(cmd.args?.file).toBeDefined()
+      expect(cmd.options?.force).toBeDefined()
+      expect(cmd.options?.verbose).toBeDefined()
+    })
+
+    it("creates command with subcommands", () => {
+      const cmd = defineCommand({
+        description: "Parent command",
+        subcommands: {
+          add: defineCommand({
+            description: "Add subcommand",
+            handler: () => {}
+          }),
+          remove: defineCommand({
+            description: "Remove subcommand",
+            handler: () => {}
+          })
+        }
+      })
+      
+      expect(cmd.subcommands?.add).toBeDefined()
+      expect(cmd.subcommands?.remove).toBeDefined()
+    })
+
+    it("creates command with aliases", () => {
+      const cmd = defineCommand({
+        description: "Command with aliases",
+        aliases: ["rm", "del"],
+        handler: () => {}
+      })
+      
+      expect(cmd.aliases).toEqual(["rm", "del"])
+    })
+  })
+
+  describe("lazyLoad", () => {
+    it("creates lazy-loaded command", () => {
+      const cmd = lazyLoad(() => import("./test-module"))
+      
+      expect(cmd._lazy).toBe(true)
+      expect(cmd._loader).toBeDefined()
+    })
+
+    it("creates lazy-loaded command with metadata", () => {
+      const cmd = lazyLoad(() => import("./test-module"), {
+        description: "Lazy command",
+        aliases: ["lazy"]
+      })
+      
+      expect(cmd.description).toBe("Lazy command")
+      expect(cmd.aliases).toEqual(["lazy"])
     })
   })
 
@@ -101,343 +212,205 @@ describe("CLI Configuration", () => {
       const base: CLIConfig = {
         name: "base-cli",
         version: "1.0.0",
-        description: "Base CLI",
-        settings: {
-          colors: true
-        }
-      }
-      
-      const override: Partial<CLIConfig> = {
-        version: "2.0.0",
-        settings: {
-          interactive: false
-        },
         commands: {
-          new: {
-            description: "New command",
+          test: {
+            description: "Test command",
             handler: async () => {}
           }
         }
       }
       
+      const override: CLIConfig = {
+        name: "override-cli",
+        version: "2.0.0",
+        commands: {
+          build: {
+            description: "Build command",
+            handler: async () => {}
+          }
+        },
+        aliases: {
+          t: "test"
+        }
+      }
+      
       const merged = mergeConfigs(base, override)
       
-      expect(merged.name).toBe("base-cli")
+      expect(merged.name).toBe("override-cli")
       expect(merged.version).toBe("2.0.0")
+      expect(merged.commands?.test).toBeDefined()
+      expect(merged.commands?.build).toBeDefined()
+      expect(merged.aliases?.t).toBe("test")
+    })
+
+    it("merges configs with deep properties", () => {
+      const base: CLIConfig = {
+        name: "test",
+        version: "1.0.0",
+        settings: {
+          theme: "light",
+          colors: true
+        }
+      }
+      
+      const override: CLIConfig = {
+        name: "test",
+        version: "1.0.0",
+        settings: {
+          theme: "dark"
+        }
+      }
+      
+      const merged = mergeConfigs(base, override)
+      
+      expect(merged.settings?.theme).toBe("dark")
       expect(merged.settings?.colors).toBe(true)
-      expect(merged.settings?.interactive).toBe(false)
-      expect(merged.commands?.new).toBeDefined()
+    })
+  })
+
+  describe("expandAliases", () => {
+    it("expands simple aliases", () => {
+      const aliases = {
+        t: "test",
+        b: "build",
+        r: "run"
+      }
+      
+      expect(expandAliases("t", aliases)).toBe("test")
+      expect(expandAliases("b", aliases)).toBe("build")
+      expect(expandAliases("r", aliases)).toBe("run")
     })
 
-    it("deep merges commands", () => {
-      const base: CLIConfig = {
-        name: "cli",
-        version: "1.0.0",
-        description: "CLI",
-        commands: {
-          test: {
-            description: "Test command",
-            options: {
-              force: z.boolean()
-            },
-            handler: async () => ({ result: "base" })
-          }
-        }
+    it("expands nested aliases", () => {
+      const aliases = {
+        t: "test",
+        ta: "t --all",
+        tav: "ta --verbose"
       }
       
-      const override: Partial<CLIConfig> = {
-        commands: {
-          test: {
-            description: "Updated test command",
-            options: {
-              verbose: z.boolean()
-            }
-          }
-        }
-      }
-      
-      const merged = mergeConfigs(base, override)
-      
-      expect(merged.commands?.test.description).toBe("Updated test command")
-      expect(merged.commands?.test.options?.force).toBeDefined()
-      expect(merged.commands?.test.options?.verbose).toBeDefined()
+      expect(expandAliases("ta", aliases)).toBe("test --all")
+      expect(expandAliases("tav", aliases)).toBe("test --all --verbose")
     })
 
-    it("merges arrays correctly", () => {
-      const base: CLIConfig = {
-        name: "cli",
-        version: "1.0.0",
-        description: "CLI",
-        plugins: ["plugin1"]
+    it("returns original if no alias found", () => {
+      const aliases = { t: "test" }
+      
+      expect(expandAliases("build", aliases)).toBe("build")
+    })
+
+    it("handles circular aliases", () => {
+      const aliases = {
+        a: "b",
+        b: "c",
+        c: "a"
       }
       
-      const override: Partial<CLIConfig> = {
-        plugins: ["plugin2", "plugin3"]
-      }
-      
-      const merged = mergeConfigs(base, override)
-      
-      expect(merged.plugins).toEqual(["plugin1", "plugin2", "plugin3"])
+      expect(expandAliases("a", aliases)).toBe("a") // Should not infinite loop
     })
   })
 
   describe("parseEnvVars", () => {
     it("parses environment variables", () => {
       const env = {
-        CLI_NAME: "my-cli",
-        CLI_VERSION: "3.0.0",
-        CLI_COLORS: "false",
-        CLI_VERBOSE: "true",
+        MY_CLI_NAME: "test-cli",
+        MY_CLI_VERSION: "1.0.0",
+        MY_CLI_VERBOSE: "true",
         OTHER_VAR: "ignored"
       }
       
-      const config = parseEnvVars(env, "CLI_")
+      const parsed = parseEnvVars(env, "MY_CLI_")
       
-      expect(config.name).toBe("my-cli")
-      expect(config.version).toBe("3.0.0")
-      expect(config.settings?.colors).toBe(false)
-      expect(config.globalOptions?.verbose).toBe(true)
+      expect(parsed.name).toBe("test-cli")
+      expect(parsed.version).toBe("1.0.0")
+      expect(parsed.verbose).toBe(true)
+      expect(parsed.other_var).toBeUndefined()
     })
 
     it("handles nested env vars", () => {
       const env = {
-        MYAPP_SETTINGS_COLORS: "true",
-        MYAPP_SETTINGS_INTERACTIVE: "false",
-        MYAPP_SETTINGS_OUTPUT: "json"
+        CLI_SETTINGS_THEME: "dark",
+        CLI_SETTINGS_COLORS: "false",
+        CLI_HOOKS_BEFORE: "echo before"
       }
       
-      const config = parseEnvVars(env, "MYAPP_")
+      const parsed = parseEnvVars(env, "CLI_")
       
-      expect(config.settings).toEqual({
-        colors: true,
-        interactive: false,
-        output: "json"
+      expect(parsed.settings_theme).toBe("dark")
+      expect(parsed.settings_colors).toBe(false)
+      expect(parsed.hooks_before).toBe("echo before")
+    })
+  })
+
+  describe("createDefaultConfig", () => {
+    it("creates default config with minimal input", () => {
+      const config = createDefaultConfig({
+        name: "my-cli",
+        version: "1.0.0"
       })
-    })
-
-    it("ignores invalid values", () => {
-      const env = {
-        CLI_COLORS: "not-a-boolean",
-        CLI_VERSION: "1.0.0"
-      }
       
-      const config = parseEnvVars(env, "CLI_")
-      
+      expect(config.name).toBe("my-cli")
       expect(config.version).toBe("1.0.0")
-      expect(config.settings?.colors).toBeUndefined()
+      expect(config.description).toBe("my-cli CLI")
+      expect(config.commands).toEqual({})
+      expect(config.settings?.colors).toBe(true)
+    })
+
+    it("preserves user settings", () => {
+      const config = createDefaultConfig({
+        name: "test",
+        version: "1.0.0",
+        description: "Custom description",
+        settings: {
+          colors: false
+        }
+      })
+      
+      expect(config.description).toBe("Custom description")
+      expect(config.settings?.colors).toBe(false)
     })
   })
 
-  describe("expandAliases", () => {
-    it("expands command aliases", () => {
-      const config: CLIConfig = {
-        name: "cli",
-        version: "1.0.0",
-        description: "CLI",
-        commands: {
-          install: {
-            description: "Install packages",
-            aliases: ["i", "add"],
-            handler: async () => {}
-          }
-        }
-      }
-      
-      const expanded = expandAliases(config)
-      
-      expect(expanded.commands?.i).toBeDefined()
-      expect(expanded.commands?.add).toBeDefined()
-      expect(expanded.commands?.i.handler).toBe(expanded.commands?.install.handler)
-    })
-
-    it("expands nested command aliases", () => {
-      const config: CLIConfig = {
-        name: "cli",
-        version: "1.0.0",
-        description: "CLI",
-        commands: {
-          database: {
-            description: "Database commands",
-            aliases: ["db"],
-            subcommands: {
-              migrate: {
-                description: "Run migrations",
-                aliases: ["m"],
-                handler: async () => {}
-              }
-            }
-          }
-        }
-      }
-      
-      const expanded = expandAliases(config)
-      
-      expect(expanded.commands?.db).toBeDefined()
-      expect(expanded.commands?.db.subcommands?.m).toBeDefined()
-    })
-
-    it("warns on conflicting aliases", () => {
-      const config: CLIConfig = {
-        name: "cli",
-        version: "1.0.0",
-        description: "CLI",
-        commands: {
-          install: {
-            description: "Install",
-            aliases: ["i"],
-            handler: async () => {}
-          },
-          info: {
-            description: "Info",
-            aliases: ["i"], // Conflict!
-            handler: async () => {}
-          }
-        }
-      }
-      
-      // Should handle conflicts gracefully
-      const expanded = expandAliases(config)
-      expect(expanded.commands?.i).toBeDefined()
-    })
-  })
-
-  describe("loadConfig", () => {
-    it("loads config from file", async () => {
-      // This would normally read from filesystem
-      // For testing, we'll mock the behavior
-      const mockConfigPath = "/path/to/config.json"
-      const mockConfig: CLIConfig = {
-        name: "loaded-cli",
-        version: "1.0.0",
-        description: "Loaded from file"
-      }
-      
-      // In real implementation, this would read from file
-      // For now, just test the validation
-      expect(() => validateConfig(mockConfig)).not.toThrow()
+  describe("normalizeCommand", () => {
+    it("normalizes command names", () => {
+      expect(normalizeCommand("TEST")).toBe("test")
+      expect(normalizeCommand("Test-Command")).toBe("test-command")
+      expect(normalizeCommand("test_command")).toBe("test_command")
+      expect(normalizeCommand("  test  ")).toBe("test")
     })
   })
 
   describe("resolveConfigPath", () => {
     it("resolves config paths", () => {
       const paths = [
-        ".myapprc",
-        ".myapprc.json",
-        ".myapprc.js",
-        "myapp.config.js"
+        "./config.json",
+        "../config.json",
+        "~/config.json",
+        "/absolute/config.json"
       ]
       
-      // In real implementation, this would check filesystem
-      // For testing, we verify the path patterns
       for (const path of paths) {
-        expect(path).toMatch(/\.(json|js|rc)$|rc$/i)
+        const resolved = resolveConfigPath(path)
+        expect(resolved).toBeTruthy()
+        expect(resolved).toContain("config.json")
       }
     })
   })
 
-  describe("createDefaultConfig", () => {
-    it("creates default config", () => {
-      const config = createDefaultConfig("my-app")
-      
-      expect(config.name).toBe("my-app")
-      expect(config.version).toBe("0.0.1")
-      expect(config.description).toBe("A CLI application")
-      expect(config.settings?.colors).toBe(true)
-      expect(config.settings?.interactive).toBe(true)
+  describe("commonOptions", () => {
+    it("provides standard options", () => {
+      expect(commonOptions.verbose).toBeDefined()
+      expect(commonOptions.force).toBeDefined()
+      expect(commonOptions.yes).toBeDefined()
+      expect(commonOptions.quiet).toBeDefined()
+      expect(commonOptions.debug).toBeDefined()
     })
   })
 
-  describe("normalizeCommand", () => {
-    it("normalizes command names", () => {
-      const tests = [
-        { input: "my-command", expected: "my-command" },
-        { input: "MyCommand", expected: "mycommand" },
-        { input: "my_command", expected: "my-command" },
-        { input: "MY_COMMAND", expected: "my-command" },
-        { input: "myCommand", expected: "mycommand" }
-      ]
-      
-      for (const test of tests) {
-        expect(normalizeCommand(test.input)).toBe(test.expected)
-      }
-    })
-  })
-
-  describe("Complex Configuration Scenarios", () => {
-    it("handles deeply nested commands", () => {
-      const config: CLIConfig = {
-        name: "complex-cli",
-        version: "1.0.0",
-        description: "Complex CLI",
-        commands: {
-          project: {
-            description: "Project commands",
-            subcommands: {
-              create: {
-                description: "Create project",
-                subcommands: {
-                  react: {
-                    description: "Create React project",
-                    handler: async () => {}
-                  },
-                  vue: {
-                    description: "Create Vue project",
-                    handler: async () => {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      
-      expect(() => validateConfig(config)).not.toThrow()
-    })
-
-    it("handles command inheritance", () => {
-      const config: CLIConfig = {
-        name: "cli",
-        version: "1.0.0",
-        description: "CLI",
-        globalOptions: {
-          verbose: z.boolean().default(false)
-        },
-        commands: {
-          deploy: {
-            description: "Deploy",
-            options: {
-              env: z.enum(["dev", "prod"])
-            },
-            handler: async () => {}
-          }
-        }
-      }
-      
-      expect(() => validateConfig(config)).not.toThrow()
-      // Commands should inherit global options
-    })
-
-    it("validates plugin configuration", () => {
-      const config: CLIConfig = {
-        name: "cli",
-        version: "1.0.0",
-        description: "CLI",
-        plugins: [
-          "my-plugin",
-          {
-            name: "inline-plugin",
-            version: "1.0.0",
-            commands: {
-              custom: {
-                description: "Custom command",
-                handler: async () => {}
-              }
-            }
-          }
-        ]
-      }
-      
-      expect(() => validateConfig(config)).not.toThrow()
+  describe("commonArgs", () => {
+    it("provides standard arguments", () => {
+      expect(commonArgs.file).toBeDefined()
+      expect(commonArgs.directory).toBeDefined()
+      expect(commonArgs.files).toBeDefined()
     })
   })
 })

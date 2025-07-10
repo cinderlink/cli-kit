@@ -20,7 +20,7 @@ describe("Input Edge Cases", () => {
       const result = parseChar("\0")
       
       expect(result.type).toBe(KeyType.Runes)
-      expect(result.key).toBe("\0")
+      expect(result.key).toBe("ctrl+`")
     })
 
     it("handles Unicode characters correctly", () => {

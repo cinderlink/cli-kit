@@ -115,7 +115,7 @@ function normalizeChildren(children: any): View[] {
       if (Array.isArray(item)) {
         return flat.concat(flatten(item))
       }
-      if (item === null || item === undefined || item === false) {
+      if (item === null || item === undefined || item === false || item === true) {
         return flat
       }
       return flat.concat(item)
@@ -198,7 +198,7 @@ export function jsx(
       let content = ''
       if (Array.isArray(children)) {
         content = children.join('')
-      } else if (children != null) {
+      } else if (children != null && typeof children !== 'boolean') {
         content = String(children)
       }
       

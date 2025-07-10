@@ -15,7 +15,7 @@ describe("TUIX Integration", () => {
 
   it("JSX runtime is properly configured", async () => {
     // Verify JSX import source is set up correctly
-    const jsx = await import("@cinderlink/cli-kit/jsx-runtime")
+    const jsx = await import("tuix/jsx-runtime")
     expect(jsx).toBeDefined()
   })
 

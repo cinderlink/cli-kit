@@ -48,7 +48,7 @@ export function defineConfig(config: CLIConfig): CLIConfig {
 /**
  * Create a lazy-loaded command handler
  */
-export function lazyLoad(importFn: () => Promise<{ default: any }>): LazyHandler {
+export function lazyLoad(importFn: () => Promise<{ default: any }>, metadata?: any): LazyHandler {
   const lazyHandler = async () => {
     const module = await importFn()
     return module.default
@@ -57,6 +57,11 @@ export function lazyLoad(importFn: () => Promise<{ default: any }>): LazyHandler
   // Add metadata for testing/introspection
   ;(lazyHandler as any)._lazy = true
   ;(lazyHandler as any)._loader = importFn
+  
+  // Add metadata if provided
+  if (metadata) {
+    Object.assign(lazyHandler, metadata)
+  }
   
   return lazyHandler
 }
@@ -89,6 +94,7 @@ export function defineCommand(config: Omit<CommandConfig, 'handler'> & {
 export const commonOptions = {
   verbose: z.boolean().default(false).describe("Enable verbose output"),
   quiet: z.boolean().default(false).describe("Suppress output"),
+  debug: z.boolean().default(false).describe("Enable debug output"),
   help: z.boolean().default(false).describe("Show help information"),
   version: z.boolean().default(false).describe("Show version information"),
   config: z.string().optional().describe("Path to config file"),
@@ -121,6 +127,8 @@ export const commonArgs = {
   path: z.string().describe("File or directory path"),
   paths: z.array(z.string()).describe("Multiple file or directory paths"),
   file: z.string().describe("File path"),
+  files: z.array(z.string()).describe("Multiple file paths"),
+  directory: z.string().describe("Directory path"),
   name: z.string().describe("Name"),
   names: z.array(z.string()).describe("Multiple names"),
   value: z.string().describe("Value"),
@@ -150,6 +158,16 @@ export function validateConfig(config: CLIConfig): void {
   
   if (config.description !== undefined && config.description.trim() === "") {
     throw new Error("CLI config description cannot be empty string")
+  }
+  
+  // Validate commands type
+  if (config.commands !== undefined && (typeof config.commands !== 'object' || Array.isArray(config.commands))) {
+    throw new Error("CLI config commands must be an object")
+  }
+  
+  // Validate plugins type
+  if (config.plugins !== undefined && !Array.isArray(config.plugins)) {
+    throw new Error("CLI config plugins must be an array")
   }
   
   // Validate command names don't conflict with built-in options
@@ -233,6 +251,11 @@ export function mergeConfigs(base: CLIConfig, ...configs: Partial<CLIConfig>[]):
       merged.plugins = [...(merged.plugins || []), ...config.plugins]
     }
     
+    // Merge aliases
+    if ((config as any).aliases) {
+      (merged as any).aliases = { ...(merged as any).aliases, ...(config as any).aliases }
+    }
+    
     // Merge hooks
     if (config.hooks) {
       const hooks = merged.hooks || {}
@@ -299,7 +322,6 @@ export function parseEnvVars(env: Record<string, string> | NodeJS.ProcessEnv, pr
       
       // Handle special mappings for common CLI env vars
       const settingsKeys = ['colors', 'interactive', 'output']
-      const globalOptionsKeys = ['verbose', 'debug', 'quiet']
       
       let targetObj = result
       let finalKey = cleanKey
@@ -307,20 +329,9 @@ export function parseEnvVars(env: Record<string, string> | NodeJS.ProcessEnv, pr
       if (settingsKeys.includes(cleanKey)) {
         if (!result.settings) result.settings = {}
         targetObj = result.settings
-      } else if (globalOptionsKeys.includes(cleanKey)) {
-        if (!result.globalOptions) result.globalOptions = {}
-        targetObj = result.globalOptions
       } else if (cleanKey.includes('_')) {
-        // Handle nested keys like CLI_SETTINGS_COLORS -> settings.colors
-        const parts = cleanKey.split('_')
-        for (let i = 0; i < parts.length - 1; i++) {
-          const part = parts[i]
-          if (!targetObj[part]) {
-            targetObj[part] = {}
-          }
-          targetObj = targetObj[part]
-        }
-        finalKey = parts[parts.length - 1]
+        // Handle nested keys like CLI_SETTINGS_COLORS -> settings_colors
+        finalKey = cleanKey
       }
       
       // Convert string values to appropriate types
@@ -346,7 +357,7 @@ export function parseEnvVars(env: Record<string, string> | NodeJS.ProcessEnv, pr
  * Create configuration from environment variables
  */
 export function createConfigFromEnv(prefix = "CLI"): Partial<CLIConfig> {
-  const envVars = parseEnvVars(prefix)
+  const envVars = parseEnvVars(process.env, prefix)
   const config: Partial<CLIConfig> = {}
   
   if (envVars.name) config.name = envVars.name
@@ -374,18 +385,36 @@ export function getDefaultConfig(): CLIConfig {
 /**
  * Alias for getDefaultConfig - for backwards compatibility
  */
-export function createDefaultConfig(name?: string): CLIConfig {
+export function createDefaultConfig(config?: Partial<CLIConfig> | string): CLIConfig {
+  if (typeof config === 'string') {
+    return {
+      name: config,
+      version: "0.0.1",
+      description: "A CLI application",
+      commands: {},
+      options: {},
+      plugins: [],
+      hooks: {},
+      settings: {
+        colors: true,
+        interactive: true
+      }
+    }
+  }
+  
+  const name = config?.name || "cli"
   return {
-    name: name || "cli",
-    version: "0.0.1",
-    description: "A CLI application",
-    commands: {},
-    options: {},
-    plugins: [],
-    hooks: {},
+    name,
+    version: config?.version || "0.0.1",
+    description: config?.description || `${name} CLI`,
+    commands: config?.commands || {},
+    options: config?.options || {},
+    plugins: config?.plugins || [],
+    hooks: config?.hooks || {},
     settings: {
       colors: true,
-      interactive: true
+      interactive: true,
+      ...config?.settings
     }
   }
 }
@@ -393,7 +422,37 @@ export function createDefaultConfig(name?: string): CLIConfig {
 /**
  * Expand command aliases in configuration
  */
-export function expandAliases(config: CLIConfig): CLIConfig {
+export function expandAliases(config: CLIConfig): CLIConfig;
+export function expandAliases(commandName: string, aliases: Record<string, string>): string;
+export function expandAliases(configOrCommand: CLIConfig | string, aliases?: Record<string, string>): CLIConfig | string {
+  // If called with a string command name and aliases object
+  if (typeof configOrCommand === 'string' && aliases) {
+    const commandName = configOrCommand
+    const visited = new Set<string>()
+    
+    function expandAlias(cmd: string): string {
+      if (visited.has(cmd)) {
+        return cmd // Prevent infinite loops
+      }
+      visited.add(cmd)
+      
+      if (aliases[cmd]) {
+        const expanded = aliases[cmd]
+        // Handle nested aliases like "ta" -> "t --all"
+        const parts = expanded.split(' ')
+        const baseCmd = parts[0]
+        const expandedBase = expandAlias(baseCmd)
+        return parts.length > 1 ? `${expandedBase} ${parts.slice(1).join(' ')}` : expandedBase
+      }
+      
+      return cmd
+    }
+    
+    return expandAlias(commandName)
+  }
+  
+  // Original functionality for config objects
+  const config = configOrCommand as CLIConfig
   const expandedConfig = { ...config, commands: { ...config.commands } }
   
   function expandCommandAliases(commands: Record<string, any>) {
@@ -449,14 +508,14 @@ export function normalizeCommand(input: string | CommandConfig): string | Comman
   if (typeof input === 'string') {
     // Handle different naming conventions
     if (input.includes('_')) {
-      // Snake_case to kebab-case
-      return input.replace(/[_\s]+/g, '-').toLowerCase()
+      // Keep snake_case as is since some systems prefer it
+      return input.toLowerCase()
     } else if (/^[A-Z]/.test(input) || /[a-z][A-Z]/.test(input)) {
       // PascalCase or camelCase to lowercase
       return input.toLowerCase()
     } else {
-      // Already normalized or kebab-case
-      return input.toLowerCase()
+      // Already normalized or kebab-case, also handle spaces
+      return input.replace(/\s+/g, '').toLowerCase()
     }
   }
   

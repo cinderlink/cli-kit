@@ -327,7 +327,7 @@ describe("JSX Runtime", () => {
     test("handles boolean children", async () => {
       const element = jsx("text", { children: true })
       const result = await Effect.runPromise(element.render())
-      expect(result).toBe("true")
+      expect(result).toBe("") // Booleans should not render
     })
   })
 

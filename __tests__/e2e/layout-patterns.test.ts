@@ -161,8 +161,8 @@ test("Layout Patterns - All Layout Names", async () => {
         const layout = expectedLayouts[i]
         const output = yield* _(ctx.getOutput())
         
-        expect(output).toContain(`Layout Showcase (${layout.index}/4)`)
-        expect(output).toContain(`Current: ${layout.name}`)
+        expect(output).toContain(`Layout Showcase (${layout?.index}/4)`)
+        expect(output).toContain(`Current: ${layout?.name}`)
         
         if (i < expectedLayouts.length - 1) {
           ctx = yield* _(ctx.sendMessage({ _tag: "NextLayout" }))

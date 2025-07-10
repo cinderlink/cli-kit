@@ -46,6 +46,7 @@ export class CLIRunner {
       // If no command provided, show help
       if (parsedArgs.command.length === 0) {
         this.showHelp()
+        process.exit(0)
         return
       }
       
@@ -55,6 +56,7 @@ export class CLIRunner {
       
       if (!route.handler) {
         this.handleUnknownCommand(parsedArgs.command)
+        process.exit(1)
         return
       }
       
@@ -74,8 +76,9 @@ export class CLIRunner {
       try {
         // Execute the command handler
         const handlerArgs = {
-          ...parsedArgs.args,
-          ...parsedArgs.options,
+          command: parsedArgs.command,
+          args: parsedArgs.rawArgs.slice(parsedArgs.command.length), // Positional args after command
+          options: parsedArgs.options,
           _context: context
         }
         
@@ -132,7 +135,7 @@ export class CLIRunner {
    * Show version information
    */
   private showVersion(): void {
-    console.log(`${this.config.name} v${this.config.version}`)
+    console.log(`${this.config.name} ${this.config.version}`)
   }
   
   /**

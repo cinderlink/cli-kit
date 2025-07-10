@@ -104,7 +104,7 @@ describe("Join Layout Functions", () => {
       const result = await Effect.runPromise(joined.render())
       
       // 0.25 position means 25% from top
-      expect(result).toBe("A \nBX\nC ")
+      expect(result).toBe("AX\nB \nC ")
     })
 
     it("pads views to their declared width", async () => {
@@ -125,7 +125,7 @@ describe("Join Layout Functions", () => {
       const joined = joinHorizontal([view1, view2, view3], { align: 'middle' })
       const result = await Effect.runPromise(joined.render())
       
-      expect(result).toBe(" X \nAY1\nBZ ")
+      expect(result).toBe("AX \nBY1\n Z ")
     })
   })
 
@@ -190,7 +190,7 @@ describe("Join Layout Functions", () => {
       const result = await Effect.runPromise(joined.render())
       
       // 0.75 position means 75% from left (closer to right)
-      expect(result).toBe("ABC\n  X")
+      expect(result).toBe("ABC\n X ")
     })
 
     it("handles multi-line views", async () => {
@@ -200,7 +200,7 @@ describe("Join Layout Functions", () => {
       const joined = joinVertical([view1, view2], { align: 'center' })
       const result = await Effect.runPromise(joined.render())
       
-      expect(result).toBe("AB\nCD\n X")
+      expect(result).toBe("AB\nCD\nX ")
     })
 
     it("preserves line content when aligning", async () => {

@@ -17,6 +17,7 @@ export interface StateRune<T> extends Rune<T> {
   readonly $type: 'state'
   $set(value: T): void
   $update(fn: (current: T) => T): void
+  $subscribe(listener: (value: T) => void): () => void
 }
 
 /**
@@ -49,6 +50,7 @@ export interface BindableOptions<T> {
  */
 export function $state<T>(initial: T): StateRune<T> {
   let value = initial
+  const listeners = new Set<(value: T) => void>()
   
   const rune = (() => {
     return value
@@ -59,11 +61,23 @@ export function $state<T>(initial: T): StateRune<T> {
   rune.$set = (newValue: T) => {
     if (value !== newValue) {
       value = newValue
+      // Notify all listeners
+      listeners.forEach(listener => listener(value))
     }
   }
   
   rune.$update = (fn: (current: T) => T) => {
     rune.$set(fn(value))
+  }
+  
+  rune.$subscribe = (listener: (value: T) => void) => {
+    listeners.add(listener)
+    // Call listener immediately with current value
+    listener(value)
+    // Return unsubscribe function
+    return () => {
+      listeners.delete(listener)
+    }
   }
   
   return rune
@@ -74,6 +88,7 @@ export function $state<T>(initial: T): StateRune<T> {
  */
 export function $bindable<T>(initial: T, options: BindableOptions<T> = {}): BindableRune<T> {
   let value = initial
+  const listeners = new Set<(value: T) => void>()
   
   const rune = (() => {
     return value
@@ -106,11 +121,23 @@ export function $bindable<T>(initial: T, options: BindableOptions<T> = {}): Bind
     
     if (value !== finalValue) {
       value = finalValue
+      // Notify all listeners
+      listeners.forEach(listener => listener(value))
     }
   }
   
   rune.$update = (fn: (current: T) => T) => {
     rune.$set(fn(value))
+  }
+  
+  rune.$subscribe = (listener: (value: T) => void) => {
+    listeners.add(listener)
+    // Call listener immediately with current value
+    listener(value)
+    // Return unsubscribe function
+    return () => {
+      listeners.delete(listener)
+    }
   }
   
   return rune
@@ -131,22 +158,74 @@ export function $derived<T>(fn: () => T): DerivedRune<T> {
 }
 
 /**
+ * Creates an effect that runs immediately and whenever dependencies change
+ * For now, this is a simple implementation that just runs the function once
+ */
+export function $effect(fn: () => void | (() => void)): () => void {
+  // Run the effect immediately
+  const cleanup = fn()
+  
+  // Return a cleanup function
+  return () => {
+    if (typeof cleanup === 'function') {
+      cleanup()
+    }
+  }
+}
+
+/**
  * Type guard to check if a value is a state rune
  */
 export function isStateRune<T>(value: any): value is StateRune<T> {
-  return value && typeof value === 'function' && value.$type === 'state'
+  return !!(value && typeof value === 'function' && value.$type === 'state')
 }
 
 /**
  * Type guard to check if a value is a bindable rune
  */
 export function isBindableRune<T>(value: any): value is BindableRune<T> {
-  return value && typeof value === 'function' && value.$type === 'bindable' && value.$bindable === true
+  return !!(value && typeof value === 'function' && value.$type === 'bindable' && value.$bindable === true)
 }
 
 /**
  * Type guard to check if a value is a derived rune
  */
 export function isDerivedRune<T>(value: any): value is DerivedRune<T> {
-  return value && typeof value === 'function' && value.$type === 'derived'
+  return !!(value && typeof value === 'function' && value.$type === 'derived')
+}
+
+/**
+ * Type guard to check if a value is any type of rune
+ */
+export function isRune<T>(value: any): value is Rune<T> {
+  return !!(value && typeof value === 'function' && typeof value.$type === 'string')
+}
+
+/**
+ * Gets the current value from a rune
+ */
+export function getValue<T>(rune: Rune<T>): T {
+  return rune()
+}
+
+/**
+ * Converts a state rune to a bindable rune
+ */
+export function toBindable<T>(state: StateRune<T>, options: BindableOptions<T> = {}): BindableRune<T> {
+  // Create a bindable with the same initial value
+  const bindable = $bindable(state(), options)
+  
+  // Override the set method to update both runes
+  const originalSet = bindable.$set
+  bindable.$set = (value: T) => {
+    originalSet(value)
+    state.$set(value)
+  }
+  
+  // Subscribe to state changes to keep bindable in sync
+  state.$subscribe((value) => {
+    originalSet(value)
+  })
+  
+  return bindable
 }

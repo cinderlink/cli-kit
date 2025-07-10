@@ -77,9 +77,8 @@ export function Panel(content: View | View[], options: PanelOptions = {}): View 
     border,
     padding: normalizedPadding,
     style: panelStyle,
-    className,
-    width,
-    height
+    minWidth: width,
+    minHeight: height
   })
 }
 
