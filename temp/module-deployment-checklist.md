@@ -1,189 +1,189 @@
 # Module & Plugin Documentation Deployment Checklist
 
 ## Root Level
-- [ ] Copy RULES.md to root
-- [ ] Copy STANDARDS.md to root
-- [ ] Copy CONVENTIONS.md to root
-- [ ] Copy MODULES.md to root
-- [ ] Copy PLUGINS.md to root
+- [ ] Copy rules.md to root
+- [ ] Copy standards.md to root
+- [ ] Copy conventions.md to root
+- [ ] Copy modules.md to root
+- [ ] Copy plugins.md to root
 
 ## Framework Modules (src/)
 
 ### Core Modules
 - [ ] **alignment/** - Documentation alignment module
-  - [x] Already has PLANNING.md
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] DEPENDENCIES.md
+  - [x] Already has planning.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] dependencies.md
 
 - [ ] **cli/** - CLI framework
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **components/** - Component system
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **config/** - Configuration management
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **core/** - Core runtime
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **health/** - Health monitoring
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **jsx/** - JSX runtime
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **layout/** - Layout algorithms
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **logger/** - Logging system
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **plugins/** - Plugin infrastructure
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **process-manager/** - Process management
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **reactivity/** - Reactive state management
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **scope/** - Scope management
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **services/** - Core services
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **styling/** - Styling system
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **tea/** - TEA architecture components
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **testing/** - Testing utilities
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 - [ ] **utils/** - Utility functions
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 ## Plugins (plugins/)
 
 - [ ] **auth** (currently auth.ts - needs directory structure)
   - [ ] Create auth/ directory
   - [ ] Move auth.ts to auth/index.ts
-  - [ ] README.md
-  - [ ] RULES.md
-  - [ ] STANDARDS.md
-  - [ ] CONVENTIONS.md
-  - [ ] ISSUES.md
-  - [ ] PLANNING.md
-  - [ ] DEPENDENCIES.md
+  - [ ] readme.md
+  - [ ] rules.md
+  - [ ] standards.md
+  - [ ] conventions.md
+  - [ ] issues.md
+  - [ ] planning.md
+  - [ ] dependencies.md
 
 ## Sub-modules with significant structure
 

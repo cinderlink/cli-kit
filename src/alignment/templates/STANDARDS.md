@@ -19,9 +19,9 @@
 {moduleDirectory}/
 ├── index.ts           # Public API exports
 ├── types.ts           # Type definitions
-├── README.md          # Module documentation
-├── ISSUES.md          # Known issues
-├── PLANNING.md        # Future plans
+├── readme.md          # Module documentation
+├── issues.md          # Known issues
+├── planning.md        # Future plans
 └── {additionalStructure}
 ```
 

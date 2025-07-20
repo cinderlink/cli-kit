@@ -292,6 +292,12 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
    - Prefer composition over inheritance
    - NEVER create workarounds or simplified versions
 
+3. **JSX Configuration**
+   - **NEVER ADD JSX PRAGMAS**: Do not add `/** @jsx jsx */` or similar pragma comments
+   - **USE BUILD CONFIG**: JSX is configured via tsconfig.json and bunfig.toml
+   - **PACKAGE.JSON FOR EXAMPLES**: If module resolution fails in examples, create a package.json with `"name": "examples"` instead of adding pragmas
+   - The project uses automatic JSX transform with `jsxImportSource: "."` configured at build level
+
 # Important Instruction Reminders
 
 - **ALWAYS READ FILES**: When asked to read documentation or files, use the Read tool to actually read them
@@ -307,4 +313,5 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 - When multiple implementations are truly needed, use interfaces and proper directory structure
 - **NEVER CREATE ONE-OFF SCRIPTS, TESTS, COMMANDS, OR EXAMPLES**: Only create or modify real feature tests. If a feature isn't covered by the feature test suite, then the feature test suite is incomplete and should be fixed
 - **NO TEST SCRIPTS**: Never create test-*.ts, test-*.tsx, demo-*.ts, example-*.ts files for testing - use the proper test suite
+- **NO JSX PRAGMAS**: Never add `/** @jsx jsx */` or `/** @jsxImportSource ... */` pragmas to files - JSX is configured at the build level
 - **FEATURE TESTS ONLY**: All testing must be done through the official test suite. If something needs testing, add it to the appropriate test file in the tests/ directory
