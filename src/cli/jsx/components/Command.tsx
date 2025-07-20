@@ -6,8 +6,6 @@
 
 import { CommandLineScope } from './CommandLineScope'
 import type { JSX } from '../../../jsx/runtime'
-import { commandStore } from '../stores'
-import { onMount } from '../../../reactivity/jsx-lifecycle'
 
 export interface CommandProps {
   name: string
@@ -34,32 +32,14 @@ export interface CommandProps {
 }
 
 export function Command(props: CommandProps): JSX.Element {
-  // Register command with store if it has a handler
-  if (props.handler) {
-    try {
-      onMount(() => {
-        commandStore.registerCommand({
-          name: props.name,
-          description: props.description,
-          handler: props.handler,
-          args: props.args,
-          flags: props.flags,
-          aliases: props.aliases,
-          path: [] // Path will be computed by scope
-        })
-      })
-    } catch {
-      // Outside component context - register immediately
-      commandStore.registerCommand({
-        name: props.name,
-        description: props.description,
-        handler: props.handler,
-        args: props.args,
-        flags: props.flags,
-        aliases: props.aliases,
-        path: []
-      })
-    }
+  // Extract handler from children if it's a function
+  let handler = props.handler
+  let children = props.children
+  
+  // If children is a function, use it as the handler
+  if (typeof props.children === 'function') {
+    handler = props.children as (ctx: any) => JSX.Element | Promise<JSX.Element>
+    children = undefined
   }
   
   return (
@@ -68,7 +48,7 @@ export function Command(props: CommandProps): JSX.Element {
       name={props.name}
       description={props.description}
       aliases={props.aliases}
-      handler={props.handler}
+      handler={handler}
       args={props.args}
       flags={props.flags}
       metadata={{
@@ -76,7 +56,7 @@ export function Command(props: CommandProps): JSX.Element {
         interactive: props.interactive
       }}
     >
-      {props.children}
+      {children}
     </CommandLineScope>
   )
 }

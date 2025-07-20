@@ -8,7 +8,7 @@
 import { jsx } from '../../../jsx/runtime'
 import { Scope, type ScopeProps, ScopeContent } from '../../../scope/jsx/components'
 import { CommandLineHelp } from './CommandLineHelp'
-import { commandStore } from '../stores'
+import { scopeCommandStore } from '../stores/scope-command-store'
 import { scopeManager } from '../../../scope/manager'
 import type { JSX } from '../../../jsx/runtime'
 
@@ -17,31 +17,12 @@ export interface CommandLineScopeProps extends ScopeProps {
 }
 
 export function CommandLineScope(props: CommandLineScopeProps): JSX.Element {
-  const currentCommandPath = commandStore.currentPath
-  const scopePath = props.path || []
-  
-  // Check if this scope's path matches the active command path
-  const isActive = currentCommandPath.length >= scopePath.length &&
-    scopePath.every((segment, i) => segment === currentCommandPath[i])
-  
-  // Check if help was specifically requested for this scope
-  const isHelpRequested = isActive && 
-    currentCommandPath.length === scopePath.length + 1 &&
-    currentCommandPath[currentCommandPath.length - 1] === 'help'
-  
-  // Check if a child command will handle this
-  const childWillHandle = isActive && 
-    currentCommandPath.length > scopePath.length &&
-    !isHelpRequested
-  
-  // Should we show help?
-  const shouldShowHelp = isActive && (isHelpRequested || !childWillHandle)
-  
-  // Custom handler that shows help when appropriate
-  const handler = shouldShowHelp ? () => <CommandLineHelp /> : props.handler
+  // CLI scopes are executable and can have handlers
+  // The scope system will handle activation/deactivation
+  // Help fallback is handled by ScopeFallback component automatically
   
   return (
-    <Scope {...props} executable={true} handler={handler}>
+    <Scope {...props} executable={true}>
       {/* Process children normally */}
       {props.children}
       
@@ -49,8 +30,9 @@ export function CommandLineScope(props: CommandLineScopeProps): JSX.Element {
       <Scope
         type="command"
         name="help"
-        description={`Show help for ${props.name}`}
-        handler={() => <CommandLineHelp />}
+        description={`Show help for ${props.name || 'command'}`}
+        path={[...(props.path || []), 'help']}
+        handler={() => <CommandLineHelp scopeId={props.id} />}
       />
     </Scope>
   )
