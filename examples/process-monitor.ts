@@ -162,11 +162,11 @@ const processMonitor: Component<Model, Msg> = {
             []
           ])
         }
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
       
       default:
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
     }
   },
   
@@ -219,7 +219,7 @@ const processMonitor: Component<Model, Msg> = {
       subtitle,
       text(""),
       box(processTable, {
-        border: Borders.single,
+        border: Borders.Normal,
         borderStyle: style().foreground(Colors.gray),
         padding: { top: 1, right: 2, bottom: 1, left: 2 }
       }),

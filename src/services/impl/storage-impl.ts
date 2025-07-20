@@ -3,8 +3,8 @@
  */
 
 import { Effect, Layer, Ref } from "effect"
-import { StorageService, StorageUtils } from "../storage.ts"
-import { StorageError } from "@/core/errors.ts"
+import { StorageService, StorageUtils } from "../storage"
+import { StorageError } from "../../core/errors"
 import * as fs from "node:fs/promises"
 import * as path from "node:path"
 import { z } from "zod"
@@ -19,10 +19,10 @@ export const StorageServiceLive = Layer.effect(
     const stateStore = yield* _(Ref.make<Map<string, string>>(new Map()))
     
     // In-memory cache with TTL
-    const cacheStore = yield* _(Ref.make<Map<string, { data: any, expires: number | null, createdAt: number }>>(new Map()))
+    const cacheStore = yield* _(Ref.make<Map<string, { data: unknown, expires: number | null, createdAt: number }>>(new Map()))
     
     // Config storage
-    const configStore = yield* _(Ref.make<Map<string, any>>(new Map()))
+    const configStore = yield* _(Ref.make<Map<string, unknown>>(new Map()))
     
     // Transaction tracking
     const transactions = yield* _(Ref.make<Map<string, Array<{ operation: 'write' | 'delete', path: string, content?: string }>>>(new Map()))
@@ -30,7 +30,7 @@ export const StorageServiceLive = Layer.effect(
     // Helper to get app data directory
     const getAppDataDir = (appName: string): string => {
       const dataPaths = StorageUtils.getDataPaths(appName)
-      return dataPaths[0]
+      return dataPaths[0] ?? ''
     }
 
     // Helper to get state file path
@@ -41,7 +41,7 @@ export const StorageServiceLive = Layer.effect(
     // Helper to get cache directory
     const getCacheDir = (): string => {
       const cachePaths = StorageUtils.getCachePaths("cli-kit")
-      return cachePaths[0]
+      return cachePaths[0] ?? ''
     }
 
     return {
@@ -119,7 +119,9 @@ export const StorageServiceLive = Layer.effect(
             // Store in memory for next time
             yield* _(Ref.update(stateStore, store => {
               const newStore = new Map(store)
-              newStore.set(key, content!)
+              if (content) {
+                newStore.set(key, content)
+              }
               return newStore
             }))
           }
@@ -697,7 +699,7 @@ export const StorageServiceLive = Layer.effect(
               yield* _(Effect.tryPromise({
                 try: async () => {
                   await fs.mkdir(path.dirname(op.path), { recursive: true })
-                  await fs.writeFile(op.path, op.content!)
+                  await fs.writeFile(op.path, op.content)
                 },
                 catch: (error) => new StorageError({
                   operation: "write",

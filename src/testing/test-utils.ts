@@ -12,7 +12,7 @@ import {
   InputService,
   RendererService,
   StorageService
-} from "@/services/index.ts"
+} from "../services/index"
 import type {
   Component,
   KeyEvent,
@@ -22,13 +22,13 @@ import type {
   Viewport,
   TerminalCapabilities,
   Cmd
-} from "@/services/index.ts"
+} from "../services/index"
 import {
   TerminalError,
   InputError,
   RenderError,
   StorageError
-} from "@/core/errors.ts"
+} from "../core/errors"
 
 // =============================================================================
 // Test Environment
@@ -60,6 +60,13 @@ export const createTestEnvironment = (
     colors: '256',
     unicode: true,
     mouse: true,
+    clipboard: false,
+    sixel: false,
+    kitty: false,
+    iterm2: false,
+    windowTitle: false,
+    columns: 80,
+    rows: 24,
     alternateScreen: true,
     cursorShapes: true
   },
@@ -519,7 +526,7 @@ export const testComponent = <Model, Msg>(
   const testLayer = createTestLayer(options?.environment)
   
   // Helper to run effects with the test layer
-  const runWithLayer = <A, E>(effect: Effect.Effect<A, E, any>): Promise<A> =>
+  const runWithLayer = <A, E, R>(effect: Effect.Effect<A, E, R>): Promise<A> =>
     Effect.runPromise(
       effect.pipe(
         Effect.provide(testLayer),
@@ -579,7 +586,7 @@ export const TUIAssert = {
    */
   stateHas: <T>(state: T, expected: Partial<T>) => {
     for (const [key, value] of Object.entries(expected)) {
-      expect((state as any)[key]).toEqual(value)
+      expect((state as Record<string, unknown>)[key]).toEqual(value)
     }
   },
 

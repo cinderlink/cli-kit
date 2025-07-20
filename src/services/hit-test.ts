@@ -6,8 +6,8 @@
  * mouse coordinate.
  */
 
-import { Effect, Context, Ref, Array as EffectArray, Layer } from "effect"
-import type { MouseEvent } from "@/core/types.ts"
+import { Effect, Context, Ref, Layer } from "effect"
+import type { MouseEvent } from "../core/types"
 
 // =============================================================================
 // Types
@@ -87,12 +87,29 @@ export const HitTestService = Context.GenericTag<HitTestServiceInterface>("HitTe
 /**
  * Check if a point is inside a rectangle
  */
-const pointInRect = (x: number, y: number, bounds: ComponentBounds): boolean => {
-  return x >= bounds.x && 
-         x < bounds.x + bounds.width &&
-         y >= bounds.y && 
-         y < bounds.y + bounds.height
-}
+const pointInRect = (x: number, y: number, bounds: ComponentBounds): boolean => 
+  x >= bounds.x && 
+  x < bounds.x + bounds.width &&
+  y >= bounds.y && 
+  y < bounds.y + bounds.height
+
+/**
+ * Convert bounds to hit test result
+ */
+const boundsToHitResult = (x: number, y: number, bounds: ComponentBounds): HitTestResult => ({
+  componentId: bounds.componentId,
+  bounds,
+  localX: x - bounds.x,
+  localY: y - bounds.y
+})
+
+/**
+ * Find all components that contain the given point
+ */
+const findHitsAtPoint = (x: number, y: number, components: Array<ComponentBounds>): Array<HitTestResult> =>
+  components
+    .filter(bounds => pointInRect(x, y, bounds))
+    .map(bounds => boundsToHitResult(x, y, bounds))
 
 /**
  * Live implementation of the hit testing service
@@ -119,16 +136,7 @@ export const HitTestServiceLive = Effect.gen(function* (_) {
     hitTest: (x: number, y: number) =>
       Effect.gen(function* (_) {
         const components = yield* _(Ref.get(componentsRef))
-        
-        // Find all components at this point, then return the topmost (highest zIndex)
-        const hits = components
-          .filter(bounds => pointInRect(x, y, bounds))
-          .map(bounds => ({
-            componentId: bounds.componentId,
-            bounds,
-            localX: x - bounds.x,
-            localY: y - bounds.y
-          }))
+        const hits = findHitsAtPoint(x, y, components)
         
         // Return the topmost hit (last in the sorted array)
         return hits.length > 0 ? hits[hits.length - 1] : null
@@ -137,15 +145,7 @@ export const HitTestServiceLive = Effect.gen(function* (_) {
     hitTestAll: (x: number, y: number) =>
       Effect.gen(function* (_) {
         const components = yield* _(Ref.get(componentsRef))
-        
-        return components
-          .filter(bounds => pointInRect(x, y, bounds))
-          .map(bounds => ({
-            componentId: bounds.componentId,
-            bounds,
-            localX: x - bounds.x,
-            localY: y - bounds.y
-          }))
+        return findHitsAtPoint(x, y, components)
       }),
     
     getAllBounds: Ref.get(componentsRef)

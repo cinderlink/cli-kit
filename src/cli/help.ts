@@ -5,12 +5,13 @@
  */
 
 import type { CLIConfig, CommandConfig } from "./types"
-import { largeTextWithPalette } from "../components/LargeText"
+import { largeTextWithPalette } from "../tea/display/LargeText"
 import { styledText, text, vstack, hstack } from "../core/view"
 import { style, Colors } from "../styling/index"
 import { styledBox } from "../layout/box"
 import { Borders } from "../styling/borders"
 import type { View } from "../core/types"
+import { z } from "zod"
 
 export interface HelpOptions {
   showBranding?: boolean
@@ -323,21 +324,29 @@ export class HelpGenerator {
   }
   
   // Helper methods
-  private hasOptions(options?: Record<string, any>): boolean {
+  private getSchemaDescription(schema: z.ZodSchema): string {
+    // Safely extract description from Zod schema
+    if ('_def' in schema && typeof schema._def === 'object' && schema._def && 'description' in schema._def) {
+      return String(schema._def.description || "")
+    }
+    return ""
+  }
+
+  private hasOptions(options?: Record<string, z.ZodSchema>): boolean {
     return Boolean(options && Object.keys(options).length > 0)
   }
   
-  private hasCommands(commands?: Record<string, any>): boolean {
+  private hasCommands(commands?: Record<string, CommandConfig>): boolean {
     return Boolean(commands && Object.keys(commands).length > 0)
   }
   
-  private hasArgs(args?: Record<string, any>): boolean {
+  private hasArgs(args?: Record<string, z.ZodSchema>): boolean {
     return Boolean(args && Object.keys(args).length > 0)
   }
   
-  private addOptionsHelp(lines: string[], options: Record<string, any>): void {
+  private addOptionsHelp(lines: string[], options: Record<string, z.ZodSchema>): void {
     Object.entries(options).forEach(([name, schema]) => {
-      const description = (schema as any)._def?.description || ""
+      const description = this.getSchemaDescription(schema)
       lines.push(`  --${name.padEnd(20)} ${description}`)
     })
   }
@@ -350,9 +359,9 @@ export class HelpGenerator {
     })
   }
   
-  private addArgsHelp(lines: string[], args: Record<string, any>): void {
+  private addArgsHelp(lines: string[], args: Record<string, z.ZodSchema>): void {
     Object.entries(args).forEach(([name, schema]) => {
-      const description = (schema as any)._def?.description || ""
+      const description = this.getSchemaDescription(schema)
       lines.push(`  ${name.padEnd(20)} ${description}`)
     })
   }
@@ -368,9 +377,9 @@ export class HelpGenerator {
       )
   }
   
-  private getOptionViews(options: Record<string, any>): View[] {
+  private getOptionViews(options: Record<string, z.ZodSchema>): View[] {
     return Object.entries(options).map(([name, schema]) => {
-      const description = (schema as any)._def?.description || ""
+      const description = this.getSchemaDescription(schema)
       return hstack(
         styledText(`--${name}`.padEnd(20), style().foreground(Colors.yellow)),
         styledText(description, style().foreground(Colors.white))
@@ -378,9 +387,9 @@ export class HelpGenerator {
     })
   }
   
-  private getArgViews(args: Record<string, any>): View[] {
+  private getArgViews(args: Record<string, z.ZodSchema>): View[] {
     return Object.entries(args).map(([name, schema]) => {
-      const description = (schema as any)._def?.description || ""
+      const description = this.getSchemaDescription(schema)
       return hstack(
         styledText(`<${name}>`.padEnd(20), style().foreground(Colors.green)),
         styledText(description, style().foreground(Colors.white))

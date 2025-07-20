@@ -1,0 +1,82 @@
+{
+  "name": "@tuix/jsx",
+  "version": "1.0.0-rc.1",
+  "description": "JSX runtime for TUIX CLI applications",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./runtime": {
+      "import": "./dist/runtime/index.mjs",
+      "require": "./dist/runtime/index.js",
+      "types": "./dist/runtime/index.d.ts"
+    },
+    "./cli": {
+      "import": "./dist/cli/index.mjs",
+      "require": "./dist/cli/index.js",
+      "types": "./dist/cli/index.d.ts"
+    },
+    "./plugins": {
+      "import": "./dist/plugins/index.mjs",
+      "require": "./dist/plugins/index.js",
+      "types": "./dist/plugins/index.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config/index.mjs",
+      "require": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
+    },
+    "./reactivity": {
+      "import": "./dist/reactivity/index.mjs",
+      "require": "./dist/reactivity/index.js",
+      "types": "./dist/reactivity/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun run build:types && bun run build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "bun build src/index.ts --outdir dist --format esm,cjs --splitting",
+    "dev": "bun run build --watch",
+    "test": "bun test src/**/*.test.ts",
+    "test:watch": "bun test --watch src/**/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'Add linting when available'",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "jsx",
+    "cli",
+    "terminal",
+    "tuix",
+    "ui",
+    "components"
+  ],
+  "author": "TUIX Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "bun": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  }
+}

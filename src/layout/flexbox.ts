@@ -12,8 +12,8 @@
  */
 
 import { Effect } from "effect"
-import { stringWidth } from "@/utils/string-width.ts"
-import type { View } from "@/core/types.ts"
+import { stringWidth } from "../utils/string-width"
+import type { View } from "../core/types"
 import {
   type FlexboxProps,
   type FlexItem,
@@ -23,11 +23,35 @@ import {
   JustifyContent,
   AlignItems,
   FlexWrap
-} from "./types.ts"
+} from "./types"
 
 // =============================================================================
 // Helper Functions
 // =============================================================================
+
+/**
+ * Check if direction is row-based (horizontal)
+ */
+const isRowDirection = (direction: FlexDirection): boolean =>
+  direction === FlexDirection.Row || direction === FlexDirection.RowReverse
+
+/**
+ * Check if direction is reversed
+ */
+const isReverseDirection = (direction: FlexDirection): boolean =>
+  direction === FlexDirection.RowReverse || direction === FlexDirection.ColumnReverse
+
+/**
+ * Get main axis dimension based on direction
+ */
+const getMainAxisDimension = (direction: FlexDirection, width: number, height: number): number =>
+  isRowDirection(direction) ? width : height
+
+/**
+ * Get cross axis dimension based on direction
+ */
+const getCrossAxisDimension = (direction: FlexDirection, width: number, height: number): number =>
+  isRowDirection(direction) ? height : width
 
 /**
  * Get the size of a view
@@ -47,9 +71,7 @@ const getMainAxisSize = (
   direction: FlexDirection
 ): number => {
   const size = getViewSize(item.view)
-  return direction === FlexDirection.Row || direction === FlexDirection.RowReverse
-    ? size.width
-    : size.height
+  return getMainAxisDimension(direction, size.width, size.height)
 }
 
 /**
@@ -60,9 +82,32 @@ const getCrossAxisSize = (
   direction: FlexDirection
 ): number => {
   const size = getViewSize(item.view)
-  return direction === FlexDirection.Row || direction === FlexDirection.RowReverse
-    ? size.height
-    : size.width
+  return getCrossAxisDimension(direction, size.width, size.height)
+}
+
+/**
+ * Create bounds based on direction and dimensions
+ */
+const createBounds = (
+  direction: FlexDirection,
+  mainPos: number,
+  crossPos: number,
+  mainSize: number,
+  crossSize: number
+): LayoutRect => {
+  return isRowDirection(direction)
+    ? {
+        x: mainPos,
+        y: crossPos,
+        width: mainSize,
+        height: crossSize
+      }
+    : {
+        x: crossPos,
+        y: mainPos,
+        width: crossSize,
+        height: mainSize
+      }
 }
 
 /**
@@ -79,6 +124,50 @@ const calculateFlexBasis = (
 }
 
 /**
+ * Calculate initial position based on justify content and free space
+ */
+const calculateInitialPosition = (
+  justifyContent: JustifyContent,
+  freeSpace: number,
+  itemCount: number
+): number => {
+  switch (justifyContent) {
+    case JustifyContent.Center:
+      return freeSpace / 2
+    case JustifyContent.End:
+      return freeSpace
+    case JustifyContent.SpaceAround:
+      return freeSpace / (itemCount * 2)
+    case JustifyContent.SpaceEvenly:
+      return freeSpace / (itemCount + 1)
+    default:
+      return 0
+  }
+}
+
+/**
+ * Calculate gap between items for justify content
+ */
+const calculateJustifyGap = (
+  justifyContent: JustifyContent,
+  freeSpace: number,
+  itemCount: number
+): number => {
+  if (itemCount <= 1) return 0
+  
+  switch (justifyContent) {
+    case JustifyContent.SpaceBetween:
+      return freeSpace / (itemCount - 1)
+    case JustifyContent.SpaceAround:
+      return freeSpace / itemCount
+    case JustifyContent.SpaceEvenly:
+      return freeSpace / (itemCount + 1)
+    default:
+      return 0
+  }
+}
+
+/**
  * Calculate total gap size
  */
 const calculateTotalGap = (
@@ -89,7 +178,7 @@ const calculateTotalGap = (
 ): number => {
   if (itemCount <= 1) return 0
   
-  const effectiveGap = direction === FlexDirection.Row || direction === FlexDirection.RowReverse
+  const effectiveGap = isRowDirection(direction)
     ? props.columnGap ?? gap
     : props.rowGap ?? gap
     
@@ -121,9 +210,8 @@ const calculateFlexLayout = (
   const availableHeight = containerHeight - (padding.top ?? 0) - (padding.bottom ?? 0)
   
   // Determine main and cross axis sizes
-  const isRow = direction === FlexDirection.Row || direction === FlexDirection.RowReverse
-  const mainAxisSize = isRow ? availableWidth : availableHeight
-  const crossAxisSize = isRow ? availableHeight : availableWidth
+  const mainAxisSize = getMainAxisDimension(direction, availableWidth, availableHeight)
+  const crossAxisSize = getCrossAxisDimension(direction, availableWidth, availableHeight)
   
   // Calculate flex basis for each item
   const flexBases = items.map(item => calculateFlexBasis(item, direction))
@@ -143,7 +231,7 @@ const calculateFlexLayout = (
   
   // Distribute space based on flex properties
   const finalSizes = items.map((item, index) => {
-    const basis = flexBases[index]
+    const basis = flexBases[index] ?? 0
     let size = basis
     
     if (remainingSpace > 0 && totalFlexGrow > 0) {
@@ -161,54 +249,29 @@ const calculateFlexLayout = (
   
   // Calculate positions based on justify content
   const positions: number[] = []
-  let currentPos = padding.top ?? 0
   
-  if (isRow) {
-    currentPos = padding.left ?? 0
-  }
+  // Initialize position based on direction and padding
+  let currentPos = isRowDirection(direction) 
+    ? (padding.left ?? 0) 
+    : (padding.top ?? 0)
   
-  // Handle justify content
+  // Calculate free space and initial position
   const totalItemSize = finalSizes.reduce((sum, size) => sum + size, 0) + totalGap
   const freeSpace = mainAxisSize - totalItemSize
   
-  switch (justifyContent) {
-    case JustifyContent.Center:
-      currentPos += freeSpace / 2
-      break
-    case JustifyContent.End:
-      currentPos += freeSpace
-      break
-    case JustifyContent.SpaceAround:
-      currentPos += freeSpace / (items.length * 2)
-      break
-    case JustifyContent.SpaceEvenly:
-      currentPos += freeSpace / (items.length + 1)
-      break
-  }
+  // Apply initial position based on justify content
+  currentPos += calculateInitialPosition(justifyContent, freeSpace, items.length)
   
   // Calculate positions for each item
+  const justifyGap = calculateJustifyGap(justifyContent, freeSpace, items.length)
+  
   items.forEach((_, index) => {
     positions.push(currentPos)
-    currentPos += finalSizes[index]
+    currentPos += finalSizes[index] ?? 0
     
-    // Add gap
+    // Add gap between items
     if (index < items.length - 1) {
-      currentPos += gap
-      
-      // Add extra space for justify content
-      switch (justifyContent) {
-        case JustifyContent.SpaceBetween:
-          if (items.length > 1) {
-            currentPos += freeSpace / (items.length - 1)
-          }
-          break
-        case JustifyContent.SpaceAround:
-          currentPos += freeSpace / items.length
-          break
-        case JustifyContent.SpaceEvenly:
-          currentPos += freeSpace / (items.length + 1)
-          break
-      }
+      currentPos += gap + justifyGap
     }
   })
   
@@ -232,26 +295,21 @@ const calculateFlexLayout = (
   
   // Create layout result
   const children = items.map((item, index) => {
-    const mainPos = positions[index]
-    const crossPos = crossPositions[index] + (isRow ? (padding.top ?? 0) : (padding.left ?? 0))
-    const mainSize = finalSizes[index]
+    const mainPos = positions[index] ?? 0
+    const crossPos = (crossPositions[index] ?? 0) + 
+      (isRowDirection(direction) ? (padding.top ?? 0) : (padding.left ?? 0))
+    const mainSize = finalSizes[index] ?? 0
     const crossSize = item.alignSelf === AlignItems.Stretch || alignItems === AlignItems.Stretch
       ? crossAxisSize
       : getCrossAxisSize(item, direction)
     
-    const bounds: LayoutRect = isRow
-      ? {
-          x: mainPos,
-          y: crossPos,
-          width: mainSize,
-          height: crossSize
-        }
-      : {
-          x: crossPos,
-          y: mainPos,
-          width: crossSize,
-          height: mainSize
-        }
+    const bounds: LayoutRect = createBounds(
+      direction,
+      mainPos,
+      crossPos,
+      mainSize,
+      crossSize
+    )
     
     return { view: item.view, bounds }
   })
@@ -274,6 +332,71 @@ const calculateFlexLayout = (
 /**
  * Create a flexbox container view
  */
+/**
+ * Calculate total dimensions for flexbox container
+ */
+const calculateContainerDimensions = (
+  flexItems: FlexItem[],
+  props: FlexboxProps
+): { width: number; height: number } => {
+  const padding = props.padding ?? {}
+  const paddingH = (padding.left ?? 0) + (padding.right ?? 0)
+  const paddingV = (padding.top ?? 0) + (padding.bottom ?? 0)
+  const direction = props.direction ?? FlexDirection.Row
+  const gap = props.gap ?? 0
+  
+  if (isRowDirection(direction)) {
+    // Row layout
+    const contentWidth = flexItems.reduce((sum, item) => sum + getViewSize(item.view).width, 0)
+    const totalGap = calculateTotalGap(flexItems.length, gap, direction, props)
+    const contentHeight = Math.max(...flexItems.map(item => getViewSize(item.view).height), 0)
+    
+    return {
+      width: paddingH + contentWidth + totalGap,
+      height: paddingV + contentHeight
+    }
+  } else {
+    // Column layout  
+    const contentHeight = flexItems.reduce((sum, item) => sum + getViewSize(item.view).height, 0)
+    const totalGap = calculateTotalGap(flexItems.length, gap, direction, props)
+    const contentWidth = Math.max(...flexItems.map(item => getViewSize(item.view).width), 0)
+    
+    return {
+      width: paddingH + contentWidth,
+      height: paddingV + contentHeight + totalGap
+    }
+  }
+}
+
+/**
+ * Render child view into 2D buffer
+ */
+const renderChildToBuffer = (
+  buffer: string[][],
+  content: string,
+  bounds: LayoutRect,
+  bufferWidth: number,
+  bufferHeight: number
+): void => {
+  const lines = content.split('\n')
+  
+  for (let y = 0; y < lines.length && y < bounds.height; y++) {
+    const line = lines[y] ?? ''
+    const chars = [...line]
+    
+    for (let x = 0; x < chars.length && x < bounds.width; x++) {
+      const bufferY = bounds.y + y
+      const bufferX = bounds.x + x
+      
+      if (bufferY >= 0 && bufferY < bufferHeight && 
+          bufferX >= 0 && bufferX < bufferWidth &&
+          buffer[bufferY] && chars[x]) {
+        buffer[bufferY][bufferX] = chars[x]
+      }
+    }
+  }
+}
+
 export const flexbox = (
   items: ReadonlyArray<FlexItem | View>,
   props: FlexboxProps = {}
@@ -283,29 +406,8 @@ export const flexbox = (
     'view' in item ? item : { view: item }
   )
   
-  // Calculate dimensions
-  const padding = props.padding ?? {}
-  const paddingH = (padding.left ?? 0) + (padding.right ?? 0)
-  const paddingV = (padding.top ?? 0) + (padding.bottom ?? 0)
-  
-  // For now, use a simple size calculation
-  // In a real implementation, this would be more sophisticated
-  const isRow = props.direction === FlexDirection.Row || props.direction === FlexDirection.RowReverse
-  
-  let totalWidth = paddingH
-  let totalHeight = paddingV
-  
-  if (isRow) {
-    // Row layout
-    totalWidth += flexItems.reduce((sum, item) => sum + getViewSize(item.view).width, 0)
-    totalWidth += calculateTotalGap(flexItems.length, props.gap ?? 0, props.direction ?? FlexDirection.Row, props)
-    totalHeight += Math.max(...flexItems.map(item => getViewSize(item.view).height))
-  } else {
-    // Column layout
-    totalHeight += flexItems.reduce((sum, item) => sum + getViewSize(item.view).height, 0)
-    totalHeight += calculateTotalGap(flexItems.length, props.gap ?? 0, props.direction ?? FlexDirection.Column, props)
-    totalWidth += Math.max(...flexItems.map(item => getViewSize(item.view).width))
-  }
+  // Calculate container dimensions
+  const { width: totalWidth, height: totalHeight } = calculateContainerDimensions(flexItems, props)
   
   return {
     render: () => Effect.gen(function* (_) {
@@ -319,22 +421,7 @@ export const flexbox = (
       // Render each child into the buffer
       for (const child of layout.children) {
         const content = yield* _(child.view.render())
-        const lines = content.split('\n')
-        
-        for (let y = 0; y < lines.length && y < child.bounds.height; y++) {
-          const line = lines[y]
-          const chars = [...line]
-          
-          for (let x = 0; x < chars.length && x < child.bounds.width; x++) {
-            const bufferY = child.bounds.y + y
-            const bufferX = child.bounds.x + x
-            
-            if (bufferY >= 0 && bufferY < totalHeight && 
-                bufferX >= 0 && bufferX < totalWidth) {
-              buffer[bufferY][bufferX] = chars[x]
-            }
-          }
-        }
+        renderChildToBuffer(buffer, content, child.bounds, totalWidth, totalHeight)
       }
       
       // Convert buffer to string
@@ -373,12 +460,46 @@ export const vbox = (
  * Center a view both horizontally and vertically
  */
 export const center = (view: View, options?: { width?: number; height?: number }): View => {
-  return flexbox([view], {
-    justifyContent: JustifyContent.Center,
-    alignItems: AlignItems.Center,
-    minWidth: options?.width || 80,
-    minHeight: options?.height || 24
-  })
+  const width = options?.width || 80
+  const height = options?.height || 24
+  
+  return {
+    render: () => Effect.gen(function* (_) {
+      const content = yield* _(view.render())
+      const lines = content.split('\n')
+      const contentHeight = lines.length
+      const contentWidth = Math.max(...lines.map(line => stringWidth(line)), 0)
+      
+      // Calculate centering offsets
+      const topPadding = Math.max(0, Math.floor((height - contentHeight) / 2))
+      const leftPadding = Math.max(0, Math.floor((width - contentWidth) / 2))
+      
+      // Create centered content
+      const centeredLines: string[] = []
+      
+      // Add top padding
+      for (let i = 0; i < topPadding; i++) {
+        centeredLines.push(' '.repeat(width))
+      }
+      
+      // Add content with horizontal centering
+      for (const line of lines) {
+        const lineWidth = stringWidth(line)
+        const linePadding = Math.max(0, Math.floor((width - lineWidth) / 2))
+        const paddedLine = ' '.repeat(linePadding) + line
+        centeredLines.push(paddedLine.padEnd(width))
+      }
+      
+      // Add bottom padding to reach target height
+      while (centeredLines.length < height) {
+        centeredLines.push(' '.repeat(width))
+      }
+      
+      return centeredLines.slice(0, height).join('\n')
+    }),
+    width,
+    height
+  }
 }
 
 /**

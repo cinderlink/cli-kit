@@ -1,0 +1,23 @@
+{
+  "name": "@example/kitchen-sink",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "kitchen-sink": "./src/index.tsx"
+  },
+  "dependencies": {
+    "@tuix/core": "workspace:*",
+    "@tuix/cli": "workspace:*",
+    "@tuix/components": "workspace:*",
+    "@tuix/jsx": "workspace:*",
+    "@tuix/reactivity": "workspace:*",
+    "@tuix/styling": "workspace:*",
+    "@tuix/plugin-process-manager": "workspace:*",
+    "@tuix/plugin-logger": "workspace:*"
+  },
+  "scripts": {
+    "dev": "bun run src/index.tsx",
+    "build": "bun build src/index.tsx --compile --outfile=kitchen-sink",
+    "test": "bun test"
+  }
+}

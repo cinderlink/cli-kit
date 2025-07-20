@@ -210,7 +210,7 @@ const gitDashboard: Component<Model, Msg> = {
     switch (msg.tag) {
       case "quit":
         // Return an empty array - the runtime will handle quit via config
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       case "filesMsg": {
         const filesTableComponent = createFilesTable()
         return filesTableComponent.update(msg.msg, model.filesTable).pipe(
@@ -256,7 +256,7 @@ const gitDashboard: Component<Model, Msg> = {
           commitsTable: { ...model.commitsTable, focused: msg.panel === 'commits' }
         }
         
-        return Effect.succeed([newModel, []])
+        return Effect.succeed([newModel, [] as const] as const)
       }
       
       case "stageFile": {

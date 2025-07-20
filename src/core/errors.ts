@@ -1,8 +1,55 @@
 /**
  * Error System - Comprehensive error hierarchy and error handling utilities
  * 
- * This module defines a complete error system for the TUI framework, including
- * typed errors, error boundaries, recovery strategies, and debugging utilities.
+ * This module provides a robust, type-safe error handling system for the TUIX framework.
+ * It defines a complete hierarchy of domain-specific errors, recovery strategies,
+ * error boundaries, and debugging utilities for building resilient terminal applications.
+ * 
+ * ## Key Features:
+ * 
+ * ### Typed Error Hierarchy
+ * - Domain-specific error classes with rich context information
+ * - Discriminated union types for exhaustive error handling
+ * - Built-in categorization of critical vs recoverable errors
+ * 
+ * ### Error Recovery
+ * - Configurable recovery strategies (retry, fallback, ignore)
+ * - Automatic terminal restoration for terminal errors
+ * - Exponential backoff and retry policies
+ * 
+ * ### Error Boundaries
+ * - Component-level error isolation
+ * - Graceful fallback rendering
+ * - Automatic error logging and reporting
+ * 
+ * ### Debugging Support
+ * - Rich error context with timestamps and component info
+ * - User-friendly error messages
+ * - Comprehensive debug information extraction
+ * 
+ * @example
+ * ```typescript
+ * import { RenderError, withErrorBoundary, RecoveryStrategies } from './errors'
+ * 
+ * // Create a typed error
+ * const error = new RenderError({
+ *   phase: 'paint',
+ *   operation: 'drawText',
+ *   component: 'TextInput',
+ *   cause: originalError
+ * })
+ * 
+ * // Use error boundary
+ * const safeEffect = withErrorBoundary(riskyOperation, {
+ *   fallback: (error) => Effect.succeed('fallback value'),
+ *   logErrors: true
+ * })
+ * 
+ * // Apply recovery strategy
+ * const robustEffect = withRecovery(effect, RecoveryStrategies.retry(3, 100))
+ * ```
+ * 
+ * @module core/errors
  */
 
 import { Data, Effect, Schedule } from "effect"
@@ -12,7 +59,21 @@ import { Data, Effect, Schedule } from "effect"
 // =============================================================================
 
 /**
- * Terminal operation errors.
+ * Terminal operation errors
+ * 
+ * Represents errors that occur during terminal operations like initialization,
+ * writing to stdout/stderr, reading from stdin, or terminal state management.
+ * These are often critical errors that may require application termination.
+ * 
+ * @example
+ * ```typescript
+ * const error = new TerminalError({
+ *   operation: 'initialize',
+ *   component: 'TerminalService',
+ *   cause: originalError,
+ *   context: { terminalType: process.env.TERM }
+ * })
+ * ```
  */
 export class TerminalError extends Data.TaggedError("TerminalError")<{
   readonly operation: string
@@ -37,7 +98,21 @@ export class TerminalError extends Data.TaggedError("TerminalError")<{
 }
 
 /**
- * Input handling errors.
+ * Input handling errors
+ * 
+ * Represents errors that occur during input processing from keyboard, mouse,
+ * or terminal events. These are typically recoverable errors that can be
+ * handled gracefully without terminating the application.
+ * 
+ * @example
+ * ```typescript
+ * const error = new InputError({
+ *   device: 'keyboard',
+ *   operation: 'parseKeySequence',
+ *   component: 'InputHandler',
+ *   context: { rawInput: '\x1b[A' }
+ * })
+ * ```
  */
 export class InputError extends Data.TaggedError("InputError")<{
   readonly device: "keyboard" | "mouse" | "terminal"
@@ -64,7 +139,21 @@ export class InputError extends Data.TaggedError("InputError")<{
 }
 
 /**
- * Rendering errors.
+ * Rendering errors
+ * 
+ * Represents errors that occur during the rendering pipeline including
+ * layout calculation, painting, and measurement operations. These errors
+ * are recoverable and should trigger fallback rendering.
+ * 
+ * @example
+ * ```typescript
+ * const error = new RenderError({
+ *   phase: 'layout',
+ *   operation: 'calculateDimensions',
+ *   component: 'FlexLayout',
+ *   context: { containerWidth: 80, childCount: 5 }
+ * })
+ * ```
  */
 export class RenderError extends Data.TaggedError("RenderError")<{
   readonly phase: "render" | "layout" | "paint" | "measure"
@@ -289,13 +378,31 @@ export enum ErrorCode {
 
 /**
  * Type guard to check if a value is an AppError
+ * 
+ * Safely determines if an unknown value is one of the framework's
+ * typed error classes by checking the _tag property.
+ * 
+ * @param value - Value to check
+ * @returns True if value is an AppError, false otherwise
+ * 
+ * @example
+ * ```typescript
+ * try {
+ *   // risky operation
+ * } catch (error) {
+ *   if (isAppError(error)) {
+ *     // Handle with full type safety
+ *     console.log(error._tag, error.message)
+ *   }
+ * }
+ * ```
  */
 export function isAppError(value: unknown): value is AppError {
   return (
     value !== null &&
     typeof value === 'object' &&
     '_tag' in value &&
-    typeof (value as any)._tag === 'string' &&
+    typeof (value as Record<string, unknown>)._tag === 'string' &&
     [
       'TerminalError',
       'InputError', 
@@ -305,7 +412,7 @@ export function isAppError(value: unknown): value is AppError {
       'ComponentError',
       'ApplicationError',
       'ValidationError'
-    ].includes((value as any)._tag)
+    ].includes((value as Record<string, unknown>)._tag as string)
   )
 }
 
@@ -407,7 +514,25 @@ export interface ErrorBoundaryConfig<A> {
 }
 
 /**
- * Create an error boundary that catches and handles errors.
+ * Create an error boundary that catches and handles errors
+ * 
+ * Wraps an Effect with error handling logic, providing fallback behavior
+ * and optional error logging. The resulting Effect never fails, making it
+ * safe for use in component trees where errors should be contained.
+ * 
+ * @param effect - Effect to wrap with error boundary
+ * @param config - Error boundary configuration
+ * @returns Effect that never fails, using fallback on errors
+ * 
+ * @example
+ * ```typescript
+ * const safeRender = withErrorBoundary(riskyRenderEffect, {
+ *   fallback: (error) => Effect.succeed('Error: Component failed'),
+ *   onError: (error) => Effect.sync(() => console.error(error)),
+ *   logErrors: true,
+ *   catchDefects: true
+ * })
+ * ```
  */
 export const withErrorBoundary = <A, E extends AppError, R>(
   effect: Effect.Effect<A, E, R>,
@@ -442,7 +567,26 @@ export const withErrorBoundary = <A, E extends AppError, R>(
 }
 
 /**
- * Create a recovery effect that applies recovery strategies.
+ * Create a recovery effect that applies recovery strategies
+ * 
+ * Enhances an Effect with automatic error recovery using the provided
+ * strategy. If recovery fails or the error is not recoverable, the
+ * original error is propagated.
+ * 
+ * @param effect - Effect to enhance with recovery
+ * @param strategy - Recovery strategy to apply
+ * @returns Effect with recovery capabilities
+ * 
+ * @example
+ * ```typescript
+ * const robustEffect = withRecovery(networkCall, 
+ *   RecoveryStrategies.retry(3, 1000)
+ * )
+ * 
+ * const withFallback = withRecovery(primaryService,
+ *   RecoveryStrategies.fallback('default value')
+ * )
+ * ```
  */
 export const withRecovery = <A, E extends AppError, R>(
   effect: Effect.Effect<A, E, R>,
@@ -456,7 +600,7 @@ export const withRecovery = <A, E extends AppError, R>(
     ),
     strategy.maxRetries && strategy.maxRetries > 1
       ? Effect.retry(Schedule.recurs(strategy.maxRetries - 1))
-      : <any>((x: any) => x) // Identity function workaround
+      : <E extends AppError, A, R>(effect: Effect.Effect<A, E, R>) => effect
   )
 
 // =============================================================================
@@ -563,7 +707,7 @@ export const ErrorUtils = {
     tag: error._tag,
     type: error._tag,
     message: error.message,
-    operation: (error as any).operation,
+    operation: (error as Record<string, unknown>).operation,
     timestamp: error.timestamp.toISOString(),
     component: error.component,
     context: error.context,

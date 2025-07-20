@@ -1,262 +1,176 @@
 /**
- * Components Module - Pre-built UI components for CLI-Kit
+ * Tuix Components - Complete UI Component Library
  * 
- * This module exports ready-to-use components that follow the
- * Bubbletea-inspired patterns and integrate with the styling system.
+ * Organized by category for easy discovery and use:
  * 
- * Also includes simplified component builders for easier usage.
+ * ## Forms
+ * - TextInput: Text input with validation and echo modes
+ * - Button: Interactive buttons with variants
+ * 
+ * ## Layout
+ * - Box: Flexible container with borders and padding
+ * - Flex: Flexbox-like layouts (Row, Column, etc.)
+ * 
+ * ## Display
+ * - Text: Rich text with colors and styles
+ * - LargeText: ASCII art text with gradients
+ * - MarkdownRenderer: Render markdown content
+ * 
+ * ## Feedback
+ * - Spinner: Loading indicators
+ * - ProgressBar: Progress indicators
+ * - Modal: Dialog boxes
+ * 
+ * ## Navigation
+ * - Tabs: Tabbed interfaces
+ * - Help: Context-aware help
+ * 
+ * ## Data
+ * - Table: Data tables with sorting
+ * - List: Selectable lists
+ * 
+ * ## Containers
+ * - Viewport: Scrollable content areas
+ * - Panel: Various panel types
+ * 
+ * @example
+ * ```tsx
+ * import { Button, TextInput, Box, Text } from 'tuix/components'
+ * 
+ * function MyApp() {
+ *   const name = $state('')
+ *   
+ *   return (
+ *     <Box padding={2} border="rounded">
+ *       <Text bold>Enter your name:</Text>
+ *       <TextInput bind:value={name} />
+ *       <Button onClick={() => console.log(name.value)}>
+ *         Submit
+ *       </Button>
+ *     </Box>
+ *   )
+ * }
+ * ```
  */
 
-// Simplified Component API (Svelte 5-inspired)
-export {
-  // Component creation
-  createComponent,
-  wrapComponent,
-  functional,
-  reactive,
-  
-  // Reactivity primitives
-  $state,
-  $derived,
-  $effect,
-  $memo,
-  $debounced,
-  $throttled,
-  createStore,
-  batch,
-  
-  // Lifecycle hooks
-  onMount,
-  onDestroy,
-  beforeUpdate,
-  afterUpdate,
-  useInterval,
-  useTimeout,
-  useAsyncEffect,
-  usePrevious,
-  tick,
-  
-  // Simplified component builders
-  Panel,
-  HeaderPanel,
-  InfoPanel,
-  SuccessPanel,
-  WarningPanel,
-  ErrorPanel,
-  Card,
-  Sidebar,
-  StatusPanel,
-  CollapsiblePanel,
-  ThemedPanel,
-  FloatingPanel,
-  
-  // Button builders (aliased to avoid conflict with Button component)
-  Button as SimpleButton,
-  PrimaryButton,
-  SecondaryButton,
-  SuccessButton,
-  DangerButton,
-  WarningButton,
-  InfoButton,
-  GhostButton,
-  IconButton,
-  SmallButton,
-  LargeButton,
-  DisabledButton,
-  LoadingButton,
-  FullWidthButton,
+// Forms
+export * from './forms'
+
+// Layout
+export * from './layout'
+
+// Display
+export * from './display'
+
+// Feedback
+export * from './feedback'
+
+// Data
+export * from './data'
+
+// Navigation
+export * from './navigation'
+
+// Containers
+export * from './containers'
+
+// System
+export * from './system'
+
+// JSX CLI Components (for JSX transform)
+export { CLI, Plugin, Command, Arg, Flag, Help, Example, LoadPlugin } from '../jsx/app'
+
+// Re-export legacy TEA components for backward compatibility
+// These are now in src/tea/ but re-exported here for compatibility
+export * from '../tea/base'
+export * from '../tea/component'
+export * from '../tea/reactivity'
+export * from '../tea/mouse-aware'
+
+// Builder components - removed (duplicates)
+
+// Stream components
+export * from './streams'
+
+// CLI components (re-exported for convenience)
+export * from '../cli/components'
+
+// Convenience re-exports for common components
+export { 
+  // Forms
+  TextInput, 
+  Button, 
   ButtonGroup,
-  SubmitCancelButtons,
-  YesNoButtons
-} from "./builders/index"
+  FilePicker
+} from './forms'
 
-// Base component types and utilities
 export {
-  type UIComponent,
-  type ComponentStyles,
-  type Focusable,
-  type Sized,
-  type Disableable,
-  type KeyBinding,
-  type KeyMap,
-  type CommonMsg,
-  type ComponentOptions,
-  keyBinding,
-  matchKeyBinding,
-  generateComponentId,
-  createDefaultStyles
-} from "./base.ts"
+  // Layout
+  Box, 
+  Flex, 
+  Row, 
+  Column, 
+  Stack,
+  Grid,
+  Spacer
+} from './layout'
 
-// Box component
 export {
-  type BoxModel,
-  type BoxMsg,
-  Box
-} from "./Box.ts"
+  // Display
+  Text,
+  Heading,
+  Code,
+  Link,
+  Success,
+  Error,
+  Warning,
+  Info
+} from './display'
 
-// Text component  
 export {
-  type TextModel,
-  type TextMsg,
-  Text
-} from "./Text.ts"
-
-// TextInput component - unified with rune support
-export {
-  type TextInputModel,
-  type TextInputMsg,
-  type TextInputOptions,
-  type TextInputStyles,
-  TextInput,
-  TextInputComponent,
-  EchoMode,
-  CursorStyle,
-  textInput,
-  emailInput,
-  passwordInput,
-  numberInput
-} from "./TextInput.ts"
-
-// Button component
-export {
-  type ButtonModel,
-  type ButtonMsg,
-  type ButtonOptions,
-  type ButtonStyles,
-  Button,
-  ButtonVariant,
-  button,
-  primaryButton,
-  secondaryButton,
-  successButton,
-  dangerButton,
-  warningButton,
-  ghostButton
-} from "./button.ts"
-
-// List component
-export {
-  type ListItem,
-  type ListModel,
-  type ListMsg,
-  type ListOptions,
-  type ListStyles,
-  List,
-  list,
-  singleSelectList,
-  multiSelectList
-} from "./list.ts"
-
-// Spinner component
-export {
-  type SpinnerModel,
-  type SpinnerMsg,
-  SpinnerStyle,
-  spinner,
-  loadingSpinner,
-  processingSpinner,
-  savingSpinner,
-  errorSpinner
-} from "./Spinner.ts"
-
-// ProgressBar component
-export {
-  type ProgressBarModel,
-  type ProgressBarMsg,
-  type ProgressBarStyle,
+  // Feedback
+  Spinner,
+  Modal,
+  InfoModal,
+  ConfirmModal,
+  LoadingModal,
+  ErrorModal,
   progressBar,
   simpleProgressBar,
-  fancyProgressBar,
-  asciiProgressBar,
-  loadingBar,
-  setProgress,
-  defaultProgressBarStyle,
-  fancyProgressBarStyle,
-  asciiProgressBarStyle
-} from "./ProgressBar.ts"
+  fancyProgressBar
+} from './feedback'
 
-// Table component
 export {
-  type TableModel,
-  type TableMsg,
-  type TableColumn,
-  type TableRow,
-  type TableSort,
-  type TableFilter,
-  TableSelectionMode,
-  table,
-  createColumn,
-  createRow,
-  simpleTable
-} from "./Table.ts"
+  // Data
+  Table,
+  SimpleTable,
+  List,
+  SingleSelectList,
+  MultiSelectList,
+  FilterBox,
+  FilterableContent,
+  LOG_FILTER_PRESETS,
+  PROCESS_FILTER_PRESETS
+} from './data'
 
-// Tabs component
 export {
-  type Tab,
-  type TabStyles,
-  type TabsModel,
-  type TabsMsg,
-  tabs,
-  createTab,
-  stringTabs,
-  viewTabs,
-  defaultTabStyles
-} from "./Tabs.ts"
+  // Navigation
+  Tabs,
+  SimpleTabs,
+  ViewTabs,
+  help
+} from './navigation'
 
-// Modal component
 export {
-  type ModalConfig,
-  type ModalModel,
-  type ModalMsg,
-  modal,
-  createInfoModal,
-  createConfirmModal,
-  createErrorModal,
-  createLoadingModal
-} from "./Modal.ts"
-
-// Viewport component  
-export {
-  type ViewportConfig,
-  type ViewportModel,
-  type ViewportMsg,
+  // Containers
+  Viewport,
   viewport,
-  createTextContent,
-  createGridContent,
-  createNumberedContent
-} from "./Viewport.ts"
+  ScrollableBox,
+  ScrollableLogBox,
+  ScrollableProcessList
+} from './containers'
 
-// FilePicker component
 export {
-  type FileItem,
-  type FilePickerConfig,
-  type FilePickerModel,
-  type FilePickerMsg,
-  filePicker
-} from "./FilePicker.ts"
-
-// Help component
-export {
-  type KeyBinding as HelpKeyBinding, // Aliased to avoid conflict with base.ts
-  type HelpSection,
-  type HelpConfig,
-  type HelpModel,
-  type HelpMsg,
-  help,
-  getDefaultKeybindings,
-  createHelpModal,
-  createHelpPanel,
-  createContextHelp
-} from "./Help.ts"
-
-// LargeText components
-export {
-  type LargeTextOptions,
-  type LargeGradientTextOptions,
-  type LargeAnimatedGradientTextOptions,
-  type GradientConfig,
-  largeText,
-  largeGradientText,
-  largeAnimatedGradientText,
-  gradientPresets
-} from "./LargeText.ts"
+  // System
+  Exit
+} from './system'

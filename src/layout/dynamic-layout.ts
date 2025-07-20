@@ -9,8 +9,8 @@
  */
 
 import { Effect } from "effect"
-import type { View, AppServices } from "@/core/types.ts"
-import { View as ViewCore } from "@/core/view.ts"
+import type { View, AppServices } from "../core/types"
+import { View as ViewCore } from "../core/view"
 
 // =============================================================================
 // Types
@@ -83,6 +83,81 @@ export const dynamicSpacer = (minHeight: number = 1, maxHeight: number = 5): Vie
 }
 
 // =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Calculate dimensions from rendered content lines
+ */
+const calculateDimensions = (lines: string[]) => ({
+  height: lines.length,
+  width: Math.max(...lines.map(line => line.length), 0)
+})
+
+/**
+ * Apply alignment to lines with consistent width
+ */
+const applyAlignment = (lines: string[], targetWidth: number, align: 'left' | 'center' | 'right') => {
+  return lines.map(line => {
+    const padding = Math.max(0, targetWidth - line.length)
+    switch (align) {
+      case 'center':
+        const leftPad = Math.floor(padding / 2)
+        const rightPad = padding - leftPad
+        return ' '.repeat(leftPad) + line + ' '.repeat(rightPad)
+      case 'right':
+        return ' '.repeat(padding) + line
+      default:
+        return line + ' '.repeat(padding)
+    }
+  })
+}
+
+/**
+ * Apply height constraints by padding or truncating
+ */
+const applyHeightConstraints = (lines: string[], minHeight: number, maxHeight: number) => {
+  const result = [...lines]
+  
+  // Apply min height by adding empty lines
+  while (result.length < minHeight) {
+    result.push('')
+  }
+  
+  // Apply max height by truncating
+  if (result.length > maxHeight) {
+    result.splice(maxHeight)
+  }
+  
+  return result
+}
+
+/**
+ * Process rendered children and add gaps between them
+ */
+const processChildrenWithGaps = (renderedChildren: Array<{ rendered: string; index: number }>, gap: number) => {
+  const allLines: string[] = []
+  let maxWidth = 0
+  
+  renderedChildren.forEach(({ rendered, index }, arrayIndex) => {
+    if (rendered) {
+      const lines = rendered.split('\n')
+      allLines.push(...lines)
+      
+      const { width } = calculateDimensions(lines)
+      maxWidth = Math.max(maxWidth, width)
+      
+      // Add gap after each child except the last
+      if (arrayIndex < renderedChildren.length - 1 && gap > 0) {
+        allLines.push(...Array(gap).fill(''))
+      }
+    }
+  })
+  
+  return { lines: allLines, maxWidth }
+}
+
+// =============================================================================
 // Dynamic Containers
 // =============================================================================
 
@@ -105,61 +180,26 @@ export const dynamicVBox = (
   
   return {
     render: () => Effect.gen(function* (_) {
-      const renderedChildren: string[] = []
-      let totalHeight = 0
-      let maxWidth = 0
-      
+      // Render all children
+      const renderedChildren: Array<{ rendered: string; index: number }> = []
       for (let i = 0; i < children.length; i++) {
         const child = children[i]
-        const rendered = yield* _(child.render())
-        
-        if (rendered) {
-          const lines = rendered.split('\n')
-          renderedChildren.push(...lines)
-          totalHeight += lines.length
-          
-          for (const line of lines) {
-            maxWidth = Math.max(maxWidth, line.length)
-          }
-          
-          // Add gap after each child except the last
-          if (i < children.length - 1 && gap > 0) {
-            for (let j = 0; j < gap; j++) {
-              renderedChildren.push('')
-              totalHeight++
-            }
-          }
+        if (child) {
+          const rendered = yield* _(child.render())
+          renderedChildren.push({ rendered, index: i })
         }
       }
       
-      // Apply min/max height constraints
-      if (totalHeight < minHeight) {
-        const padding = minHeight - totalHeight
-        for (let i = 0; i < padding; i++) {
-          renderedChildren.push('')
-        }
-        totalHeight = minHeight
-      } else if (totalHeight > maxHeight) {
-        renderedChildren.splice(maxHeight)
-        totalHeight = maxHeight
-      }
+      // Process children with gaps using helper
+      const { lines, maxWidth } = processChildrenWithGaps(renderedChildren, gap)
       
-      // Apply alignment
-      const alignedChildren = renderedChildren.map(line => {
-        const padding = maxWidth - line.length
-        switch (align) {
-          case 'center':
-            const leftPad = Math.floor(padding / 2)
-            const rightPad = padding - leftPad
-            return ' '.repeat(leftPad) + line + ' '.repeat(rightPad)
-          case 'right':
-            return ' '.repeat(padding) + line
-          default:
-            return line + ' '.repeat(padding)
-        }
-      })
+      // Apply height constraints using helper
+      const constrainedLines = applyHeightConstraints(lines, minHeight, maxHeight)
       
-      return alignedChildren.join('\n')
+      // Apply alignment using helper
+      const alignedLines = applyAlignment(constrainedLines, maxWidth, align)
+      
+      return alignedLines.join('\n')
     }),
     width: 0, // Dynamic width
     height: 0 // Dynamic height
@@ -346,9 +386,12 @@ export const formSection = (
   }
   
   for (let i = 0; i < fields.length; i++) {
-    views.push(fields[i])
-    if (i < fields.length - 1 && gap > 0) {
-      views.push(fixedSpacer(gap))
+    const field = fields[i]
+    if (field) {
+      views.push(field)
+      if (i < fields.length - 1 && gap > 0) {
+        views.push(fixedSpacer(gap))
+      }
     }
   }
   

@@ -3,9 +3,9 @@
  */
 
 import { Effect, Layer, Queue, Stream, Ref, Option } from "effect"
-import { InputService } from "@/services/input.ts"
-import type { KeyEvent, MouseEvent } from "@/core/types.ts"
-import { KeyType } from "@/core/keys.ts"
+import { InputService } from "../services/input"
+import type { KeyEvent, MouseEvent, Component } from "../core/types"
+import { KeyType } from "../core/keys"
 
 /**
  * Test input adapter that allows programmatic key injection
@@ -132,7 +132,7 @@ export const createTestInputService = (): Layer.Layer<InputService, never, never
       const adapter = new TestInputAdapter(keyQueue, mouseQueue)
       
       // Store adapter globally for test access
-      ;(globalThis as any).__testInputAdapter = adapter
+      ;(globalThis as Record<string, unknown>).__testInputAdapter = adapter
 
       return {
         keyEvents: Stream.fromQueue(keyQueue),
@@ -185,21 +185,21 @@ export const createTestInputService = (): Layer.Layer<InputService, never, never
  * Get the global test input adapter (for use in tests)
  */
 export const getTestInputAdapter = (): TestInputAdapter | null => {
-  return (globalThis as any).__testInputAdapter || null
+  return (globalThis as Record<string, unknown>).__testInputAdapter as TestInputAdapter || null
 }
 
 /**
  * Helper to run a TUI app with test input
  */
 export const runTestApp = async <Model, Msg>(
-  component: any, // Component type
+  component: Component<Model, Msg>,
   testScript: (adapter: TestInputAdapter) => Promise<void>,
-  config?: any
+  config?: Record<string, unknown>
 ): Promise<void> => {
-  const { runApp } = await import("@/core/runtime.ts")
-  const { TerminalServiceLive } = await import("@/services/impl/terminal-impl.ts")
-  const { RendererServiceLive } = await import("@/services/impl/renderer-impl.ts")
-  const { StorageServiceLive } = await import("@/services/impl/storage-impl.ts")
+  const { runApp } = await import("../core/runtime")
+  const { TerminalServiceLive } = await import("../services/impl/terminal-impl")
+  const { RendererServiceLive } = await import("../services/impl/renderer-impl")
+  const { StorageServiceLive } = await import("../services/impl/storage-impl")
   const { Layer } = await import("effect")
   
   // Create test services with test input

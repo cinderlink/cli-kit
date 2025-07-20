@@ -1,0 +1,24 @@
+{
+  "name": "file-watcher",
+  "ipcConfig": {
+    "name": "file-watcher",
+    "channel": "unix-socket",
+    "path": "/Users/aewing/Projects/cinderlink/cli-kit/examples/pm-app/.tuix/sockets/file-watcher.sock"
+  },
+  "config": {
+    "name": "file-watcher",
+    "command": "bun",
+    "args": [
+      "file-watcher.ts"
+    ],
+    "autostart": true,
+    "restart": "on-failure",
+    "restartDelay": 2000,
+    "description": "Watches for file changes and logs activity",
+    "cwd": "/Users/aewing/Projects/cinderlink/cli-kit/examples/pm-app"
+  },
+  "status": "stopped",
+  "restarts": 0,
+  "health": "unknown",
+  "startTime": "2025-07-15T02:06:20.043Z"
+}

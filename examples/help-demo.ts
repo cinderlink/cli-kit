@@ -209,9 +209,9 @@ const helpDemo: Component<AppModel, AppMsg> = {
         
         const selectedAction = actions[model.selectedOption]
         if (selectedAction) {
-          return Effect.succeed([model, [Effect.succeed(selectedAction)]])
+          return Effect.succeed([model, [Effect.succeed(selectedAction)] as const] as const)
         }
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
       
       case "UpdateTerminalSize": {
@@ -280,7 +280,7 @@ const helpDemo: Component<AppModel, AppMsg> = {
       }
       
       case "Quit": {
-        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" } as any)]])
+        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" } as any)] as const] as const)
       }
     }
   },

@@ -1,33 +1,172 @@
 /**
- * Core types for the TUIX TUI framework
+ * Core Types - Fundamental types for the TUIX TUI framework
  * 
- * This module defines the fundamental types that implement the Model-View-Update (MVU) 
- * pattern enhanced with Effect.ts for robust error handling and resource management.
+ * This module defines the complete type system for TUIX, implementing a robust
+ * Model-View-Update (MVU) architecture enhanced with Effect.ts for type-safe
+ * error handling, resource management, and asynchronous operations.
+ * 
+ * ## Architecture Overview:
+ * 
+ * ### MVU Pattern
+ * - **Model**: Application state (immutable data)
+ * - **View**: Pure functions that render state to UI
+ * - **Update**: State transition functions triggered by messages
+ * - **Commands**: Asynchronous side effects that produce messages
+ * - **Subscriptions**: Continuous streams of external events
+ * 
+ * ### Effect.ts Integration
+ * - All operations are Effect computations for composability
+ * - Comprehensive error handling with typed error channels
+ * - Resource-safe operations with automatic cleanup
+ * - Dependency injection through Context system
+ * 
+ * ### Service Architecture
+ * - Terminal operations (clearing, writing, cursor control)
+ * - Input handling (keyboard, mouse, resize events)
+ * - Rendering pipeline (frame management, viewport control)
+ * - Storage operations (state persistence, configuration)
+ * 
+ * @example
+ * ```typescript
+ * // Define a counter component
+ * interface CounterModel {
+ *   count: number
+ * }
+ * 
+ * type CounterMsg = 
+ *   | { _tag: 'Increment' }
+ *   | { _tag: 'Decrement' }
+ * 
+ * const counterComponent: Component<CounterModel, CounterMsg> = {
+ *   init: Effect.succeed([{ count: 0 }, []]),
+ *   
+ *   update: (msg, model) => {
+ *     switch (msg._tag) {
+ *       case 'Increment':
+ *         return Effect.succeed([{ count: model.count + 1 }, []])
+ *       case 'Decrement':
+ *         return Effect.succeed([{ count: model.count - 1 }, []])
+ *     }
+ *   },
+ *   
+ *   view: (model) => ({
+ *     render: () => Effect.succeed(`Count: ${model.count}`)
+ *   })
+ * }
+ * ```
+ * 
+ * @module core/types
  */
 
 import { Effect, Stream, Context, Data } from "effect"
+import { z } from "zod"
 import type { KeyEvent } from "./keys"
+import type {
+  Color, Position, Size, Bounds, KeyType, MouseButton, MouseEventType,
+  MouseEvent, WindowSize, Padding, Align, VerticalAlign, Style, 
+  BorderCharacters, TerminalCapabilities,
+  ProcessStatus, IPCChannelType, ProcessConfig, ProcessLog
+} from "./schemas"
+import type {
+  TerminalError,
+  InputError, 
+  RenderError,
+  StorageError,
+  ConfigError,
+  ComponentError,
+  ApplicationError,
+  ValidationError,
+  AppError,
+  CriticalError,
+  RecoverableError,
+  ErrorRecoveryStrategy,
+  ErrorBoundaryConfig
+} from "./errors"
+
+// Re-export imported types for public API
+export type {
+  // Key events
+  KeyEvent,
+  // Schema types  
+  Color, Position, Size, Bounds, KeyType, MouseButton, MouseEventType,
+  MouseEvent, WindowSize, Padding, Align, VerticalAlign, Style, 
+  BorderCharacters, TerminalCapabilities,
+  ProcessStatus, IPCChannelType, ProcessConfig, ProcessLog,
+  // Error types
+  TerminalError, InputError, RenderError, StorageError, ConfigError,
+  ComponentError, ApplicationError, ValidationError, AppError,
+  CriticalError, RecoverableError, ErrorRecoveryStrategy, ErrorBoundaryConfig
+}
 
 // =============================================================================
 // Core MVU Types
 // =============================================================================
 
 /**
- * A command represents an asynchronous operation that will produce a message.
+ * A command represents an asynchronous operation that will produce a message
+ * 
  * Commands are Effect computations that handle side effects like HTTP requests,
- * file operations, timers, etc.
+ * file operations, timers, and other async operations. They are the MVU pattern's
+ * way of performing side effects while maintaining functional purity.
+ * 
+ * Commands never fail (error channel is never) because errors should be
+ * converted to messages and handled in the update function.
+ * 
+ * @example
+ * ```typescript
+ * // HTTP request command
+ * const fetchUser = (id: string): Cmd<UserMsg> =>
+ *   Effect.gen(function* (_) {
+ *     try {
+ *       const user = yield* _(httpGet(`/users/${id}`))
+ *       return { _tag: 'UserLoaded', user }
+ *     } catch (error) {
+ *       return { _tag: 'UserLoadFailed', error }
+ *     }
+ *   })
+ * ```
  */
 export type Cmd<Msg> = Effect.Effect<Msg, never, AppServices>
 
 /**
- * A subscription represents a continuous stream of messages, such as keyboard
- * input, mouse events, window resize events, or timer ticks.
+ * A subscription represents a continuous stream of messages
+ * 
+ * Subscriptions provide ongoing streams of messages from external sources
+ * like keyboard input, mouse events, window resize events, timers, or
+ * network connections. They are automatically managed by the runtime.
+ * 
+ * @example
+ * ```typescript
+ * // Timer subscription
+ * const timerSub = (intervalMs: number): Sub<TimerMsg> =>
+ *   Stream.fromSchedule(Schedule.spaced(intervalMs)).pipe(
+ *     Stream.map(() => ({ _tag: 'Tick', timestamp: Date.now() }))
+ *   )
+ * ```
  */
 export type Sub<Msg> = Stream.Stream<Msg, never, AppServices>
 
 /**
- * A view represents the visual output of a component. It can be rendered to a string
- * that will be displayed in the terminal.
+ * A view represents the visual output of a component
+ * 
+ * Views are pure representations of UI state that can be rendered to terminal
+ * output. They encapsulate the rendering logic and optional dimension constraints.
+ * The render function is where the actual terminal output is generated.
+ * 
+ * @example
+ * ```typescript
+ * const buttonView: View = {
+ *   render: () => Effect.succeed('[  OK  ]'),
+ *   width: 8,
+ *   height: 1
+ * }
+ * 
+ * // Dynamic view based on state
+ * const counterView = (count: number): View => ({
+ *   render: () => Effect.succeed(`Count: ${count}`),
+ *   width: `Count: ${count}`.length
+ * })
+ * ```
  */
 export interface View {
   readonly render: () => Effect.Effect<string, RenderError, never>
@@ -36,8 +175,54 @@ export interface View {
 }
 
 /**
- * The core Component interface that implements the MVU pattern.
- * All components must implement these three methods.
+ * The core Component interface that implements the MVU pattern
+ * 
+ * All TUIX components must implement this interface, which defines the complete
+ * MVU (Model-View-Update) architecture. Components are pure, composable units
+ * that manage their own state and respond to messages.
+ * 
+ * The Component interface ensures:
+ * - Predictable state management through the update function
+ * - Pure rendering through the view function  
+ * - Controlled side effects through commands
+ * - External event handling through subscriptions
+ * 
+ * @template Model - The component's state type
+ * @template Msg - The component's message type
+ * 
+ * @example
+ * ```typescript
+ * interface TodoModel {
+ *   items: string[]
+ *   input: string
+ * }
+ * 
+ * type TodoMsg = 
+ *   | { _tag: 'AddItem' }
+ *   | { _tag: 'UpdateInput', text: string }
+ * 
+ * const todoComponent: Component<TodoModel, TodoMsg> = {
+ *   init: Effect.succeed([{ items: [], input: '' }, []]),
+ *   
+ *   update: (msg, model) => {
+ *     switch (msg._tag) {
+ *       case 'AddItem':
+ *         return Effect.succeed([
+ *           { ...model, items: [...model.items, model.input], input: '' },
+ *           []
+ *         ])
+ *       case 'UpdateInput':
+ *         return Effect.succeed([{ ...model, input: msg.text }, []])
+ *     }
+ *   },
+ *   
+ *   view: (model) => ({
+ *     render: () => Effect.succeed(
+ *       model.items.join('\n') + '\n> ' + model.input
+ *     )
+ *   })
+ * }
+ * ```
  */
 export interface Component<Model, Msg> {
   /**
@@ -100,35 +285,11 @@ export type SystemMsg =
 export type ComponentMsg<T = never> = SystemMsg | T
 
 // =============================================================================
-// Input Events
+// Input Events  
 // =============================================================================
 
-/**
- * Keyboard event with modifier keys and special key handling.
- * Re-exported from keys module for better organization.
- */
-export type { KeyEvent, KeyType } from "./keys.ts"
-
-/**
- * Mouse event with position and button information.
- */
-export interface MouseEvent {
-  readonly type: 'press' | 'release' | 'wheel' | 'motion'
-  readonly button: 'left' | 'right' | 'middle' | 'wheel-up' | 'wheel-down' | 'none'
-  readonly x: number
-  readonly y: number
-  readonly ctrl: boolean
-  readonly alt: boolean
-  readonly shift: boolean
-}
-
-/**
- * Terminal window size change event.
- */
-export interface WindowSize {
-  readonly width: number
-  readonly height: number
-}
+// KeyEvent is imported and re-exported at the top of the file
+// MouseEvent and WindowSize are imported from schemas.ts
 
 // =============================================================================
 // Application Configuration
@@ -155,67 +316,28 @@ export interface Viewport {
   readonly height: number
 }
 
-/**
- * Terminal capabilities detected at runtime.
- */
-export interface TerminalCapabilities {
-  readonly colors: '16' | '256' | 'truecolor'
-  readonly unicode: boolean
-  readonly mouse: boolean
-  readonly alternateScreen: boolean
-  readonly cursorShapes: boolean
-}
-
-// =============================================================================
-// Error Types
-// =============================================================================
-
-/**
- * Terminal operation errors.
- */
-export class TerminalError extends Data.TaggedError("TerminalError")<{
-  readonly operation: string
-  readonly cause?: unknown
-}> {}
-
-/**
- * Input handling errors.
- */
-export class InputError extends Data.TaggedError("InputError")<{
-  readonly device: "keyboard" | "mouse" | "terminal"
-  readonly cause?: unknown
-}> {}
-
-/**
- * Rendering errors.
- */
-export class RenderError extends Data.TaggedError("RenderError")<{
-  readonly component?: string
-  readonly phase: "render" | "layout" | "paint"
-  readonly cause?: unknown
-}> {}
-
-/**
- * Storage errors for configuration and state persistence.
- */
-export class StorageError extends Data.TaggedError("StorageError")<{
-  readonly operation: "read" | "write" | "delete"
-  readonly path?: string
-  readonly cause?: unknown
-}> {}
-
-/**
- * Union of all possible application errors.
- */
-export type AppError = TerminalError | InputError | RenderError | StorageError
+// Error types are imported at the top of the file
 
 // =============================================================================
 // Service Types (Forward Declarations)
 // =============================================================================
 
 /**
- * Forward declaration of service interfaces.
- * These will be fully defined in the services module.
+ * Terminal service interface for low-level terminal operations
+ * 
+ * Provides access to terminal capabilities like clearing the screen,
+ * writing output, cursor control, and terminal state management.
+ * All operations are Effect-based for composability and error handling.
+ * 
+ * @example
+ * ```typescript
+ * const writeHello = Effect.gen(function* (_) {
+ *   const terminal = yield* _(TerminalService)
+ *   yield* _(terminal.clear)
+ *   yield* _(terminal.write('Hello, World!'))
+ *   yield* _(terminal.moveCursor(0, 1))
+ * })
+ * ```
  */
 export interface TerminalService extends Context.Tag<"TerminalService", {
   readonly clear: Effect.Effect<void, TerminalError, never>
@@ -227,6 +349,25 @@ export interface TerminalService extends Context.Tag<"TerminalService", {
   readonly getCapabilities: Effect.Effect<TerminalCapabilities, TerminalError, never>
 }> {}
 
+/**
+ * Input service interface for handling user input events
+ * 
+ * Provides streams of input events from keyboard, mouse, and window
+ * resize operations. All streams are managed automatically by the runtime.
+ * 
+ * @example
+ * ```typescript
+ * const handleInput = Effect.gen(function* (_) {
+ *   const input = yield* _(InputService)
+ *   
+ *   // Set up keyboard event subscription
+ *   const keyStream = input.keyEvents
+ *   
+ *   // Enable mouse support
+ *   yield* _(input.enableMouse)
+ * })
+ * ```
+ */
 export interface InputService extends Context.Tag<"InputService", {
   readonly keyEvents: Sub<KeyEvent>
   readonly mouseEvents: Sub<MouseEvent>
@@ -235,6 +376,23 @@ export interface InputService extends Context.Tag<"InputService", {
   readonly disableMouse: Effect.Effect<void, InputError, never>
 }> {}
 
+/**
+ * Renderer service interface for managing the rendering pipeline
+ * 
+ * Handles the conversion of View objects to terminal output, frame
+ * management, viewport control, and optimization of screen updates.
+ * 
+ * @example
+ * ```typescript
+ * const renderFrame = Effect.gen(function* (_) {
+ *   const renderer = yield* _(RendererService)
+ *   
+ *   yield* _(renderer.beginFrame)
+ *   yield* _(renderer.render(myView))
+ *   yield* _(renderer.endFrame)
+ * })
+ * ```
+ */
 export interface RendererService extends Context.Tag<"RendererService", {
   readonly render: (view: View) => Effect.Effect<void, RenderError, never>
   readonly beginFrame: Effect.Effect<void, RenderError, never>
@@ -243,6 +401,24 @@ export interface RendererService extends Context.Tag<"RendererService", {
   readonly clearDirtyRegions: Effect.Effect<void, never, never>
 }> {}
 
+/**
+ * Storage service interface for persistent state management
+ * 
+ * Provides key-value storage for application state, configuration,
+ * and other persistent data. All operations are type-safe and Effect-based.
+ * 
+ * @example
+ * ```typescript
+ * const saveUserPrefs = Effect.gen(function* (_) {
+ *   const storage = yield* _(StorageService)
+ *   
+ *   const prefs = { theme: 'dark', fontSize: 14 }
+ *   yield* _(storage.saveState('userPrefs', prefs))
+ *   
+ *   const loaded = yield* _(storage.loadState<typeof prefs>('userPrefs'))
+ * })
+ * ```
+ */
 export interface StorageService extends Context.Tag<"StorageService", {
   readonly saveState: <T>(key: string, data: T) => Effect.Effect<void, StorageError, never>
   readonly loadState: <T>(key: string) => Effect.Effect<T | null, StorageError, never>
@@ -259,14 +435,32 @@ export type AppServices = TerminalService | InputService | RendererService | Sto
 // =============================================================================
 
 /**
- * Extract the model type from a component.
+ * Extract the model type from a component
+ * 
+ * Utility type that extracts the Model type parameter from a Component.
+ * Useful for working with component types in generic contexts.
+ * 
+ * @example
+ * ```typescript
+ * type MyComponent = Component<{ count: number }, { type: 'increment' }>
+ * type Model = ModelOf<MyComponent> // { count: number }
+ * ```
  */
-export type ModelOf<T> = T extends Component<infer M, any> ? M : never
+export type ModelOf<T> = T extends Component<infer M, unknown> ? M : never
 
 /**
- * Extract the message type from a component.
+ * Extract the message type from a component
+ * 
+ * Utility type that extracts the Msg type parameter from a Component.
+ * Useful for working with component message types in generic contexts.
+ * 
+ * @example
+ * ```typescript
+ * type MyComponent = Component<{ count: number }, { type: 'increment' }>
+ * type Messages = MsgOf<MyComponent> // { type: 'increment' }
+ * ```
  */
-export type MsgOf<T> = T extends Component<any, infer Msg> ? Msg : never
+export type MsgOf<T> = T extends Component<unknown, infer Msg> ? Msg : never
 
 /**
  * A program represents a complete TUI application with its model and message types.

@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "no-console": "warn",
+    "no-debugger": "error",
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-unused-vars": "error",
+    "no-explicit-any": "error",
+    "prefer-nullish-coalescing": "error",
+    "prefer-optional-chain": "error",
+    "no-throw-literal": "error"
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "coverage/**",
+    ".tuix/**"
+  ],
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "__tests__/**/*", "tests/**/*"],
+      "rules": {
+        "no-console": "off",
+        "no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["examples/**/*", "bin/**/*"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}

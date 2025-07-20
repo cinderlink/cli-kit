@@ -157,7 +157,7 @@ const showcaseComponent: Component<Model, Msg> = {
       
       case "applyFilter": {
         if (!model.filterValue.trim()) {
-          return Effect.succeed([model, []])
+          return Effect.succeed([model, [] as const] as const)
         }
         
         const filter: TableFilter = {
@@ -244,7 +244,7 @@ const showcaseComponent: Component<Model, Msg> = {
         {
           width: 50,
           height: 9,
-          border: Borders.single,
+          border: Borders.Normal,
           borderStyle: style().foreground(Colors.blue),
           padding: { top: 0, right: 1, bottom: 0, left: 1 }
         }

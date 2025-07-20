@@ -7,11 +7,11 @@
  */
 
 import { Effect, pipe } from "effect"
-import { stringWidth } from "@/utils/string-width.ts"
-import type { Style } from "./style.ts"
-import { type Color, ColorProfile, toAnsiSequence } from "./color.ts"
-import { type Border, BorderSide, renderBox, getBorderChar } from "./borders.ts"
-import { HorizontalAlign, VerticalAlign } from "./types.ts"
+import { stringWidth } from "../utils/string-width"
+import type { Style } from "./style"
+import { type Color, ColorProfile, toAnsiSequence } from "./color"
+import { type Border, BorderSide, renderBox, getBorderChar } from "./borders"
+import { HorizontalAlign, VerticalAlign } from "./types"
 
 // =============================================================================
 // ANSI Escape Codes
@@ -32,6 +32,10 @@ const STRIKETHROUGH = "\x1b[9m"
 
 /**
  * Apply text transformation based on style
+ * 
+ * @param text - The input text to transform
+ * @param style - Style containing transform property
+ * @returns Transformed text according to style.transform
  */
 const applyTransform = (text: string, style: Style): string => {
   const transform = style.get("transform")
@@ -52,11 +56,56 @@ const applyTransform = (text: string, style: Style): string => {
 }
 
 // =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Justify text by distributing spaces between words
+ * 
+ * @param line - Text line to justify
+ * @param totalSpace - Total space to distribute
+ * @returns Justified text
+ */
+const justifyText = (line: string, totalSpace: number): string => {
+  const words = line.split(" ")
+  if (words.length <= 1) return line
+  
+  const gaps = words.length - 1
+  const spacePerGap = Math.floor(totalSpace / gaps)
+  const extraSpaces = totalSpace % gaps
+  
+  let result = words[0] ?? ''
+  for (let i = 1; i < words.length; i++) {
+    const spaces = spacePerGap + (i <= extraSpaces ? 1 : 0)
+    result += " ".repeat(spaces + 1) + (words[i] ?? '')
+  }
+  return result
+}
+
+/**
+ * Create an array of empty lines
+ * 
+ * @param count - Number of lines to create
+ * @param content - Content for each line (default: empty string)
+ * @returns Array of lines
+ */
+const createEmptyLines = (count: number, content: string = ""): string[] => 
+  count > 0 ? Array(count).fill(content) : []
+
+// =============================================================================
 // Text Alignment
 // =============================================================================
 
 /**
  * Apply horizontal alignment to a line of text
+ * 
+ * Aligns text within a fixed width using the specified alignment.
+ * Supports left, right, center, and justify alignment.
+ * 
+ * @param line - The text line to align
+ * @param width - Target width in characters
+ * @param align - Alignment type
+ * @returns Aligned text line
  */
 const alignHorizontal = (
   line: string,
@@ -82,25 +131,20 @@ const alignHorizontal = (
     }
     
     case HorizontalAlign.Justify:
-      // Simple justify - distribute spaces between words
-      const words = line.split(" ")
-      if (words.length <= 1) return line
-      
-      const gaps = words.length - 1
-      const spacePerGap = Math.floor(space / gaps)
-      const extraSpaces = space % gaps
-      
-      let result = words[0]
-      for (let i = 1; i < words.length; i++) {
-        const spaces = spacePerGap + (i <= extraSpaces ? 1 : 0)
-        result += " ".repeat(spaces + 1) + words[i]
-      }
-      return result
+      return justifyText(line, space)
   }
 }
 
 /**
  * Apply vertical alignment to content
+ * 
+ * Aligns content within a fixed height by adding empty lines.
+ * Supports top, middle, and bottom alignment.
+ * 
+ * @param lines - Array of text lines
+ * @param height - Target height in lines
+ * @param align - Vertical alignment type
+ * @returns Array of aligned lines
  */
 const alignVertical = (
   lines: string[],
@@ -113,18 +157,18 @@ const alignVertical = (
   
   switch (align) {
     case VerticalAlign.Top:
-      return [...lines, ...Array(space).fill("")]
+      return [...lines, ...createEmptyLines(space)]
       
     case VerticalAlign.Bottom:
-      return [...Array(space).fill(""), ...lines]
+      return [...createEmptyLines(space), ...lines]
       
     case VerticalAlign.Middle: {
       const top = Math.floor(space / 2)
       const bottom = space - top
       return [
-        ...Array(top).fill(""),
+        ...createEmptyLines(top),
         ...lines,
-        ...Array(bottom).fill("")
+        ...createEmptyLines(bottom)
       ]
     }
   }
@@ -136,6 +180,13 @@ const alignVertical = (
 
 /**
  * Apply padding to content
+ * 
+ * Adds space around content based on padding configuration.
+ * Horizontal padding adds spaces, vertical padding adds empty lines.
+ * 
+ * @param lines - Array of text lines
+ * @param style - Style containing padding property
+ * @returns Array of padded lines
  */
 const applyPadding = (lines: string[], style: Style): string[] => {
   const padding = style.get("padding")
@@ -153,9 +204,9 @@ const applyPadding = (lines: string[], style: Style): string[] => {
   const emptyLine = " ".repeat(width)
   
   return [
-    ...Array(top).fill(emptyLine),
+    ...createEmptyLines(top, emptyLine),
     ...paddedLines,
-    ...Array(bottom).fill(emptyLine)
+    ...createEmptyLines(bottom, emptyLine)
   ]
 }
 
@@ -165,6 +216,13 @@ const applyPadding = (lines: string[], style: Style): string[] => {
 
 /**
  * Apply border to content
+ * 
+ * Wraps content with a border using the specified border style.
+ * Supports partial borders through borderSides property.
+ * 
+ * @param lines - Array of text lines
+ * @param style - Style containing border properties
+ * @returns Array of lines with border applied
  */
 const applyBorder = (lines: string[], style: Style): string[] => {
   const border = style.get("border")
@@ -181,6 +239,12 @@ const applyBorder = (lines: string[], style: Style): string[] => {
 
 /**
  * Build ANSI escape sequence for text decoration
+ * 
+ * Creates a combined ANSI sequence for all text decorations
+ * like bold, italic, underline, etc.
+ * 
+ * @param style - Style containing decoration properties
+ * @returns ANSI escape sequence string
  */
 const buildDecorationSequence = (style: Style): string => {
   let sequence = ""
@@ -198,6 +262,14 @@ const buildDecorationSequence = (style: Style): string => {
 
 /**
  * Apply color and decoration to text
+ * 
+ * Applies foreground/background colors and text decorations
+ * using ANSI escape sequences. Handles proper reset sequences.
+ * 
+ * @param text - The text to style
+ * @param style - Style containing color and decoration properties
+ * @param colorProfile - Color profile for ANSI sequence generation
+ * @returns Text wrapped in ANSI escape sequences
  */
 const applyColors = (
   text: string,
@@ -224,9 +296,7 @@ const applyColors = (
   if (!sequence) return text
   
   // Apply sequence and reset at the end
-  // For inline styles, use aggressive reset to prevent bleeding
-  const reset = style.get("inline") ? RESET : RESET
-  return sequence + text + reset
+  return sequence + text + RESET
 }
 
 // =============================================================================
@@ -326,9 +396,9 @@ export const renderStyled = (
       
       // Add vertical margins
       const result = [
-        ...Array(top).fill(""),
+        ...createEmptyLines(top),
         ...margined,
-        ...Array(bottom).fill("")
+        ...createEmptyLines(bottom)
       ]
       
       return result.join("\n")
@@ -339,6 +409,9 @@ export const renderStyled = (
 
 /**
  * Render styled text synchronously (for simple cases)
+ * 
+ * @deprecated Use renderStyled with proper Effect handling instead
+ * This function exists only for backward compatibility
  */
 export const renderStyledSync = (
   text: string,
@@ -349,5 +422,26 @@ export const renderStyledSync = (
     height?: number
   } = {}
 ): string => {
-  return Effect.runSync(renderStyled(text, style, options))
+  // This is a simplified version that doesn't use Effect
+  // For proper error handling, use renderStyled instead
+  const colorProfile = options.colorProfile ?? ColorProfile.TrueColor
+  
+  // Apply text transformation
+  const transformed = applyTransform(text, style)
+  
+  // For synchronous version, just apply basic styling
+  let lines = transformed.split("\n")
+  
+  // Apply padding
+  lines = applyPadding(lines, style)
+  
+  // Apply border
+  lines = applyBorder(lines, style)
+  
+  // Apply colors to each line
+  const styledLines = lines.map(line => 
+    applyColors(line, style, colorProfile)
+  )
+  
+  return styledLines.join("\n")
 }

@@ -4,7 +4,7 @@
 [jsx]
 factory = "jsx"
 fragment = "Fragment"
-importSource = "@cinderlink/cli-kit/jsx-runtime"
+importSource = "tuix"
 
 [test]
 # Preload setup files (uncomment when setup.ts is created)

@@ -106,7 +106,7 @@ const app: Component<ButtonShowcaseModel, ButtonShowcaseMsg> = {
         const newEnabledIndex = Math.max(0, Math.min(enabledButtons.length - 1, currentEnabledIndex + direction))
         const newSelectedButton = enabledButtons[newEnabledIndex]
         
-        if (!newSelectedButton) return Effect.succeed([model, []])
+        if (!newSelectedButton) return Effect.succeed([model, [] as const] as const)
 
         const newButtons = model.buttons.map(button => ({
           ...button,
@@ -133,7 +133,7 @@ const app: Component<ButtonShowcaseModel, ButtonShowcaseMsg> = {
             []
           ])
         }
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
 
       case "clearMessage": {

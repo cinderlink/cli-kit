@@ -1,0 +1,679 @@
+{
+  "processes": [
+    {
+      "name": "test-unit",
+      "config": {
+        "name": "test-unit",
+        "command": "test-unit",
+        "autorestart": false
+      },
+      "restarts": 0,
+      "logs": []
+    },
+    {
+      "name": "vitest",
+      "config": {
+        "name": "vitest",
+        "command": "bun test --watch",
+        "autorestart": true,
+        "group": "testing"
+      },
+      "status": "stopped",
+      "restarts": 0,
+      "logs": []
+    },
+    {
+      "name": "typecheck",
+      "config": {
+        "name": "typecheck",
+        "command": "bun run tsc --noEmit --watch",
+        "autorestart": false,
+        "group": "quality",
+        "logPreset": "tsc",
+        "healthCheck": {
+          "pattern": "Found \\d+ errors|No errors found",
+          "timeout": 10000
+        }
+      },
+      "status": "stopped",
+      "restarts": 0,
+      "logs": [
+        {
+          "timestamp": "2025-07-12T05:19:10.338Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.338Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | LogViewerModel)[], never, never>' is not assignable to type 'Effect<readonly [LogViewerModel, readonly Cmd<LogViewerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.339Z",
+          "level": "info",
+          "message": "      Type '(never[] | LogViewerModel)[]' is not assignable to type 'readonly [LogViewerModel, readonly Cmd<LogViewerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.339Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.339Z",
+          "level": "info",
+          "message": "tests/e2e/log-viewer.test.ts(301,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | LogViewerModel)[], never, never>; update: (msg: LogViewerMsg, model: LogViewerModel) => Effect.Effect<(never[] | LogViewerModel)[], never, never> | Effect.Effect<...>; view: (model: LogViewerModel) => { ...; }; handleKeyEvent: (key: string, model: LogViewerModel) => LogViewerMsg | nu...' is not assignable to parameter of type 'Component<LogViewerModel, LogViewerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.339Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.339Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | LogViewerModel)[], never, never>' is not assignable to type 'Effect<readonly [LogViewerModel, readonly Cmd<LogViewerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.339Z",
+          "level": "info",
+          "message": "      Type '(never[] | LogViewerModel)[]' is not assignable to type 'readonly [LogViewerModel, readonly Cmd<LogViewerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.339Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.339Z",
+          "level": "info",
+          "message": "tests/e2e/log-viewer.test.ts(358,53): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | LogViewerModel)[], never, never>; update: (msg: LogViewerMsg, model: LogViewerModel) => Effect.Effect<(never[] | LogViewerModel)[], never, never> | Effect.Effect<...>; view: (model: LogViewerModel) => { ...; }; handleKeyEvent: (key: string, model: LogViewerModel) => LogViewerMsg | nu...' is not assignable to parameter of type 'Component<LogViewerModel, LogViewerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | LogViewerModel)[], never, never>' is not assignable to type 'Effect<readonly [LogViewerModel, readonly Cmd<LogViewerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "      Type '(never[] | LogViewerModel)[]' is not assignable to type 'readonly [LogViewerModel, readonly Cmd<LogViewerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(154,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.340Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(170,53): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(196,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.341Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.342Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.342Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(211,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.342Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.342Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.342Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.342Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.342Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(226,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.343Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.343Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.343Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.343Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.343Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(241,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.343Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.343Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.343Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(256,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(271,53): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.344Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "tests/e2e/package-manager.test.ts(302,53): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>; update: (msg: PackageManagerMsg, model: PackageManagerModel) => Effect.Effect<...>; view: (m...' is not assignable to parameter of type 'Component<PackageManagerModel, PackageManagerMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[], never, never>' is not assignable to type 'Effect<readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "      Type '(never[] | { activeTab: \"packages\"; packageCount: number; selectedPackages: number; statusMessage: string; searchTerm: string; operationInProgress: boolean; selectedPackage: string; })[]' is not assignable to type 'readonly [PackageManagerModel, readonly Cmd<PackageManagerMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "tests/e2e/process-monitor.test.ts(125,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>; update: (msg: ProcessMonitorMsg, model: ProcessMonitorModel) => Effect.Effect<...>; view: (model: ProcessMonitorModel) => { ...; };...' is not assignable to parameter of type 'Component<ProcessMonitorModel, ProcessMonitorMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.345Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>' is not assignable to type 'Effect<readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "      Type '(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[]' is not assignable to type 'readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "tests/e2e/process-monitor.test.ts(141,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>; update: (msg: ProcessMonitorMsg, model: ProcessMonitorModel) => Effect.Effect<...>; view: (model: ProcessMonitorModel) => { ...; };...' is not assignable to parameter of type 'Component<ProcessMonitorModel, ProcessMonitorMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>' is not assignable to type 'Effect<readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "      Type '(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[]' is not assignable to type 'readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.346Z",
+          "level": "info",
+          "message": "tests/e2e/process-monitor.test.ts(157,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>; update: (msg: ProcessMonitorMsg, model: ProcessMonitorModel) => Effect.Effect<...>; view: (model: ProcessMonitorModel) => { ...; };...' is not assignable to parameter of type 'Component<ProcessMonitorModel, ProcessMonitorMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>' is not assignable to type 'Effect<readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "      Type '(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[]' is not assignable to type 'readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "tests/e2e/process-monitor.test.ts(171,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>; update: (msg: ProcessMonitorMsg, model: ProcessMonitorModel) => Effect.Effect<...>; view: (model: ProcessMonitorModel) => { ...; };...' is not assignable to parameter of type 'Component<ProcessMonitorModel, ProcessMonitorMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>' is not assignable to type 'Effect<readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "      Type '(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[]' is not assignable to type 'readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.347Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "tests/e2e/process-monitor.test.ts(190,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>; update: (msg: ProcessMonitorMsg, model: ProcessMonitorModel) => Effect.Effect<...>; view: (model: ProcessMonitorModel) => { ...; };...' is not assignable to parameter of type 'Component<ProcessMonitorModel, ProcessMonitorMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>' is not assignable to type 'Effect<readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "      Type '(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[]' is not assignable to type 'readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "tests/e2e/process-monitor.test.ts(223,53): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>; update: (msg: ProcessMonitorMsg, model: ProcessMonitorModel) => Effect.Effect<...>; view: (model: ProcessMonitorModel) => { ...; };...' is not assignable to parameter of type 'Component<ProcessMonitorModel, ProcessMonitorMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[], never, never>' is not assignable to type 'Effect<readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.348Z",
+          "level": "info",
+          "message": "      Type '(never[] | { processCount: number; selectedPid: number; statusMessage: string; refreshInterval: number; cpuUsage: number; memoryUsage: number; })[]' is not assignable to type 'readonly [ProcessMonitorModel, readonly Cmd<ProcessMonitorMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "tests/e2e/recommended-approach.test.ts(114,55): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | EditorModel)[], never, never>; update: (msg: EditorMsg, model: EditorModel) => Effect.Effect<(never[] | EditorModel)[], never, never> | Effect.Effect<...>; view: (model: EditorModel) => { ...; }; handleKeyEvent: (key: string, model: EditorModel) => EditorMsg | null; }' is not assignable to parameter of type 'Component<EditorModel, EditorMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | EditorModel)[], never, never>' is not assignable to type 'Effect<readonly [EditorModel, readonly Cmd<EditorMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "      Type '(never[] | EditorModel)[]' is not assignable to type 'readonly [EditorModel, readonly Cmd<EditorMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "tests/e2e/recommended-approach.test.ts(164,53): error TS2345: Argument of type '{ init: Effect.Effect<(never[] | EditorModel)[], never, never>; update: (msg: EditorMsg, model: EditorModel) => Effect.Effect<(never[] | EditorModel)[], never, never> | Effect.Effect<...>; view: (model: EditorModel) => { ...; }; handleKeyEvent: (key: string, model: EditorModel) => EditorMsg | null; }' is not assignable to parameter of type 'Component<EditorModel, EditorMsg>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "  Types of property 'init' are incompatible.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.349Z",
+          "level": "info",
+          "message": "    Type 'Effect<(never[] | EditorModel)[], never, never>' is not assignable to type 'Effect<readonly [EditorModel, readonly Cmd<EditorMsg>[]], never, AppServices>'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.350Z",
+          "level": "info",
+          "message": "      Type '(never[] | EditorModel)[]' is not assignable to type 'readonly [EditorModel, readonly Cmd<EditorMsg>[]]'.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.350Z",
+          "level": "info",
+          "message": "        Target requires 2 element(s) but source may have fewer.",
+          "source": "stdout"
+        },
+        {
+          "timestamp": "2025-07-12T05:19:10.350Z",
+          "level": "info",
+          "message": "10:19:10 PM - Found 2194 errors. Watching for file changes.",
+          "source": "stdout"
+        }
+      ]
+    },
+    {
+      "name": "test-watch",
+      "config": {
+        "name": "test-watch",
+        "command": "bun test --watch --coverage",
+        "autorestart": true,
+        "group": "testing",
+        "logPreset": "bun",
+        "healthCheck": {
+          "pattern": "\\d+ pass|\\d+ fail",
+          "timeout": 8000
+        }
+      },
+      "status": "stopped",
+      "restarts": 0,
+      "logs": []
+    },
+    {
+      "name": "test-echo",
+      "config": {
+        "name": "test-echo",
+        "command": "echo",
+        "args": [
+          "Hello from detached process!"
+        ],
+        "autostart": false,
+        "autorestart": false
+      },
+      "status": "stopped",
+      "startTime": "2025-07-13T00:42:18.428Z",
+      "restarts": 0,
+      "logs": []
+    }
+  ],
+  "groups": [],
+  "dependencies": []
+}

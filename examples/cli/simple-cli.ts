@@ -37,7 +37,7 @@ const config = defineConfig({
     count: {
       description: "Count from 1 to N",
       args: {
-        number: z.number().min(1).max(100).describe("Number to count to")
+        number: z.coerce.number().min(1).max(100).describe("Number to count to")
       },
       options: {
         delay: z.number().default(1000).describe("Delay between numbers (ms)")

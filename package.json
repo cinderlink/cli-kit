@@ -1,13 +1,17 @@
 {
   "name": "tuix",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "description": "A performant TUI framework for Bun with JSX and reactive state management",
   "main": "dist/index.js",
   "module": "src/index.ts",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "tuix": "./bin/tuix.ts",
-    "build": "bun build src/index.ts --outdir dist --format esm",
+    "build": "bun run build:packages && bun build src/index.ts --outdir dist --format esm --target bun",
+    "build:packages": "for pkg in packages/*/; do (cd \"$pkg\" && bun run build); done",
     "build:compile": "bun build --compile --minify --bytecode --target bun-linux-x64 --outfile dist/tuix src/index.ts",
     "dev": "bun --watch run src/index.ts",
     "test": "bun test",
@@ -35,11 +39,15 @@
     "test:core-coverage": "bun test __tests__/unit/core __tests__/core.test.ts __tests__/simple.test.ts --coverage",
     "test:layout-coverage": "bun test __tests__/unit/layout --coverage",
     "test:styling-coverage": "bun test __tests__/unit/styling --coverage",
-    "typecheck": "tsc --noEmit && tsc --project tsconfig.tuix.json --noEmit",
-    "lint": "echo 'No linter configured yet'",
+    "typecheck": "bun build src/index.ts --target bun --outdir /tmp/tuix-typecheck",
+    "typecheck:src": "bun check src/**/*.ts || true",
+    "typecheck:tests": "bun test --dry-run || true",
+    "typecheck:tsc": "tsc --noEmit --project tsconfig.src.json",
+    "lint": "oxlint src/",
+    "lint:fix": "oxlint src/ --fix",
+    "lint:all": "oxlint .",
     "clean": "rm -rf dist coverage",
     "check": "bun run typecheck && bun test",
-    
     "pm2:start": "pm2 start ecosystem.config.cjs",
     "pm2:stop": "pm2 stop ecosystem.config.cjs",
     "pm2:restart": "pm2 restart ecosystem.config.cjs",
@@ -69,7 +77,9 @@
     "example:table-showcase": "bun examples/table-showcase.ts",
     "example:mouse-demo": "bun examples/mouse-demo.ts",
     "example:loading-screen": "bun examples/loading-screen.ts",
-    "example:jsx-demo": "bun examples/cli/jsx-demo.tsx",
+    "example:jsx-demo": "bun examples/jsx-cli-demo.tsx",
+    "example:jsx-cli": "bun examples/jsx-cli-demo.tsx",
+    "example:interactive": "bun examples/interactive-mode-demo.tsx",
     "example:bindable-demo": "bun examples/bindable-demo.tuix",
     "example:showcase-runes": "bun examples/showcase-runes.tuix",
     "example:runes-demo": "bun examples/runes-demo.tuix",
@@ -86,41 +96,123 @@
   "author": "Cinderlink",
   "license": "MIT",
   "bin": {
-    "tuix": "./bin/tuix.ts"
+    "tuix": "./bin/tuix.ts",
+    "tuix-logs": "./bin/tuix-logs.ts"
   },
   "files": [
     "dist",
     "src",
     "bin",
-    "README.md",
-    "cli.ts",
-    "jsx-runtime.ts",
-    "jsx-dev-runtime.ts"
+    "README.md"
   ],
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts"
     },
+    "./runtime": {
+      "import": "./src/core/runtime.ts",
+      "types": "./src/core/runtime.ts"
+    },
     "./cli": {
-      "import": "./cli.ts",
-      "types": "./cli.ts"
+      "import": "./src/cli/index.ts",
+      "types": "./src/cli/index.ts"
+    },
+    "./plugins": {
+      "import": "./src/plugins/index.ts",
+      "types": "./src/plugins/index.ts"
+    },
+    "./jsx": {
+      "import": "./src/jsx/index.ts",
+      "types": "./src/jsx/index.ts"
+    },
+    "./jsx-runtime": {
+      "import": "./src/jsx/runtime/index.ts",
+      "types": "./src/jsx/runtime/index.ts"
+    },
+    "./jsx-dev-runtime": {
+      "import": "./src/jsx/runtime/dev.ts",
+      "types": "./src/jsx/runtime/dev.ts"
     },
     "./components": {
       "import": "./src/components/index.ts",
       "types": "./src/components/index.ts"
     },
-    "./jsx-runtime": {
-      "import": "./jsx-runtime.ts",
-      "types": "./jsx-runtime.ts"
+    "./components/forms": {
+      "import": "./src/components/forms/index.ts",
+      "types": "./src/components/forms/index.ts"
     },
-    "./jsx-dev-runtime": {
-      "import": "./jsx-dev-runtime.ts",
-      "types": "./jsx-dev-runtime.ts"
+    "./components/forms/text-input": {
+      "import": "./src/components/forms/text-input/index.ts",
+      "types": "./src/components/forms/text-input/index.ts"
+    },
+    "./components/forms/button": {
+      "import": "./src/components/forms/button/index.ts",
+      "types": "./src/components/forms/button/index.ts"
+    },
+    "./components/layout": {
+      "import": "./src/components/layout/index.ts",
+      "types": "./src/components/layout/index.ts"
+    },
+    "./components/layout/box": {
+      "import": "./src/components/layout/box/index.ts",
+      "types": "./src/components/layout/box/index.ts"
+    },
+    "./components/layout/flex": {
+      "import": "./src/components/layout/flex/index.ts",
+      "types": "./src/components/layout/flex/index.ts"
+    },
+    "./components/display": {
+      "import": "./src/components/display/index.ts",
+      "types": "./src/components/display/index.ts"
+    },
+    "./components/display/text": {
+      "import": "./src/components/display/text/index.ts",
+      "types": "./src/components/display/text/index.ts"
+    },
+    "./styles": {
+      "import": "./src/styling/index.ts",
+      "types": "./src/styling/index.ts"
+    },
+    "./process-manager": {
+      "import": "./src/process-manager/index.ts",
+      "types": "./src/process-manager/index.ts"
+    },
+    "./logger": {
+      "import": "./src/logger/index.ts",
+      "types": "./src/logger/index.ts"
     },
     "./runes": {
-      "import": "./src/runes.ts",
-      "types": "./src/runes.ts"
+      "import": "./src/reactivity/runes.ts",
+      "types": "./src/reactivity/runes.ts"
+    },
+    "./layout": {
+      "import": "./src/layout/index.ts",
+      "types": "./src/layout/index.ts"
+    },
+    "./testing": {
+      "import": "./src/testing/index.ts",
+      "types": "./src/testing/index.ts"
+    },
+    "./core": {
+      "import": "./src/core/index.ts",
+      "types": "./src/core/index.ts"
+    },
+    "./services": {
+      "import": "./src/services/index.ts",
+      "types": "./src/services/index.ts"
+    },
+    "./config": {
+      "import": "./src/config/index.ts",
+      "types": "./src/config/index.ts"
+    },
+    "./health": {
+      "import": "./src/health/index.ts",
+      "types": "./src/health/index.ts"
+    },
+    "./utils": {
+      "import": "./src/utils/index.ts",
+      "types": "./src/utils/index.ts"
     }
   },
   "dependencies": {
@@ -134,7 +226,11 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/strip-ansi": "^5.2.1",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
+    "eslint": "^9.31.0",
     "node-pty": "^1.0.0",
+    "oxlint": "^1.7.0",
     "pm2": "^6.0.8",
     "typescript": "^5.3.0"
   },

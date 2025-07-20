@@ -1,7 +1,65 @@
 /**
- * CLI Configuration System
+ * CLI Configuration System - Complete configuration management for CLI applications
  * 
- * Provides the defineConfig API for creating CLI applications
+ * This module provides a comprehensive configuration system for building CLI applications
+ * with the TUIX framework. It includes configuration definition, validation, merging,
+ * lazy loading, and environment variable integration.
+ * 
+ * ## Key Features:
+ * 
+ * ### Configuration Definition
+ * - Type-safe configuration builders with `defineConfig()`
+ * - Command definition helpers with validation
+ * - Lazy loading support for performance optimization
+ * - Environment variable integration
+ * 
+ * ### Validation System
+ * - Comprehensive configuration validation
+ * - Reserved name checking to prevent conflicts
+ * - Semver version validation
+ * - Schema validation for options and arguments
+ * 
+ * ### Configuration Merging
+ * - Plugin-friendly configuration merging
+ * - Hook composition for middleware patterns
+ * - Deep merging of nested command structures
+ * - Conflict resolution strategies
+ * 
+ * ### Common Patterns
+ * - Pre-defined option and argument schemas
+ * - Standard CLI patterns (verbose, quiet, help, etc.)
+ * - File and server configuration helpers
+ * - Output formatting options
+ * 
+ * @example
+ * ```typescript
+ * import { defineConfig, defineCommand, commonOptions } from './config'
+ * 
+ * // Simple CLI configuration
+ * const config = defineConfig({
+ *   name: 'myapp',
+ *   version: '1.0.0',
+ *   description: 'My awesome CLI application',
+ *   commands: {
+ *     build: defineCommand({
+ *       description: 'Build the application',
+ *       options: {
+ *         watch: commonOptions.watch,
+ *         output: commonOptions.output
+ *       },
+ *       handler: async (args) => {
+ *         console.log('Building with options:', args)
+ *       }
+ *     })
+ *   }
+ * })
+ * 
+ * // Environment-based configuration
+ * const envConfig = createConfigFromEnv('MYAPP')
+ * const finalConfig = mergeConfigs(config, envConfig)
+ * ```
+ * 
+ * @module cli/config
  */
 
 import { z } from "zod"
@@ -38,36 +96,70 @@ export function defineConfig(config: CLIConfig): CLIConfig {
   return {
     ...config,
     // Ensure we have defaults
-    options: config.options || {},
-    commands: config.commands || {},
-    plugins: config.plugins || [],
-    hooks: config.hooks || {}
+    options: config.options ?? {},
+    commands: config.commands ?? {},
+    plugins: config.plugins ?? []
   }
 }
 
 /**
- * Create a lazy-loaded command handler
+ * Create a lazy-loaded command handler for performance optimization
+ * 
+ * Wraps an import function to create a lazy-loaded handler that only loads
+ * the actual handler code when the command is executed. This improves CLI
+ * startup time for applications with many commands.
+ * 
+ * @param importFn - Function that dynamically imports the handler module
+ * @param metadata - Optional metadata to attach to the lazy handler
+ * @returns A lazy handler that loads on first execution
+ * 
+ * @example
+ * ```typescript
+ * const buildHandler = lazyLoad(
+ *   () => import('./commands/build'),
+ *   { category: 'development' }
+ * )
+ * ```
  */
-export function lazyLoad(importFn: () => Promise<{ default: any }>, metadata?: any): LazyHandler {
-  const lazyHandler = async () => {
+export function lazyLoad(importFn: () => Promise<{ default: Handler }>, metadata?: Record<string, unknown>): LazyHandler {
+  const lazyHandler = async (): Promise<Handler> => {
     const module = await importFn()
     return module.default
   }
   
   // Add metadata for testing/introspection
-  ;(lazyHandler as any)._lazy = true
-  ;(lazyHandler as any)._loader = importFn
+  Object.assign(lazyHandler, { _lazy: true, _loader: importFn })
   
   // Add metadata if provided
   if (metadata) {
     Object.assign(lazyHandler, metadata)
   }
   
-  return lazyHandler
+  return lazyHandler as LazyHandler
 }
 
 /**
- * Helper to create a command configuration
+ * Helper to create a command configuration with type safety
+ * 
+ * Provides a convenient way to define command configurations with automatic
+ * lazy loading detection and proper type checking.
+ * 
+ * @param config - Command configuration with handler
+ * @returns Complete command configuration
+ * 
+ * @example
+ * ```typescript
+ * const deployCommand = defineCommand({
+ *   description: 'Deploy the application',
+ *   options: {
+ *     environment: z.enum(['dev', 'staging', 'prod']),
+ *     force: commonOptions.force
+ *   },
+ *   handler: async (args) => {
+ *     console.log(`Deploying to ${args.environment}`)
+ *   }
+ * })
+ * ```
  */
 export function defineCommand(config: Omit<CommandConfig, 'handler'> & {
   handler: Handler | LazyHandler | (() => Promise<{ default: Handler }>)
@@ -219,22 +311,24 @@ export function mergeConfigs(base: CLIConfig, ...configs: Partial<CLIConfig>[]):
     if (config.commands) {
       merged.commands = merged.commands || {}
       Object.entries(config.commands).forEach(([name, command]) => {
-        if (merged.commands![name]) {
+        const existingCommands = merged.commands
+        if (existingCommands && existingCommands[name]) {
           // Deep merge command config including nested commands
-          merged.commands![name] = {
-            ...merged.commands![name],
+          const existingCommand = existingCommands[name]
+          existingCommands[name] = {
+            ...existingCommand,
             ...command,
             options: {
-              ...merged.commands![name].options,
+              ...existingCommand.options,
               ...command.options
             },
             commands: command.commands ? {
-              ...merged.commands![name].commands,
+              ...existingCommand.commands,
               ...command.commands
-            } : merged.commands![name].commands
+            } : existingCommand.commands
           }
-        } else {
-          merged.commands![name] = command
+        } else if (existingCommands) {
+          existingCommands[name] = command
         }
       })
     }
@@ -251,46 +345,15 @@ export function mergeConfigs(base: CLIConfig, ...configs: Partial<CLIConfig>[]):
       merged.plugins = [...(merged.plugins || []), ...config.plugins]
     }
     
-    // Merge aliases
-    if ((config as any).aliases) {
-      (merged as any).aliases = { ...(merged as any).aliases, ...(config as any).aliases }
+    // Merge aliases (if present in extended configuration)
+    const configWithAliases = config as CLIConfig & { aliases?: Record<string, string> }
+    const mergedWithAliases = merged as CLIConfig & { aliases?: Record<string, string> }
+    if (configWithAliases.aliases) {
+      mergedWithAliases.aliases = { ...mergedWithAliases.aliases, ...configWithAliases.aliases }
     }
     
-    // Merge hooks
-    if (config.hooks) {
-      const hooks = merged.hooks || {}
-      if (config.hooks.beforeCommand) {
-        const existing = hooks.beforeCommand
-        hooks.beforeCommand = existing 
-          ? async (cmd, args) => {
-              await existing(cmd, args)
-              await config.hooks!.beforeCommand!(cmd, args)
-            }
-          : config.hooks.beforeCommand
-      }
-      
-      if (config.hooks.afterCommand) {
-        const existing = hooks.afterCommand
-        hooks.afterCommand = existing
-          ? async (cmd, args, result) => {
-              await existing(cmd, args, result)
-              await config.hooks!.afterCommand!(cmd, args, result)
-            }
-          : config.hooks.afterCommand
-      }
-      
-      if (config.hooks.onError) {
-        const existing = hooks.onError
-        hooks.onError = existing
-          ? async (error, cmd, args) => {
-              await existing(error, cmd, args)
-              await config.hooks!.onError!(error, cmd, args)
-            }
-          : config.hooks.onError
-      }
-      
-      merged.hooks = hooks
-    }
+    // Hooks have been moved to event-driven system
+    // No longer merging hooks here
   }
   
   return merged
@@ -312,9 +375,24 @@ export async function loadConfig(filePath: string): Promise<CLIConfig> {
 
 /**
  * Parse environment variables with a given prefix
+ * 
+ * Converts environment variables into a configuration object by parsing
+ * variables that start with the given prefix. Handles type conversion
+ * and nested key structures.
+ * 
+ * @param env - Environment variables object
+ * @param prefix - Prefix to filter environment variables
+ * @returns Parsed configuration object
+ * 
+ * @example
+ * ```typescript
+ * // Environment: MYAPP_VERBOSE=true, MYAPP_PORT=3000
+ * const config = parseEnvVars(process.env, 'MYAPP_')
+ * // Returns: { verbose: true, port: '3000' }
+ * ```
  */
-export function parseEnvVars(env: Record<string, string> | NodeJS.ProcessEnv, prefix: string): any {
-  const result: any = {}
+export function parseEnvVars(env: Record<string, string> | NodeJS.ProcessEnv, prefix: string): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
   
   Object.entries(env).forEach(([key, value]) => {
     if (key.startsWith(prefix) && value) {
@@ -323,12 +401,12 @@ export function parseEnvVars(env: Record<string, string> | NodeJS.ProcessEnv, pr
       // Handle special mappings for common CLI env vars
       const settingsKeys = ['colors', 'interactive', 'output']
       
-      let targetObj = result
+      let targetObj: Record<string, unknown> = result
       let finalKey = cleanKey
       
       if (settingsKeys.includes(cleanKey)) {
         if (!result.settings) result.settings = {}
-        targetObj = result.settings
+        targetObj = result.settings as Record<string, unknown>
       } else if (cleanKey.includes('_')) {
         // Handle nested keys like CLI_SETTINGS_COLORS -> settings_colors
         finalKey = cleanKey
@@ -360,9 +438,9 @@ export function createConfigFromEnv(prefix = "CLI"): Partial<CLIConfig> {
   const envVars = parseEnvVars(process.env, prefix)
   const config: Partial<CLIConfig> = {}
   
-  if (envVars.name) config.name = envVars.name
-  if (envVars.version) config.version = envVars.version
-  if (envVars.description) config.description = envVars.description
+  if (envVars.name && typeof envVars.name === 'string') config.name = envVars.name
+  if (envVars.version && typeof envVars.version === 'string') config.version = envVars.version
+  if (envVars.description && typeof envVars.description === 'string') config.description = envVars.description
   
   return config
 }
@@ -377,8 +455,7 @@ export function getDefaultConfig(): CLIConfig {
     description: "A CLI application",
     commands: {},
     options: {},
-    plugins: [],
-    hooks: {}
+    plugins: []
   }
 }
 
@@ -394,7 +471,6 @@ export function createDefaultConfig(config?: Partial<CLIConfig> | string): CLICo
       commands: {},
       options: {},
       plugins: [],
-      hooks: {},
       settings: {
         colors: true,
         interactive: true
@@ -410,7 +486,6 @@ export function createDefaultConfig(config?: Partial<CLIConfig> | string): CLICo
     commands: config?.commands || {},
     options: config?.options || {},
     plugins: config?.plugins || [],
-    hooks: config?.hooks || {},
     settings: {
       colors: true,
       interactive: true,
@@ -436,13 +511,17 @@ export function expandAliases(configOrCommand: CLIConfig | string, aliases?: Rec
       }
       visited.add(cmd)
       
-      if (aliases[cmd]) {
+      if (aliases && aliases[cmd]) {
         const expanded = aliases[cmd]
-        // Handle nested aliases like "ta" -> "t --all"
-        const parts = expanded.split(' ')
-        const baseCmd = parts[0]
-        const expandedBase = expandAlias(baseCmd)
-        return parts.length > 1 ? `${expandedBase} ${parts.slice(1).join(' ')}` : expandedBase
+        if (expanded) {
+          // Handle nested aliases like "ta" -> "t --all"
+          const parts = expanded.split(' ')
+          const baseCmd = parts[0]
+          if (baseCmd) {
+            const expandedBase = expandAlias(baseCmd)
+            return parts.length > 1 ? `${expandedBase} ${parts.slice(1).join(' ')}` : expandedBase
+          }
+        }
       }
       
       return cmd
@@ -455,7 +534,7 @@ export function expandAliases(configOrCommand: CLIConfig | string, aliases?: Rec
   const config = configOrCommand as CLIConfig
   const expandedConfig = { ...config, commands: { ...config.commands } }
   
-  function expandCommandAliases(commands: Record<string, any>) {
+  function expandCommandAliases(commands: Record<string, CommandConfig>): Record<string, CommandConfig> {
     const expanded = { ...commands }
     
     Object.entries(commands).forEach(([commandName, commandConfig]) => {
@@ -467,10 +546,10 @@ export function expandAliases(configOrCommand: CLIConfig | string, aliases?: Rec
       }
       
       // Recursively expand subcommands
-      if (commandConfig.subcommands) {
+      if (commandConfig.commands) {
         expanded[commandName] = {
           ...commandConfig,
-          subcommands: expandCommandAliases(commandConfig.subcommands)
+          commands: expandCommandAliases(commandConfig.commands)
         }
         
         // Also expand for the alias commands
@@ -478,7 +557,7 @@ export function expandAliases(configOrCommand: CLIConfig | string, aliases?: Rec
           commandConfig.aliases.forEach((alias: string) => {
             expanded[alias] = {
               ...commandConfig,
-              subcommands: expandCommandAliases(commandConfig.subcommands)
+              commands: commandConfig.commands ? expandCommandAliases(commandConfig.commands) : undefined
             }
           })
         }

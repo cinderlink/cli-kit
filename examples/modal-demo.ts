@@ -249,9 +249,9 @@ const modalDemo: Component<AppModel, AppMsg> = {
         
         const selectedAction = actions[model.selectedOption]
         if (selectedAction) {
-          return Effect.succeed([model, [Effect.succeed(selectedAction)]])
+          return Effect.succeed([model, [Effect.succeed(selectedAction)] as const] as const)
         }
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
       
       case "UpdateTerminalSize": {

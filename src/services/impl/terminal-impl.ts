@@ -3,9 +3,9 @@
  */
 
 import { Effect, Layer, Ref } from "effect"
-import { TerminalService } from "../terminal.ts"
-import { TerminalError } from "@/core/errors.ts"
-import type { WindowSize, TerminalCapabilities } from "@/core/types.ts"
+import { TerminalService } from "../terminal"
+import { TerminalError } from "../../core/errors"
+import type { WindowSize, TerminalCapabilities } from "../../core/types"
 
 // ANSI Escape Sequences
 const ESC = '\x1b'
@@ -65,13 +65,39 @@ const ANSI = {
 } as const
 
 /**
+ * Platform abstraction for terminal operations
+ */
+interface PlatformTerminal {
+  readonly stdout: {
+    readonly columns?: number
+    readonly rows?: number
+    write: (data: string) => void
+  }
+  readonly stdin: {
+    readonly isTTY?: boolean
+    setRawMode?: (enabled: boolean) => void
+  }
+  readonly env: Record<string, string | undefined>
+  readonly platform: string
+}
+
+/**
+ * Get platform-specific terminal interface
+ */
+const getPlatform = (): PlatformTerminal => ({
+  stdout: process.stdout,
+  stdin: process.stdin,
+  env: process.env,
+  platform: process.platform
+})
+
+/**
  * Create the live Terminal service implementation
  */
 export const TerminalServiceLive = Layer.effect(
   TerminalService,
   Effect.gen(function* (_) {
-    const stdout = process.stdout
-    const stdin = process.stdin
+    const platform = getPlatform()
     const isRawMode = yield* _(Ref.make(false))
     const isAlternateScreen = yield* _(Ref.make(false))
     
@@ -79,7 +105,7 @@ export const TerminalServiceLive = Layer.effect(
     const write = (data: string) =>
       Effect.try({
         try: () => {
-          stdout.write(data)
+          platform.stdout.write(data)
         },
         catch: (error) => new TerminalError({ 
           operation: "write",
@@ -89,7 +115,7 @@ export const TerminalServiceLive = Layer.effect(
     
     // Helper to detect terminal capabilities
     const detectCapabilities = (): TerminalCapabilities => {
-      const env = process.env
+      const env = platform.env
       const colorSupport = (() => {
         if (env.COLORTERM === 'truecolor') return 'truecolor'
         if (env.TERM?.includes('256color')) return '256'
@@ -99,15 +125,15 @@ export const TerminalServiceLive = Layer.effect(
       
       return {
         colors: colorSupport,
-        unicode: process.platform !== 'win32', // Simplified check
+        unicode: platform.platform !== 'win32', // Simplified check
         mouse: true, // Most modern terminals support mouse
         clipboard: false, // Requires additional setup
         sixel: false, // Image protocol support
         kitty: env.TERM === 'xterm-kitty',
         iterm2: env.TERM_PROGRAM === 'iTerm.app',
         windowTitle: true,
-        columns: stdout.columns || 80,
-        rows: stdout.rows || 24,
+        columns: platform.stdout.columns || 80,
+        rows: platform.stdout.rows || 24,
       }
     }
     
@@ -136,8 +162,8 @@ export const TerminalServiceLive = Layer.effect(
       
       // Terminal State Management
       getSize: Effect.sync(() => ({
-        width: stdout.columns || 80,
-        height: stdout.rows || 24,
+        width: platform.stdout.columns || 80,
+        height: platform.stdout.rows || 24,
       })),
       
       setRawMode: (enabled: boolean) =>
@@ -147,8 +173,8 @@ export const TerminalServiceLive = Layer.effect(
           
           yield* _(Effect.try({
             try: () => {
-              if (stdin.isTTY) {
-                stdin.setRawMode(enabled)
+              if (platform.stdin.isTTY && platform.stdin.setRawMode) {
+                platform.stdin.setRawMode(enabled)
               }
             },
             catch: (error) => new TerminalError({
@@ -210,10 +236,26 @@ export const TerminalServiceLive = Layer.effect(
       bell: write(ANSI.bell),
       
       getCursorPosition: Effect.gen(function* (_) {
-        // This is complex as it requires reading from stdin
-        // For now, return a placeholder
-        yield* _(Effect.logWarning("getCursorPosition not fully implemented"))
-        return { x: 1, y: 1 }
+        // Implementation for cursor position retrieval
+        // This requires sending ANSI escape sequence and reading response
+        try {
+          yield* _(write(ANSI.requestCursorPosition))
+          // In a full implementation, we would:
+          // 1. Set stdin to raw mode temporarily
+          // 2. Write the cursor position request sequence
+          // 3. Read the response from stdin
+          // 4. Parse the response (format: \x1b[row;colR)
+          // 5. Restore previous stdin mode
+          // For now, return current size as fallback
+          const size = yield* _(Effect.sync(() => ({
+            width: platform.stdout.columns || 80,
+            height: platform.stdout.rows || 24,
+          })))
+          return { x: 1, y: 1 } // Would be parsed from stdin response
+        } catch {
+          // Fallback if cursor position cannot be determined
+          return { x: 1, y: 1 }
+        }
       }),
       
       setCursorShape: (shape: 'block' | 'underline' | 'bar') =>

@@ -6,8 +6,8 @@
  */
 
 import { Effect, Context } from "effect"
-import { Schema } from "zod"
-import type { StorageError } from "@/core/types.ts"
+import { z } from "zod"
+import type { StorageError } from "../core/types"
 
 /**
  * The StorageService interface defines persistent storage operations.
@@ -28,7 +28,7 @@ export class StorageService extends Context.Tag("StorageService")<
       key: string,
       data: T,
       options?: {
-        readonly schema?: Schema<T>
+        readonly schema?: z.ZodSchema<T>
         readonly pretty?: boolean
       }
     ) => Effect.Effect<void, StorageError, never>
@@ -39,7 +39,7 @@ export class StorageService extends Context.Tag("StorageService")<
      */
     readonly loadState: <T>(
       key: string,
-      schema: Schema<T>
+      schema: z.ZodSchema<T>
     ) => Effect.Effect<T | null, StorageError, never>
 
     /**
@@ -67,7 +67,7 @@ export class StorageService extends Context.Tag("StorageService")<
      */
     readonly loadConfig: <T>(
       appName: string,
-      schema: Schema<T>,
+      schema: z.ZodSchema<T>,
       defaults: T
     ) => Effect.Effect<T, StorageError, never>
 
@@ -77,7 +77,7 @@ export class StorageService extends Context.Tag("StorageService")<
     readonly saveConfig: <T>(
       appName: string,
       config: T,
-      schema: Schema<T>
+      schema: z.ZodSchema<T>
     ) => Effect.Effect<void, StorageError, never>
 
     /**
@@ -90,7 +90,7 @@ export class StorageService extends Context.Tag("StorageService")<
      */
     readonly watchConfig: <T>(
       appName: string,
-      schema: Schema<T>
+      schema: z.ZodSchema<T>
     ) => Effect.Effect<
       Effect.Effect<T, StorageError, never>, // Stream of config changes
       StorageError,
@@ -116,7 +116,7 @@ export class StorageService extends Context.Tag("StorageService")<
      */
     readonly getCache: <T>(
       key: string,
-      schema: Schema<T>
+      schema: z.ZodSchema<T>
     ) => Effect.Effect<T | null, StorageError, never>
 
     /**
@@ -147,7 +147,7 @@ export class StorageService extends Context.Tag("StorageService")<
      */
     readonly readTextFile: <T = string>(
       path: string,
-      schema?: Schema<T>
+      schema?: z.ZodSchema<T>
     ) => Effect.Effect<T, StorageError, never>
 
     /**
@@ -167,7 +167,7 @@ export class StorageService extends Context.Tag("StorageService")<
      */
     readonly readJsonFile: <T>(
       path: string,
-      schema: Schema<T>
+      schema: z.ZodSchema<T>
     ) => Effect.Effect<T, StorageError, never>
 
     /**

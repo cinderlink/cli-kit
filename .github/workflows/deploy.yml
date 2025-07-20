@@ -1,0 +1,353 @@
+name: Deploy Examples
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-examples:
+    name: Build Examples
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      run: bun install
+
+    - name: Build main package
+      run: bun run build
+
+    - name: Test examples
+      run: |
+        # Test that examples run without errors
+        echo "Testing examples..."
+        
+        # Test core examples
+        timeout 5s bun examples/button-showcase.ts || true
+        timeout 5s bun examples/table-showcase.ts || true
+        timeout 5s bun examples/modal-demo.ts || true
+        timeout 5s bun examples/help-demo.ts || true
+        timeout 5s bun examples/gradient-demo.ts || true
+        
+        # Test CLI examples
+        timeout 5s bun examples/cli/simple-cli.ts --help || true
+        
+        # Test JSX examples
+        timeout 5s bun examples/jsx-cli-demo.tsx --help || true
+        timeout 5s bun examples/interactive-mode-demo.tsx --help || true
+
+    - name: Generate example screenshots
+      run: |
+        # Generate screenshots for examples
+        mkdir -p example-screenshots
+        
+        # Use the screenshot functionality
+        bun run screenshot:examples || true
+        
+        # Copy screenshots to deployment folder
+        if [ -d ".tuix/screenshots" ]; then
+          cp -r .tuix/screenshots/* example-screenshots/ || true
+        fi
+
+    - name: Build example documentation
+      run: |
+        mkdir -p example-docs
+        
+        # Generate documentation for examples
+        echo "# TUIX Examples" > example-docs/README.md
+        echo "Generated on: $(date)" >> example-docs/README.md
+        echo "" >> example-docs/README.md
+        
+        # List all examples
+        echo "## Available Examples" >> example-docs/README.md
+        echo "" >> example-docs/README.md
+        
+        for example in examples/*.ts examples/*.tsx; do
+          if [ -f "$example" ]; then
+            name=$(basename "$example" .ts)
+            name=$(basename "$name" .tsx)
+            echo "- [$name](./$example)" >> example-docs/README.md
+          fi
+        done
+        
+        echo "" >> example-docs/README.md
+        echo "## CLI Examples" >> example-docs/README.md
+        echo "" >> example-docs/README.md
+        
+        for example in examples/cli/*.ts examples/cli/*.tsx; do
+          if [ -f "$example" ]; then
+            name=$(basename "$example" .ts)
+            name=$(basename "$name" .tsx)
+            echo "- [$name](./$example)" >> example-docs/README.md
+          fi
+        done
+        
+        # Copy example files
+        cp -r examples/ example-docs/
+
+    - name: Upload example artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: example-artifacts
+        path: |
+          example-docs/
+          example-screenshots/
+
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    needs: build-examples
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      run: bun install
+
+    - name: Build documentation
+      run: |
+        mkdir -p docs-site
+        
+        # Generate API documentation
+        echo "# TUIX API Documentation" > docs-site/api.md
+        echo "Generated on: $(date)" >> docs-site/api.md
+        echo "" >> docs-site/api.md
+        
+        # Extract exports from main index
+        echo "## Main Exports" >> docs-site/api.md
+        echo '```typescript' >> docs-site/api.md
+        grep -E "export.*from\|export.*=" src/index.ts | head -20 >> docs-site/api.md
+        echo '```' >> docs-site/api.md
+        
+        # Component documentation
+        echo "## Components" >> docs-site/api.md
+        echo '```typescript' >> docs-site/api.md
+        grep -E "export.*class\|export.*function\|export.*const" src/components/index.ts | head -10 >> docs-site/api.md
+        echo '```' >> docs-site/api.md
+        
+        # CLI documentation
+        echo "## CLI Framework" >> docs-site/api.md
+        echo '```typescript' >> docs-site/api.md
+        grep -E "export.*class\|export.*function\|export.*const" src/cli/index.ts | head -10 >> docs-site/api.md
+        echo '```' >> docs-site/api.md
+
+    - name: Download example artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: example-artifacts
+        path: docs-site/
+
+    - name: Create documentation index
+      run: |
+        # Create main documentation index
+        cat > docs-site/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>TUIX Documentation</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                h1 { color: #2c3e50; }
+                h2 { color: #34495e; }
+                code { background: #f4f4f4; padding: 2px 4px; border-radius: 3px; }
+                pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+                .example { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+                .screenshot { max-width: 100%; height: auto; border: 1px solid #ddd; }
+            </style>
+        </head>
+        <body>
+            <h1>TUIX - Terminal UI Framework</h1>
+            <p>A performant TUI framework for Bun with JSX and reactive state management.</p>
+            
+            <h2>Quick Start</h2>
+            <pre><code>bun add tuix</code></pre>
+            
+            <h2>Documentation</h2>
+            <ul>
+                <li><a href="api.md">API Reference</a></li>
+                <li><a href="example-docs/README.md">Examples</a></li>
+                <li><a href="https://github.com/cinderlink/cli-kit">GitHub Repository</a></li>
+            </ul>
+            
+            <h2>Examples</h2>
+            <p>Check out the <a href="example-docs/">examples directory</a> for working examples.</p>
+            
+            <h2>Screenshots</h2>
+            <p>See the framework in action in the <a href="example-screenshots/">screenshots gallery</a>.</p>
+        </body>
+        </html>
+        EOF
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs-site
+
+  demo-environment:
+    name: Demo Environment
+    runs-on: ubuntu-latest
+    needs: build-examples
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      run: bun install
+
+    - name: Build for demo
+      run: bun run build
+
+    - name: Create demo environment
+      run: |
+        mkdir -p demo-env
+        
+        # Copy built package
+        cp -r dist/ demo-env/
+        cp -r examples/ demo-env/
+        cp package.json demo-env/
+        cp README.md demo-env/
+        
+        # Create demo script
+        cat > demo-env/demo.sh << 'EOF'
+        #!/bin/bash
+        echo "TUIX Demo Environment"
+        echo "===================="
+        echo ""
+        echo "Available examples:"
+        echo "  bun examples/button-showcase.ts"
+        echo "  bun examples/table-showcase.ts"
+        echo "  bun examples/modal-demo.ts"
+        echo "  bun examples/help-demo.ts"
+        echo "  bun examples/jsx-cli-demo.tsx"
+        echo ""
+        echo "CLI examples:"
+        echo "  bun examples/cli/simple-cli.ts --help"
+        echo ""
+        echo "Interactive mode:"
+        echo "  bun examples/interactive-mode-demo.tsx"
+        EOF
+        
+        chmod +x demo-env/demo.sh
+
+    - name: Upload demo environment
+      uses: actions/upload-artifact@v3
+      with:
+        name: demo-environment-pr-${{ github.event.number }}
+        path: demo-env/
+
+  performance-monitoring:
+    name: Performance Monitoring
+    runs-on: ubuntu-latest
+    needs: build-examples
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      run: bun install
+
+    - name: Run performance tests
+      run: |
+        # Run performance benchmarks
+        bun run test:perf || true
+        
+        # Monitor example performance
+        echo "# Performance Report" > performance-report.md
+        echo "Generated on: $(date)" >> performance-report.md
+        echo "" >> performance-report.md
+        
+        # Test startup time
+        echo "## Startup Performance" >> performance-report.md
+        echo '```' >> performance-report.md
+        time bun examples/button-showcase.ts --version 2>&1 | head -5 >> performance-report.md
+        echo '```' >> performance-report.md
+        
+        # Test memory usage
+        echo "## Memory Usage" >> performance-report.md
+        echo '```' >> performance-report.md
+        echo "Memory usage monitoring would go here" >> performance-report.md
+        echo '```' >> performance-report.md
+
+    - name: Upload performance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-report
+        path: performance-report.md
+
+  health-check:
+    name: Deployment Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy-docs, demo-environment, performance-monitoring]
+    if: always()
+    
+    steps:
+    - name: Check deployment status
+      run: |
+        echo "# Deployment Health Check" > health-check.md
+        echo "Generated on: $(date)" >> health-check.md
+        echo "" >> health-check.md
+        
+        # Check job results
+        if [ "${{ needs.deploy-docs.result }}" == "success" ]; then
+          echo "✅ Documentation: DEPLOYED" >> health-check.md
+        else
+          echo "❌ Documentation: FAILED" >> health-check.md
+        fi
+        
+        if [ "${{ needs.demo-environment.result }}" == "success" ]; then
+          echo "✅ Demo Environment: CREATED" >> health-check.md
+        else
+          echo "❌ Demo Environment: FAILED" >> health-check.md
+        fi
+        
+        if [ "${{ needs.performance-monitoring.result }}" == "success" ]; then
+          echo "✅ Performance: MONITORED" >> health-check.md
+        else
+          echo "❌ Performance: FAILED" >> health-check.md
+        fi
+        
+        echo "" >> health-check.md
+        echo "## URLs" >> health-check.md
+        echo "- Documentation: https://cinderlink.github.io/cli-kit/" >> health-check.md
+        echo "- Repository: https://github.com/cinderlink/cli-kit" >> health-check.md
+        echo "- NPM Package: https://www.npmjs.com/package/tuix" >> health-check.md
+
+    - name: Upload health check
+      uses: actions/upload-artifact@v3
+      with:
+        name: health-check
+        path: health-check.md

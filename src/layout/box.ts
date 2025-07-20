@@ -6,11 +6,11 @@
  */
 
 import { Effect } from "effect"
-import { stringWidth } from "@/utils/string-width.ts"
-import type { View } from "@/core/types.ts"
-import * as ViewUtils from "@/core/view.ts"
-import { style, type Style, type Border, Borders, renderBox, BorderSide } from "@/styling/index.ts"
-import { joinVertical, Center } from "./join.ts"
+import { stringWidth } from "../utils/string-width"
+import type { View } from "../core/types"
+import * as ViewUtils from "../core/view"
+import { style, type Style, type Border, Borders, renderBox, BorderSide } from "../styling/index"
+import { joinVertical, Center } from "./join"
 
 /**
  * Box properties
@@ -23,6 +23,73 @@ export interface BoxProps {
   readonly minHeight?: number
   readonly style?: Style
 }
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Normalize padding to individual values
+ */
+const normalizePadding = (padding?: number | { top?: number; right?: number; bottom?: number; left?: number }) => {
+  if (typeof padding === "number") {
+    return { top: padding, right: padding, bottom: padding, left: padding }
+  }
+  return {
+    top: padding?.top || 0,
+    right: padding?.right || 0,
+    bottom: padding?.bottom || 0,
+    left: padding?.left || 0
+  }
+}
+
+/**
+ * Calculate content dimensions from lines
+ */
+const getContentDimensions = (lines: string[]) => ({
+  width: Math.max(...lines.map(line => stringWidth(line)), 0),
+  height: lines.length
+})
+
+/**
+ * Create padded lines with consistent width
+ */
+const createPaddedLines = (
+  contentLines: string[],
+  contentWidth: number,
+  padding: { top: number; right: number; bottom: number; left: number }
+): string[] => {
+  const paddedWidth = contentWidth + padding.left + padding.right
+  const paddedLines: string[] = []
+  
+  // Top padding
+  paddedLines.push(...Array(padding.top).fill(' '.repeat(paddedWidth)))
+  
+  // Content with horizontal padding
+  for (const line of contentLines) {
+    const padded = ' '.repeat(padding.left) + line.padEnd(contentWidth) + ' '.repeat(padding.right)
+    paddedLines.push(padded)
+  }
+  
+  // Bottom padding
+  paddedLines.push(...Array(padding.bottom).fill(' '.repeat(paddedWidth)))
+  
+  return paddedLines
+}
+
+/**
+ * Adjust lines to final width if needed
+ */
+const adjustToFinalWidth = (lines: string[], currentWidth: number, finalWidth: number): string[] => {
+  if (finalWidth <= currentWidth) return lines
+  
+  const extraPadding = finalWidth - currentWidth
+  return lines.map(line => line + ' '.repeat(extraPadding))
+}
+
+// =============================================================================
+// Box Components
+// =============================================================================
 
 /**
  * Create a styled box around content
@@ -38,12 +105,8 @@ export const styledBox = (
     ? contents[0] 
     : joinVertical(Center, ...contents)
   
-  // Calculate padding
-  const padding = props.padding || 0
-  const padTop = typeof padding === "number" ? padding : (padding.top || 0)
-  const padRight = typeof padding === "number" ? padding : (padding.right || 0)
-  const padBottom = typeof padding === "number" ? padding : (padding.bottom || 0)
-  const padLeft = typeof padding === "number" ? padding : (padding.left || 0)
+  // Calculate padding with helper
+  const padding = normalizePadding(props.padding)
   
   return {
     render: () => Effect.gen(function* (_) {
@@ -51,45 +114,21 @@ export const styledBox = (
       const innerContent = yield* _(innerView.render())
       const innerLines = innerContent.split('\n')
       
-      // Calculate inner dimensions
-      const innerWidth = Math.max(...innerLines.map(line => stringWidth(line)))
-      const innerHeight = innerLines.length
+      // Calculate inner dimensions using helper
+      const { width: innerWidth } = getContentDimensions(innerLines)
       
-      // Apply padding
-      const paddedWidth = innerWidth + padLeft + padRight
-      const paddedLines: string[] = []
+      // Create padded content using helper
+      const paddedLines = createPaddedLines(innerLines, innerWidth, padding)
+      const paddedWidth = innerWidth + padding.left + padding.right
       
-      // Top padding
-      for (let i = 0; i < padTop; i++) {
-        paddedLines.push(' '.repeat(paddedWidth))
-      }
-      
-      // Content with horizontal padding
-      for (const line of innerLines) {
-        const padded = ' '.repeat(padLeft) + line.padEnd(innerWidth) + ' '.repeat(padRight)
-        paddedLines.push(padded)
-      }
-      
-      // Bottom padding
-      for (let i = 0; i < padBottom; i++) {
-        paddedLines.push(' '.repeat(paddedWidth))
-      }
-      
-      // Apply min width if specified
+      // Apply min width and adjust if needed
       const finalWidth = Math.max(paddedWidth, props.minWidth || 0)
-      
-      // Pad lines to final width if needed
-      if (finalWidth > paddedWidth) {
-        const extraPadding = finalWidth - paddedWidth
-        for (let i = 0; i < paddedLines.length; i++) {
-          paddedLines[i] = paddedLines[i] + ' '.repeat(extraPadding)
-        }
-      }
+      const adjustedLines = adjustToFinalWidth(paddedLines, paddedWidth, finalWidth)
       
       // Apply border if specified
       if (props.border) {
         const bordered = renderBox(
-          paddedLines,
+          adjustedLines,
           props.border,
           props.borderSides || BorderSide.All,
           finalWidth
@@ -97,14 +136,14 @@ export const styledBox = (
         return bordered.join('\n')
       }
       
-      return paddedLines.join('\n')
+      return adjustedLines.join('\n')
     }),
     width: Math.max(
-      (innerView.width || 0) + padLeft + padRight + (props.border ? 2 : 0),
+      (innerView.width || 0) + padding.left + padding.right + (props.border ? 2 : 0),
       (props.minWidth || 0) + (props.border ? 2 : 0)
     ),
     height: Math.max(
-      (innerView.height || 0) + padTop + padBottom + (props.border ? 2 : 0),
+      (innerView.height || 0) + padding.top + padding.bottom + (props.border ? 2 : 0),
       (props.minHeight || 0) + (props.border ? 2 : 0)
     )
   }

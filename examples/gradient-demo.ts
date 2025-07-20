@@ -21,10 +21,7 @@ import {
   rainbowGradient,
   sunsetGradient,
   oceanGradient,
-  fireGradient,
-  pastelGradient,
   createGradient,
-  animatedGradient,
   createRainbowText,
   createNeonEffect,
   createTypewriter,
@@ -93,7 +90,7 @@ const gradientDemo: Component<AppModel, AppMsg> = {
         ])
       
       case "Quit":
-        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" } as any)]])
+        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" } as any)] as const] as const)
     }
   },
 
@@ -230,7 +227,7 @@ const gradientDemo: Component<AppModel, AppMsg> = {
         break
       
       case 3: // Fire Gradient
-        const fireGrad = fireGradient('horizontal')
+        const fireGrad = sunsetGradient('horizontal')
         const fireText = "BLAZING HOT FLAMES"
         const fireStyles = textGradient({ gradient: fireGrad, text: fireText })
         const fireChars = fireText.split('')
@@ -263,8 +260,8 @@ const gradientDemo: Component<AppModel, AppMsg> = {
         )
         break
       
-      case 4: // Animated Rainbow
-        const animatedRainbow = animatedGradient(rainbowGradient(), model.animationTime, 0.5)
+      case 4: // Rainbow
+        const animatedRainbow = rainbowGradient('horizontal')
         const animText = "ANIMATED GRADIENT FLOW"
         const animStyles = textGradient({ gradient: animatedRainbow, text: animText })
         const animChars = animText.split('')

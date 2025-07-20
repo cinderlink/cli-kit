@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
     // Environment setup & latest features
-    "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "Preserve",
+    "lib": ["ES2020", "DOM"],
+    "target": "ES2020",
+    "module": "ES2020",
     "moduleDetection": "force",
     "jsx": "react-jsx",
-    "jsxImportSource": "@cinderlink/cli-kit",
+    "jsxImportSource": ".",
     "allowJs": true,
+    "downlevelIteration": true,
 
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "noEmit": true,
 
     // Best practices
@@ -27,15 +28,20 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
 
-    // Path mapping for clean imports
+    // Base URL for module resolution
     "baseUrl": ".",
+    
+    // Path mapping for @tuix/* packages
     "paths": {
-      "@/*": ["src/*"],
-      "@/core/*": ["src/core/*"],
-      "@/services/*": ["src/services/*"],
-      "@/components/*": ["src/components/*"],
-      "@/styling/*": ["src/styling/*"],
-      "@/testing/*": ["src/testing/*"]
+      "@tuix/core": ["./packages/core/src"],
+      "@tuix/cli": ["./packages/cli/src"],
+      "@tuix/components": ["./packages/components/src"],
+      "@tuix/jsx": ["./packages/jsx/src"],
+      "@tuix/reactive": ["./packages/reactive/src"],
+      "@tuix/services": ["./packages/services/src"],
+      "@tuix/layout": ["./packages/layout/src"],
+      "@tuix/styling": ["./packages/styling/src"],
+      "@tuix/testing": ["./packages/testing/src"]
     }
   },
   "include": [

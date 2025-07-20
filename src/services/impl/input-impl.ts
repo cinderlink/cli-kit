@@ -3,15 +3,44 @@
  */
 
 import { Effect, Layer, Stream, Queue, Chunk, Option, PubSub } from "effect"
-import { InputService } from "../input.ts"
-import { InputError } from "@/core/errors.ts"
+import { InputService } from "../input"
+import { InputError } from "../../core/errors"
 import { 
   KeyType, 
   ANSI_SEQUENCES, 
   parseChar, 
   getKeyName 
-} from "@/core/keys.ts"
-import type { KeyEvent, MouseEvent, WindowSize } from "@/core/types.ts"
+} from "../../core/keys"
+import type { KeyEvent, MouseEvent, WindowSize } from "../../core/types"
+
+/**
+ * Platform abstraction for input operations
+ */
+interface PlatformInput {
+  readonly stdin: {
+    readonly isTTY: boolean
+    setEncoding: (encoding: string) => void
+    setRawMode?: (enabled: boolean) => void
+    on: (event: string, listener: (data: unknown) => void) => void
+    removeAllListeners: (event?: string) => void
+    removeListener: (event: string, listener: (data: unknown) => void) => void
+  }
+  readonly stdout: {
+    readonly columns?: number
+    readonly rows?: number
+    write: (data: string) => void
+    on: (event: string, listener: () => void) => void
+    removeListener: (event: string, listener: () => void) => void
+  }
+}
+
+/**
+ * Get platform-specific input interface
+ */
+const getPlatform = (): PlatformInput => ({
+  stdin: process.stdin,
+  stdout: process.stdout
+})
 
 /**
  * Parse mouse events from ANSI sequences
@@ -56,9 +85,9 @@ const parseMouseEvent = (sequence: string): MouseEvent | null => {
   // Basic X10 mouse protocol: ESC [ M <button+32> <x+32> <y+32>
   match = sequence.match(/^\x1b\[M(.)(.)(.)/)
   if (match) {
-    const info = match[1].charCodeAt(0) - 32
-    const x = match[2].charCodeAt(0) - 32
-    const y = match[3].charCodeAt(0) - 32
+    const info = match[1]?.charCodeAt(0) ?? 32 - 32
+    const x = match[2]?.charCodeAt(0) ?? 32 - 32
+    const y = match[3]?.charCodeAt(0) ?? 32 - 32
     
     const button = info & 0x03
     const shift = !!(info & 0x04)
@@ -201,7 +230,8 @@ const parseBuffer = (
 export const InputServiceLive = Layer.scoped(
   InputService,
   Effect.gen(function* (_) {
-    const stdin = process.stdin
+    const platform = getPlatform()
+    const stdin = platform.stdin
     // Use PubSub to broadcast events to all consumers
     const keyPubSub = yield* _(PubSub.unbounded<KeyEvent>())
     const mousePubSub = yield* _(PubSub.unbounded<MouseEvent>())
@@ -237,28 +267,21 @@ export const InputServiceLive = Layer.scoped(
       
       mouseEvents: Stream.fromPubSub(mousePubSub),
       
-      allEvents: Stream.merge(
-        Stream.fromPubSub(keyPubSub).pipe(
-          Stream.map(key => ({ _tag: 'key' as const, event: key }))
-        ),
-        Stream.fromPubSub(mousePubSub).pipe(
-          Stream.map(mouse => ({ _tag: 'mouse' as const, event: mouse }))
+      readKey: Stream.fromPubSub(keyPubSub).pipe(
+        Stream.take(1), 
+        Stream.runHead, 
+        Effect.flatMap(opt => 
+          Option.isSome(opt) 
+            ? Effect.succeed(opt.value)
+            : Effect.fail(new InputError({ operation: "readKey", cause: "No key event available" }))
         )
       ),
       
-      waitForKey: Stream.fromPubSub(keyPubSub).pipe(
-        Stream.take(1), 
-        Stream.runHead, 
-        Effect.map(opt => Option.getOrElse(opt, () => null as any))
-      ),
+      readLine: Effect.fail(new InputError({ operation: "readLine", cause: "Not implemented" })),
       
-      waitForMouse: Stream.fromPubSub(mousePubSub).pipe(
-        Stream.take(1), 
-        Stream.runHead, 
-        Effect.map(opt => Option.getOrElse(opt, () => null as any))
-      ),
+      inputAvailable: Effect.succeed(false),
       
-      clearInputBuffer: Effect.void,
+      flushInput: Effect.void,
       
       filterKeys: (predicate) =>
         Stream.fromPubSub(keyPubSub).pipe(
@@ -295,9 +318,13 @@ export const InputServiceLive = Layer.scoped(
           }
         }),
       
-      rawInput: Stream.async<string>((emit) => {
-        stdin.on('data', (chunk: string) => {
-          emit(Effect.succeed(Chunk.of(chunk)))
+      rawInput: Stream.async<Uint8Array>((emit) => {
+        stdin.on('data', (chunk: unknown) => {
+          if (chunk instanceof Buffer) {
+            emit(Effect.succeed(Chunk.of(new Uint8Array(chunk))))
+          } else if (typeof chunk === 'string') {
+            emit(Effect.succeed(Chunk.of(new TextEncoder().encode(chunk))))
+          }
         })
       }),
       
@@ -317,10 +344,10 @@ export const InputServiceLive = Layer.scoped(
       // Mouse Control
       enableMouse: Effect.try({
         try: () => {
-          process.stdout.write('\x1b[?1000h') // Enable X10 mouse tracking
-          process.stdout.write('\x1b[?1002h') // Enable button event tracking
-          process.stdout.write('\x1b[?1015h') // Enable urxvt extended mode
-          process.stdout.write('\x1b[?1006h') // Enable SGR extended mode
+          platform.stdout.write('\x1b[?1000h') // Enable X10 mouse tracking
+          platform.stdout.write('\x1b[?1002h') // Enable button event tracking
+          platform.stdout.write('\x1b[?1015h') // Enable urxvt extended mode
+          platform.stdout.write('\x1b[?1006h') // Enable SGR extended mode
         },
         catch: (error) => new InputError({
           device: 'mouse',
@@ -330,10 +357,10 @@ export const InputServiceLive = Layer.scoped(
       
       disableMouse: Effect.try({
         try: () => {
-          process.stdout.write('\x1b[?1000l') // Disable X10 mouse tracking
-          process.stdout.write('\x1b[?1002l') // Disable button event tracking
-          process.stdout.write('\x1b[?1015l') // Disable urxvt extended mode
-          process.stdout.write('\x1b[?1006l') // Disable SGR extended mode
+          platform.stdout.write('\x1b[?1000l') // Disable X10 mouse tracking
+          platform.stdout.write('\x1b[?1002l') // Disable button event tracking
+          platform.stdout.write('\x1b[?1015l') // Disable urxvt extended mode
+          platform.stdout.write('\x1b[?1006l') // Disable SGR extended mode
         },
         catch: (error) => new InputError({
           device: 'mouse',
@@ -343,7 +370,7 @@ export const InputServiceLive = Layer.scoped(
       
       enableMouseMotion: Effect.try({
         try: () => {
-          process.stdout.write('\x1b[?1003h') // Enable all mouse motion tracking
+          platform.stdout.write('\x1b[?1003h') // Enable all mouse motion tracking
         },
         catch: (error) => new InputError({
           device: 'mouse',
@@ -353,7 +380,7 @@ export const InputServiceLive = Layer.scoped(
       
       disableMouseMotion: Effect.try({
         try: () => {
-          process.stdout.write('\x1b[?1003l') // Disable all mouse motion tracking
+          platform.stdout.write('\x1b[?1003l') // Disable all mouse motion tracking
         },
         catch: (error) => new InputError({
           device: 'mouse',
@@ -364,18 +391,60 @@ export const InputServiceLive = Layer.scoped(
       resizeEvents: Stream.async<WindowSize>((emit) => {
         const handleResize = () => {
           emit(Effect.succeed(Chunk.of({
-            width: process.stdout.columns || 80,
-            height: process.stdout.rows || 24
+            width: platform.stdout.columns || 80,
+            height: platform.stdout.rows || 24
           })))
         }
         
-        process.stdout.on('resize', handleResize)
+        platform.stdout.on('resize', handleResize)
         return Effect.sync(() => {
-          process.stdout.removeListener('resize', handleResize)
+          platform.stdout.removeListener('resize', handleResize)
         })
       }),
       
-      pasteEvents: Stream.empty // Not implemented yet
+      pasteEvents: Stream.empty, // Not implemented yet
+      
+      enableBracketedPaste: Effect.try({
+        try: () => {
+          platform.stdout.write('\x1b[?2004h') // Enable bracketed paste mode
+        },
+        catch: (error) => new InputError({
+          operation: 'enableBracketedPaste',
+          cause: error
+        })
+      }),
+      
+      disableBracketedPaste: Effect.try({
+        try: () => {
+          platform.stdout.write('\x1b[?2004l') // Disable bracketed paste mode
+        },
+        catch: (error) => new InputError({
+          operation: 'disableBracketedPaste',
+          cause: error
+        })
+      }),
+      
+      enableFocusTracking: Effect.try({
+        try: () => {
+          platform.stdout.write('\x1b[?1004h') // Enable focus tracking
+        },
+        catch: (error) => new InputError({
+          operation: 'enableFocusTracking',
+          cause: error
+        })
+      }),
+      
+      disableFocusTracking: Effect.try({
+        try: () => {
+          platform.stdout.write('\x1b[?1004l') // Disable focus tracking
+        },
+        catch: (error) => new InputError({
+          operation: 'disableFocusTracking',
+          cause: error
+        })
+      }),
+      
+      focusEvents: Stream.empty // Not implemented yet
     }
   })
 )

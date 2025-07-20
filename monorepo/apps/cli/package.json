@@ -1,0 +1,41 @@
+{
+  "name": "@tuix/cli",
+  "version": "1.0.0-rc.2",
+  "description": "TUIX CLI application for terminal UI development",
+  "main": "dist/index.js",
+  "bin": {
+    "tuix": "dist/index.js"
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir=dist --target=node --format=esm",
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "cli",
+    "terminal",
+    "ui",
+    "tui",
+    "tuix",
+    "framework",
+    "development"
+  ],
+  "author": "TUIX Team",
+  "license": "MIT",
+  "dependencies": {
+    "@tuix/core": "workspace:*",
+    "@tuix/jsx": "workspace:*",
+    "@tuix/cli-framework": "workspace:*",
+    "@tuix/components": "workspace:*",
+    "@tuix/plugin-process-manager": "workspace:*",
+    "@tuix/plugin-logger": "workspace:*",
+    "effect": "^3.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

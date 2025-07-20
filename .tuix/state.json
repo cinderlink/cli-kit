@@ -1,0 +1,21 @@
+{
+  "orchestrator": 54839,
+  "timestamp": "2025-07-13T04:31:43.649Z",
+  "processes": [
+    {
+      "name": "test-running",
+      "config": {
+        "name": "test-running",
+        "command": "sleep",
+        "args": [
+          "10"
+        ]
+      },
+      "status": "running",
+      "pid": 55164,
+      "startTime": "2025-07-13T04:31:43.649Z",
+      "restarts": 0,
+      "health": "unknown"
+    }
+  ]
+}

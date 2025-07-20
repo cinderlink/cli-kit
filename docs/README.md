@@ -1,125 +1,155 @@
-# CLI Kit Documentation
+# TUIX Documentation
 
-Welcome to the CLI Kit documentation! This framework provides a comprehensive toolkit for building modern command-line applications with TypeScript, Effect.ts, and JSX support with Svelte-inspired runes.
+Terminal User Interface eXtensions - A comprehensive framework for building modern terminal-based applications.
 
-## Quick Start
+## Quick Links
 
-```typescript
-import { createCLI, z } from '@cli-kit/core'
-
-const cli = createCLI({
-  name: 'my-app',
-  version: '1.0.0',
-  commands: {
-    hello: {
-      description: 'Say hello to someone',
-      args: {
-        name: z.string().describe('Name to greet')
-      },
-      handler: (args) => `Hello, ${args.name}!`
-    }
-  }
-})
-
-await cli.run(process.argv.slice(2))
-```
-
-## Documentation Index
-
-### Core Framework
-- **[CLI Framework](./cli-framework.md)** - Core CLI framework concepts and architecture
-- **[API Reference](./api-reference.md)** - Complete API documentation
-- **[Coding Standards](./CODING-STANDARDS.md)** - Development guidelines and best practices
-
-### Features
-- **[Components](./COMPONENTS.md)** - Terminal UI components and layout system
-- **[JSX Support](./jsx.md)** - JSX/TSX syntax for terminal UIs
-- **[Input Handling](./INPUT-HANDLING.md)** - Keyboard and mouse input processing
-- **[Styling](./STYLING.md)** - Colors, themes, and visual styling
-- **[Plugins](./plugins.md)** - Plugin system and extensibility
-
-### Guides
-- **[Examples](./EXAMPLES.md)** - Code examples and tutorials
-- **[Performance](./performance.md)** - Performance optimization techniques
-
-### Advanced
-- **[API Design](./API.md)** - Internal API design principles
-
-## Architecture Overview
-
-CLI Kit is built around several core principles:
-
-1. **Type Safety** - Full TypeScript support with strong typing
-2. **Functional Programming** - Effect.ts for error handling and async operations
-3. **Component-Based UI** - JSX components for terminal interfaces
-4. **Plugin System** - Extensible architecture for custom functionality
-5. **Performance** - Optimized rendering and caching systems
-
-## Key Features
-
-- 🎯 **Type-Safe Commands** - Define commands with Zod schema validation
-- 🎨 **JSX Terminal UI** - Build UIs with Svelte-inspired runes for reactivity
-- ⚡ **Performance Optimized** - Lazy loading, caching, and efficient rendering
-- 🔌 **Plugin System** - Extensible with hooks and middleware
-- 📦 **Zero Dependencies** - Minimal runtime with optional peer dependencies
-- 🎨 **Rich Styling** - Colors, gradients, and advanced terminal features
-- ⌨️ **Input Handling** - Keyboard shortcuts, mouse support, and event handling
+- [Getting Started](#getting-started)
+- [Core Concepts](#core-concepts)
+- [Component Guide](#components)
+- [API Reference](#api-reference)
 
 ## Getting Started
 
-1. **Installation**
-   ```bash
-   bun add @cli-kit/core
-   ```
+TUIX is a powerful framework for creating rich terminal user interfaces with TypeScript and Effect.ts.
 
-2. **Create Your First CLI**
-   ```typescript
-   import { createCLI } from '@cli-kit/core'
-   
-   const cli = createCLI({
-     name: 'my-cli',
-     version: '1.0.0',
-     commands: {
-       hello: {
-         handler: () => 'Hello, World!'
-       }
-     }
-   })
-   
-   cli.run()
-   ```
+### Installation
 
-3. **Add Components with Runes**
-   ```typescript
-   import { Button, Text } from '@cli-kit/components'
-   
-   const MyApp = () => {
-     let count = $state(0)
-     
-     return (
-       <div>
-         <Text color="blue">Welcome to my app!</Text>
-         <Text>Count: {count}</Text>
-         <Button onClick={() => count++}>
-           Click me
-         </Button>
-       </div>
-     )
-   }
-   ```
+```bash
+bun add tuix
+```
 
-4. **Run Your CLI**
-   ```bash
-   bun run my-cli hello
-   ```
+### Basic Example
 
-## Contributing
+```typescript
+import { text, vstack, box } from "tuix/core/view"
 
-Please read our [Coding Standards](./CODING-STANDARDS.md) before contributing. We follow strict type safety guidelines and Effect.ts patterns for consistent, maintainable code.
+const app = box(vstack(
+  text("Welcome to TUIX!"),
+  text("Building beautiful terminal UIs")
+))
+
+console.log(await Effect.runPromise(app.render()))
+```
+
+## Core Concepts
+
+### Views
+Views are the fundamental building blocks - composable units that render content:
+- [View System](./core/view.md) - Basic view primitives and composition
+
+### Error Handling
+Comprehensive error system built on Effect.ts patterns:
+- [Error System](./core/errors.md) - Typed errors, recovery, and boundaries
+
+### Performance
+Optimizations for smooth terminal experiences:
+- [View Cache](./core/view-cache.md) - Render caching and memoization
+
+## Components
+
+Interactive UI components with state management:
+
+- Button - Clickable buttons with styling
+- TextInput - Text input fields with validation
+- List - Scrollable lists with selection
+- Table - Data tables with sorting and filtering
+- Modal - Overlay dialogs and popups
+- Tabs - Tabbed interfaces
+- ProgressBar - Progress indicators
+- Spinner - Loading animations
+
+## API Reference
+
+### Core Modules
+- `@/core/view` - View primitives and composition
+- `@/core/errors` - Error handling and recovery
+- `@/core/view-cache` - Performance optimizations
+
+### Component System
+- `@/components/*` - Interactive UI components
+- `@/components/base` - Component utilities and helpers
+
+### Styling System
+- `@/styling/*` - Colors, borders, effects, and themes
+
+### Layout System
+- `@/layout/*` - Flexbox, grid, and advanced layouts
+
+### Services
+- `@/services/*` - Terminal, input, rendering, and storage services
+
+## Architecture
+
+TUIX follows functional programming principles with Effect.ts:
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Components    │────│     Views       │────│    Services     │
+│                 │    │                 │    │                 │
+│ - Interactive   │    │ - Composable    │    │ - Terminal      │
+│ - Stateful      │    │ - Renderable    │    │ - Input         │
+│ - Event-driven  │    │ - Cacheable     │    │ - Storage       │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+          │                       │                       │
+          └───────────────────────┼───────────────────────┘
+                                  │
+                    ┌─────────────────┐
+                    │   Effect.ts     │
+                    │                 │
+                    │ - Error Safe    │
+                    │ - Async         │
+                    │ - Composable    │
+                    └─────────────────┘
+```
+
+## Development
+
+### Testing
+
+```bash
+# Run all tests
+bun test
+
+# Run specific module tests
+bun test src/core/view.test.ts
+
+# Watch mode
+bun test --watch
+```
+
+### Building
+
+```bash
+# Type checking
+bun run tsc --noEmit
+
+# Lint code  
+bun run eslint src/
+
+# Build for production
+bun build src/index.ts
+```
+
+### Contributing
+
+1. Follow the existing code patterns
+2. Use Effect.ts for async operations and error handling
+3. Write comprehensive tests for all new features
+4. Update documentation for public APIs
+5. Ensure TypeScript compiles without errors
+
+## Examples
+
+See the `examples/` directory for complete applications:
+
+- `examples/git-dashboard.ts` - Git repository dashboard
+- `examples/process-monitor.ts` - System process monitor  
+- `examples/log-viewer.ts` - Log file viewer with search
+- `examples/table-showcase.ts` - Data table demonstrations
 
 ## Support
 
-- 📖 [Documentation](./api-reference.md)
-- 💡 [Examples](./EXAMPLES.md)
-- 🐛 [Issues](https://github.com/cinderlink/cli-kit/issues)
-- 💬 [Discussions](https://github.com/cinderlink/cli-kit/discussions)
+- [GitHub Issues](https://github.com/cinderlink/tuix/issues)
+- [Documentation](https://docs.tuix.dev)
+- [Examples](https://github.com/cinderlink/tuix/tree/main/examples)

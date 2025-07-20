@@ -1,0 +1,24 @@
+{
+  "name": "worker-logger",
+  "ipcConfig": {
+    "name": "worker-logger",
+    "channel": "unix-socket",
+    "path": "/Users/aewing/Projects/cinderlink/cli-kit/examples/pm-app/.tuix/sockets/worker-logger.sock"
+  },
+  "config": {
+    "name": "worker-logger",
+    "command": "bun",
+    "args": [
+      "worker-logger.ts"
+    ],
+    "autostart": true,
+    "restart": "on-failure",
+    "restartDelay": 1000,
+    "description": "Worker that logs random messages every few seconds",
+    "cwd": "/Users/aewing/Projects/cinderlink/cli-kit/examples/pm-app"
+  },
+  "status": "stopped",
+  "restarts": 0,
+  "health": "unknown",
+  "startTime": "2025-07-15T02:06:18.936Z"
+}

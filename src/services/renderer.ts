@@ -6,7 +6,7 @@
  */
 
 import { Effect, Context } from "effect"
-import type { RenderError, View, Viewport } from "@/core/types.ts"
+import type { RenderError, View, Viewport } from "../core/types"
 
 /**
  * The RendererService interface defines the rendering pipeline.
@@ -251,6 +251,31 @@ export class RendererService extends Context.Tag("RendererService")<
 // Rendering Utilities
 // =============================================================================
 
+// =============================================================================
+// View Processing Helpers
+// =============================================================================
+
+/**
+ * Render all views and split into lines
+ */
+const renderAndSplitViews = (views: ReadonlyArray<View>) =>
+  Effect.gen(function* (_) {
+    const rendered = yield* _(Effect.all(views.map(view => view.render())))
+    return rendered.map(text => text.split('\n'))
+  })
+
+/**
+ * Create padding lines
+ */
+const createPaddingLines = (count: number, width: number): string[] =>
+  Array(count).fill(' '.repeat(width))
+
+/**
+ * Process content lines with horizontal padding
+ */
+const addHorizontalPadding = (lines: string[], left: number, right: number): string[] =>
+  lines.map(line => ' '.repeat(left) + line + ' '.repeat(right))
+
 /**
  * Utilities for working with views and rendering.
  */
@@ -276,13 +301,8 @@ export const RenderUtils = {
    */
   joinHorizontal: (views: ReadonlyArray<View>): View => ({
     render: () => Effect.gen(function* (_) {
-      const rendered = yield* _(
-        Effect.all(views.map(view => view.render()))
-      )
-      
-      // Split each view into lines and join horizontally
-      const lines = rendered.map(text => text.split('\n'))
-      const maxLines = Math.max(...lines.map(l => l.length))
+      const lines = yield* _(renderAndSplitViews(views))
+      const maxLines = Math.max(...lines.map(l => l.length), 0)
       
       const result: string[] = []
       for (let i = 0; i < maxLines; i++) {
@@ -299,9 +319,7 @@ export const RenderUtils = {
    */
   joinVertical: (views: ReadonlyArray<View>): View => ({
     render: () => Effect.gen(function* (_) {
-      const rendered = yield* _(
-        Effect.all(views.map(view => view.render()))
-      )
+      const rendered = yield* _(Effect.all(views.map(view => view.render())))
       return rendered.join('\n')
     })
   }),
@@ -318,16 +336,12 @@ export const RenderUtils = {
       const lines = content.split('\n')
       
       // Add horizontal padding
-      const paddedLines = lines.map(line => 
-        ' '.repeat(padding.left) + line + ' '.repeat(padding.right)
-      )
+      const paddedLines = addHorizontalPadding(lines, padding.left, padding.right)
       
       // Add vertical padding
-      const emptyLine = ' '.repeat(
-        (lines[0]?.length || 0) + padding.left + padding.right
-      )
-      const topPadding = Array(padding.top).fill(emptyLine)
-      const bottomPadding = Array(padding.bottom).fill(emptyLine)
+      const lineWidth = (lines[0]?.length || 0) + padding.left + padding.right
+      const topPadding = createPaddingLines(padding.top, lineWidth)
+      const bottomPadding = createPaddingLines(padding.bottom, lineWidth)
       
       return [...topPadding, ...paddedLines, ...bottomPadding].join('\n')
     }),

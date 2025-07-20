@@ -29,6 +29,3 @@ export {
   getValue,
   toBindable
 } from './reactivity/runes'
-
-// Re-export JSX runtime for convenience
-export { jsx, jsxs, jsxDEV, Fragment } from './jsx-runtime'

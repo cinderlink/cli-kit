@@ -6,7 +6,10 @@
  */
 
 import { Effect, Context, Stream } from "effect"
-import type { InputError, KeyEvent, MouseEvent, WindowSize } from "@/core/types.ts"
+import type { InputError, KeyEvent, MouseEvent, WindowSize } from "../core/types"
+
+// Re-export types for convenience
+export type { KeyEvent, MouseEvent } from "../core/types"
 
 /**
  * The InputService interface defines all input event handling capabilities.

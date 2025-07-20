@@ -5,14 +5,15 @@
  * layouts in TUI applications, inspired by CSS flexbox and grid.
  */
 
-import type { View } from "@/core/types.ts"
+import type { View } from "../core/types"
 
 // =============================================================================
 // Flexbox Types
 // =============================================================================
 
 /**
- * Flex direction controls the main axis
+ * Flex direction controls the main axis of flexbox layout.
+ * Determines whether items are laid out in rows or columns.
  */
 export enum FlexDirection {
   Row = "row",
@@ -22,7 +23,8 @@ export enum FlexDirection {
 }
 
 /**
- * Justify content aligns items along the main axis
+ * Justify content aligns items along the main axis.
+ * Controls how space is distributed between and around items.
  */
 export enum JustifyContent {
   Start = "start",
@@ -34,7 +36,8 @@ export enum JustifyContent {
 }
 
 /**
- * Align items controls alignment on the cross axis
+ * Align items controls alignment on the cross axis.
+ * Determines how items are aligned perpendicular to the main axis.
  */
 export enum AlignItems {
   Start = "start",
@@ -45,7 +48,8 @@ export enum AlignItems {
 }
 
 /**
- * Flex wrap controls whether items wrap to new lines
+ * Flex wrap controls whether items wrap to new lines.
+ * Determines if items should wrap when they overflow the container.
  */
 export enum FlexWrap {
   NoWrap = "nowrap",
@@ -54,7 +58,8 @@ export enum FlexWrap {
 }
 
 /**
- * Flex item properties
+ * Flex item properties for individual items within a flexbox container.
+ * Controls how the item grows, shrinks, and aligns within the layout.
  */
 export interface FlexItem {
   readonly view: View
@@ -67,7 +72,8 @@ export interface FlexItem {
 }
 
 /**
- * Flexbox container properties
+ * Flexbox container properties that control the overall layout behavior.
+ * Based on CSS flexbox model adapted for terminal interfaces.
  */
 export interface FlexboxProps {
   readonly direction?: FlexDirection
@@ -90,7 +96,8 @@ export interface FlexboxProps {
 // =============================================================================
 
 /**
- * Grid template definition
+ * Grid template definition that specifies the columns and rows of a grid.
+ * Defines the structure and sizing of the grid layout.
  */
 export interface GridTemplate {
   readonly columns: ReadonlyArray<GridTrack>
@@ -98,7 +105,8 @@ export interface GridTemplate {
 }
 
 /**
- * Grid track sizing
+ * Grid track sizing options for columns and rows.
+ * Supports fixed sizes, fractions, and content-based sizing.
  */
 export type GridTrack =
   | { type: "fixed"; size: number }
@@ -108,7 +116,8 @@ export type GridTrack =
   | { type: "max-content" }
 
 /**
- * Grid item placement
+ * Grid item placement controls where an item appears in the grid.
+ * Allows precise positioning and spanning across multiple cells.
  */
 export interface GridPlacement {
   readonly column?: number | { start: number; end: number }
@@ -118,7 +127,8 @@ export interface GridPlacement {
 }
 
 /**
- * Grid item properties
+ * Grid item properties for individual items within a grid container.
+ * Controls placement, alignment, and ordering within the grid.
  */
 export interface GridItem {
   readonly view: View
@@ -129,7 +139,8 @@ export interface GridItem {
 }
 
 /**
- * Grid container properties
+ * Grid container properties that control the overall grid layout behavior.
+ * Based on CSS Grid Layout adapted for terminal interfaces.
  */
 export interface GridProps {
   readonly template?: GridTemplate
@@ -156,7 +167,8 @@ export interface GridProps {
 // =============================================================================
 
 /**
- * Calculated layout for a view
+ * Calculated layout rectangle for a view after layout computation.
+ * Represents the final position and dimensions in screen coordinates.
  */
 export interface LayoutRect {
   readonly x: number
@@ -166,7 +178,8 @@ export interface LayoutRect {
 }
 
 /**
- * Size constraints for layout calculations
+ * Size constraints for layout calculations.
+ * Defines minimum and maximum bounds for width and height.
  */
 export interface SizeConstraints {
   readonly minWidth?: number
@@ -176,7 +189,8 @@ export interface SizeConstraints {
 }
 
 /**
- * Layout calculation result
+ * Layout calculation result containing computed positions for container and children.
+ * Output of the layout engine after processing constraints and properties.
  */
 export interface LayoutResult {
   readonly bounds: LayoutRect
@@ -191,7 +205,8 @@ export interface LayoutResult {
 // =============================================================================
 
 /**
- * Spacer properties
+ * Spacer properties for creating flexible whitespace in layouts.
+ * Can have fixed size or flex to fill available space.
  */
 export interface SpacerProps {
   readonly size?: number
@@ -199,7 +214,8 @@ export interface SpacerProps {
 }
 
 /**
- * Divider orientation
+ * Divider orientation determines whether the divider is horizontal or vertical.
+ * Controls the direction of the visual separator line.
  */
 export enum DividerOrientation {
   Horizontal = "horizontal",
@@ -207,10 +223,13 @@ export enum DividerOrientation {
 }
 
 /**
- * Divider properties
+ * Divider properties for creating visual separators between layout elements.
+ * Supports custom characters and styling for the separator line.
  */
 export interface DividerProps {
   readonly orientation?: DividerOrientation
+  /** Character to use for the divider line (default: '-' for horizontal, '|' for vertical) */
   readonly char?: string
-  readonly style?: any // Style type from styling module
+  /** Style properties for the divider appearance */
+  readonly style?: Record<string, unknown>
 }

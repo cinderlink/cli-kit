@@ -6,7 +6,7 @@
  */
 
 import { Effect, Context } from "effect"
-import type { TerminalError, WindowSize, TerminalCapabilities } from "@/core/types.ts"
+import type { TerminalError, WindowSize, TerminalCapabilities } from "../core/types"
 
 /**
  * The TerminalService interface defines all low-level terminal operations.

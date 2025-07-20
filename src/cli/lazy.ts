@@ -7,7 +7,7 @@
 import type { Component } from "../core/types"
 import type { Handler } from "./types"
 
-export interface LazyComponent<TModel = any, TMsg = any> {
+export interface LazyComponent<TModel = unknown, TMsg = unknown> {
   (): Promise<Component<TModel, TMsg>>
   preload?: () => Promise<void>
   isLoaded?: boolean
@@ -22,10 +22,10 @@ export interface LazyHandler {
 /**
  * Create a lazy-loaded module with caching and preloading support
  */
-export function lazyLoad<T = any>(
+export function lazyLoad<T = unknown>(
   importFn: () => Promise<{ default: T }>,
   fallback?: T
-): LazyComponent<any, any> | LazyHandler {
+): LazyComponent<unknown, unknown> | LazyHandler {
   let cached: T | undefined
   let loading: Promise<T> | undefined
   let loadError: Error | undefined
@@ -80,7 +80,7 @@ export function lazyLoad<T = any>(
     get: () => !!cached && !loadError
   })
   
-  return lazyFunction as LazyComponent<any, any> | LazyHandler
+  return lazyFunction as LazyComponent<unknown, unknown> | LazyHandler
 }
 
 /**
@@ -114,8 +114,8 @@ export async function preloadAll(
  * Create a lazy loading cache for frequently accessed modules
  */
 export class LazyCache {
-  private cache = new Map<string, any>()
-  private loading = new Map<string, Promise<any>>()
+  private cache = new Map<string, unknown>()
+  private loading = new Map<string, Promise<unknown>>()
   
   async get<T>(
     key: string, 
@@ -123,12 +123,12 @@ export class LazyCache {
   ): Promise<T> {
     // Return cached if available
     if (this.cache.has(key)) {
-      return this.cache.get(key)
+      return this.cache.get(key) as T
     }
     
     // Return loading promise if in progress
     if (this.loading.has(key)) {
-      return this.loading.get(key)
+      return await (this.loading.get(key) as Promise<T>)
     }
     
     // Start loading

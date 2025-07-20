@@ -21,7 +21,7 @@ const EMOJI_OVERRIDES: Record<string, number> = {
 export const stringWidth = (str: string): number => {
   // Check for exact matches in overrides
   if (str in EMOJI_OVERRIDES) {
-    return EMOJI_OVERRIDES[str]
+    return EMOJI_OVERRIDES[str]!
   }
   
   // Use Bun's native implementation
@@ -53,19 +53,33 @@ export const truncateString = (str: string, maxWidth: number, suffix = "…"): s
   let result = ""
   let currentWidth = 0
   
-  // Use grapheme segmenter to avoid splitting characters
-  const segmenter = new Intl.Segmenter()
-  const segments = [...segmenter.segment(str)]
-  
-  for (const { segment } of segments) {
-    const segmentWidth = stringWidth(segment)
+  // Use grapheme segmenter to avoid splitting characters if available
+  if ('Segmenter' in Intl) {
+    const segmenter = new (Intl as any).Segmenter()
+    const segments = [...segmenter.segment(str)]
     
-    if (currentWidth + segmentWidth > targetWidth) {
-      break
+    for (const { segment } of segments) {
+      const segmentWidth = stringWidth(segment)
+      
+      if (currentWidth + segmentWidth > targetWidth) {
+        break
+      }
+      
+      result += segment
+      currentWidth += segmentWidth
     }
-    
-    result += segment
-    currentWidth += segmentWidth
+  } else {
+    // Fallback for environments without Intl.Segmenter
+    for (const char of str) {
+      const charWidth = stringWidth(char)
+      
+      if (currentWidth + charWidth > targetWidth) {
+        break
+      }
+      
+      result += char
+      currentWidth += charWidth
+    }
   }
   
   return result + suffix

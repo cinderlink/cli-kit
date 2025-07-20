@@ -4,7 +4,12 @@
  * Routes parsed commands to their handlers with support for lazy loading
  */
 
+import { Effect } from "effect"
 import type { CLIConfig, CommandConfig, ParsedArgs, Handler, LazyHandler } from "./types"
+import { getGlobalEventBus } from "../core/event-bus"
+import { getGlobalRegistry } from "../core/module-registry"
+import { CLIModule } from "./module"
+import { CLIEventChannels } from "./events"
 
 export interface RouteResult {
   handler: Handler | LazyHandler | null
@@ -14,11 +19,32 @@ export interface RouteResult {
 
 export class CLIRouter {
   private _commands: Record<string, CommandConfig> = {}
-  private _middleware: Array<(handler: Handler) => Handler> = []
+  private _middleware: Array<(handler: Handler | LazyHandler) => Handler | LazyHandler> = []
+  private cliModule: CLIModule | null = null
 
   constructor(private config: CLIConfig) {
     // Initialize with commands from config
     this._commands = { ...(config.commands || {}) }
+    
+    // Initialize CLI module if available
+    this.initializeCLIModule()
+  }
+  
+  private initializeCLIModule() {
+    try {
+      const registry = getGlobalRegistry()
+      this.cliModule = registry.getModule<CLIModule>('cli')
+      
+      if (!this.cliModule) {
+        // Create and register CLI module
+        const eventBus = getGlobalEventBus()
+        this.cliModule = new CLIModule(eventBus)
+        Effect.runSync(registry.register(this.cliModule))
+        Effect.runSync(this.cliModule.initialize())
+      }
+    } catch (error) {
+      // Continue without event support
+    }
   }
   
   /**
@@ -35,6 +61,11 @@ export class CLIRouter {
     
     const commandConfig = this.findCommandConfig(parsedArgs.command)
     if (!commandConfig) {
+      // Emit route not found event
+      if (this.cliModule) {
+        Effect.runSync(this.cliModule.emitRouteNotFound(parsedArgs.command))
+      }
+      
       return {
         handler: null,
         config: null,
@@ -53,6 +84,11 @@ export class CLIRouter {
     
     // Check if handler is lazy (function that returns Promise)
     const isLazy = this.isLazyHandler(handler)
+    
+    // Emit route found event
+    if (this.cliModule) {
+      Effect.runSync(this.cliModule.emitRouteFound(parsedArgs.command, handler as Function))
+    }
     
     return {
       handler,
@@ -148,9 +184,9 @@ export class CLIRouter {
    */
   async executeHandler(
     handler: Handler | LazyHandler,
-    args: any,
+    args: Record<string, unknown>,
     isLazy: boolean = false
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       if (isLazy) {
         // Lazy handler - first call returns the actual handler
@@ -172,7 +208,7 @@ export class CLIRouter {
   /**
    * Call a handler function with proper error handling
    */
-  private async callHandler(handler: Handler, args: any): Promise<any> {
+  private async callHandler(handler: Handler, args: Record<string, unknown>): Promise<unknown> {
     const result = handler(args)
     
     // Handle both sync and async handlers
@@ -252,7 +288,7 @@ export class CLIRouter {
   /**
    * Execute a command by name
    */
-  async execute(commandName: string, args: any = {}, options: any = {}): Promise<any> {
+  async execute(commandName: string, args: Record<string, unknown> = {}, options: Record<string, unknown> = {}): Promise<unknown> {
     const command = this.getCommand(commandName)
     if (!command) {
       throw new Error(`Unknown command: ${commandName}`)
@@ -276,23 +312,17 @@ export class CLIRouter {
       // Check if it's a zero-argument function (could be lazy or regular)
       if (handler.length === 0) {
         // Could be lazy handler or zero-arg regular handler
-        const result = await handler()
+        const result = await (handler as () => Promise<unknown> | unknown)()
         if (typeof result === 'function') {
           // It's a lazy handler, result is the actual handler
-          return result(combinedArgs)
+          return (result as Handler)(combinedArgs)
         } else {
           // It's a regular zero-arg handler, result is the final result
           return result
         }
       } else {
-        // Regular handler with args - check arity to decide calling convention
-        if (handler.length === 2) {
-          // Handler expects (args, options)
-          return (handler as any)(args, options)
-        } else {
-          // Handler expects combined args
-          return handler(combinedArgs)
-        }
+        // Regular handler with args - always use combined args per Handler type
+        return (handler as Handler)(combinedArgs)
       }
     }
 
@@ -302,7 +332,7 @@ export class CLIRouter {
   /**
    * Add middleware that wraps command handlers
    */
-  addMiddleware(middleware: (handler: Handler) => Handler): void {
+  addMiddleware(middleware: (handler: Handler | LazyHandler) => Handler | LazyHandler): void {
     this._middleware.push(middleware)
   }
 }

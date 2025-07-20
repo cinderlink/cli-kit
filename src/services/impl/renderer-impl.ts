@@ -3,11 +3,11 @@
  */
 
 import { Effect, Layer, Ref, Chunk } from "effect"
-import { stringWidth } from "@/utils/string-width.ts"
-import { RendererService } from "../renderer.ts"
-import { TerminalService } from "@/services/terminal.ts"
-import { RenderError } from "@/core/errors.ts"
-import type { View, Viewport } from "@/core/types.ts"
+import { stringWidth } from "../../utils/string-width"
+import { RendererService } from "../renderer"
+import { TerminalService } from "../terminal"
+import { RenderError } from "../../core/errors"
+import type { View, Viewport } from "../../core/types"
 
 /**
  * Strip ANSI escape sequences from text
@@ -22,7 +22,7 @@ const stripAnsi = (text: string): string => {
 const extractStyle = (text: string): { style: string; cleanText: string } => {
   const match = text.match(/^(\x1b\[[0-9;]*m)(.*)(\x1b\[0m)$/)
   if (match) {
-    return { style: match[1], cleanText: match[2] }
+    return { style: match[1] ?? '', cleanText: match[2] ?? '' }
   }
   return { style: '', cleanText: text }
 }
@@ -54,19 +54,19 @@ class Buffer {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
       return undefined
     }
-    return this.cells[y][x]
+    return this.cells[y]?.[x]
   }
   
   set(x: number, y: number, cell: Cell): void {
     if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-      this.cells[y][x] = cell
+      if (this.cells[y]) this.cells[y]![x] = cell
     }
   }
   
   clear(): void {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        this.cells[y][x] = { char: ' ' }
+        if (this.cells[y]) this.cells[y]![x] = { char: ' ' }
       }
     }
   }
@@ -147,7 +147,7 @@ class Buffer {
         
         // Write the character to the buffer
         if (segmentX < this.width && currentY < this.height) {
-          this.set(segmentX, currentY, { char, style: currentStyle })
+          this.set(segmentX, currentY, { char, style: currentStyle ?? '' })
           
           // For wide characters, fill the extra columns with empty cells
           for (let i = 1; i < charWidth; i++) {
@@ -543,8 +543,20 @@ export const RendererServiceLive = Layer.effect(
       
       setClipRegion: (region) =>
         Effect.gen(function* (_) {
-          // Store clipping region for render operations
-          yield* _(Ref.set(viewportStack, [region]))
+          if (region === null) {
+            // Reset to default viewport
+            const terminal = yield* _(TerminalService)
+            const size = yield* _(terminal.getSize)
+            yield* _(Ref.set(viewportStack, [{
+              x: 0,
+              y: 0,
+              width: size.width,
+              height: size.height
+            }]))
+          } else {
+            // Store clipping region for render operations
+            yield* _(Ref.set(viewportStack, [region]))
+          }
         }),
       
       saveState: Effect.gen(function* (_) {

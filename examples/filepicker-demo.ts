@@ -124,7 +124,7 @@ const filePickerDemo: Component<AppModel, AppMsg> = {
       }
       
       case "Quit": {
-        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" } as any)]])
+        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" } as any)] as const] as const)
       }
     }
   },

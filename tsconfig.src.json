@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // JSX configuration for src files
+    "jsx": "react-jsx",
+    "jsxImportSource": "..",
+    
+    // Bun-optimized settings
+    "target": "ES2022",
+    "module": "ESNext", 
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "downlevelIteration": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    
+    // Less strict for Bun compatibility
+    "strict": false,
+    "noImplicitAny": false,
+    "exactOptionalPropertyTypes": false
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts"
+  ]
+}

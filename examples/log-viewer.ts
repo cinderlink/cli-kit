@@ -194,7 +194,7 @@ const logViewer: Component<Model, Msg> = {
   update(msg: Msg, model: Model) {
     switch (msg.tag) {
       case "quit":
-        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" as const })]])
+        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" as const })] as const] as const)
         
       case "searchMsg": {
         const searchComponent = textInput({ placeholder: "Search logs...", width: 40 })
@@ -410,7 +410,7 @@ const logViewer: Component<Model, Msg> = {
           }
           
           // Key not handled by input
-          return Effect.succeed([model, []])
+          return Effect.succeed([model, [] as const] as const)
         }
         
         // Normal mode key handling
@@ -436,11 +436,11 @@ const logViewer: Component<Model, Msg> = {
         if (key.key === '3') return Effect.map(this.update({ tag: "toggleLevel", level: 'INFO' }, model), result => result)
         if (key.key === '4') return Effect.map(this.update({ tag: "toggleLevel", level: 'DEBUG' }, model), result => result)
         
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
       
       default:
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
     }
   },
   

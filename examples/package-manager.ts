@@ -279,7 +279,7 @@ const packageManager: Component<Model, Msg> = {
           searchInput: { ...model.searchInput, focused: msg.tab === 'search' }
         }
         
-        return Effect.succeed([newModel, []])
+        return Effect.succeed([newModel, [] as const] as const)
       }
       
       case "installPackage": {
@@ -297,7 +297,7 @@ const packageManager: Component<Model, Msg> = {
             ]
           ])
         }
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
       
       case "uninstallPackage": {
@@ -315,7 +315,7 @@ const packageManager: Component<Model, Msg> = {
             ]
           ])
         }
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
       
       case "updatePackage": {
@@ -333,7 +333,7 @@ const packageManager: Component<Model, Msg> = {
             ]
           ])
         }
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
       
       case "bulkInstall": {
@@ -362,7 +362,7 @@ const packageManager: Component<Model, Msg> = {
       }
       
       default:
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
     }
   },
   
@@ -454,7 +454,7 @@ const packageManager: Component<Model, Msg> = {
           styledText(pkg.description, style().foreground(Colors.gray))
         ),
         {
-          border: Borders.single,
+          border: Borders.Normal,
           borderStyle: style().foreground(Colors.brightCyan),
           padding: { top: 0, right: 1, bottom: 0, left: 1 },
           width: 40,
@@ -470,7 +470,7 @@ const packageManager: Component<Model, Msg> = {
         styledText(model.operationInProgress ? " ⏳" : "", style().foreground(Colors.brightYellow))
       ),
       {
-        border: Borders.single,
+        border: Borders.Normal,
         borderStyle: style().foreground(Colors.gray),
         padding: { top: 0, right: 1, bottom: 0, left: 1 },
         width: 104

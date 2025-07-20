@@ -1,0 +1,24 @@
+{
+  "name": "test-invalid",
+  "ipcConfig": {
+    "name": "test-invalid",
+    "channel": "unix-socket",
+    "path": ".tuix/sockets/test-invalid.sock"
+  },
+  "config": {
+    "name": "test-invalid",
+    "command": "this-command-does-not-exist"
+  },
+  "status": "running",
+  "restarts": 0,
+  "health": "unknown",
+  "pid": 55166,
+  "startTime": "2025-07-13T04:31:43.653Z",
+  "connection": {
+    "config": {
+      "name": "test-invalid",
+      "channel": "unix-socket",
+      "path": ".tuix/sockets/test-invalid.sock"
+    }
+  }
+}

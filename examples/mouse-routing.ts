@@ -163,7 +163,7 @@ const mouseRoutingDemo: Component<DemoModel, DemoMsg> = {
   update(msg: DemoMsg, model: DemoModel) {
     switch (msg._tag) {
       case "Quit":
-        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" as const })]])
+        return Effect.succeed([model, [Effect.succeed({ _tag: "Quit" as const })] as const] as const)
         
       case "Button1Msg": {
         const button1Component = createMouseAwareButton("Click Me!", 5, 5, 12)
@@ -271,7 +271,7 @@ const mouseRoutingDemo: Component<DemoModel, DemoMsg> = {
           return Effect.map(this.update({ _tag: "Quit" }, model), result => result)
         }
         
-        return Effect.succeed([model, []])
+        return Effect.succeed([model, [] as const] as const)
       }
     }
   },

@@ -4,11 +4,12 @@ A comprehensive TypeScript framework for building modern command-line applicatio
 
 ## ✨ Features
 
-- 🎯 **Type-Safe CLI Framework**: Full TypeScript support with Zod validation
+- 🎯 **Declarative CLI with JSX**: Define complex command structures using intuitive JSX syntax
 - 🧩 **JSX Terminal Components**: React-like syntax with [Svelte](https://svelte.dev/)-inspired runes for reactive terminal UIs
+- 🌊 **Stream Components**: Powerful stream handling with Effect.ts for real-time data processing
 - 🎨 **Rich Styling System**: Colors, gradients, borders, and advanced styling
 - ⌨️ **Input & Mouse Handling**: Comprehensive event processing
-- 🔌 **Plugin System**: Extensible architecture with hooks and middleware
+- 🔌 **Plugin System**: Built-in plugins for logging, process management, and more
 - ⚡ **Performance Optimized**: Lazy loading, caching, and efficient rendering
 - 📱 **Responsive Layouts**: Adaptive designs for any terminal size
 - 🔄 **Effect.ts Integration**: Functional programming with proper error handling
@@ -19,6 +20,93 @@ A comprehensive TypeScript framework for building modern command-line applicatio
 
 ```bash
 bun add tuix
+```
+
+### Create Your First CLI App
+
+```tsx
+#!/usr/bin/env bun
+import { jsx, Plugin, Command, Arg, Flag } from "tuix"
+
+function MyCLI() {
+  return (
+    <vstack>
+      {/* Define commands declaratively */}
+      <Plugin name="myapp" description="My awesome CLI" version="1.0.0">
+        <Command 
+          name="hello" 
+          description="Say hello"
+          handler={() => <success>Hello, World! 🎉</success>}
+        />
+        
+        <Command name="greet" description="Greet someone">
+          <Arg name="name" description="Person to greet" required />
+          <Flag name="loud" description="Shout the greeting" alias="l" />
+          
+          <Command handler={(ctx) => (
+            <text color="blue">
+              {ctx.flags.loud ? `HELLO ${ctx.args.name.toUpperCase()}!` : `Hello ${ctx.args.name}`}
+            </text>
+          )} />
+        </Command>
+      </Plugin>
+      
+      {/* Main UI shown when no command is provided */}
+      <text color="cyan" bold>Welcome to My CLI!</text>
+      <text>Run 'hello' or 'greet <name>' to get started</text>
+    </vstack>
+  )
+}
+
+// Run the app
+jsx(MyCLI).catch(console.error)
+```
+
+Run your CLI:
+```bash
+./my-cli hello                    # Shows: Hello, World! 🎉
+./my-cli greet Alice              # Shows: Hello Alice
+./my-cli greet Alice --loud       # Shows: HELLO ALICE!
+./my-cli help                     # Shows available commands
+```
+
+### Module Imports
+
+TUIX exports are organized for optimal tree-shaking and type safety:
+
+```typescript
+// Main exports
+import { runApp, Component, Effect } from 'tuix'
+
+// Components (JSX elements)
+import { Text, Button, Box, List, Table } from 'tuix/components'
+
+// Stream components
+import { Stream, Pipe, Transform, StreamBox } from 'tuix/components/streams'
+import { Spawn, ManagedSpawn, CommandPipeline } from 'tuix/components/streams/spawn'
+import { timer, poll, fromArray, random } from 'tuix/components/streams'
+
+// Styling system
+import { style, Colors, Borders } from 'tuix/styling'
+
+// Layout utilities
+import { flexbox, grid, spacer, center } from 'tuix/layout'
+
+// CLI framework
+import { createCLI, plugin, middleware } from 'tuix/cli'
+
+// Testing utilities
+import { testComponent, createTestHarness } from 'tuix/testing'
+
+// Logger
+import { logger, LogLevel } from 'tuix/logger'
+
+// Process management
+import { ProcessManager } from 'tuix/process-manager'
+
+// Direct core imports for advanced usage
+import { View, text, vstack, hstack } from 'tuix/core/view'
+import type { AppServices, TerminalCapabilities } from 'tuix/core/types'
 ```
 
 ### Create Your First CLI
@@ -149,6 +237,197 @@ Interactive terminal applications following the **Model-View-Update (MVU)** patt
 ```
 
 Both frameworks are powered by **Effect.ts** for functional programming, error handling, and resource management, with **[Svelte](https://svelte.dev/)-inspired runes** providing reactive state management.
+
+## 🌊 Stream Components
+
+Tuix provides powerful stream components that integrate seamlessly with Effect.ts for real-time data processing:
+
+### Basic Streaming
+
+```tsx
+import { Stream } from "effect"
+import { timer, fromArray } from "tuix/streams"
+
+function StreamingApp() {
+  // Create a timer that emits every second
+  const timerStream = timer(1000, 10)
+  
+  return (
+    <vstack>
+      {/* Stream component renders items as they arrive */}
+      <Stream 
+        stream={timerStream}
+        transform={(n) => <text color="green">Tick {n}</text>}
+        maxItems={5}
+      />
+      
+      {/* StreamBox provides a bordered container */}
+      <StreamBox
+        title="Live Data"
+        border="rounded"
+        stream={dataStream}
+        placeholder="Waiting for data..."
+      >
+        {(item) => <text>{JSON.stringify(item)}</text>}
+      </StreamBox>
+    </vstack>
+  )
+}
+```
+
+### Process Spawning & Output Streaming
+
+```tsx
+// Spawn a process and stream its output
+<Spawn 
+  command="npm test" 
+  stdout="stream"
+  stderr="stream"
+  stdoutStyle={{ foreground: "green" }}
+  stderrStyle={{ foreground: "red" }}
+/>
+
+// Custom spawn rendering
+<Spawn command={["ls", "-la"]} >
+  {({ stdout, stderr, exitCode }) => (
+    <vstack>
+      <Stream stream={stdout} />
+      <Stream stream={stderr} transform={(line) => <error>{line}</error>} />
+    </vstack>
+  )}
+</Spawn>
+
+// Command pipeline - pipe multiple commands
+<CommandPipeline
+  commands={[
+    { command: "find . -name '*.ts'" },
+    { command: "grep -v node_modules" },
+    { command: "wc -l" }
+  ]}
+  showPipeline={true}
+>
+  {(output) => <Stream stream={output} />}
+</CommandPipeline>
+```
+
+### Stream Transformations
+
+```tsx
+// Pipe component for single transformations
+<Pipe
+  from={numberStream}
+  through={(n) => n * n}
+  concurrency={5}
+>
+  {(squaredStream) => <Stream stream={squaredStream} />}
+</Pipe>
+
+// Transform component for multiple transformations
+<Transform
+  stream={dataStream}
+  transforms={[
+    { name: "Parse", fn: (s) => Stream.map(s, JSON.parse) },
+    { name: "Filter", fn: (s) => Stream.filter(s, (d) => d.active) },
+    { name: "Format", fn: (s) => Stream.map(s, formatData) }
+  ]}
+  showPipeline={true}
+>
+  {(finalStream) => <StreamBox stream={finalStream} />}
+</Transform>
+```
+
+## 🎮 Interactive Mode
+
+Tuix provides a powerful context-based interactive mode system that works universally across the framework. By default, all commands and applications are non-interactive (they render and exit), but you can enable interactive mode at any scope.
+
+### Non-Interactive by Default
+
+```tsx
+// Commands render and exit immediately by default
+<Command name="status" handler={() => (
+  <text color="green">✅ All systems operational</text>
+)} />
+```
+
+### Enabling Interactive Mode
+
+```tsx
+// Always interactive
+<Command name="monitor" interactive={true} handler={() => (
+  <vstack>
+    <text>Monitoring... Press Ctrl+C to exit</text>
+    <Stream stream={metricsStream} />
+  </vstack>
+)} />
+
+// Conditionally interactive based on context
+<Command 
+  name="logs"
+  interactive={(ctx) => ctx.flags.follow === true}
+  handler={(ctx) => (
+    <LogViewer follow={ctx.flags.follow} />
+  )}
+/>
+
+// Interactive with configuration
+<Command
+  name="watch"
+  interactive={{
+    enabled: true,
+    timeout: 60000,     // Exit after 1 minute
+    exitOn: {
+      idle: 10000,      // Exit after 10s of inactivity
+      complete: true,   // Exit when streams complete
+      error: true       // Exit on errors
+    }
+  }}
+  handler={() => <WatchUI />}
+/>
+```
+
+### Using the Interactive API
+
+```tsx
+import { Interactive } from "tuix"
+
+// Run part of your app in interactive mode
+const MyCommand = () => Effect.gen(function* () {
+  // Non-interactive work
+  yield* doSetup()
+  
+  // Enter interactive mode for a section
+  yield* Interactive.scope(
+    showInteractiveUI(),
+    { timeout: 30000 }
+  )
+  
+  // Back to non-interactive
+  yield* cleanup()
+})
+
+// Check if currently interactive
+const StatusBar = () => Effect.gen(function* () {
+  const isInteractive = yield* Interactive.isActive
+  
+  return (
+    <hstack>
+      <text>Mode: {isInteractive ? "Interactive" : "Batch"}</text>
+      {isInteractive && <text color="gray">Press 'q' to quit</text>}
+    </hstack>
+  )
+})
+```
+
+### Exit Control
+
+```tsx
+// Exit with the Exit component
+<Exit code={0} message="✅ Done!" />
+<Exit code={1} delay={3000}>💥 Self-destruct in 3s...</Exit>
+
+// Exit programmatically
+yield* Interactive.exit(0)
+```
 
 ## 🧩 JSX Components
 

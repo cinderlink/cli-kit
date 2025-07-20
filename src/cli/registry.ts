@@ -5,7 +5,7 @@
  */
 
 import { Effect, Ref } from "effect"
-import type { Plugin, PluginContext, PluginMiddleware } from "./plugin"
+import type { Plugin, PluginContext, HandlerWrapper } from "./plugin"
 import type { CommandConfig, CLIConfig, Handler } from "./types"
 
 export interface RegisteredPlugin {
@@ -14,7 +14,7 @@ export interface RegisteredPlugin {
   loadTime: Date
   dependencies: string[]
   dependents: string[]
-  config?: any
+  config?: Record<string, unknown>
 }
 
 export interface RegistryOptions {
@@ -47,7 +47,7 @@ export class PluginRegistry {
   /**
    * Register a plugin
    */
-  register(plugin: Plugin, config?: any): boolean {
+  register(plugin: Plugin, config?: Record<string, unknown>): boolean {
     const name = plugin.metadata.name
     
     // Check for duplicates
@@ -286,26 +286,28 @@ export class PluginRegistry {
       }
     }
     
-    // Chain hooks
-    modifiedConfig.hooks = this.mergeHooks(config.hooks || {}, enabledPlugins)
     
     return modifiedConfig
   }
   
   /**
-   * Get all middleware from enabled plugins
+   * Get all handler wrappers from enabled plugins
    */
-  getMiddleware(): PluginMiddleware[] {
+  getHandlerWrappers(): HandlerWrapper[] {
     return this.getEnabled()
-      .filter(plugin => plugin.middleware)
-      .map(plugin => plugin.middleware!)
+      .filter(plugin => plugin.extensions)
+      .flatMap(plugin => 
+        Object.values(plugin.extensions || {})
+          .filter(ext => ext.wrapper)
+          .map(ext => ext.wrapper!)
+      )
   }
   
   /**
    * Get all services provided by enabled plugins
    */
-  getServices(): Record<string, any> {
-    const services: Record<string, any> = {}
+  getServices(): Record<string, unknown> {
+    const services: Record<string, unknown> = {}
     
     for (const plugin of this.getEnabled()) {
       if (plugin.services) {
@@ -410,55 +412,6 @@ export class PluginRegistry {
     return command
   }
   
-  private mergeHooks(
-    baseHooks: NonNullable<CLIConfig['hooks']>,
-    plugins: Plugin[]
-  ): NonNullable<CLIConfig['hooks']> {
-    const merged = { ...baseHooks }
-    
-    for (const plugin of plugins) {
-      if (plugin.hooks) {
-        // Handle each hook type individually for type safety
-        if (plugin.hooks.beforeCommand) {
-          const existing = merged.beforeCommand
-          if (existing) {
-            merged.beforeCommand = async (command, args) => {
-              await existing(command, args)
-              await plugin.hooks!.beforeCommand!(command, args)
-            }
-          } else {
-            merged.beforeCommand = plugin.hooks.beforeCommand
-          }
-        }
-        
-        if (plugin.hooks.afterCommand) {
-          const existing = merged.afterCommand
-          if (existing) {
-            merged.afterCommand = async (command, args, result) => {
-              await existing(command, args, result)
-              await plugin.hooks!.afterCommand!(command, args, result)
-            }
-          } else {
-            merged.afterCommand = plugin.hooks.afterCommand
-          }
-        }
-        
-        if (plugin.hooks.onError) {
-          const existing = merged.onError
-          if (existing) {
-            merged.onError = async (error, command, args) => {
-              await existing(error, command, args)
-              await plugin.hooks!.onError!(error, command, args)
-            }
-          } else {
-            merged.onError = plugin.hooks.onError
-          }
-        }
-      }
-    }
-    
-    return merged
-  }
 }
 
 /**
@@ -473,6 +426,6 @@ export const createPluginRegistry = (options?: RegistryOptions) =>
 export const registerPlugin = (
   registry: PluginRegistry,
   plugin: Plugin,
-  config?: any
+  config?: Record<string, unknown>
 ) =>
   Effect.sync(() => registry.register(plugin, config))
