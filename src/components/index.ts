@@ -93,7 +93,7 @@ export * from '../tea/mouse-aware'
 export * from './streams'
 
 // CLI components (re-exported for convenience)
-export * from '../cli/components'
+export * from '../cli/jsx/components'
 
 // Convenience re-exports for common components
 export { 

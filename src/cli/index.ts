@@ -154,4 +154,4 @@ export { PluginLoader, createPluginLoader, loadAllPlugins, loadPluginByName } fr
 // =============================================================================
 
 /** Declarative components for building CLIs */
-export * from "./components"
+export * from "./jsx/components"

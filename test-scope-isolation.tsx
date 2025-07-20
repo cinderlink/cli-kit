@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-/** @jsxImportSource . */
+
 /**
  * Test scope isolation with the refactored architecture
  */

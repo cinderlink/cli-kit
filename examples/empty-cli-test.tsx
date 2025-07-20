@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-/** @jsxImportSource tuix */
 
 import { render } from 'tuix/jsx'
 

@@ -2,15 +2,15 @@
  * JSX Runtime for CLI-KIT
  * 
  * Enables JSX/TSX syntax for building terminal UIs
- * Compatible with React JSX transform with Svelte-inspired binding support
+ * Uses React JSX transform with Svelte-inspired binding support
  */
 
-import type { View } from "../core/types"
-import { text, vstack, hstack, styledText } from "../core/view"
-import { style, type Style, Colors } from "../styling"
-import { isBindableRune, isStateRune, type BindableRune, type StateRune } from '../reactivity/runes'
-import { config, templates } from "../config/index"
-import { mergeDeep } from "../config/utils"
+import type { View } from "../../core/types"
+import { text, vstack, hstack, styledText } from "../../core/view"
+import { style, type Style, Colors } from "../../styling"
+import { isBindableRune, isStateRune, type BindableRune, type StateRune } from '../../reactivity/runes'
+import { config, templates } from "../../config/index"
+import { mergeDeep } from "../../config/utils"
 import * as fs from "fs/promises"
 import * as path from "path"
 import { Effect } from "effect"
@@ -18,9 +18,9 @@ import {
   scopeManager,
   type ScopeContext,
   type ScopeDef
-} from "../scope"
-import { getGlobalEventBus } from "../core/event-bus"
-import { getGlobalRegistry } from "../core/module-registry"
+} from "../../scope"
+import { getGlobalEventBus } from "../../core/event-bus"
+import { getGlobalRegistry } from "../../core/module-registry"
 import { 
   CLI,
   Plugin,
@@ -34,11 +34,11 @@ import {
   LoadPlugin,
   CommandLineScope,
   CommandLineHelp
-} from "../cli/jsx/components"
-import { Scope, ScopeContent, ScopeFallback } from "../scope/jsx/components"
-import { JSXModule } from "./module"
-import type { JSXPluginEvent, JSXCommandEvent } from "./events"
-import { onMount } from '../reactivity/jsx-lifecycle'
+} from "../../cli/jsx/components"
+import { Scope, ScopeContent, ScopeFallback } from "../../scope/jsx/components"
+import { JSXModule } from "../module"
+import type { JSXPluginEvent, JSXCommandEvent } from "../events"
+import { onMount } from '../../reactivity/jsx-lifecycle'
 
 
 // Debug logging that respects TUIX_DEBUG env var
@@ -64,9 +64,6 @@ class JSXPluginRegistry {
   // JSX Module integration
   private jsxModule: JSXModule | null = null
   
-  // Legacy fields kept for compatibility during transition
-  private commandStack: any[] = [] // Stack for building nested commands
-  private renderableContent: any[] = [] // Stack for tracking renderable content
   
   // Command context for proper JSX evaluation
   private activeCommand: {
@@ -668,7 +665,7 @@ export const Fragment = ({ children }: { children?: any }) => {
   return vstack(validChildren)
 }
 
-// Export createElement for compatibility
+// Export createElement
 export const createElement = jsx
 
 // Export JSX namespace types
@@ -707,7 +704,7 @@ export namespace JSX {
   }
 }
 
-// Export jsx-runtime compatible functions
+// Export jsx-runtime functions
 export { jsx as jsxs, jsx as jsxDEV }
 
 // Export the registry for plugin access
@@ -722,7 +719,7 @@ export const getScopeManager = registry.getScopeManager.bind(registry)
 // Export utilities
 export { config, templates }
 
-// Export JSXContext for compatibility
+// Export JSXContext
 export const JSXContext = {
   registry,
   getScopeManager

@@ -4,7 +4,7 @@
 [jsx]
 factory = "jsx"
 fragment = "Fragment"
-importSource = "tuix"
+importSource = "."
 
 [test]
 # Preload setup files (uncomment when setup.ts is created)
