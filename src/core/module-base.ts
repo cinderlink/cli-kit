@@ -6,7 +6,7 @@
  */
 
 import { Effect } from 'effect'
-import type { EventBus, BaseEvent, EventHandler } from './event-bus'
+import type { EventBus, BaseEvent, EventHandler } from "./model/events/event-bus"
 
 /**
  * Module lifecycle state

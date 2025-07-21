@@ -6,7 +6,7 @@
  */
 
 import { Effect, Stream, Schedule, Duration, Option } from 'effect'
-import { EventBus, BaseEvent } from '../event-bus'
+import { EventBus, BaseEvent } from "../model/events/event-bus"
 import { ModuleBase } from '../module-base'
 
 /**

@@ -5,7 +5,7 @@
  * layouts in TUI applications, inspired by CSS flexbox and grid.
  */
 
-import type { View } from "../core/types"
+import type { View } from "../../types"
 
 // =============================================================================
 // Flexbox Types

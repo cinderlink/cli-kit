@@ -59,15 +59,15 @@ import type {
   AppServices,
   KeyEvent,
   MouseEvent
-} from "./types"
+} from "../../types"
 import { 
   TerminalService, 
   InputService, 
   RendererService, 
   StorageService,
   MouseRouterService 
-} from "../services/index"
-import { ApplicationError } from "./errors"
+} from "../../services/index"
+import { ApplicationError } from "../../types/errors"
 
 /**
  * System messages that the runtime can inject

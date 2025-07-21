@@ -6,7 +6,7 @@
  */
 
 import { Stream, Effect, Queue, Duration, Option, Chunk, Schedule } from 'effect'
-import { EventBus, BaseEvent } from '../event-bus'
+import { EventBus, BaseEvent } from "../model/events/event-bus"
 
 /**
  * Stream optimization error

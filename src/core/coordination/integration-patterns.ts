@@ -6,7 +6,7 @@
  */
 
 import { Effect, Stream, Fiber } from 'effect'
-import { EventBus, BaseEvent } from '../event-bus'
+import { EventBus, BaseEvent } from "../model/events/event-bus"
 import type { ProcessEvent, ProcessHealthEvent, ProcessOutputEvent } from '../../process-manager/events'
 import type { CLIParseEvent, CLICommandEvent } from '../../cli/events'
 import type { ConfigEvent } from '../../config/events'

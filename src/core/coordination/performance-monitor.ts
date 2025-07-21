@@ -6,7 +6,7 @@
  */
 
 import { Effect, Stream, Duration, Schedule } from 'effect'
-import { EventBus, BaseEvent } from '../event-bus'
+import { EventBus, BaseEvent } from "../model/events/event-bus"
 import { ModuleBase } from '../module-base'
 import type { CLICommandEvent } from '../../cli/events'
 

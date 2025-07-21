@@ -122,8 +122,8 @@ export { z as Schema } from "zod"
  * Provides the main Runtime class and convenience functions for
  * running TUIX applications with proper lifecycle management.
  */
-export { Runtime, runApp } from "./runtime"
-export type { RuntimeConfig, SystemMsg } from "./runtime"
+export { Runtime, runApp } from "./runtime/mvu/runtime"
+export type { RuntimeConfig, SystemMsg } from "./runtime/mvu/runtime"
 
 /**
  * Keyboard input processing utilities
@@ -131,8 +131,8 @@ export type { RuntimeConfig, SystemMsg } from "./runtime"
  * Comprehensive keyboard handling with cross-platform compatibility
  * and convenient utility functions for common key operations.
  */
-export { KeyUtils } from "./keys"
-export type { KeyEvent, KeyType } from "./keys"
+export { KeyUtils } from "./terminal/input/keys"
+export type { KeyEvent, KeyType } from "./terminal/input/keys"
 
 // =============================================================================
 // View System
@@ -144,7 +144,7 @@ export type { KeyEvent, KeyType } from "./keys"
  * Complete set of functions for creating, composing, and styling
  * views in terminal UI applications.
  */
-export * as View from "./view"
+export * as View from "./view/primitives/view"
 
 /**
  * High-performance view caching system
@@ -152,4 +152,4 @@ export * as View from "./view"
  * LRU-based caching for view rendering optimization,
  * improving performance in complex UI applications.
  */
-export * as ViewCache from "./view-cache"
+export * as ViewCache from "./view/view-cache"

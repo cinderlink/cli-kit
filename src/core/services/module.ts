@@ -6,7 +6,7 @@
 
 import { Effect } from 'effect'
 import { ModuleBase, ModuleError } from '../module-base'
-import type { EventBus } from '../event-bus'
+import type { EventBus } from '../model/events/event-bus'
 import type { 
   ServiceEvent, 
   TerminalEvent, 

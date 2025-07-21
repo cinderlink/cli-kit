@@ -6,7 +6,7 @@
  */
 
 import { Effect, Stream, Duration } from 'effect'
-import { EventBus, BaseEvent } from '../event-bus'
+import { EventBus, BaseEvent } from "../model/events/event-bus"
 import { ModuleBase, ModuleError } from '../module-base'
 import type { ProcessEvent, ProcessOutputEvent, ProcessHealthEvent } from '../../process-manager/events'
 import type { CLICommandEvent, CLIParseEvent } from '../../cli/events'

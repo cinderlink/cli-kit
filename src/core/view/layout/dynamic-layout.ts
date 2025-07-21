@@ -9,8 +9,8 @@
  */
 
 import { Effect } from "effect"
-import type { View, AppServices } from "../core/types"
-import { View as ViewCore } from "../core/view"
+import type { View, AppServices } from "../../types"
+import { View as ViewCore } from "../primitives/view"
 
 // =============================================================================
 // Types

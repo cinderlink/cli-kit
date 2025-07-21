@@ -5,8 +5,8 @@
  */
 
 import { Effect } from "effect"
-import { stringWidth } from "../utils/string-width"
-import type { View } from "../core/types"
+import { stringWidth } from "../../../utils/string-width"
+import type { View } from "../../types"
 
 /**
  * Position for alignment (0.0 to 1.0)

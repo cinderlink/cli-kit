@@ -14,7 +14,7 @@ import {
   ScopeNotFoundError,
   ScopeExistsError 
 } from './types'
-import { getGlobalEventBus } from '../../event-bus'
+import { getGlobalEventBus } from '../events/event-bus'
 import { getGlobalRegistry } from '../../module-registry'
 import { JSXModule } from '../../../jsx/module'
 import { JSXEventChannels } from '../../../jsx/events'

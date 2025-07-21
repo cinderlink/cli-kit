@@ -9,7 +9,7 @@
  */
 
 import { Effect } from "effect"
-import type { View } from "../core/types"
+import type { View } from "../../types"
 import {
   type GridProps,
   type GridItem,

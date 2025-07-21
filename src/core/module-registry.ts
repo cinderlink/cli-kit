@@ -7,7 +7,7 @@
 
 import { Effect } from 'effect'
 import { ModuleBase, ModuleError } from './module-base'
-import { EventBus, getGlobalEventBus } from './event-bus'
+import { EventBus, getGlobalEventBus } from "./model/events/event-bus"
 
 /**
  * Module registration entry

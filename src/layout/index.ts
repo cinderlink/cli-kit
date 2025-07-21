@@ -48,7 +48,7 @@ export {
   type SpacerProps,
   type DividerProps,
   DividerOrientation
-} from "./types"
+} from "../core/view/layout/types"
 
 // =============================================================================
 // Flexbox Layout System
@@ -63,7 +63,7 @@ export {
   vbox,
   center,
   spread
-} from "./flexbox"
+} from "../core/view/layout/flexbox"
 
 // =============================================================================
 // Grid Layout System
@@ -78,7 +78,7 @@ export {
   template,
   gridItem,
   span
-} from "./grid"
+} from "../core/view/layout/grid"
 
 // =============================================================================
 // Spacing and Divider Utilities
@@ -101,7 +101,7 @@ export {
   thickDivider,
   spaced,
   separated
-} from "./spacer"
+} from "../core/view/layout/spacer"
 
 // =============================================================================
 // Box and Panel Components
@@ -114,7 +114,7 @@ export {
   styledBox,
   panel,
   type BoxProps
-} from "./box"
+} from "../core/view/layout/box"
 
 // =============================================================================
 // View Composition and Positioning
@@ -133,7 +133,7 @@ export {
   Center,
   Bottom,
   Right
-} from "./join"
+} from "../core/view/layout/join"
 
 // =============================================================================
 // Dynamic and Responsive Layout System
@@ -156,7 +156,7 @@ export {
   type DynamicViewProps,
   type SpacerOptions,
   type ConditionalSpacerOptions
-} from "./dynamic-layout"
+} from "../core/view/layout/dynamic-layout"
 
 // =============================================================================
 // Simple Layout Utilities  
@@ -168,4 +168,4 @@ export {
 export {
   simpleLayout,
   layered
-} from "./simple"
+} from "../core/view/layout/simple"

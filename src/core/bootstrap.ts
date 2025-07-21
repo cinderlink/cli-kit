@@ -6,7 +6,7 @@
  */
 
 import { Effect } from 'effect'
-import { EventBus, getGlobalEventBus } from './event-bus'
+import { EventBus, getGlobalEventBus } from "./model/events/event-bus"
 import { ModuleRegistry, getGlobalRegistry } from './module-registry'
 
 // Core modules

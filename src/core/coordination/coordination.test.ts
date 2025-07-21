@@ -1,6 +1,6 @@
 import { test, expect, afterEach } from "bun:test"
 import { Effect, Duration, Fiber } from "effect"
-import { getGlobalEventBus, resetGlobalEventBus } from "../event-bus"
+import { getGlobalEventBus, resetGlobalEventBus } from "../model/events/event-bus"
 import { resetGlobalRegistry } from "../module-registry"
 import { bootstrapWithModules } from "../bootstrap"
 import { CoordinationModule } from "./module"

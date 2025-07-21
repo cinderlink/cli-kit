@@ -4,7 +4,7 @@
 
 import { test, expect, describe, beforeEach, afterEach } from 'bun:test'
 import { Effect } from 'effect'
-import { EventBus, resetGlobalEventBus } from './event-bus'
+import { EventBus, resetGlobalEventBus } from "./model/events/event-bus"
 import { ModuleRegistry, resetGlobalRegistry } from './module-registry'
 import { JSXModule } from '../jsx/module'
 import { CLIModule } from '../cli/module'

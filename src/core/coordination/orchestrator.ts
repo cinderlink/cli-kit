@@ -6,7 +6,7 @@
  */
 
 import { Effect, Duration } from 'effect'
-import { EventBus } from '../event-bus'
+import { EventBus } from "../model/events/event-bus"
 import { ModuleBase, ModuleError } from '../module-base'
 import { EventChoreographer } from './choreography'
 import { getGlobalRegistry } from '../module-registry'

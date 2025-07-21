@@ -6,7 +6,7 @@ import {
   bootstrapMinimal,
   bootstrapWithModules 
 } from "./bootstrap"
-import { getGlobalEventBus, resetGlobalEventBus } from "./event-bus"
+import { getGlobalEventBus, resetGlobalEventBus } from "./model/events/event-bus"
 import { resetGlobalRegistry } from "./module-registry"
 import type { ServiceEvent } from "../services/events"
 import type { ConfigEvent } from "../config/events"

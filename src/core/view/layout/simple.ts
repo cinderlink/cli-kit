@@ -6,8 +6,8 @@
  */
 
 import { Effect } from "effect"
-import { stringWidth } from "../utils/string-width"
-import type { View } from "../core/types"
+import { stringWidth } from "../../../utils/string-width"
+import type { View } from "../../types"
 
 /**
  * Create a simple layout with basic positioning

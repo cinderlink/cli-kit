@@ -10,7 +10,7 @@ import {
   ANSI_SEQUENCES, 
   parseChar, 
   getKeyName 
-} from "../../keys"
+} from "../../terminal/input/keys"
 import type { KeyEvent, MouseEvent, WindowSize } from "../../types"
 
 /**
