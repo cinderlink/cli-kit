@@ -4,7 +4,7 @@
 
 import { Effect, Layer, Ref } from "effect"
 import { StorageService, StorageUtils } from "../storage"
-import { StorageError } from "../../core/errors"
+import { StorageError } from "../../types/errors"
 import * as fs from "node:fs/promises"
 import * as path from "node:path"
 import { z } from "zod"

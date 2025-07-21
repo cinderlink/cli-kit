@@ -5,16 +5,16 @@
  */
 
 import { Effect } from 'effect'
-import { ModuleBase, ModuleError } from '../core/module-base'
-import type { EventBus } from '../core/event-bus'
+import { ModuleBase, ModuleError } from '../module-base'
+import type { EventBus } from '../event-bus'
 import type { 
   ServiceEvent, 
   TerminalEvent, 
   InputEvent, 
   RenderEvent,
   StorageEvent 
-} from './events'
-import { ServiceEventChannels } from './events'
+} from '../../services/events'
+import { ServiceEventChannels } from '../../services/events'
 
 /**
  * Service error types

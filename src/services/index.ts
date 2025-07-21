@@ -47,11 +47,13 @@
  * @module services
  */
 
-// Service interfaces
-export * from "./terminal"
-export * from "./input"
-export * from "./renderer"
-export * from "./storage"
+// Service interfaces from core
+export * from "../core/services/terminal"
+export * from "../core/services/input"
+export * from "../core/services/renderer"
+export * from "../core/services/storage"
+
+// Services that remain in this module
 export * from "./hit-test"
 export * from "./mouse-router"
 export * from "./focus"

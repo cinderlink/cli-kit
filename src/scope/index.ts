@@ -4,11 +4,11 @@
  * Core scope management system for TUIX
  */
 
-// Export types
-export * from './types'
+// Export types from core
+export * from '../core/model/scope/types'
 
-// Export manager
-export { scopeManager, ScopeManager } from './manager'
+// Export manager from core
+export { scopeManager, ScopeManager } from '../core/model/scope/manager'
 
 // Export JSX components
 export { Scope } from './jsx/components/Scope'

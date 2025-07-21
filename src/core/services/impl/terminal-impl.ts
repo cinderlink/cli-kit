@@ -4,8 +4,8 @@
 
 import { Effect, Layer, Ref } from "effect"
 import { TerminalService } from "../terminal"
-import { TerminalError } from "../../core/errors"
-import type { WindowSize, TerminalCapabilities } from "../../core/types"
+import { TerminalError } from "../../types/errors"
+import type { WindowSize, TerminalCapabilities } from "../../types"
 
 // ANSI Escape Sequences
 const ESC = '\x1b'

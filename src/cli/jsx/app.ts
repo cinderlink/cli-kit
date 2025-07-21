@@ -5,11 +5,11 @@
  */
 
 import { Effect } from 'effect'
-import { scopeManager } from '../../scope/manager'
-import type { ScopeDef } from '../../scope/types'
+import { scopeManager } from '../../core/model/scope/manager'
+import type { ScopeDef } from '../../core/model/scope/types'
 import { setCommandContext, clearCommandContext, getCommandByPath, hasCliCommands, cliConfig, setCliConfig } from './stores'
 import { runApp } from '../../core/runtime'
-import { LiveServices } from '../../services/impl'
+import { LiveServices } from '../../core/services/impl'
 import type { View } from '../../core/types'
 import type { JSXCommandConfig, JSXCommandHandler, JSXFlagConfig } from './types'
 

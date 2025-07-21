@@ -5,8 +5,8 @@
  */
 
 import { $state, $derived } from '../../../reactivity/runes'
-import { scopeManager } from '../../manager'
-import type { ScopeDef } from '../../types'
+import { scopeManager } from '../../../core/model/scope/manager'
+import type { ScopeDef } from '../../../core/model/scope/types'
 
 /**
  * Current scope store

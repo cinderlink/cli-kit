@@ -7,9 +7,9 @@
 
 import { Effect } from 'effect'
 import { onMount, onDestroy } from '../../../reactivity/runes'
-import { scopeManager } from '../../manager'
+import { scopeManager } from '../../../core/model/scope/manager'
 import { currentScopeStore, parentScopeStore } from '../stores'
-import type { ScopeDef, ScopeContext as ScopeState } from '../../types'
+import type { ScopeDef, ScopeContext as ScopeState } from '../../../core/model/scope/types'
 
 /**
  * Hook to create and manage a scope within a component

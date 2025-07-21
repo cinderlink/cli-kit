@@ -10,13 +10,13 @@ import {
   StorageService,
   HitTestService,
   MouseRouterService
-} from "../index"
+} from ".."
 import { TerminalServiceLive } from "./terminal-impl"
 import { InputServiceLive } from "./input-impl"
 import { RendererServiceLive } from "./renderer-impl"
 import { StorageServiceLive } from "./storage-impl"
-import { HitTestServiceLive } from "../hit-test"
-import { MouseRouterServiceLive } from "../mouse-router"
+import { HitTestServiceLive } from "../../../services/hit-test"
+import { MouseRouterServiceLive } from "../../../services/mouse-router"
 
 // Export individual service implementations
 export * from "./terminal-impl"

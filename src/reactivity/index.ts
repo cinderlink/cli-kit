@@ -27,4 +27,7 @@ export {
   // Utilities
   getValue,
   toBindable
-} from './runes'
+} from '../core/update/reactivity/runes'
+
+// Export JSX lifecycle hooks
+export * from '../core/update/reactivity/jsx-lifecycle'

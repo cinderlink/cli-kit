@@ -14,14 +14,14 @@
 import { test, expect, describe, beforeEach, afterEach, mock } from 'bun:test'
 import { Effect } from 'effect'
 import { 
-  useScope, 
-  useActiveScope, 
-  useScopeContext,
-  useScopeStore
+  useScope
+  // useActiveScope, 
+  // useScopeContext,
+  // useScopeStore
 } from './useScope'
-import { scopeManager } from '../../manager'
-import { onMount, onDestroy, getContext } from '../../../reactivity/jsx-lifecycle'
-import type { ScopeDef } from '../../types'
+import { scopeManager } from '../../../core/model/scope/manager'
+import { onMount, onDestroy } from '../../../reactivity/jsx-lifecycle'
+import type { ScopeDef } from '../../../core/model/scope/types'
 
 // Mock the lifecycle functions
 const mockOnMount = mock()

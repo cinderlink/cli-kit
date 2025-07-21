@@ -5,7 +5,7 @@
  * This is where help text typically appears.
  */
 
-import { scopeManager } from '../../manager'
+import { scopeManager } from '../../../core/model/scope/manager'
 import { jsx } from '../../../jsx/runtime'
 import type { JSX } from '../../../jsx/runtime'
 import { CommandLineHelp } from '../../../cli/jsx/components'

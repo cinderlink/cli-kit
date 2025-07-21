@@ -5,7 +5,7 @@
  */
 
 import { currentScopeStore } from '../stores'
-import { scopeManager } from '../../manager'
+import { scopeManager } from '../../../core/model/scope/manager'
 import type { JSX } from '../../../jsx/runtime'
 
 export interface ScopedProps {

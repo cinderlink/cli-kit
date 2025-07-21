@@ -3,11 +3,11 @@
  */
 
 import { Effect, Layer, Ref, Chunk } from "effect"
-import { stringWidth } from "../../utils/string-width"
+import { stringWidth } from "../../../utils/string-width"
 import { RendererService } from "../renderer"
 import { TerminalService } from "../terminal"
-import { RenderError } from "../../core/errors"
-import type { View, Viewport } from "../../core/types"
+import { RenderError } from "../../types/errors"
+import type { View, Viewport } from "../../types"
 
 /**
  * Strip ANSI escape sequences from text

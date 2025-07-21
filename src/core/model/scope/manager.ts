@@ -14,10 +14,10 @@ import {
   ScopeNotFoundError,
   ScopeExistsError 
 } from './types'
-import { getGlobalEventBus } from '../core/event-bus'
-import { getGlobalRegistry } from '../core/module-registry'
-import { JSXModule } from '../jsx/module'
-import { JSXEventChannels } from '../jsx/events'
+import { getGlobalEventBus } from '../../event-bus'
+import { getGlobalRegistry } from '../../module-registry'
+import { JSXModule } from '../../../jsx/module'
+import { JSXEventChannels } from '../../../jsx/events'
 import type { ScopeContext } from './types'
 
 export class ScopeManager {

@@ -7,7 +7,7 @@
 
 import { Effect } from 'effect'
 import { onMount } from '../../../reactivity/jsx-lifecycle'
-import { scopeManager, markScopeRendered } from '../../manager'
+import { scopeManager, markScopeRendered } from '../../../core/model/scope/manager'
 import { currentScopeStore } from '../stores'
 import type { JSX } from '../../../jsx/runtime'
 
