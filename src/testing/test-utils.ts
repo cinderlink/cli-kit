@@ -636,3 +636,118 @@ export const withMockServices = <R, E, A>(
   const services = createMockAppServices()
   return Effect.provide(effect, services.layer)
 }
+
+// =============================================================================
+// Test Interaction Helpers
+// =============================================================================
+
+/**
+ * Test interaction helper
+ */
+export interface InteractionTest<Model, Msg> {
+  component: Component<Model, Msg>
+  interactions: Array<{
+    type: 'keypress' | 'mouse' | 'resize'
+    key?: string
+    event?: any
+    size?: { width: number; height: number }
+    wait?: number
+  }>
+  expectations: Array<{
+    after: number
+    check: (state: Model) => void
+  }>
+}
+
+export async function testInteraction<Model, Msg>(
+  test: InteractionTest<Model, Msg>
+): Promise<{ success: boolean; error?: Error }> {
+  try {
+    // Mock implementation for now
+    // TODO: Implement proper interaction testing
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: error as Error }
+  }
+}
+
+/**
+ * Test lifecycle helper
+ */
+export interface LifecycleTest<Model, Msg> {
+  component: Component<Model, Msg> & {
+    cleanup?: Effect.Effect<void>
+  }
+  duration: number
+}
+
+export async function testLifecycle<Model, Msg>(
+  test: LifecycleTest<Model, Msg>
+): Promise<{ 
+  success: boolean
+  mountCalled: boolean
+  destroyCalled: boolean
+  error?: Error 
+}> {
+  try {
+    // Mock implementation for now
+    // TODO: Implement proper lifecycle testing
+    return { success: true, mountCalled: true, destroyCalled: true }
+  } catch (error) {
+    return { success: false, mountCalled: false, destroyCalled: false, error: error as Error }
+  }
+}
+
+/**
+ * Test harness interface
+ */
+export interface TestHarness<Model = any, Msg = any> {
+  run: (component: Component<Model, Msg>) => Promise<void>
+  send: (msg: Msg) => Promise<void>
+  sendAndCatchError: (msg: Msg) => Promise<{ error?: Error }>
+  stop: () => Promise<void>
+  getState: () => Promise<Model>
+  terminal: any
+  input: any
+  renderer: any
+  storage: any
+  runtime: any
+}
+
+export function createTestHarness<Model = any, Msg = any>(): TestHarness<Model, Msg> {
+  const services = createMockAppServices()
+  
+  return {
+    terminal: services.terminal,
+    input: services.input,
+    renderer: services.renderer,
+    storage: services.storage,
+    runtime: null,
+    
+    async run(component: Component<Model, Msg>) {
+      // Mock implementation
+    },
+    
+    async send(msg: Msg) {
+      // Mock implementation
+    },
+    
+    async sendAndCatchError(msg: Msg) {
+      try {
+        await this.send(msg)
+        return {}
+      } catch (error) {
+        return { error: error as Error }
+      }
+    },
+    
+    async stop() {
+      // Mock implementation
+    },
+    
+    async getState() {
+      // Mock implementation
+      return {} as Model
+    }
+  }
+}

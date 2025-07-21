@@ -462,6 +462,16 @@ export class ScopeManager {
   }
 }
 
+/**
+ * Scope error types
+ */
+export class ScopeError extends Error {
+  constructor(message: string, public scopeId?: string, public cause?: unknown) {
+    super(message)
+    this.name = 'ScopeError'
+  }
+}
+
 // Global scope manager instance
 export const scopeManager = new ScopeManager()
 

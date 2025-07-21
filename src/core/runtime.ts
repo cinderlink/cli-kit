@@ -734,3 +734,25 @@ export const runApp = <Model, Msg>(
   const runtime = new Runtime(component, config)
   return runtime.run()
 }
+
+/**
+ * Create a runtime instance
+ */
+export const createRuntime = <Model = any, Msg = any>(
+  config?: RuntimeConfig
+): Effect.Effect<Runtime<Model, Msg>, RuntimeError> => {
+  return Effect.succeed(new Runtime<Model, Msg>(null as any, config))
+}
+
+/**
+ * Runtime error types
+ */
+export class RuntimeError extends Error {
+  constructor(message: string, public cause?: unknown) {
+    super(message)
+    this.name = 'RuntimeError'
+  }
+}
+
+// Export Runtime type for external use
+export type { Runtime }

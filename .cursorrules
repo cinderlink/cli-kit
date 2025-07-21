@@ -1,0 +1,47 @@
+# Tuix Framework - Cursor Rules
+
+## Environment
+- ALWAYS use bun (NEVER npm/npx/pnpm/yarn)
+- Commands: `bun test`, `bun install`, `bun run`, `bun build`
+- Use Bun native APIs over Node.js equivalents
+
+## Required Reading Order
+1. [RULES.md](./RULES.md) - Framework NEVER/ALWAYS rules
+2. [STANDARDS.md](./STANDARDS.md) - Code quality standards
+3. [CONVENTIONS.md](./CONVENTIONS.md) - File naming conventions
+4. Module-specific: `src/{module}/README.md` before modifying modules
+
+## File Naming
+- kebab-case ONLY (user-input.ts not UserInput.ts)
+- NEVER create variants (-v2, -simple, -enhanced)
+- NEVER use PascalCase/UPPERCASE for files
+
+## Code Standards
+- TypeScript strict mode, no `any` types
+- 80% test coverage minimum
+- bun test before commits
+- Fix TypeScript errors immediately
+
+## Architecture
+- Single implementation per feature
+- Module boundaries enforced
+- Use established patterns
+- No direct terminal access (use services)
+
+## JSX
+- NO pragmas (configured at build level)
+- Components extend framework base classes
+- Use established component patterns
+
+## Testing
+- `bun test` only (NEVER jest/vitest)
+- Tests next to implementation
+- Follow AAA pattern (Arrange/Act/Assert)
+
+## Module Work
+Read module docs first:
+- CLI: src/cli/README.md
+- JSX: src/jsx/README.md  
+- Scope: src/scope/README.md
+- Styling: src/styling/README.md
+- Layout: src/layout/README.md
