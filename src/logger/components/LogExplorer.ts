@@ -5,9 +5,9 @@
  */
 
 import { Effect } from "effect"
-import { View, text, vstack, hstack, styledText } from "../../core/view"
-import { style, Colors } from "../../styling"
-import type { InteractiveLogEntry, LogLevel } from "../types"
+import { View, text, vstack, hstack, styledText } from "@core/view"
+import { style, Colors } from "@core/terminal/ansi/styles"
+import type { InteractiveLogEntry, LogLevel } from "@logger/types"
 
 interface LogExplorerProps {
   entries: InteractiveLogEntry[]

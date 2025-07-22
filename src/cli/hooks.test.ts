@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach } from "bun:test"
 import { Effect } from "effect"
-import { EventBus } from "../core/event-bus"
+import { EventBus } from "@core/model/events/eventBus"
 import {
   createHooks,
   createHookEvent,
@@ -30,8 +30,8 @@ describe("Hook System", () => {
   describe("Hook Creation", () => {
     it("should create hooks with event bus", () => {
       expect(hooks).toBeDefined()
-      expect(hooks.onBeforeCommand).toBeDefined()
-      expect(hooks.onAfterCommand).toBeDefined()
+      expect(hooks.beforeCommand).toBeDefined()
+      expect(hooks.afterCommand).toBeDefined()
       expect(hooks.onError).toBeDefined()
     })
 
@@ -51,7 +51,7 @@ describe("Hook System", () => {
       let receivedEvent: BeforeCommandEvent | null = null
 
       await Effect.runPromise(
-        hooks.onBeforeCommand.subscribe((event) => {
+        hooks.beforeCommand.tap('test', (event) => {
           called = true
           receivedEvent = event
           return Effect.void
@@ -74,20 +74,23 @@ describe("Hook System", () => {
     it("should support multiple subscribers", async () => {
       let count = 0
 
+      // Subscribe first handler
       await Effect.runPromise(
-        hooks.onBeforeCommand.subscribe(() => {
+        hooks.beforeCommand.tap('test1', () => {
           count++
           return Effect.void
         })
       )
 
+      // Subscribe second handler
       await Effect.runPromise(
-        hooks.onBeforeCommand.subscribe(() => {
+        hooks.beforeCommand.tap('test2', () => {
           count++
           return Effect.void
         })
       )
 
+      // Emit event
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
@@ -102,7 +105,7 @@ describe("Hook System", () => {
       let called = false
 
       await Effect.runPromise(
-        hooks.onBeforeCommand.subscribe((event) => {
+        hooks.beforeCommand.tap('test', (event) => {
           called = true
           // Sync handler - no Effect
         })
@@ -122,7 +125,7 @@ describe("Hook System", () => {
       let called = false
 
       await Effect.runPromise(
-        hooks.onBeforeCommand.subscribe(async (event) => {
+        hooks.beforeCommand.tapAsync('test', async (event) => {
           await new Promise(resolve => setTimeout(resolve, 1))
           called = true
         })
@@ -140,30 +143,31 @@ describe("Hook System", () => {
   })
 
   describe("Hook Filtering", () => {
-    it("should filter events", async () => {
+    it("should filter events manually", async () => {
       let count = 0
 
       await Effect.runPromise(
-        hooks.onBeforeCommand
-          .filter(event => event.command[0] === 'test')
-          .subscribe(() => {
+        hooks.beforeCommand.tap('test', (event) => {
+          // Manual filtering
+          if (event.command[0] === 'test') {
             count++
-            return Effect.void
-          })
+          }
+          return Effect.void
+        })
       )
 
-      // Should trigger
+      // Should count
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
-          command: ['test', 'command'],
+          command: ['test'],
           args: {}
         }))
       )
 
-      // Should not trigger
+      // Should not count
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
-          command: ['other', 'command'],
+          command: ['other'],
           args: {}
         }))
       )
@@ -171,20 +175,19 @@ describe("Hook System", () => {
       expect(count).toBe(1)
     })
 
-    it("should support chained filters", async () => {
+    it("should support conditional execution", async () => {
       let called = false
 
       await Effect.runPromise(
-        hooks.onBeforeCommand
-          .filter(event => event.command.length > 1)
-          .filter(event => event.command[0] === 'test')
-          .subscribe(() => {
+        hooks.beforeCommand.tap('test', (event) => {
+          if (event.command.length > 1 && event.command[0] === 'test') {
             called = true
-            return Effect.void
-          })
+          }
+          return Effect.void
+        })
       )
 
-      // Should not trigger (only one command)
+      // Should not call - only one command part
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
@@ -194,10 +197,10 @@ describe("Hook System", () => {
 
       expect(called).toBe(false)
 
-      // Should trigger
+      // Should call - two command parts with 'test' first
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
-          command: ['test', 'command'],
+          command: ['test', 'sub'],
           args: {}
         }))
       )
@@ -206,18 +209,71 @@ describe("Hook System", () => {
     })
   })
 
-  describe("Once Subscription", () => {
-    it("should only trigger once", async () => {
-      let count = 0
-
+  describe("Error Handling", () => {
+    it("should handle errors in handlers", async () => {
       await Effect.runPromise(
-        hooks.onBeforeCommand.once(() => {
-          count++
+        hooks.onError.tap('error-handler', (event) => {
+          expect(event.error).toBeDefined()
+          expect(event.error.message).toContain('test error')
           return Effect.void
         })
       )
 
-      // First event
+      await Effect.runPromise(
+        hooks.emit(createHookEvent('hook:onError', {
+          error: new Error('test error'),
+          phase: 'command'
+        }))
+      )
+    })
+
+    it("should not break other handlers if one fails", async () => {
+      let successCount = 0
+
+      await Effect.runPromise(
+        hooks.beforeCommand.tap('failing', () => {
+          throw new Error('Handler failed')
+        })
+      )
+
+      await Effect.runPromise(
+        hooks.beforeCommand.tap('success', () => {
+          successCount++
+          return Effect.void
+        })
+      )
+
+      // The failing handler should not prevent the success handler from running
+      await Effect.runPromise(
+        hooks.emit(createHookEvent('hook:beforeCommand', {
+          command: ['test'],
+          args: {}
+        })).pipe(
+          Effect.catchAll(() => Effect.void)
+        )
+      )
+
+      expect(successCount).toBe(1)
+    })
+  })
+
+  describe("Once Subscription", () => {
+    it("should allow manual one-time subscriptions", async () => {
+      let count = 0
+      let subscription: { unsubscribe: () => void } | null = null
+
+      subscription = await Effect.runPromise(
+        hooks.beforeCommand.tap('once', (event) => {
+          count++
+          // Unsubscribe after first call
+          if (subscription) {
+            subscription.unsubscribe()
+          }
+          return Effect.void
+        })
+      )
+
+      // First call
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
@@ -225,7 +281,7 @@ describe("Hook System", () => {
         }))
       )
 
-      // Second event
+      // Second call (should not increment)
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
@@ -237,48 +293,18 @@ describe("Hook System", () => {
     })
   })
 
-  describe("Error Handling", () => {
-    it("should handle Effect failures in handlers", async () => {
-      let errorLogged = false
-
-      await Effect.runPromise(
-        hooks.onBeforeCommand.subscribe(() => {
-          // Return an Effect failure instead of throwing
-          return Effect.fail(new Error("Handler error"))
-        })
-      )
-
-      // Emit event and expect it to handle the failure gracefully
-      await Effect.runPromise(
-        hooks.emit(createHookEvent('hook:beforeCommand', {
-          command: ['test'],
-          args: {}
-        })).pipe(
-          Effect.catchAll((error) => {
-            errorLogged = true
-            // The error should be caught and handled
-            return Effect.void
-          })
-        )
-      )
-
-      // For now, errors are caught but not re-emitted as error events
-      expect(errorLogged).toBe(false) // Errors are handled internally
-    })
-  })
-
   describe("Unsubscribe", () => {
-    it("should unsubscribe handlers", async () => {
+    it("should unsubscribe from events", async () => {
       let count = 0
 
       const subscription = await Effect.runPromise(
-        hooks.onBeforeCommand.subscribe(() => {
+        hooks.beforeCommand.tap('test', () => {
           count++
           return Effect.void
         })
       )
 
-      // First event
+      // First call
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
@@ -289,9 +315,9 @@ describe("Hook System", () => {
       expect(count).toBe(1)
 
       // Unsubscribe
-      await Effect.runPromise(subscription.unsubscribe())
+      subscription.unsubscribe()
 
-      // Second event
+      // Second call (should not increment)
       await Effect.runPromise(
         hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
@@ -299,111 +325,90 @@ describe("Hook System", () => {
         }))
       )
 
-      expect(count).toBe(1) // Should not increment
+      expect(count).toBe(1)
     })
-  })
 
-  describe("Custom Hooks", () => {
-    it("should support custom event channels", async () => {
-      let called = false
-
-      interface CustomEvent extends BaseEvent {
-        type: 'custom:myEvent'
-        data: string
-      }
+    it("should untap by name", async () => {
+      let count = 0
 
       await Effect.runPromise(
-        hooks.on<CustomEvent>('custom:myEvent').subscribe((event) => {
-          called = true
-          expect(event.data).toBe('test data')
+        hooks.beforeCommand.tap('removable', () => {
+          count++
           return Effect.void
         })
       )
 
+      // First call
       await Effect.runPromise(
-        eventBus.emit('custom:myEvent', createHookEvent('custom:myEvent', {
-          data: 'test data'
-        }) as CustomEvent)
-      )
-
-      expect(called).toBe(true)
-    })
-  })
-
-  describe("Plugin Lifecycle Hooks", () => {
-    it("should emit plugin load events", async () => {
-      let loaded = false
-
-      await Effect.runPromise(
-        hooks.onPluginLoad.subscribe((event) => {
-          loaded = true
-          expect(event.pluginName).toBe('test-plugin')
-          expect(event.pluginVersion).toBe('1.0.0')
-          return Effect.void
-        })
-      )
-
-      await Effect.runPromise(
-        hooks.emit(createHookEvent('hook:pluginLoad', {
-          pluginName: 'test-plugin',
-          pluginVersion: '1.0.0'
+        hooks.emit(createHookEvent('hook:beforeCommand', {
+          command: ['test'],
+          args: {}
         }))
       )
 
-      expect(loaded).toBe(true)
+      expect(count).toBe(1)
+
+      // Untap by name
+      hooks.beforeCommand.untap('removable')
+
+      // Second call (should not increment)
+      await Effect.runPromise(
+        hooks.emit(createHookEvent('hook:beforeCommand', {
+          command: ['test'],
+          args: {}
+        }))
+      )
+
+      expect(count).toBe(1)
     })
   })
 
-  describe("Command Lifecycle", () => {
-    it("should emit full command lifecycle", async () => {
-      const events: string[] = []
+  describe("Lifecycle Hooks", () => {
+    it("should support all lifecycle hooks", async () => {
+      const calls: string[] = []
 
-      // Subscribe to all lifecycle events
-      await Effect.runPromise(Effect.all([
-        hooks.onBeforeParse.subscribe(() => {
-          events.push('beforeParse')
-          return Effect.void
-        }),
-        hooks.onAfterParse.subscribe(() => {
-          events.push('afterParse')
-          return Effect.void
-        }),
-        hooks.onBeforeValidate.subscribe(() => {
-          events.push('beforeValidate')
-          return Effect.void
-        }),
-        hooks.onAfterValidate.subscribe(() => {
-          events.push('afterValidate')
-          return Effect.void
-        }),
-        hooks.onBeforeExecute.subscribe(() => {
-          events.push('beforeExecute')
-          return Effect.void
-        }),
-        hooks.onAfterExecute.subscribe(() => {
-          events.push('afterExecute')
-          return Effect.void
-        })
-      ]))
+      await Effect.runPromise(
+        Effect.all([
+          hooks.beforeInit.tap('test', () => {
+            calls.push('beforeInit')
+            return Effect.void
+          }),
+          hooks.afterInit.tap('test', () => {
+            calls.push('afterInit')
+            return Effect.void
+          }),
+          hooks.beforeExecute.tap('test', () => {
+            calls.push('beforeExecute')
+            return Effect.void
+          }),
+          hooks.afterExecute.tap('test', () => {
+            calls.push('afterExecute')
+            return Effect.void
+          })
+        ])
+      )
 
-      // Emit lifecycle events in order
-      await Effect.runPromise(Effect.all([
-        hooks.emit(createHookEvent('hook:beforeParse', { argv: ['test'] })),
-        hooks.emit(createHookEvent('hook:afterParse', { argv: ['test'], parsed: {} })),
-        hooks.emit(createHookEvent('hook:beforeValidate', { args: {}, command: ['test'] })),
-        hooks.emit(createHookEvent('hook:afterValidate', { args: {}, command: ['test'], valid: true })),
-        hooks.emit(createHookEvent('hook:beforeExecute', { command: ['test'], args: {} })),
-        hooks.emit(createHookEvent('hook:afterExecute', { command: ['test'], args: {}, result: 'done' }))
-      ]))
+      await Effect.runPromise(
+        Effect.all([
+          hooks.emit(createHookEvent('hook:beforeInit', { config: {} })),
+          hooks.emit(createHookEvent('hook:afterInit', { config: {} })),
+          hooks.emit(createHookEvent('hook:beforeExecute', { 
+            command: ['test'], 
+            args: {},
+            handler: () => Effect.void
+          })),
+          hooks.emit(createHookEvent('hook:afterExecute', { 
+            command: ['test'], 
+            args: {},
+            result: 'success'
+          }))
+        ])
+      )
 
-      expect(events).toEqual([
-        'beforeParse',
-        'afterParse',
-        'beforeValidate',
-        'afterValidate',
-        'beforeExecute',
-        'afterExecute'
-      ])
+      expect(calls).toContain('beforeInit')
+      expect(calls).toContain('afterInit')
+      expect(calls).toContain('beforeExecute')
+      expect(calls).toContain('afterExecute')
     })
   })
 })

@@ -13,16 +13,16 @@
  */
 
 // Test utilities
-export * from "./test-utils"
+export * from "./testUtils"
 
 // E2E testing harness
-export * from "./e2e-harness"
+export * from "./e2eHarness"
 
 // Lightweight testing harness (no PTY dependency)
 export * from "./harness"
 
 // Input adapter for simulating user input in tests
-export * from "./input-adapter"
+export * from "./inputAdapter"
 
 // Visual testing utilities
-export * from "./visual-test"
+export * from "./visualTest"

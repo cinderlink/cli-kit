@@ -20,7 +20,7 @@ import type { Subprocess } from 'bun'
 import { join, resolve } from 'path'
 import { existsSync, mkdirSync } from 'fs'
 import type { ProcessConfig, ProcessState, ProcessLog, ProcessManagerConfig } from './types'
-import type { Logger } from '../logger/types'
+import type { Logger } from '@logger/types'
 import { Effect } from 'effect'
 
 interface ManagedProcess {

@@ -29,9 +29,9 @@
  * ```
  */
 
-import { jsx } from '../../../jsx'
-import type { View } from '../../../core/types'
-import { Box, type BoxProps } from '../box'
+import { jsx } from '@jsx/runtime'
+import type { View } from '@core/view/primitives/view'
+import { Box, type BoxProps } from '@ui/components/layout/box'
 
 // Types
 export interface FlexProps extends Omit<BoxProps, 'direction'> {

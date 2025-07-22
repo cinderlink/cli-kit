@@ -25,36 +25,67 @@ alwaysApply: true
 ## Required Reading Before Coding
 
 ### ALWAYS Read First
-1. **[RULES.md](./RULES.md)** - Framework rules (NEVER/ALWAYS)
-2. **[STANDARDS.md](./STANDARDS.md)** - Code quality standards  
-3. **[CONVENTIONS.md](./CONVENTIONS.md)** - File naming and organization
+1. **[RULES.md](./docs/RULES.md)** - Framework rules (NEVER/ALWAYS)
+2. **[STANDARDS.md](./docs/STANDARDS.md)** - Code quality standards  
+3. **[CONVENTIONS.md](./docs/CONVENTIONS.md)** - File naming and organization
 
 ### Read for Specific Work
 - **CLI work**: [src/cli/README.md](./src/cli/README.md)
 - **JSX components**: [src/jsx/README.md](./src/jsx/README.md)
 - **Scope system**: [src/scope/README.md](./src/scope/README.md)
 - **Styling/Layout**: [src/styling/README.md](./src/styling/README.md), [src/layout/README.md](./src/layout/README.md)
-- **Module integration**: [MODULES.md](./MODULES.md)
-- **Plugin development**: [PLUGINS.md](./PLUGINS.md)
+- **Module integration**: [MODULES.md](./docs/MODULES.md)
+- **Plugin development**: [PLUGINS.md](./docs/PLUGINS.md)
 
-## Key Rules
+## Critical Framework Rules
 
-- **NEVER** use npm/npx/pnpm/pnpx - ALWAYS use bun
+### Code Organization
 - **NEVER** create multiple implementations (-v2, -simple, -enhanced)
-- **NEVER** use PascalCase files - ALWAYS use kebab-case
+- **NEVER** use qualifier names (simple-logger, basic-button)
+- **NEVER** create test-*.ts or demo-*.ts files - use proper test suite
+- **NEVER** commit backup files (.bak, .old, .backup, .orig)
+- **ALWAYS** follow Single Implementation Principle
+
+### File Naming
+- **NEVER** use UPPERCASE for files (except documentation)
+- **ALWAYS** use lowercase path-based naming for files and directories
+- **EXCEPTIONS**: 
+  - PascalCase for component files (Button.tsx, Modal.tsx)
+  - camelCase for store files (userStore.ts, pluginStore.ts)
+  - UPPERCASE.md for documentation (README.md, ISSUES.md)
+- **AVOID** kebab-case except for proper nouns (process-manager)
 - **NEVER** add JSX pragmas - configured at build level
+
+### Development Process
 - **ALWAYS** read module docs before modifying modules
 - **ALWAYS** run `bun test` before committing
 - **ALWAYS** check `bun run tsc --noEmit` for type errors
+- **NEVER** use `any` types - use proper TypeScript
+- **ALWAYS** maintain 80% test coverage
 
-## File Organization
+### Architecture
+- **NEVER** violate module boundaries
+- **ALWAYS** use Effect for async operations
+- **ALWAYS** validate inputs at module boundaries
+- **NEVER** directly access terminal - use services
 
+## Documentation Structure
+
+**Project Root docs/ (framework-wide concerns):**
+- docs/RULES.md - NEVER/ALWAYS rules
+- docs/STANDARDS.md - Code quality standards
+- docs/CONVENTIONS.md - File naming conventions
+- docs/DEPENDENCIES.md - Framework dependencies
+- docs/MODULES.md - Module overview
+- docs/PLUGINS.md - Plugin system
+
+**Each Module (module-specific concerns):**
 ```
 src/module-name/
-├── README.md          # Read this before modifying module
-├── PLANNING.md        # Module roadmap and plans
-├── ISSUES.md          # Known issues and tracking
-└── index.ts           # Public API
+├── README.md          # Module purpose, usage, API
+├── PLANNING.md        # Future development plans
+├── ISSUES.md          # Known issues and improvements
+└── index.ts           # Public API exports
 ```
 
 ## Testing

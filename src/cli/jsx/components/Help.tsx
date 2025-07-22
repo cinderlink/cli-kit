@@ -4,8 +4,8 @@
  * Provides help text and documentation for commands
  */
 
-import { text } from '../../../components'
-import type { JSX } from '../../../jsx/runtime'
+import { text } from '@core/view/primitives/view'
+import type { JSX } from '@jsx/runtime'
 
 export interface HelpProps {
   content: string

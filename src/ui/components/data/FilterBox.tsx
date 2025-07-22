@@ -6,9 +6,9 @@
  */
 
 import { Effect } from "effect"
-import type { View } from "../../core/types"
-import { View as ViewUtils } from "../../core"
-import { style, Colors } from "../../styling"
+import type { View } from "@core/view/primitives/view"
+import * as ViewUtils from "@core/view/primitives/view"
+import { style, Colors } from "@core/terminal/ansi/styles"
 
 const { vstack, hstack, text, styledText } = ViewUtils
 

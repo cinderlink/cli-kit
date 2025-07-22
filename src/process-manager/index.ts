@@ -38,3 +38,9 @@ export { ProcessManagerPlugin } from "./plugin"
 
 // Export default manager
 export default ProcessManager
+
+// Constants
+export * from "./constants"
+
+// Export module implementation (for compatibility)
+export { ProcessManagerModule as ProcessManagerLive } from "./module"

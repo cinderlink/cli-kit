@@ -5,19 +5,19 @@
  */
 
 export * from "./types"
-export * from "./logger"
-export * from "./formatters"
-export * from "./transports"
+export * from "./core/logger"
+export * from "./formatters/formatters"
+export * from "./transports/transports"
 export { LogExplorer } from "./components/LogExplorer"
 export * from "./components/LogComponents"
 export { LiveLogDashboard, ProcessLogView } from "./components/LiveLogDashboard"
-export * from "./presets"
+export * from "./impl/presets"
 
 import { Effect, Layer, Context } from "effect"
 import type { Logger, LoggerConfig, LogLevel } from "./types"
-import { TuixLogger, makeLoggerLayer, makeQueuedLoggerLayer } from "./logger"
-import { ConsoleTransport, FileTransport, StreamTransport, HttpTransport } from "./transports"
-import { PrettyFormatter, JSONFormatter, CompactFormatter, CLIFormatter } from "./formatters"
+import { TuixLogger, makeLoggerLayer, makeQueuedLoggerLayer } from "./core/logger"
+import { ConsoleTransport, FileTransport, StreamTransport, HttpTransport } from "./transports/transports"
+import { PrettyFormatter, JSONFormatter, CompactFormatter, CLIFormatter } from "./formatters/formatters"
 
 /**
  * Create a default console logger
@@ -289,4 +289,9 @@ export const LoggerUtils = {
  * Re-export commonly used types and functions
  */
 export type { Logger, LogEntry, LogLevel, LogTransport, LogFormatter } from "./types"
-export { log, withLoggerContext, setGlobalLogger, getGlobalLogger } from "./logger"
+export { log, withLoggerContext, setGlobalLogger, getGlobalLogger } from "./core/logger"
+
+/**
+ * Logger constants
+ */
+export * from "./constants"

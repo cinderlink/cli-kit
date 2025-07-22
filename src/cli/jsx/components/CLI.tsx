@@ -4,9 +4,9 @@
  * Top-level CLI component that establishes the root scope
  */
 
-import { jsx } from '../../../jsx/runtime'
+import { jsx } from '@jsx/runtime'
 import { CommandLineScope } from './CommandLineScope'
-import type { JSX } from '../../../jsx/runtime'
+import type { JSX } from '@jsx/runtime'
 
 export interface CLIProps {
   name: string

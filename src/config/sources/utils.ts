@@ -6,7 +6,7 @@
 
 import * as path from "path"
 import { watch } from "fs"
-import { ConfigValue, ConfigObject } from "./types"
+import { ConfigValue, ConfigObject } from "../types"
 
 /**
  * Get a value from an object by dot-separated path

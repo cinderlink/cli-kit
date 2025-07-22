@@ -6,10 +6,10 @@
  */
 
 import { Effect } from "effect"
-import { stringWidth } from "../../../utils/string-width"
-import type { View } from "../../types"
-import * as ViewUtils from "../primitives/view"
-import { style, type Style, type Border, Borders, renderBox, BorderSide } from "../../../styling/index"
+import { stringWidth } from "@core/terminal/output/string/width"
+import type { View } from "@core/types"
+import * as ViewUtils from "@core/view/primitives/view"
+import { style, type Style, type Border, Borders, renderBox, BorderSide } from "@core/terminal/ansi/styles"
 import { joinVertical, Center } from "./join"
 
 /**

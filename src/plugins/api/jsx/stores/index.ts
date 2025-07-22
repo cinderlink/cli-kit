@@ -4,8 +4,8 @@
  * Reactive stores for plugin state management using Svelte 5 runes
  */
 
-// Use simple store without runes for now
-import { pluginStore as store, type PluginRegistration } from './plugin-store-simple'
+// Plugin store implementation
+import { pluginStore as store, type PluginRegistration } from './pluginStore'
 
 export { store as pluginStore, type PluginRegistration }
 

@@ -1,2 +1,2 @@
-// TEA MarkdownRenderer component (moved to src/tea/)
-export { MarkdownRenderer } from '../../../tea/display/MarkdownRenderer'
+// Markdown rendering component not yet implemented in MVU/JSX
+// TODO: Implement when needed using JSX and MVU architecture

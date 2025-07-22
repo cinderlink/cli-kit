@@ -30,10 +30,10 @@
  * ```
  */
 
-import { jsx } from '../../../jsx'
-import { $state, $derived } from '../../../reactivity/runes'
-import { style, Colors, type Style } from '../../../styling'
-import { stringWidth } from '../../../utils/string-width'
+import { jsx } from '@jsx/runtime'
+import { $state, $derived, $effect } from '@core/update/reactivity/runes'
+import { style, Colors, type Style } from '@core/terminal/ansi/styles'
+import { stringWidth } from '@core/terminal/output/string/width'
 
 // Types
 export interface TextProps {
@@ -148,9 +148,9 @@ export function Text(props: TextProps): JSX.Element {
   }
   
   return jsx('text', {
-    style: textStyle.value,
+    style: textStyle(),
     className: props.className,
-    children: processedText.value
+    children: processedText()
   })
 }
 
@@ -169,13 +169,13 @@ function RainbowText(props: TextProps): JSX.Element {
   
   $effect(() => {
     const interval = setInterval(() => {
-      colorIndex.value = (colorIndex.value + 1) % colors.length
+      colorIndex.$set((colorIndex() + 1) % colors.length)
     }, 100)
     
     return () => clearInterval(interval)
   })
   
-  return <Text {...props} color={colors[colorIndex.value]} rainbow={false} />
+  return <Text {...props} color={colors[colorIndex()]} rainbow={false} />
 }
 
 function PulsingText(props: TextProps): JSX.Element {
@@ -183,13 +183,13 @@ function PulsingText(props: TextProps): JSX.Element {
   
   $effect(() => {
     const interval = setInterval(() => {
-      bright.value = !bright.value
+      bright.$set(!bright())
     }, 500)
     
     return () => clearInterval(interval)
   })
   
-  return <Text {...props} bright={bright.value} pulse={false} />
+  return <Text {...props} bright={bright()} pulse={false} />
 }
 
 // Specialized text components
@@ -223,13 +223,13 @@ export function Link(props: TextProps & { href?: string; onClick?: () => void })
   const hovering = $state(false)
   
   return jsx('interactive', {
-    onMouseEnter: () => { hovering.value = true },
-    onMouseLeave: () => { hovering.value = false },
+    onMouseEnter: () => { hovering.$set(true) },
+    onMouseLeave: () => { hovering.$set(false) },
     onClick: props.onClick,
     children: <Text 
       color={Colors.blue}
-      underline={hovering.value}
-      bright={hovering.value}
+      underline={hovering()}
+      bright={hovering()}
       {...props}
     />
   })

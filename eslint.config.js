@@ -32,7 +32,55 @@ export default [
       
       // Effect.ts patterns
       'no-throw-literal': 'error',
-      'prefer-promise-reject-errors': 'error'
+      'prefer-promise-reject-errors': 'error',
+      
+      // Architectural enforcement
+      'no-restricted-imports': ['error', {
+        patterns: [
+          // Core isolation rules
+          {
+            group: ['**/core/runtime/mvu/**'],
+            message: 'Only @core/runtime can directly access MVU internals'
+          },
+          {
+            group: ['**/debug/mvu/**'],
+            message: 'Only @debug can directly access debug MVU internals'
+          },
+          // Module boundary rules
+          {
+            group: ['**/cli/mvu/**'],
+            message: 'Only @cli can directly access CLI MVU internals'
+          }
+        ]
+      }]
+    }
+  },
+  {
+    // JSX module restrictions
+    files: ['src/jsx/**/*'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          {
+            group: ['@cli/*', '../cli/*', '../../cli/*'],
+            message: 'JSX module cannot import from CLI module. Use proper module boundaries.'
+          }
+        ]
+      }]
+    }
+  },
+  {
+    // CLI module restrictions
+    files: ['src/cli/**/*'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          {
+            group: ['@jsx/*', '../jsx/*', '../../jsx/*'],
+            message: 'CLI module cannot import from JSX module. Use proper module boundaries.'
+          }
+        ]
+      }]
     }
   },
   {

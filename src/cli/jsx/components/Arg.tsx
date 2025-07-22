@@ -5,7 +5,7 @@
  */
 
 import { CommandLineScope } from './CommandLineScope'
-import type { JSX } from '../../../jsx/runtime'
+import type { JSX } from '@jsx/runtime'
 
 export interface ArgProps {
   name: string
@@ -13,7 +13,7 @@ export interface ArgProps {
   required?: boolean
   type?: 'string' | 'number' | 'boolean'
   choices?: string[]
-  default?: any
+  default?: string | number | boolean
   children?: JSX.Element | JSX.Element[]
 }
 

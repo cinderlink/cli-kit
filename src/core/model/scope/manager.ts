@@ -15,10 +15,11 @@ import {
   ScopeExistsError 
 } from './types'
 import { getGlobalEventBus } from '../events/event-bus'
-import { getGlobalRegistry } from '../../module-registry'
+import { getGlobalRegistry } from '@core/runtime/module/registry'
 import { JSXModule } from '../../../jsx/module'
 import { JSXEventChannels } from '../../../jsx/events'
 import type { ScopeContext } from './types'
+import { scopeDebug } from '@core/debug'
 
 export class ScopeManager {
   private scopes = new Map<string, ScopeState>()
@@ -45,6 +46,8 @@ export class ScopeManager {
    */
   registerScope(def: ScopeDef): Effect.Effect<void, ScopeError> {
     return Effect.gen(function* () {
+      scopeDebug.debug(`Registering scope: ${def.type}:${def.name} (${def.id})`, { path: def.path })
+      
       // Check if already exists
       if (this.scopes.has(def.id)) {
         // If it's the same definition, just update and return success
@@ -77,6 +80,15 @@ export class ScopeManager {
         if (parent) {
           state.parentId = parent.def.id
           parent.childIds.push(def.id)
+          scopeDebug.debug(`Linked child ${def.name} to parent ${parent.def.name}`, {
+            childPath: def.path,
+            parentPath: parent.def.path
+          })
+        } else {
+          scopeDebug.warn(`Parent not found for ${def.name}`, {
+            expectedParentPath: parentPath,
+            childPath: def.path
+          })
         }
       }
       
@@ -87,6 +99,10 @@ export class ScopeManager {
             existingPath.slice(0, -1).join('/') === def.path.join('/')) {
           state.childIds.push(id)
           existingState.parentId = def.id
+          scopeDebug.debug(`Found existing child ${existingState.def.name} for new parent ${def.name}`, {
+            childPath: existingPath,
+            parentPath: def.path
+          })
         }
       }
       
@@ -186,7 +202,7 @@ export class ScopeManager {
   /**
    * Set scope context data
    */
-  setScopeContext(id: string, data: Record<string, any>): Effect.Effect<void, ScopeError> {
+  setScopeContext(id: string, data: Record<string, unknown>): Effect.Effect<void, ScopeError> {
     return Effect.gen(function* () {
       const state = this.scopes.get(id)
       if (!state) {
@@ -200,7 +216,7 @@ export class ScopeManager {
   /**
    * Get scope context data
    */
-  getScopeContext(id: string): Record<string, any> | null {
+  getScopeContext(id: string): Record<string, unknown> | null {
     const state = this.scopes.get(id)
     return state ? state.context : null
   }
@@ -208,7 +224,7 @@ export class ScopeManager {
   /**
    * Set transient state
    */
-  setTransientState(id: string, data: Record<string, any>): Effect.Effect<void, ScopeError> {
+  setTransientState(id: string, data: Record<string, unknown>): Effect.Effect<void, ScopeError> {
     return Effect.gen(function* () {
       const state = this.scopes.get(id)
       if (!state) {

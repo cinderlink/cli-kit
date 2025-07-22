@@ -13,15 +13,15 @@
  */
 
 import { Effect } from "effect"
-import type { View, Cmd, AppServices, KeyEvent } from "../../../core/types"
-import { vstack, hstack } from "../../../core/view"
-import { style, Colors, Borders } from "../../../styling/index"
-import { stringWidth } from "../../../utils/string-width"
-import { Box } from "../../layout/box/Box"
-import { Text } from "../../display/text/Text"
-import { Flex } from "../../layout/flex/Flex"
-import { List, type ListItem } from "../../data/list/List"
-import { Spinner } from "../../feedback/spinner/Spinner"
+import type { View, Cmd, AppServices, KeyEvent } from "@core/types"
+import { vstack, hstack } from "@core/view"
+import { style, Colors, Borders } from "@core/terminal/ansi/styles/index"
+import { stringWidth } from "@core/terminal/output/string-width"
+import { Box } from "@ui/components/layout/box/Box"
+import { Text } from "@ui/components/display/text/Text"
+import { Flex } from "@ui/components/layout/flex/Flex"
+import { List, type ListItem } from "@ui/components/data/list/List"
+import { Spinner } from "@ui/components/feedback/spinner/Spinner"
 
 // =============================================================================
 // Types
@@ -333,7 +333,7 @@ const FileItemRenderer = ({
   const date = showFileInfo ? formatDate(item.lastModified) : ''
   
   return (
-    <Flex direction="horizontal" gap={2}>
+    <Flex direction="row" gap={2}>
       <Text>{icon}</Text>
       <Text style={focused ? style().bold() : style()}>{name}</Text>
       {showFileInfo && (
@@ -358,7 +358,7 @@ const ErrorMessage = ({ error }: { error: string }) => (
 )
 
 const LoadingIndicator = () => (
-  <Flex direction="horizontal" gap={1} justify="center" align="center">
+  <Flex direction="row" gap={1} justify="center" align="center">
     <Spinner size="small" />
     <Text>Loading directory...</Text>
   </Flex>

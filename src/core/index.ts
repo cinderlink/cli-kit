@@ -65,7 +65,7 @@ export * from "./types"
  * Zod schemas for validating input data, configuration, and runtime
  * type checking. Provides both validation functions and type inference.
  */
-export * as Schemas from "./schemas"
+export * as Schemas from "./types/schemas"
 
 // =============================================================================
 // Error Handling System
@@ -90,7 +90,7 @@ export {
   withErrorBoundary,
   withRecovery,
   RecoveryStrategies
-} from "./errors"
+} from "./types/errors"
 
 // =============================================================================
 // External Dependencies
@@ -111,6 +111,11 @@ export { Effect, Context, Layer, Stream, Queue, Ref } from "effect"
  * and validation in application code.
  */
 export { z as Schema } from "zod"
+
+/**
+ * Core constants
+ */
+export * from "./constants"
 
 // =============================================================================
 // Application Runtime
@@ -152,4 +157,4 @@ export * as View from "./view/primitives/view"
  * LRU-based caching for view rendering optimization,
  * improving performance in complex UI applications.
  */
-export * as ViewCache from "./view/view-cache"
+export * as ViewCache from "./view/viewCache"

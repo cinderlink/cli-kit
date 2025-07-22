@@ -22,7 +22,7 @@
 export * from "./core/index.ts"
 
 // Interactive mode management
-export { Interactive, InteractiveContextLive, type InteractiveConfig } from "./core/interactive.ts"
+export { Interactive, InteractiveContextLive, type InteractiveConfig } from "./core/runtime/interactive.ts"
 
 // Service interfaces (selective export to avoid conflicts)
 export {
@@ -30,27 +30,29 @@ export {
   InputService,
   RendererService,
   StorageService
-} from "./services/index.ts"
+} from "./core/services/index.ts"
 
 // Testing utilities are exported separately - import from "tuix/testing"
 
 // View system
-export * as View from "./core/view.ts"
+export * as View from "./core/view/primitives/view.ts"
+// Export commonly used view primitives directly
+export { text, vstack, hstack, box, empty } from "./core/view/primitives/view.ts"
 
 // Reactivity system - Svelte-inspired runes
-export * from "./reactivity/index.ts"
+export * from "./core/update/reactivity/index.ts"
 
 // JSX runtime and JSX app components
 export * from "./jsx/index"
 
-// Components
-export * from "./components/index.ts"
+// UI Components
+export * from "./ui/components/index.ts"
 
 // Styling
-export * from "./styling/index.ts"
+export * from "./core/terminal/ansi/styles/index.ts"
 
 // Layout system - CSS-inspired layout utilities
-export * from "./layout/index.ts"
+export * from "./core/view/layout/index.ts"
 
 // CLI framework
 export * from "./cli/index.ts"
@@ -74,8 +76,8 @@ export * from "./config/index.ts"
 // export * from "./theming"
 
 // Type Safety & Validation
-export * from "./core/schemas.ts"
-export * from "./core/type-utils.ts"
+export * from "./core/types/schemas.ts"
+// export * from "./core/types/type-utils.ts" // TODO: File not found
 
 // Version information
 export const VERSION = "1.0.0-rc.3" as const

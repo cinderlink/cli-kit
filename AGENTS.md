@@ -52,7 +52,7 @@ bun install
 ## Critical Rules
 
 - **NEVER** create multiple implementations (-v2, -simple, etc.)
-- **NEVER** use PascalCase for files (use kebab-case)
+- **NEVER** use PascalCase for files (use lowercase path-based naming, except components)
 - **NEVER** use npm/node tooling (use bun)
 - **ALWAYS** read module documentation before changes
 - **ALWAYS** run tests before committing

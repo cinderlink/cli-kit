@@ -4,7 +4,7 @@
  * Functions for working with ANSI escape codes in terminal output
  */
 
-import { stringWidth } from './string-width'
+import { stringWidth } from '../output/string/width'
 
 /**
  * ANSI escape sequence regex pattern

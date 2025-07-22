@@ -4,8 +4,8 @@
  * Shows usage examples for commands
  */
 
-import { box, text } from '../../../components'
-import type { JSX } from '../../../jsx/runtime'
+import { box, text } from '@core/view/primitives/view'
+import type { JSX } from '@jsx/runtime'
 
 export interface ExampleProps {
   code: string

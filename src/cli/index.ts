@@ -122,10 +122,22 @@ export {
 // =============================================================================
 
 /** Automatic help generation and formatting */
-export { HelpGenerator } from "./help"
+export { HelpGenerator } from "./core/help"
+export type { HelpData, HelpSection, HelpItem } from "./core/helpData"
+export { generateHelpData } from "./core/helpData"
+
+/** View runtime system for rendering */
+export { 
+  registerViewRuntime, 
+  getViewRuntime,
+  TextViewRuntime,
+  viewRuntimeRegistry,
+  type ViewRuntime 
+} from "./core/viewRuntime"
 
 /** Application execution and lifecycle management */
 export { CLIRunner, runCLI, cli, ensureConfig } from "./runner"
+export { runCLI as createCLI } from "./runner" // Alias for compatibility
 
 // =============================================================================
 // Performance Features
@@ -137,21 +149,29 @@ export {
   lazyLoadPlugin,
   LazyCache as LazyCommandCache,
   globalLazyCache as globalCommandCache
-} from "./lazy"
+} from "./impl/lazy"
 
 /** Intelligent caching for lazy-loaded commands */
 export {
   createLazyHandler,
   LazyCache,
   globalLazyCache
-} from "./lazy-cache"
+} from "./impl/lazyCache"
 
 /** Dynamic module loading and resolution */
-export { PluginLoader, createPluginLoader, loadAllPlugins, loadPluginByName } from "./loader"
+export { PluginLoader, createPluginLoader, loadAllPlugins, loadPluginByName } from "./core/loader"
 
 // =============================================================================
 // CLI Components
 // =============================================================================
 
 /** Declarative components for building CLIs */
-export * from "./jsx/components"
+// TODO: Export JSX components through a separate entry point to avoid runtime issues
+// export * from "./jsx/components"
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+/** CLI constants */
+export * from "./constants"

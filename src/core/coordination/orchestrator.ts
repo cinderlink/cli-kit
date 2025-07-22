@@ -6,10 +6,10 @@
  */
 
 import { Effect, Duration } from 'effect'
-import { EventBus } from "../model/events/event-bus"
-import { ModuleBase, ModuleError } from '../module-base'
+import { EventBus } from "@core/model/events/eventBus"
+import { ModuleBase, ModuleError } from '@core/runtime/module/base'
 import { EventChoreographer } from './choreography'
-import { getGlobalRegistry } from '../module-registry'
+import { getGlobalRegistry } from '@core/runtime/module/registry'
 
 /**
  * Workflow error type
@@ -333,7 +333,8 @@ export class WorkflowOrchestrator extends ModuleBase {
       }
       
       const config = step.config as { command: string; args: string[]; name: string }
-      yield* (processManager as any).startProcess(config)
+      const pmModule = processManager as { startProcess: (config: { command: string; args: string[]; name: string }) => Effect.Effect<unknown, Error> }
+      yield* pmModule.startProcess(config)
     })
   }
   
@@ -347,7 +348,8 @@ export class WorkflowOrchestrator extends ModuleBase {
       }
       
       const config = step.config as { command: string[]; args: Record<string, unknown> }
-      yield* (cliModule as any).executeCommand(config.command, config.args)
+      const cli = cliModule as { executeCommand: (command: string[], args: Record<string, unknown>) => Effect.Effect<unknown, Error> }
+      yield* cli.executeCommand(config.command, config.args)
     })
   }
   
@@ -361,7 +363,8 @@ export class WorkflowOrchestrator extends ModuleBase {
       }
       
       const config = step.config as { path: string; section: string; value: unknown }
-      yield* (configModule as any).updateConfig(config.path, config.section, config.value)
+      const cfg = configModule as { updateConfig: (path: string, section: string, value: unknown) => Effect.Effect<unknown, Error> }
+      yield* cfg.updateConfig(config.path, config.section, config.value)
     })
   }
   
@@ -369,12 +372,13 @@ export class WorkflowOrchestrator extends ModuleBase {
     return Effect.gen(function* () {
       const config = step.config as { type: string; payload: unknown }
       
+      const eventPayload = config.payload as Record<string, unknown>
       yield* this.emitEvent('ui-update', {
-        type: config.type as any,
+        type: config.type,
         source: 'orchestrator',
         timestamp: new Date(),
         id: this.generateId(),
-        ...config.payload as any
+        ...eventPayload
       })
     }.bind(this))
   }

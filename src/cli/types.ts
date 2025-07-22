@@ -65,9 +65,9 @@
  */
 
 import { z } from "zod"
-import type { Component } from "../core/types"
+import type { Component } from "@core/types"
 import type { Plugin } from "./plugin"
-import type { TuixConfig } from "../config"
+import type { TuixConfig } from "tuix/config"
 
 // Re-export Plugin for external use
 export type { Plugin } from "./plugin"
@@ -86,6 +86,11 @@ export interface CLIConfig {
   commands?: Record<string, CommandConfig>
   plugins?: PluginReference[]
   settings?: Record<string, unknown>
+  hooks?: {
+    preCommand?: (context: CLIContext) => Promise<void> | void
+    postCommand?: (context: CLIContext, result: unknown) => Promise<void> | void
+  }
+  aliases?: Record<string, string>
 }
 
 /**
@@ -113,9 +118,11 @@ export interface CommandConfig {
  * improving CLI application boot time for large command sets.
  */
 export interface LazyHandler {
-  (): Promise<Handler>
+  (args: Record<string, unknown>): Promise<Component<unknown, unknown> | void>
   _lazy: true
+  _importFn?: () => Promise<{ default: Handler }>
   _loader?: () => Promise<{ default: Handler }>
+  metadata?: Record<string, unknown> // Explicit metadata property instead of index signature
 }
 
 /**

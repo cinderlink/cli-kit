@@ -5,12 +5,12 @@
  * Uses React JSX transform with Svelte-inspired binding support
  */
 
-import type { View } from "../../core/types"
-import { text, vstack, hstack, styledText } from "../../core/view"
-import { style, type Style, Colors } from "../../styling"
-import { isBindableRune, isStateRune, type BindableRune, type StateRune } from '../../reactivity/runes'
-import { config, templates } from "../../config/index"
-import { mergeDeep } from "../../config/utils"
+import type { View } from "@core/types"
+import { text, box, vstack, hstack, styledText, isView } from "@core/view"
+import { style, type Style, Colors } from "@core/terminal/ansi/styles"
+import { isBindableRune, isStateRune, type BindableRune, type StateRune } from '@core/update/reactivity/runes'
+import { config, templates } from "tuix/config"
+import { mergeDeep } from "@config/utils"
 import * as fs from "fs/promises"
 import * as path from "path"
 import { Effect } from "effect"
@@ -18,9 +18,9 @@ import {
   scopeManager,
   type ScopeContext,
   type ScopeDef
-} from "../../scope"
-import { getGlobalEventBus } from "../../core/event-bus"
-import { getGlobalRegistry } from "../../core/module-registry"
+} from "@core/model/scope"
+import { getGlobalEventBus } from "@core/model/events/eventBus"
+import { getGlobalRegistry } from "@core/runtime/module/registry"
 import { 
   CLI,
   Plugin,
@@ -34,20 +34,17 @@ import {
   LoadPlugin,
   CommandLineScope,
   CommandLineHelp
-} from "../../cli/jsx/components"
-import { Scope, ScopeContent, ScopeFallback } from "../../scope/jsx/components"
-import { JSXModule } from "../module"
-import type { JSXPluginEvent, JSXCommandEvent } from "../events"
-import { onMount } from '../../reactivity/jsx-lifecycle'
+} from "@cli/jsx/components"
+import { Scope, ScopeContent, ScopeFallback } from "@core/model/scope/jsx/components"
+import { JSXModule } from "@jsx/module"
+import type { JSXPluginEvent, JSXCommandEvent } from "@jsx/events"
+// import { onMount } from '../../reactivity/jsx-lifecycle' // TODO: Fix jsx-lifecycle import
 
+
+import { jsxDebug } from '@core/debug'
 
 // Debug logging that respects TUIX_DEBUG env var
-const DEBUG = process.env.TUIX_DEBUG === 'true'
-const debug = (msg: string, ...args: any[]) => {
-  if (DEBUG) {
-    console.log(`[TUIX JSX] ${msg}`, ...args)
-  }
-}
+const debug = jsxDebug.debug
 
 // Global plugin registry for JSX components - now uses stores
 class JSXPluginRegistry {
@@ -537,6 +534,29 @@ class JSXPluginRegistry {
 // Create global registry instance
 const registry = new JSXPluginRegistry()
 
+/**
+ * JSX factory function for creating terminal UI elements
+ * 
+ * This is the core JSX runtime factory that transforms JSX syntax into View objects.
+ * Supports both intrinsic elements (like 'text', 'vstack') and function components.
+ * 
+ * @param type - The element type (string for intrinsics, function for components)
+ * @param props - Element properties/attributes object
+ * @param children - Child elements (can be Views, strings, or arrays)
+ * @returns A View object that can be rendered to the terminal
+ * 
+ * @example
+ * ```tsx
+ * // Intrinsic element
+ * const textElement = jsx('text', { style: { color: 'red' } }, 'Hello World')
+ * 
+ * // Function component
+ * const MyComponent = ({ name }: { name: string }) => jsx('text', null, `Hello ${name}`)
+ * const componentElement = jsx(MyComponent, { name: 'Drew' })
+ * ```
+ * 
+ * @throws Error if the element type is unknown and cannot be converted to a text node
+ */
 // Export component registrations
 export const jsx = (
   type: string | Function,
@@ -584,11 +604,38 @@ export const jsx = (
     case 'text':
       return text(validChildren.join(''))
     
+    case 'box':
+      // Ensure children are Views before passing to box/vstack
+      const boxChildren = validChildren.map(child => {
+        if (isView(child)) return child
+        if (typeof child === 'string') return text(child)
+        // If it's a JSX element that was already processed, it should be a View
+        return child
+      }).filter(isView)
+      
+      return box(boxChildren.length === 1 ? boxChildren[0] : vstack(...boxChildren))
+    
     case 'vstack':
-      return vstack(validChildren, safeProps)
+      // Ensure children are Views before passing to vstack
+      const vstackChildren = validChildren.map(child => {
+        if (isView(child)) return child
+        if (typeof child === 'string') return text(child)
+        // If it's a JSX element that was already processed, it should be a View
+        return child
+      }).filter(isView)
+      
+      return vstack(...vstackChildren)
     
     case 'hstack':
-      return hstack(validChildren, safeProps)
+      // Ensure children are Views before passing to hstack
+      const hstackChildren = validChildren.map(child => {
+        if (isView(child)) return child
+        if (typeof child === 'string') return text(child)
+        // If it's a JSX element that was already processed, it should be a View
+        return child
+      }).filter(isView)
+      
+      return hstack(...hstackChildren)
     
     case 'styled-text':
     case 'styledText':
@@ -649,6 +696,31 @@ export const jsx = (
   }
 }
 
+/**
+ * JSX Fragment component for grouping multiple elements without a wrapper
+ * 
+ * Fragments allow you to group multiple JSX elements without adding an extra
+ * container element to the DOM. Single children are returned as-is, multiple
+ * children are automatically wrapped in a vertical stack.
+ * 
+ * @param props - Fragment properties
+ * @param props.children - Child elements to group
+ * @returns A single View or vstack containing the children
+ * 
+ * @example
+ * ```tsx
+ * // Multiple children get wrapped in vstack
+ * <>
+ *   <text>First line</text>
+ *   <text>Second line</text>
+ * </>
+ * 
+ * // Single child returned as-is
+ * <>
+ *   <text>Only child</text>
+ * </>
+ * ```
+ */
 // Export Fragment support
 export const Fragment = ({ children }: { children?: any }) => {
   const childArray = Array.isArray(children) ? children : [children]
@@ -665,6 +737,22 @@ export const Fragment = ({ children }: { children?: any }) => {
   return vstack(validChildren)
 }
 
+/**
+ * React-compatible createElement function
+ * 
+ * Alias for the jsx function to maintain compatibility with React's createElement API.
+ * This allows existing React components to work seamlessly with tuix.
+ * 
+ * @param type - The element type (string for intrinsics, function for components)
+ * @param props - Element properties/attributes object
+ * @param children - Child elements
+ * @returns A View object that can be rendered to the terminal
+ * 
+ * @example
+ * ```tsx
+ * const element = createElement('text', { style: { color: 'blue' } }, 'Hello')
+ * ```
+ */
 // Export createElement
 export const createElement = jsx
 
@@ -674,6 +762,7 @@ export namespace JSX {
   
   export interface IntrinsicElements {
     text: { children?: any }
+    box: { children?: any; style?: Style; padding?: number; margin?: number }
     vstack: { children?: any; gap?: number; align?: 'left' | 'center' | 'right' }
     hstack: { children?: any; gap?: number; align?: 'top' | 'middle' | 'bottom' }
     'styled-text': { children?: any; style?: Style }
@@ -707,6 +796,23 @@ export namespace JSX {
 // Export jsx-runtime functions
 export { jsx as jsxs, jsx as jsxDEV }
 
+/**
+ * Global JSX plugin registry instance
+ * 
+ * Provides access to the central registry for managing plugins, commands,
+ * and component lifecycle within the JSX runtime environment.
+ * 
+ * @example
+ * ```tsx
+ * // Register a plugin
+ * pluginRegistry.registerPlugin('myPlugin', pluginInstance)
+ * 
+ * // Check if plugin exists
+ * if (pluginRegistry.hasDeclarativePlugin('myPlugin')) {
+ *   // Plugin is available
+ * }
+ * ```
+ */
 // Export the registry for plugin access
 export const pluginRegistry = registry
 

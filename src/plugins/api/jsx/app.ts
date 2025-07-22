@@ -4,7 +4,7 @@
  * Utilities for creating and managing plugins
  */
 
-import type { JSXPlugin } from '../../cli/jsx/types'
+import type { JSXPlugin } from '@cli/jsx/types'
 
 /**
  * Create a JSX plugin with commands

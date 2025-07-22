@@ -13,8 +13,8 @@ import type {
   LogTransport,
   SpanContext,
   Serializers
-} from "./types"
-import { Logger, LogLevels, defaultSerializers } from "./types"
+} from "../types"
+import { Logger, LogLevels, defaultSerializers } from "../types"
 
 export class TuixLogger implements Logger {
   private levelValue: number

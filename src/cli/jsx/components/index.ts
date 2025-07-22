@@ -19,4 +19,4 @@ export { CommandLineScope, type CommandLineScopeProps } from './CommandLineScope
 export { CommandLineHelp, type CommandLineHelpProps } from './CommandLineHelp'
 
 // Re-export base scope components for convenience
-export { Scope, ScopeContent, ScopeFallback } from '../../../scope/jsx/components'
+export { Scope, ScopeContent, ScopeFallback } from '@core/model/scope/jsx/components'

@@ -38,6 +38,12 @@ export {
   Example,
   Exit,
   
+  // Layout components  
+  Box,
+  panel,
+  button,
+  input,
+  
   // Types
   type JSXPlugin,
   type JSXCommandContext,
@@ -62,11 +68,17 @@ export {
 } from './app'
 
 // Configuration exports
-export { validateJSXElement } from './config-validator'
+export { validateJSXElement } from './impl/configValidator'
 
 // Rendering exports
-export { renderToTerminal, renderToString } from './render'
+export { renderToTerminal, renderToString } from './impl/render'
+
+// CLI integration exports
+export { JSXCLIViewRuntime, createJSXCLIRuntime } from './adapters/cliViewRuntime'
 
 // Re-export components from the components directory
-export { Exit as ExitComponent } from '../components/system'
-export { TextInput as JSXTextInput, type TextInputProps as JSXTextInputProps } from '../components/forms/text-input'
+export { Exit as ExitComponent } from '@ui/components/system'
+export { TextInput as JSXTextInput, type TextInputProps as JSXTextInputProps } from '@ui/components/forms/text-input'
+
+// Constants
+export * from './constants'

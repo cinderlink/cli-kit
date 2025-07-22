@@ -38,11 +38,11 @@
  * ```
  */
 
-import { jsx } from '../../../jsx'
-import { $state, $derived } from '../../../reactivity/runes'
-import type { View } from '../../../core/types'
-import { text, hstack, vstack } from '../../../core/view'
-import { style, Colors } from '../../../styling'
+import { jsx } from '@jsx/runtime'
+import { $state, $derived } from '@core/update/reactivity/runes'
+import type { View } from '@core/view/primitives/view'
+import { text, hstack, vstack } from '@core/view/primitives/view'
+import { style, Colors } from '@core/terminal/ansi/styles'
 
 // Types
 export type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'ghost'

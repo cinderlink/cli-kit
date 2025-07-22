@@ -18,8 +18,8 @@ import type {
   ConfigSchema,
   ConfigChangeEvent,
   ConfigBuilder
-} from "./types"
-import { JSONLoader, TypeScriptLoader, YAMLLoader } from "./loaders"
+} from "../types"
+import { JSONLoader, TypeScriptLoader, YAMLLoader } from "../impl/loader"
 import { getValueByPath, setValueByPath, deleteValueByPath, mergeDeep, watchFile } from "./utils"
 
 /**

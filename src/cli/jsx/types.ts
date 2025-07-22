@@ -4,7 +4,7 @@
  * Types for CLI-specific JSX components and functionality
  */
 
-import type { TuixConfig } from '../../config'
+import type { TuixConfig } from 'tuix/config'
 
 // Component prop types
 export interface CLIProps {
@@ -12,14 +12,14 @@ export interface CLIProps {
   alias?: string
   version?: string
   description?: string
-  children?: any
+  children?: JSX.Element | JSX.Element[] | ((props: CLIProps) => JSX.Element)
 }
 
 export interface PluginProps {
   name: string
   description?: string
   version?: string
-  children?: any
+  children?: JSX.Element | JSX.Element[] | ((props: PluginProps) => JSX.Element)
 }
 
 export interface CommandProps {
@@ -29,7 +29,7 @@ export interface CommandProps {
   handler?: JSXCommandHandler
   args?: Record<string, JSXArgConfig>
   flags?: Record<string, JSXFlagConfig>
-  children?: any
+  children?: JSX.Element | JSX.Element[] | JSXCommandHandler
   hidden?: boolean
   interactive?: boolean | ((ctx: JSXCommandContext) => boolean)
 }
@@ -40,7 +40,7 @@ export interface ArgProps {
   required?: boolean
   type?: 'string' | 'number' | 'boolean'
   choices?: string[]
-  default?: any
+  default?: string | number | boolean
 }
 
 export interface FlagProps {
@@ -48,7 +48,7 @@ export interface FlagProps {
   description: string
   alias?: string
   type?: 'string' | 'number' | 'boolean'
-  default?: any
+  default?: string | number | boolean
   choices?: string[]
 }
 
@@ -56,7 +56,7 @@ export interface OptionProps {
   name: string
   description: string
   required?: boolean
-  default?: any
+  default?: string | number | boolean
   type?: 'string' | 'number' | 'boolean'
 }
 
@@ -64,7 +64,7 @@ export interface HelpProps {
   command?: string
   description?: string
   examples?: string[]
-  children?: any
+  children?: JSX.Element | JSX.Element[] | string
 }
 
 export interface ExampleProps {
@@ -75,7 +75,7 @@ export interface ExampleProps {
 export interface LoadPluginProps {
   name: string
   path?: string
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 // Command configuration types
@@ -97,14 +97,14 @@ export interface JSXArgConfig {
   required?: boolean
   type?: 'string' | 'number' | 'boolean'
   choices?: string[]
-  default?: any
+  default?: string | number | boolean
 }
 
 export interface JSXFlagConfig {
   description: string
   alias?: string
   type?: 'string' | 'number' | 'boolean'
-  default?: any
+  default?: string | number | boolean
   choices?: string[]
 }
 
@@ -113,8 +113,8 @@ export interface JSXCommandHandler {
 }
 
 export interface JSXCommandContext {
-  args: Record<string, any>
-  flags: Record<string, any>
+  args: Record<string, string | number | boolean | undefined>
+  flags: Record<string, string | number | boolean | undefined>
   command: string
   subcommand?: string
   raw: string[]

@@ -10,6 +10,8 @@
   ],
   "scripts": {
     "tuix": "./bin/tuix.ts",
+    "exemplar": "./bin/tuix.ts",
+    "ex": "bun run exemplar",
     "build": "bun run build:packages && bun build src/index.ts --outdir dist --format esm --target bun",
     "build:packages": "for pkg in packages/*/; do (cd \"$pkg\" && bun run build); done",
     "build:compile": "bun build --compile --minify --bytecode --target bun-linux-x64 --outfile dist/tuix src/index.ts",
@@ -134,6 +136,10 @@
       "import": "./src/jsx/runtime/dev.ts",
       "types": "./src/jsx/runtime/dev.ts"
     },
+    "./debug": {
+      "import": "./src/debug/index.ts",
+      "types": "./src/debug/index.ts"
+    },
     "./components": {
       "import": "./src/components/index.ts",
       "types": "./src/components/index.ts"
@@ -216,9 +222,12 @@
     }
   },
   "dependencies": {
+    "@effect/cli": "^0.68.0",
+    "@effect/platform-node": "^0.92.0",
+    "@effect/schema": "^0.75.5",
     "@types/figlet": "^1.7.0",
     "commander": "^11.1.0",
-    "effect": "^3.0.0",
+    "effect": "^3.16.9",
     "figlet": "^1.8.1",
     "strip-ansi": "^7.1.0",
     "zod": "^3.22.0"

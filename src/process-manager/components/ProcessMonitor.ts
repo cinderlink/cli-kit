@@ -5,10 +5,10 @@
  */
 
 import { Effect } from "effect"
-import { View, text, vstack, hstack, styledText } from "../../core/view"
-import { style, Colors } from "../../styling"
-import type { ProcessState, ProcessLog, ProcessManagerStats } from "../types"
-import type { ProcessManagerClass } from "../manager"
+import { View, text, vstack, hstack, styledText } from "@core/view"
+import { style, Colors } from "@core/terminal/ansi/styles"
+import type { ProcessState, ProcessLog, ProcessManagerStats } from "@process-manager/types"
+import type { ProcessManagerClass } from "@process-manager/manager"
 
 interface ProcessMonitorProps {
   manager: ProcessManagerClass

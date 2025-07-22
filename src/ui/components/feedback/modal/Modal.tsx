@@ -12,15 +12,15 @@
  */
 
 import { Effect } from "effect"
-import type { View, Cmd, AppServices, KeyEvent, MouseEvent } from "../../../core/types"
-import { style, Colors, Borders, type Style } from "../../../styling/index"
-import { stringWidth } from "../../../utils/string-width"
-import { Box, BoxProps } from "../../layout/box/Box"
-import { Text } from "../../display/text/Text"
-import { Button } from "../../forms/button/Button"
-import { Flex } from "../../layout/flex/Flex"
-import { Spinner } from "../spinner/Spinner"
-import { vstack, hstack } from "../../../core/view"
+import type { View, Cmd, AppServices, KeyEvent, MouseEvent } from "@core/types"
+import { style, Colors, Borders, type Style } from "@core/terminal/ansi/styles"
+import { stringWidth } from "@core/terminal/output/string/width"
+import { Box, BoxProps } from "@ui/components/layout/box/Box"
+import { Text } from "@ui/components/display/text/Text"
+import { Button } from "@ui/components/forms/button/Button"
+import { Flex } from "@ui/components/layout/flex/Flex"
+import { Spinner } from "@ui/components/feedback/spinner/Spinner"
+import { vstack, hstack } from "@core/view/primitives/view"
 
 // =============================================================================
 // Types
@@ -109,7 +109,7 @@ const ModalContent = ({
     if (props.showCloseButton) {
       const spacerWidth = Math.max(0, actualWidth - stringWidth(props.title) - 3)
       header.push(
-        <Flex direction="horizontal">
+        <Flex direction="row">
           <Text style={titleStyle}>{props.title}</Text>
           <Text>{" ".repeat(spacerWidth)}</Text>
           <Text style={style().foreground(Colors.red).bold()}>[×]</Text>
@@ -319,7 +319,7 @@ export const ConfirmModal = ({
   const width = Math.max(50, stringWidth(message) + 8)
   
   const buttonRow = (
-    <Flex direction="horizontal" gap={3} justify="center">
+    <Flex direction="row" gap={3} justify="center">
       <Button 
         label="Yes" 
         style={style().background(Colors.green).foreground(Colors.white).bold()}
@@ -372,7 +372,7 @@ export const LoadingModal = ({
     ...props,
     children: [
       <Text>{""}</Text>,
-      <Flex direction="horizontal" gap={1}>
+      <Flex direction="row" gap={1}>
         <Text>{"  "}</Text>
         <Spinner size="small" style={style().foreground(Colors.blue).bold()} />
         <Text>{" "}</Text>

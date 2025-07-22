@@ -54,9 +54,9 @@
  */
 
 import { Effect } from "effect"
-import { stringWidth } from "../utils/string-width"
+import { stringWidth } from "@core/terminal/output/string/width"
 import type { View, RenderError } from "./types"
-import { style as createStyle, renderStyledSync, type Style } from "../styling/index"
+import { style as createStyle, renderStyledSync, type Style } from "@core/terminal/ansi/styles"
 
 /**
  * Create a simple text view
@@ -75,11 +75,16 @@ import { style as createStyle, renderStyledSync, type Style } from "../styling/i
  * const withAnsi = text('\x1b[31mRed text\x1b[0m')
  * ```
  */
-export const text = (content: string): View => ({
-  render: () => Effect.succeed(content),
-  width: content.split('\n').reduce((max, line) => Math.max(max, stringWidth(line)), 0),
-  height: content.split('\n').length
-})
+export const text = (content: string): View => {
+  // Handle undefined/null content
+  const safeContent = content ?? ''
+  
+  return {
+    render: () => Effect.succeed(safeContent),
+    width: safeContent.split('\n').reduce((max, line) => Math.max(max, stringWidth(line)), 0),
+    height: safeContent.split('\n').length
+  }
+}
 
 /**
  * Create an empty view
@@ -415,7 +420,7 @@ export const white = (view: View) => styled(view, '\x1b[37m')
  * 
  * @example
  * ```typescript
- * import { style, Colors } from '../styling'
+ * import { style, Colors } from '../../terminal/ansi/styles'
  * 
  * const fancyText = styledText('Fancy Text', 
  *   style()
@@ -427,6 +432,6 @@ export const white = (view: View) => styled(view, '\x1b[37m')
  */
 export const styledText = (content: string, style: Style): View => ({
   render: () => Effect.succeed(renderStyledSync(content, style)),
-  width: style.get("width") || content.split('\n').reduce((max, line) => Math.max(max, stringWidth(line)), 0),
-  height: style.get("height") || content.split('\n').length
+  width: style.props.width || content.split('\n').reduce((max, line) => Math.max(max, stringWidth(line)), 0),
+  height: style.props.height || content.split('\n').length
 })

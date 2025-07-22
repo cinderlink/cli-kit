@@ -5,7 +5,10 @@
  */
 
 export { LoggingPlugin } from "./logging"
-export { ProcessManagerPlugin } from "../process-manager"
+export { ProcessManagerPlugin } from "@process-manager/index"
 
 // Re-export plugin types for convenience
-export type { JSXPlugin } from "../jsx/app"
+export type { JSXPlugin } from "@jsx/app"
+
+// Constants
+export * from "./constants"

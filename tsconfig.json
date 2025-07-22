@@ -1,19 +1,18 @@
 {
   "compilerOptions": {
     // Environment setup & latest features
-    "lib": ["ES2020", "DOM"],
-    "target": "ES2020",
-    "module": "ES2020",
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "Preserve",
     "moduleDetection": "force",
     "jsx": "react-jsx",
-    "jsxImportSource": ".",
+    "jsxImportSource": "tuix",
     "allowJs": true,
-    "downlevelIteration": true,
 
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": false,
+    "verbatimModuleSyntax": true,
     "noEmit": true,
 
     // Best practices
@@ -31,17 +30,19 @@
     // Base URL for module resolution
     "baseUrl": ".",
     
-    // Path mapping for @tuix/* packages
+    // Path mapping for internal modules
     "paths": {
-      "@tuix/core": ["./packages/core/src"],
-      "@tuix/cli": ["./packages/cli/src"],
-      "@tuix/components": ["./packages/components/src"],
-      "@tuix/jsx": ["./packages/jsx/src"],
-      "@tuix/reactive": ["./packages/reactive/src"],
-      "@tuix/services": ["./packages/services/src"],
-      "@tuix/layout": ["./packages/layout/src"],
-      "@tuix/styling": ["./packages/styling/src"],
-      "@tuix/testing": ["./packages/testing/src"]
+      "tuix": ["./src/index.ts"],
+      "tuix/*": ["./src/*"],
+      "@cli/*": ["./src/cli/*"],
+      "@core/*": ["./src/core/*"],
+      "@jsx/*": ["./src/jsx/*"],
+      "@ui/*": ["./src/ui/*"],
+      "@logger/*": ["./src/logger/*"],
+      "@process-manager/*": ["./src/process-manager/*"],
+      "@plugins/*": ["./src/plugins/*"],
+      "@testing/*": ["./src/testing/*"],
+      "@config/*": ["./src/config/*"]
     }
   },
   "include": [

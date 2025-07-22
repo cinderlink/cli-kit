@@ -33,14 +33,14 @@
  * ```
  */
 
-import { jsx } from '../../../jsx'
-import { $state, $derived, $effect } from '../../../reactivity/runes'
-import type { StateRune, BindableRune } from '../../../reactivity/runes'
-import { isBindableRune, isStateRune } from '../../../reactivity/runes'
-import type { View } from '../../../core/types'
-import { text, hstack } from '../../../core/view'
-import { style, Colors } from '../../../styling'
-import { stringWidth } from '../../../utils/string-width'
+import { jsx } from '@jsx/runtime'
+import { $state, $derived, $effect } from '@core/update/reactivity/runes'
+import type { StateRune, BindableRune } from '@core/update/reactivity/runes'
+import { isBindableRune, isStateRune } from '@core/update/reactivity/runes'
+import type { View } from '@core/view/primitives/view'
+import { text, hstack } from '@core/view/primitives/view'
+import { style, Colors } from '@core/terminal/ansi/styles'
+import { stringWidth } from '@core/terminal/output/string/width'
 
 // Types
 export type EchoMode = 'normal' | 'password' | 'none'

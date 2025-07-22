@@ -3,9 +3,9 @@
  */
 
 import { Effect } from 'effect'
-import { getGlobalEventBus } from '../core/event-bus'
-import { getGlobalRegistry } from '../core/module-registry'
-import { ReactivityModule } from './module'
+import { getGlobalEventBus } from '../../model/events/eventBus'
+import { getGlobalRegistry } from '@core/runtime/module/registry'
+import { ReactivityModule } from './reactivityModule'
 import { ReactivityEventChannels } from './events'
 
 // Global reactivity module reference
@@ -228,7 +228,7 @@ export {
   afterUpdate,
   tick,
   untrack
-} from './jsx-lifecycle'
+} from './jsxLifecycle'
 
 /**
  * Type guard to check if a value is a state rune

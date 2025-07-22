@@ -19,9 +19,9 @@ import type {
   HttpTransportOptions,
   LogLevel,
   InteractiveLogEntry
-} from "./types"
-import { LogLevels } from "./types"
-import { PrettyFormatter, JSONFormatter, CLIFormatter } from "./formatters"
+} from "../types"
+import { LogLevels } from "../types"
+import { PrettyFormatter, JSONFormatter, CLIFormatter } from "../formatters/formatters"
 
 const gzip = promisify(zlib.gzip)
 const gunzip = promisify(zlib.gunzip)

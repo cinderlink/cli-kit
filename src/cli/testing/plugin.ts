@@ -5,10 +5,10 @@
  */
 
 import { Effect } from "effect"
-import type { Plugin, PluginContext } from "../plugin"
-import type { CLIConfig, ParsedArgs } from "../types"
-import { CLIParser } from "../parser"
-import { CLIRouter } from "../router"
+import type { Plugin, PluginContext } from "@cli/plugin"
+import type { CLIConfig, ParsedArgs } from "@cli/types"
+import { CLIParser } from "@cli/parser"
+import { CLIRouter } from "@cli/router"
 
 /**
  * Mock plugin context for testing

@@ -5,14 +5,14 @@
  */
 
 import { CommandLineScope } from './CommandLineScope'
-import type { JSX } from '../../../jsx/runtime'
+import type { JSX } from '@jsx/runtime'
 
 export interface OptionProps {
   name: string
   description: string
   alias?: string
   type?: 'string' | 'number' | 'boolean'
-  default?: any
+  default?: string | number | boolean
   choices?: string[]
   required?: boolean
   children?: JSX.Element | JSX.Element[]

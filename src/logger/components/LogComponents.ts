@@ -4,9 +4,9 @@
  * Reusable components for displaying logs with proper formatting and colors
  */
 
-import { View, text, hstack, vstack, styledText } from "../../core/view"
-import { style, Colors } from "../../styling"
-import type { LogLevel } from "../types"
+import { View, text, hstack, vstack, styledText } from "@core/view"
+import { style, Colors } from "@core/terminal/ansi/styles"
+import type { LogLevel } from "@logger/types"
 
 // Level colors matching the formatters
 export const LEVEL_COLORS: Record<LogLevel, keyof typeof Colors> = {

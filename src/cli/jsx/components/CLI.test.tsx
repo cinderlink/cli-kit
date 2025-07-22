@@ -13,7 +13,7 @@
 
 import { test, expect, describe, beforeEach, mock } from 'bun:test'
 import { Effect } from 'effect'
-import { jsx } from '../../../jsx/runtime'
+import { jsx } from '@jsx/runtime'
 import { 
   CLI, 
   Plugin, 
@@ -26,9 +26,9 @@ import {
   type PluginProps,
   type CommandProps
 } from './index'
-import { scopeManager } from '../../../scope'
-import { createMockTerminalService, createTestHarness } from '../../../testing/test-utils'
-import { text } from '../../../core/view'
+import { scopeManager } from '@core/model/scope/manager'
+import { createMockTerminalService, createTestHarness } from '@testing/testUtils'
+import { text } from '@core/view'
 
 describe('CLI JSX Components', () => {
   beforeEach(() => {
@@ -121,7 +121,7 @@ describe('CLI JSX Components', () => {
 
   describe('Command Component', () => {
     test('should register command with handler', () => {
-      const handler = mock((ctx: any) => <text>Command output</text>)
+      const handler = mock((ctx: JSXCommandContext) => <text>Command output</text>)
 
       const app = (
         <CLI name="myapp">
@@ -249,7 +249,7 @@ describe('CLI JSX Components', () => {
 
   describe('Command Execution', () => {
     test('should execute command handler with context', async () => {
-      let executedContext: any = null
+      let executedContext: JSXCommandContext | null = null
 
       const app = (
         <CLI name="myapp">

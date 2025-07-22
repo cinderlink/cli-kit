@@ -414,12 +414,12 @@ export interface StorageService extends Context.Tag<"StorageService", {
   readonly clearState: (key: string) => Effect.Effect<void, StorageError, never>
   readonly hasState: (key: string) => Effect.Effect<boolean, StorageError, never>
   readonly listStateKeys: Effect.Effect<ReadonlyArray<string>, StorageError, never>
-  readonly loadConfig: <T>(appName: string, schema: any, defaults: T) => Effect.Effect<T, StorageError, never>
-  readonly saveConfig: <T>(appName: string, config: T, schema: any) => Effect.Effect<void, StorageError, never>
+  readonly loadConfig: <T>(appName: string, schema: unknown, defaults: T) => Effect.Effect<T, StorageError, never>
+  readonly saveConfig: <T>(appName: string, config: T, schema: unknown) => Effect.Effect<void, StorageError, never>
   readonly getConfigPath: (appName: string) => Effect.Effect<string, StorageError, never>
-  readonly watchConfig: <T>(appName: string, schema: any) => Effect.Effect<Effect.Effect<T, StorageError, never>, StorageError, never>
+  readonly watchConfig: <T>(appName: string, schema: unknown) => Effect.Effect<Effect.Effect<T, StorageError, never>, StorageError, never>
   readonly setCache: <T>(key: string, data: T, ttlSeconds?: number) => Effect.Effect<void, StorageError, never>
-  readonly getCache: <T>(key: string, schema: any) => Effect.Effect<T | null, StorageError, never>
+  readonly getCache: <T>(key: string, schema: unknown) => Effect.Effect<T | null, StorageError, never>
   readonly clearCache: (key: string) => Effect.Effect<void, StorageError, never>
   readonly clearExpiredCache: Effect.Effect<void, StorageError, never>
   readonly getCacheStats: Effect.Effect<{
@@ -427,7 +427,7 @@ export interface StorageService extends Context.Tag<"StorageService", {
     expiredEntries: number
     totalSize: number
   }, StorageError, never>
-  readonly readTextFile: <T>(path: string, schema?: any) => Effect.Effect<T, StorageError, never>
+  readonly readTextFile: <T>(path: string, schema?: unknown) => Effect.Effect<T, StorageError, never>
   readonly writeTextFile: (path: string, content: string, options?: { readonly createDirs?: boolean; readonly backup?: boolean }) => Effect.Effect<void, StorageError, never>
   readonly readJsonFile: <T>(path: string, schema: unknown) => Effect.Effect<T, StorageError, never>
   readonly writeJsonFile: <T>(path: string, data: T, options?: { pretty?: boolean }) => Effect.Effect<void, StorageError, never>

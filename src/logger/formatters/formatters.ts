@@ -5,7 +5,7 @@
  */
 
 import type { LogEntry, LogFormatter, LogLevel } from "./types"
-import { stripAnsi } from "../utils/ansi"
+import { stripAnsi } from "@core/terminal/ansi"
 
 const LEVEL_COLORS: Record<LogLevel, string> = {
   trace: "\x1b[90m",    // gray

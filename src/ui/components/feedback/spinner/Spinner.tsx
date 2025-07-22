@@ -22,10 +22,10 @@
  * ```
  */
 
-import { jsx } from '../../../jsx'
-import { $state, $effect } from '../../../reactivity/runes'
-import { text } from '../../../core/view'
-import { style, Colors } from '../../../styling'
+import { jsx } from '@jsx/runtime'
+import { $state, $effect } from '@core/update/reactivity/runes'
+import { text } from '@core/view/primitives/view'
+import { style, Colors } from '@core/terminal/ansi/styles'
 
 // Types
 export type SpinnerType = 'dots' | 'line' | 'circle' | 'bounce' | 'pulse' | 'wave'

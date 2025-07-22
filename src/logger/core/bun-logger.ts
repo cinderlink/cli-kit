@@ -5,9 +5,9 @@
  */
 
 import { Effect, Stream, Queue, Layer, Context, Ref } from "effect"
-import type { LogEntry, LogLevel, LogTransport } from "./types"
-import { LogLevels } from "./types"
-import { createBunTransport } from "./bun-transports"
+import type { LogEntry, LogLevel, LogTransport } from "../types"
+import { LogLevels } from "../types"
+import { createBunTransport } from "../transports/bun-transports"
 
 // Logger service interface
 export interface BunLogger {

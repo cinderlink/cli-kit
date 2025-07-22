@@ -4,13 +4,13 @@
  * Advanced log dashboard with real-time updates, filtering, and preset support
  */
 
-import { View, text, vstack, hstack, styledText } from "../../core/view"
-import { style, Colors } from "../../styling"
+import { View, text, vstack, hstack, styledText } from "@core/view"
+import { style, Colors } from "@core/terminal/ansi/styles"
 import { LEVEL_COLORS, LEVEL_EMOJIS, logUtils } from "./LogComponents"
-import type { LogLevel } from "../types"
-import type { ProcessLog } from "../../process-manager/types"
-import type { LogFilter } from "../presets"
-import { applyPreset, matchesFilter, LOG_PRESETS } from "../presets"
+import type { LogLevel } from "@logger/types"
+import type { ProcessLog } from "@process-manager/types"
+import type { LogFilter } from "../impl/presets"
+import { applyPreset, matchesFilter, LOG_PRESETS } from "../impl/presets"
 
 interface LiveLogDashboardProps {
   processes: Array<{

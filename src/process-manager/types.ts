@@ -5,7 +5,7 @@
  */
 
 import { Context } from "effect"
-import type { Logger } from "../logger/types"
+import type { Logger } from "@logger/types"
 
 export interface ProcessConfig {
   name: string

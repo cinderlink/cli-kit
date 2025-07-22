@@ -6,14 +6,14 @@
 
 export * from "./types"
 export type { TuixConfig } from "./types"
-export * from "./config"
-export * from "./loaders"
-export * from "./utils"
-export * from "./jsx-config"
+export * from "./sources/config"
+export * from "./impl/loader"
+export * from "./sources/utils"
+export * from "./jsxConfig"
 
 import { Effect, Layer } from "effect"
 import { Config as IConfig, ConfigOptions } from "./types"
-import { createConfig } from "./config"
+import { createConfig } from "./sources/config"
 
 /**
  * Create the default configuration layer
@@ -206,7 +206,7 @@ export function defineConfig<T extends Record<string, any>>(
 /**
  * Load configuration from standard locations
  */
-export async function loadConfig(appName: string = 'tuix'): Promise<Config> {
+export async function loadConfig(appName: string = 'tuix'): Promise<IConfig> {
   const configBuilder = createConfig()
     .name(appName)
     .withUserConfig()
@@ -216,3 +216,8 @@ export async function loadConfig(appName: string = 'tuix'): Promise<Config> {
   
   return await configBuilder.build()
 }
+
+/**
+ * Config constants
+ */
+export * from "./constants"

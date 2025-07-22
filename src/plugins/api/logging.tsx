@@ -5,12 +5,12 @@
  * with beautiful terminal styling and user-friendly commands
  */
 
-import { defineJSXCommand, type JSXCommandContext } from "../jsx/app"
-import { Plugin, Command } from "../jsx/index"
-import { LogExplorer, createConsoleLogger, createDevelopmentLogger } from "../logger"
-import { TUITransport } from "../logger/transports"
-import { runApp } from "../core/runtime"
-import { LiveServices } from "../services/impl"
+import { defineJSXCommand, type JSXCommandContext } from "@plugins/api/jsx/app"
+import { Plugin, Command } from "@plugins/api/jsx/index"
+import { LogExplorer, createConsoleLogger, createDevelopmentLogger } from "@logger/index"
+import { TUITransport } from "@logger/transports/transports"
+import { runApp } from "@core/runtime"
+import { LiveServices } from "@core/services/impl"
 import { Effect } from "effect"
 import * as fs from "fs/promises"
 import * as path from "path"

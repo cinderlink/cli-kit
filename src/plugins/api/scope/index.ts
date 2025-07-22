@@ -5,9 +5,9 @@
  */
 
 import { Effect } from 'effect'
-import { scopeManager } from '../../scope/manager'
-import type { ScopeDef } from '../../scope/types'
-import { currentScopeStore, parentScopeStore } from '../../scope/jsx/stores'
+import { scopeManager } from '@core/model/scope/manager'
+import type { ScopeDef } from '@core/model/scope/types'
+import { currentScopeStore, parentScopeStore } from '@core/model/scope/jsx/stores'
 
 /**
  * Get all plugin scopes from the scope tree

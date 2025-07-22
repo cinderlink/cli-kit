@@ -5,30 +5,31 @@
  */
 
 import { CommandLineScope } from './CommandLineScope'
-import type { JSX } from '../../../jsx/runtime'
+import type { JSX } from '@jsx/runtime'
+import type { JSXCommandContext } from '@cli/jsx/types'
 
 export interface CommandProps {
   name: string
   description?: string
   aliases?: string[]
   hidden?: boolean
-  handler?: (ctx: any) => JSX.Element | Promise<JSX.Element>
-  interactive?: boolean | ((ctx: any) => boolean)
+  handler?: (ctx: JSXCommandContext) => JSX.Element | Promise<JSX.Element>
+  interactive?: boolean | ((ctx: JSXCommandContext) => boolean)
   args?: Record<string, {
     description: string
     required?: boolean
     type?: 'string' | 'number' | 'boolean'
     choices?: string[]
-    default?: any
+    default?: string | number | boolean
   }>
   flags?: Record<string, {
     description: string
     alias?: string
     type?: 'string' | 'number' | 'boolean'
-    default?: any
+    default?: string | number | boolean
     choices?: string[]
   }>
-  children?: JSX.Element | JSX.Element[]
+  children?: JSX.Element | JSX.Element[] | ((ctx: JSXCommandContext) => JSX.Element | Promise<JSX.Element>)
 }
 
 export function Command(props: CommandProps): JSX.Element {
@@ -38,7 +39,7 @@ export function Command(props: CommandProps): JSX.Element {
   
   // If children is a function, use it as the handler
   if (typeof props.children === 'function') {
-    handler = props.children as (ctx: any) => JSX.Element | Promise<JSX.Element>
+    handler = props.children as (ctx: JSXCommandContext) => JSX.Element | Promise<JSX.Element>
     children = undefined
   }
   

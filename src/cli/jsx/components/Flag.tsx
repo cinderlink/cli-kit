@@ -5,7 +5,7 @@
  */
 
 import { CommandLineScope } from './CommandLineScope'
-import type { JSX } from '../../../jsx/runtime'
+import type { JSX } from '@jsx/runtime'
 
 export interface FlagProps {
   name: string

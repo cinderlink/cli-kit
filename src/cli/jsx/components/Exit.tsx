@@ -5,9 +5,9 @@
  */
 
 import { Effect } from 'effect'
-import { onMount } from '../../../reactivity/jsx-lifecycle'
-import { text } from '../../../components'
-import type { JSX } from '../../../jsx/runtime'
+import { onMount } from '@core/update/reactivity/jsxLifecycle'
+import { text } from '@core/view/primitives/view'
+import type { JSX } from '@jsx/runtime'
 
 export interface ExitProps {
   code?: number

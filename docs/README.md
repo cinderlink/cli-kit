@@ -36,15 +36,29 @@ console.log(await Effect.runPromise(app.render()))
 
 ### Views
 Views are the fundamental building blocks - composable units that render content:
-- [View System](./core/view.md) - Basic view primitives and composition
+- [View System](../src/core/view.md) - Basic view primitives and composition
 
 ### Error Handling
 Comprehensive error system built on Effect.ts patterns:
-- [Error System](./core/errors.md) - Typed errors, recovery, and boundaries
+- [Error System](../src/core/errors.md) - Typed errors, recovery, and boundaries
 
 ### Performance
 Optimizations for smooth terminal experiences:
-- [View Cache](./core/view-cache.md) - Render caching and memoization
+- [View Cache](../src/core/view-cache.md) - Render caching and memoization
+
+### Lifecycle Management
+Component lifecycle and state management:
+- [Component Lifecycle](../src/core/lifecycle.md) - Hooks, effects, and timing
+
+### Scope System
+Hierarchical context management for CLI applications:
+- [Scope Architecture](../src/core/model/scope/architecture.md) - Core scope system design
+- [Scope Usage Guide](../src/core/model/scope/usage-guide.md) - Building nested CLI structures
+
+### Reactivity
+State management with runes and hooks:
+- [Hooks Integration](../src/core/update/reactivity/hooks-integration.md) - Integrating hooks with runes
+- [Migration Guide](../src/core/update/reactivity/migration-guide.md) - Upgrading to new reactivity system
 
 ## Components
 
@@ -62,22 +76,25 @@ Interactive UI components with state management:
 ## API Reference
 
 ### Core Modules
-- `@/core/view` - View primitives and composition
-- `@/core/errors` - Error handling and recovery
-- `@/core/view-cache` - Performance optimizations
+For detailed documentation, see the README.md files in each module:
 
-### Component System
-- `@/components/*` - Interactive UI components
-- `@/components/base` - Component utilities and helpers
-
-### Styling System
-- `@/styling/*` - Colors, borders, effects, and themes
-
-### Layout System
-- `@/layout/*` - Flexbox, grid, and advanced layouts
-
-### Services
-- `@/services/*` - Terminal, input, rendering, and storage services
+- [Core System](../src/core/README.md) - View primitives, lifecycle, and runtime
+- [CLI Framework](../src/cli/README.md) - Command-line interface building
+- [JSX Runtime](../src/jsx/README.md) - Declarative UI development
+- [Components](../src/components/README.md) - Pre-built UI components
+- [Styling System](../src/styling/README.md) - Colors, borders, and themes
+- [Layout System](../src/layout/README.md) - Flexbox, grid, and layouts
+- [Services](../src/services/README.md) - Terminal, input, and rendering
+- [Reactivity](../src/reactivity/README.md) - State management with runes
+- [Testing](../src/testing/README.md) - Testing utilities and harnesses
+- [Process Manager](../src/process-manager/README.md) - Process lifecycle management
+- [Logger](../src/logger/README.md) - Structured logging system
+- [Health Monitoring](../src/health/README.md) - Health checks and diagnostics
+- [Configuration](../src/config/README.md) - Configuration management
+- [Plugins](../src/plugins/README.md) - Plugin system and built-ins
+- [TEA Architecture](../src/tea/README.md) - The Elm Architecture components
+- [Utilities](../src/utils/README.md) - Shared utility functions
+- [Alignment Tools](../src/alignment/README.md) - Documentation and AI integration
 
 ## Architecture
 

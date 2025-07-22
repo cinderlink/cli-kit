@@ -5,9 +5,9 @@
  */
 
 import { CommandLineScope } from './CommandLineScope'
-import type { JSX } from '../../../jsx/runtime'
-import { pluginStore } from '../../../plugins/jsx/stores'
-import { onMount } from '../../../reactivity/jsx-lifecycle'
+import type { JSX } from '@jsx/runtime'
+import { pluginStore } from '@plugins/api/jsx/stores/pluginStore'
+import { onMount } from '@core/update/reactivity/jsxLifecycle'
 
 export interface PluginProps {
   name: string

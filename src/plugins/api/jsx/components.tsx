@@ -4,7 +4,7 @@
  * Components for plugin management within the JSX runtime
  */
 
-import { Scope } from '../../scope/jsx/components'
+import { Scope } from '@core/model/scope/jsx/components'
 import { pluginStore } from './stores'
 import type { RegisterPluginProps, EnablePluginProps, ConfigurePluginProps } from './types'
 

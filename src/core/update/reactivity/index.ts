@@ -4,4 +4,4 @@
  */
 
 export * from './runes'
-export * from './jsx-lifecycle'
+export * from './jsxLifecycle'

@@ -11,18 +11,18 @@ import {
   HitTestService,
   MouseRouterService
 } from ".."
-import { TerminalServiceLive } from "./terminal-impl"
-import { InputServiceLive } from "./input-impl"
-import { RendererServiceLive } from "./renderer-impl"
-import { StorageServiceLive } from "./storage-impl"
-import { HitTestServiceLive } from "../../../services/hit-test"
-import { MouseRouterServiceLive } from "../../../services/mouse-router"
+import { TerminalServiceLive } from "./terminal"
+import { InputServiceLive } from "./input"
+import { RendererServiceLive } from "./renderer"
+import { StorageServiceLive } from "./storage"
+import { HitTestServiceLive } from "@core/input/mouse/hitTest"
+import { MouseRouterServiceLive } from "@core/input/mouse/router"
 
 // Export individual service implementations
-export * from "./terminal-impl"
-export * from "./input-impl"
-export * from "./renderer-impl"
-export * from "./storage-impl"
+export * from "./terminal"
+export * from "./input"
+export * from "./renderer"
+export * from "./storage"
 
 /**
  * Complete live service layer with all services

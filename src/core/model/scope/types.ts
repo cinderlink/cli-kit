@@ -27,19 +27,19 @@ export interface ScopeDef {
   executable?: boolean
   
   /** Handler function for executable scopes */
-  handler?: any // Will be properly typed when integrated with CLI
+  handler?: Handler // Will be properly typed when integrated with CLI
   
   /** Arguments definition for commands */
-  args?: Record<string, any>
+  args?: Record<string, ArgDef>
   
   /** Flags definition for commands */
-  flags?: Record<string, any>
+  flags?: Record<string, FlagDef>
   
   /** Command aliases */
   aliases?: string[]
   
   /** Additional metadata */
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   
   /** Child scopes (populated by scope manager) */
   children: ScopeDef[]
@@ -64,10 +64,10 @@ export interface ScopeState {
   isActive: boolean
   
   /** Context data for this scope */
-  context: Record<string, any>
+  context: Record<string, unknown>
   
   /** Transient state (reset between renders) */
-  transient: Record<string, any>
+  transient: Record<string, unknown>
   
   /** Parent scope ID */
   parentId?: string
@@ -157,7 +157,7 @@ export interface OptionDef {
  * Handler function type for executable scopes
  */
 export interface Handler {
-  (args: ParsedArgs, scope: ScopeContext): Effect.Effect<ExitCode, ExecutionError, any>
+  (args: ParsedArgs, scope: ScopeContext): Effect.Effect<ExitCode, ExecutionError>
 }
 
 /**

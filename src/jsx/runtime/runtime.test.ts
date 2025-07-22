@@ -24,10 +24,10 @@ import {
   JSXContext,
   type JSX
 } from './index'
-import { scopeManager } from '../../scope'
-import { text, vstack, hstack } from '../../core/view'
-import type { View } from '../../core/types'
-import { style } from '../../styling'
+import { scopeManager } from '@core/model/scope/manager'
+import { text, vstack, hstack } from '@core/view/primitives/view'
+import type { View } from '@core/types'
+import { style } from '@core/terminal/ansi/styles'
 
 describe('JSX Runtime', () => {
   beforeEach(() => {

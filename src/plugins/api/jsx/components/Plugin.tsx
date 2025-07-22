@@ -4,8 +4,8 @@
  * Defines a plugin scope that can contain commands
  */
 
-import { CommandLineScope } from '../../../cli/jsx/components/CommandLineScope'
-import type { JSX } from '../../../jsx/runtime'
+import { CommandLineScope } from '@cli/jsx/components/CommandLineScope'
+import type { JSX } from '@jsx/runtime'
 
 export interface PluginProps {
   name: string

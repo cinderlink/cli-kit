@@ -8,8 +8,8 @@
  */
 
 import { Effect } from "effect"
-import type { View } from "../../types"
-import { style, type Style, renderStyledSync } from "../../../styling/index"
+import type { View } from "@core/types"
+import { style, type Style, renderStyledSync } from "@core/terminal/ansi/styles"
 import {
   type SpacerProps,
   type DividerProps,

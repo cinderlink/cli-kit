@@ -4,11 +4,11 @@
  * Handles dynamic loading of plugins from various sources
  */
 
-import { Effect } from "effect"
+import { Effect, Context } from "effect"
 import * as fs from "fs/promises"
 import * as path from "path"
-import type { Plugin } from "./plugin"
-import { checkPluginCompatibility } from "./plugin"
+import type { Plugin } from "@cli/plugin"
+import { checkPluginCompatibility } from "@cli/plugin"
 
 export interface LoaderOptions {
   // Directories to search for plugins
@@ -35,6 +35,17 @@ export interface LoadedPlugin {
 export class PluginLoader {
   private options: Required<LoaderOptions>
   private loadedPlugins: Map<string, LoadedPlugin> = new Map()
+
+  /**
+   * Convert LoadedPlugin map to PluginMetadata map
+   */
+  private getPluginMetadataMap(): Map<string, import('../plugin/types').PluginMetadata> {
+    const metadataMap = new Map<string, import('../plugin/types').PluginMetadata>()
+    for (const [name, loaded] of this.loadedPlugins) {
+      metadataMap.set(name, loaded.plugin.metadata)
+    }
+    return metadataMap
+  }
   
   constructor(options: LoaderOptions = {}) {
     this.options = {
@@ -176,7 +187,7 @@ export class PluginLoader {
       const compatibility = checkPluginCompatibility(plugin, this.options.cliVersion)
       
       if (!compatibility.compatible && this.options.strictCompatibility) {
-        throw new Error(compatibility.reason)
+        throw new Error(compatibility.issues.join(', '))
       }
       
       const loaded: LoadedPlugin = {
@@ -271,12 +282,19 @@ export class PluginLoader {
     // Call uninstall lifecycle if available
     if (loaded.plugin.uninstall) {
       try {
-        await loaded.plugin.uninstall({
-          command: [],
-          config: {},
-          plugins: [],
-          metadata: loaded.plugin.metadata
-        })
+        const context: import("../plugin/types").PluginContext = {
+          config: {
+            name: "cli-kit",
+            version: this.options.cliVersion
+          },
+          logger: console,
+          storage: new Map(),
+          events: new EventTarget(),
+          services: Context.empty(), // Empty context for uninstall
+          env: process.env as Record<string, string | undefined>,
+          plugins: this.getPluginMetadataMap()
+        }
+        await loaded.plugin.uninstall(context)
       } catch (error) {
         console.error(`Error uninstalling plugin ${name}:`, error)
       }

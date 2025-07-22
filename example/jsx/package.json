@@ -1,0 +1,46 @@
+{
+  "name": "tuix-jsx-example",
+  "version": "1.0.0",
+  "description": "Comprehensive JSX example application showcasing Tuix framework features",
+  "main": "src/index.tsx",
+  "module": "src/index.tsx",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/index.tsx",
+    "dev": "bun --watch run src/index.tsx",
+    "build": "bun build src/index.tsx --outdir dist --format esm --target bun",
+    "test": "bun test",
+    "dashboard": "bun run src/index.tsx dashboard",
+    "form": "bun run src/index.tsx form",
+    "visualize": "bun run src/index.tsx visualize",
+    "explorer": "bun run src/index.tsx explorer",
+    "terminal": "bun run src/index.tsx terminal",
+    "settings": "bun run src/index.tsx settings",
+    "showcase": "bun run src/index.tsx showcase"
+  },
+  "keywords": [
+    "tuix",
+    "jsx",
+    "cli",
+    "terminal",
+    "tui",
+    "reactive",
+    "runes",
+    "example"
+  ],
+  "author": "Tuix Framework",
+  "license": "MIT",
+  "dependencies": {
+    "tuix": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

@@ -27,11 +27,11 @@
  * ```
  */
 
-import { jsx } from '../../../jsx/runtime'
-import { $state, $derived } from '../../../reactivity/runes'
-import type { View } from '../../../core/types'
-import { style, Colors, type Style } from '../../../styling'
-import type { BorderStyle } from '../../../styling/borders'
+import { jsx } from '@jsx/runtime'
+import { $state, $derived } from '@core/update/reactivity/runes'
+import type { View } from '@core/view/primitives/view'
+import { style, Colors, type Style } from '@core/terminal/ansi/styles'
+import type { BorderStyle } from '@core/terminal/ansi/styles/borders'
 
 // Types
 export interface BoxProps {

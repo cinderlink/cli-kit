@@ -10,9 +10,9 @@
 
 import type { JSX } from './runtime'
 import { jsx as jsxFactory } from './runtime'
-import type { View } from '../core/types'
-import { text, vstack, hstack } from '../core/view'
-import { style, Colors } from '../styling'
+import type { View } from '@core/types'
+import { text, vstack, hstack } from '@core/view'
+import { style, Colors } from '@core/terminal/ansi/styles'
 
 export interface ScopeProps {
   type: 'cli' | 'plugin' | 'command'

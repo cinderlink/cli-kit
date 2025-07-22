@@ -1,8 +1,8 @@
 import { test, expect, afterEach } from "bun:test"
 import { Effect, Duration, Fiber } from "effect"
-import { getGlobalEventBus, resetGlobalEventBus } from "../model/events/event-bus"
-import { resetGlobalRegistry } from "../module-registry"
-import { bootstrapWithModules } from "../bootstrap"
+import { getGlobalEventBus, resetGlobalEventBus } from "@core/model/events/eventBus"
+import { resetGlobalRegistry } from "@core/runtime/module/registry"
+import { bootstrapWithModules } from "@core/runtime/bootstrap"
 import { CoordinationModule } from "./module"
 import type { CLICommandEvent } from "../../cli/events"
 import type { ProcessEvent } from "../../process-manager/events"
@@ -192,7 +192,8 @@ test("stream optimization configures properly", async () => {
   )
   
   // Get optimization stats to verify configuration
-  const optimizer = (coordination as any).streamOptimizer
+  const coordinationWithOptimizer = coordination as { streamOptimizer: { getOptimizationStats: () => Effect.Effect<{ bufferSizes: Map<string, number>; rateLimits: Map<string, number> }, never> } }
+  const optimizer = coordinationWithOptimizer.streamOptimizer
   const stats = await Effect.runPromise(optimizer.getOptimizationStats())
   
   expect(stats.bufferSizes.get('process-output')).toBe(100)
