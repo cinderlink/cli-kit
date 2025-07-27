@@ -5,12 +5,12 @@
  */
 
 import { Effect, FiberRef } from "effect"
-import { runApp } from "@core/runtime/mvu/runtime"
-import { LiveServices } from "@core/services/impl"
-import type { View } from "@core/types"
-import { Interactive, InteractiveContextLive, InteractiveFiberRef } from "@core/runtime/interactive"
-import { EventBus } from "@core/model/events/eventBus"
-import { createConsoleLogger } from "@logger"
+import { runApp } from "../core/runtime/mvu/runtime"
+import { LiveServices } from "../core/services/impl"
+import type { View } from "../core/types"
+import { Interactive, InteractiveContextLive, InteractiveFiberRef } from "../core/runtime/interactive"
+import { EventBus } from "../core/model/events/eventBus"
+import { createConsoleLogger } from "../logger"
 
 // Debug logging
 const DEBUG = process.env.TUIX_DEBUG === 'true'
@@ -27,7 +27,7 @@ import { jsx as jsxFactory, JSXContext } from "./runtime"
 export { JSXContext }
 
 // Re-export runes for easy JSX development
-export { $state, $bindable, $derived, $effect } from '@core/update/reactivity/runes'
+export { $state, $bindable, $derived, $effect } from '../core/update/reactivity/runes'
 
 // Re-export lifecycle hooks for component lifecycle management
 export { 
@@ -38,7 +38,7 @@ export {
   tick,
   untrack,
   withLifecycle
-} from '@core/update/reactivity/jsxLifecycle'
+} from '../core/update/reactivity/jsxLifecycle'
 
 // CLI components are exported dynamically to avoid circular dependencies
 // They can be imported from '@cli/jsx/components' when needed
@@ -47,14 +47,14 @@ export {
   Scope,
   ScopeContent,
   ScopeFallback
-} from '@core/model/scope/jsx/components'
+} from '../core/model/scope/jsx/components'
 
 // Plugin management components - handled by plugin module
 export { 
   RegisterPlugin,
   EnablePlugin,
   ConfigurePlugin
-} from '@plugins/api/jsx/Components'
+} from '../plugins/api/jsx/Components'
 
 /**
  * Create a text element for displaying strings in the terminal
@@ -265,17 +265,17 @@ export interface JSXAppConfig {
  */
 export function createJSXApp(AppComponent: (() => JSX.Element) | JSX.Element, config?: JSXAppConfig & { interactive?: boolean | Partial<import('../core/interactive').InteractiveConfig> }): Promise<void>
 export function createJSXApp<Model, Msg>(config: {
-  init: () => [Model, import('@core/types').Cmd<Msg>[]]
-  update: (msg: Msg, model: Model) => [Model, import('@core/types').Cmd<Msg>[]]
+  init: () => [Model, import('../core/types').Cmd<Msg>[]]
+  update: (msg: Msg, model: Model) => [Model, import('../core/types').Cmd<Msg>[]]
   view: (props: { model: Model, dispatch: (msg: Msg) => void }) => JSX.Element
-  subscriptions?: (model: Model) => Effect<import('@core/types').Sub<Msg>, never, import('@core/types').AppServices>
+  subscriptions?: (model: Model) => Effect<import('../core/types').Sub<Msg>, never, import('../core/types').AppServices>
 }): Promise<void>
 export function createJSXApp<Model = {}, Msg = never>(
   configOrComponent: (() => JSX.Element) | JSX.Element | {
-    init: () => [Model, import('@core/types').Cmd<Msg>[]]
-    update: (msg: Msg, model: Model) => [Model, import('@core/types').Cmd<Msg>[]]
+    init: () => [Model, import('../core/types').Cmd<Msg>[]]
+    update: (msg: Msg, model: Model) => [Model, import('../core/types').Cmd<Msg>[]]
     view: (props: { model: Model, dispatch: (msg: Msg) => void }) => JSX.Element
-    subscriptions?: (model: Model) => Effect<import('@core/types').Sub<Msg>, never, import('@core/types').AppServices>
+    subscriptions?: (model: Model) => Effect<import('../core/types').Sub<Msg>, never, import('../core/types').AppServices>
   },
   config?: JSXAppConfig & { interactive?: boolean | Partial<import('../core/interactive').InteractiveConfig> }
 ): Promise<void> {
@@ -290,14 +290,14 @@ export function createJSXApp<Model = {}, Msg = never>(
     let currentDispatch: ((msg: Msg) => void) | null = null
     
     // Create proper MVU component
-    let component: import('@core/types').Component<Model, Msg> = {
+    let component: import('../core/types').Component<Model, Msg> = {
       init: () => Effect.map(
         Effect.succeed(mvuConfig.init()),
-        ([model, effects]) => [model, effects.map(eff => eff as import('@core/types').Cmd<Msg>)]
+        ([model, effects]) => [model, effects.map(eff => eff as import('../core/types').Cmd<Msg>)]
       ),
       update: (msg, model) => Effect.map(
         Effect.succeed(mvuConfig.update(msg, model)),
-        ([newModel, effects]) => [newModel, effects.map(eff => eff as import('@core/types').Cmd<Msg>)]
+        ([newModel, effects]) => [newModel, effects.map(eff => eff as import('../core/types').Cmd<Msg>)]
       ),
       view: (model) => {
         const element = mvuConfig.view({ 
@@ -306,7 +306,7 @@ export function createJSXApp<Model = {}, Msg = never>(
             Effect.runSync(logger.warn('Dispatch called before initialization'))
           })
         })
-        return element as import('@core/types').View
+        return element as import('../core/types').View
       },
       subscriptions: mvuConfig.subscriptions
     }
@@ -362,13 +362,13 @@ export function createJSXApp<Model = {}, Msg = never>(
   }
 
   // Create MVU component from JSX app
-  const component: import('@core/types').Component<{}, never> = {
+  const component: import('../core/types').Component<{}, never> = {
     init: Effect.succeed([{}, []]),
     update: (_msg, model) => Effect.succeed([model, []]),
     view: (_model) => {
       const element = getAppElement()
       // JSX elements are already Views, so we can return them directly
-      return element as import('@core/types').View
+      return element as import('../core/types').View
     },
     subscriptions: undefined // No subscriptions for simple JSX apps
   }
@@ -547,7 +547,7 @@ export function render(AppComponent: (() => JSX.Element) | JSX.Element): Promise
 }
 
 // Plugin creation moved to plugin module
-export { createJSXPlugin } from '@plugins/api/jsx/app'
+export { createJSXPlugin } from '../plugins/api/jsx/app'
 
 // CLI-specific runners are available from '@cli/jsx/app' when needed
 
@@ -573,7 +573,7 @@ export type {
   RegisterPluginProps as RegisterPlugin,
   EnablePluginProps as EnablePlugin,
   ConfigurePluginProps as ConfigurePlugin
-} from "@plugins/api/jsx/types"
+} from "../plugins/api/jsx/types"
 
 /**
  * Default export for convenience
