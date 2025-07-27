@@ -1,2 +1,2 @@
-export { Tabs, SimpleTabs, ViewTabs } from './Tabs'
-export type { TabsProps, TabsModel, TabsMsg, Tab, TabStyles } from './Tabs'
+export { Tabs, Tab, SimpleTabs, PillTabs, VerticalTabs } from './Tabs.js'
+export type { TabsProps, TabProps } from './Tabs.js'

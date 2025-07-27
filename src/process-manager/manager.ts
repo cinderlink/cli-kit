@@ -609,10 +609,20 @@ export function setupManagedProcess() {
           break
           
         case 'shutdown':
-          // Note: Can't use this.log here as 'this' context is lost in process.on
-          console.log('Received shutdown signal, cleaning up...')
+          // Note: Using Effect.runSync for synchronous logging during shutdown
+          if (this.logger) {
+            Effect.runSync(this.logger.info('Received shutdown signal, cleaning up...'))
+          }
           // Perform cleanup
-          process.exit(0)
+          // Use proper shutdown for process manager
+          import('@core/runtime/interactive').then(({ Interactive }) => {
+            import('effect').then(({ Effect }) => {
+              Effect.runSync(Interactive.exit(0))
+            })
+          }).catch(() => {
+            // Fallback if modules can't be loaded during shutdown
+            process.exit(0)
+          })
           break
       }
     })

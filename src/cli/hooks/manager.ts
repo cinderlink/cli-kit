@@ -35,8 +35,8 @@ export interface Hooks {
   onError: ReturnType<typeof createPluginHooks>['onError']
   
   // Event emitters
-  emit: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'>) => Effect<void, never>
-  emitSync: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'>) => void
+  emit: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }) => Effect.Effect<void, never>
+  emitSync: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }) => void
 }
 
 /**
@@ -54,7 +54,7 @@ export function createHooks(eventBus: EventBus, source = 'cli'): Hooks {
     ...pluginHooks,
     
     // Event emitters
-    emit: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'>) => {
+    emit: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }) => {
       const fullEvent = {
         ...event,
         id: Date.now().toString(),
@@ -64,7 +64,7 @@ export function createHooks(eventBus: EventBus, source = 'cli'): Hooks {
       return eventBus.emit(event.type, fullEvent)
     },
     
-    emitSync: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'>) => {
+    emitSync: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }) => {
       const fullEvent = {
         ...event,
         id: Date.now().toString(),

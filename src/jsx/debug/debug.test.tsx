@@ -11,7 +11,7 @@ test("debug wrapper wraps content when TUIX_DEBUG=true", async () => {
     process.env.TUIX_DEBUG = 'true'
     
     // Import fresh to get debug behavior
-    const { DebugWrapper } = await import('./wrapper')
+    const { DebugWrapper } = await import('./Wrapper')
     
     // Create simple content
     const content = jsx('text', {}, 'Test content')

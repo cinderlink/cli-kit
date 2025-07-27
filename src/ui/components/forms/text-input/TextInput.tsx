@@ -40,7 +40,7 @@ import { isBindableRune, isStateRune } from '@core/update/reactivity/runes'
 import type { View } from '@core/view/primitives/view'
 import { text, hstack } from '@core/view/primitives/view'
 import { style, Colors } from '@core/terminal/ansi/styles'
-import { stringWidth } from '@core/terminal/output/string/width'
+import { createTextInputStore, type TextInputStore } from '@ui/stores/textInputStore'
 
 // Types
 export type EchoMode = 'normal' | 'password' | 'none'
@@ -69,159 +69,120 @@ export interface TextInputProps {
  * TextInput Component
  */
 export function TextInput(props: TextInputProps): JSX.Element {
-  // Extract bound value or create internal state
-  const valueRune = props['bind:value'] || $state(props.value || '')
-  const value = isBindableRune(valueRune) || isStateRune(valueRune) 
-    ? valueRune 
-    : $state(props.value || '')
+  // Create store for managing complex input state
+  const store = createTextInputStore({
+    initialValue: props.value || '',
+    charLimit: props.charLimit,
+    validator: props.validate,
+    transformer: props.transform,
+    width: props.width || 30
+  })
   
-  // Internal state
-  const cursor = $state(0)
-  const offset = $state(0)
-  const focused = $state(props.autoFocus || false)
-  const showCursor = $state(true)
-  const validationError = $state<string | null>(null)
+  // Extract bound value if provided
+  const boundValue = props['bind:value']
   
   // Configuration
   const width = props.width || 30
   const placeholder = props.placeholder || ''
   const echoMode = props.echoMode || 'normal'
   const cursorStyle = props.cursorStyle || 'bar'
-  const charLimit = props.charLimit
   
-  // Derived state
+  // Sync bound value with store
+  $effect(() => {
+    if (boundValue && (isBindableRune(boundValue) || isStateRune(boundValue))) {
+      // Update store when bound value changes
+      if (boundValue.value !== store.value.value) {
+        store.setValue(boundValue.value)
+      }
+    }
+  })
+  
+  // Sync store value back to bound value
+  $effect(() => {
+    if (boundValue && (isBindableRune(boundValue) || isStateRune(boundValue))) {
+      // Update bound value when store changes
+      if (store.value.value !== boundValue.value) {
+        boundValue.value = store.value.value
+      }
+    }
+    
+    // Call onChange callback
+    props.onChange?.(store.value.value)
+  })
+  
+  // Auto-focus effect
+  $effect(() => {
+    if (props.autoFocus) {
+      store.focus()
+    }
+  })
+  
+  // Derived state for display
   const displayValue = $derived(() => {
-    const val = getValue(value)
+    const val = store.value.value
     if (echoMode === 'password') {
       return '•'.repeat(val.length)
     } else if (echoMode === 'none') {
       return ''
     }
-    return val
+    return store.displayValue.value
   })
   
-  const visibleText = $derived(() => {
-    const display = displayValue.value
-    const availableWidth = width - 2 // Account for borders
-    
-    if (stringWidth(display) <= availableWidth) {
-      return display
-    }
-    
-    // Handle scrolling
-    const beforeCursor = display.slice(0, cursor.value)
-    const afterCursor = display.slice(cursor.value)
-    
-    if (stringWidth(beforeCursor) > availableWidth / 2) {
-      // Scroll to keep cursor visible
-      const start = offset.value
-      return display.slice(start, start + availableWidth)
-    }
-    
-    return display.slice(offset.value, offset.value + availableWidth)
-  })
-  
-  // Cursor blink effect
+  // Cursor blink effect override for specific styles
   $effect(() => {
-    if (focused.value && cursorStyle === 'blink') {
+    if (store.isFocused.value && cursorStyle === 'blink') {
       const interval = setInterval(() => {
-        showCursor.value = !showCursor.value
+        store.showCursor.value = !store.showCursor.value
       }, 500)
       
       return () => clearInterval(interval)
     }
   })
   
-  // Validation effect
-  $effect(() => {
-    if (props.validate) {
-      const error = props.validate(getValue(value))
-      validationError.value = error
-    }
-  })
-  
-  // Helper to get value from rune
-  function getValue(v: any): string {
-    if (isBindableRune(v) || isStateRune(v)) {
-      return v.value
-    }
-    return v || ''
-  }
-  
-  // Helper to set value
-  function setValue(newValue: string) {
-    if (charLimit && newValue.length > charLimit) {
-      return
-    }
-    
-    if (props.transform) {
-      newValue = props.transform(newValue)
-    }
-    
-    if (isBindableRune(value) || isStateRune(value)) {
-      value.value = newValue
-    }
-    
-    props.onChange?.(newValue)
-  }
-  
   // Event handlers
   function handleKeyPress(key: string) {
-    if (!focused.value || props.disabled) return
-    
-    const currentValue = getValue(value)
+    if (!store.isFocused.value || props.disabled) return
     
     switch (key) {
       case 'ArrowLeft':
-        if (cursor.value > 0) {
-          cursor.value--
-        }
+        store.moveCursorRelative(-1)
         break
         
       case 'ArrowRight':
-        if (cursor.value < currentValue.length) {
-          cursor.value++
-        }
+        store.moveCursorRelative(1)
         break
         
       case 'Home':
-        cursor.value = 0
-        offset.value = 0
+        store.moveCursor(0)
         break
         
       case 'End':
-        cursor.value = currentValue.length
+        store.moveCursor(store.value.value.length)
         break
         
       case 'Backspace':
-        if (cursor.value > 0) {
-          const newValue = currentValue.slice(0, cursor.value - 1) + 
-                          currentValue.slice(cursor.value)
-          setValue(newValue)
-          cursor.value--
-        }
+        store.deleteBackward()
         break
         
       case 'Delete':
-        if (cursor.value < currentValue.length) {
-          const newValue = currentValue.slice(0, cursor.value) + 
-                          currentValue.slice(cursor.value + 1)
-          setValue(newValue)
-        }
+        store.deleteForward()
         break
         
       case 'Enter':
-        props.onSubmit?.(currentValue)
+        props.onSubmit?.(store.value.value)
+        break
+        
+      case 'a':
+        // Handle Ctrl+A for select all
+        // TODO: Properly handle keyboard events with modifiers
+        // For now, skip Ctrl+A handling until we have proper KeyboardEvent types
+        store.insertText(key)
         break
         
       default:
         // Character input
         if (key.length === 1) {
-          const newValue = currentValue.slice(0, cursor.value) + 
-                          key + 
-                          currentValue.slice(cursor.value)
-          setValue(newValue)
-          cursor.value++
+          store.insertText(key)
         }
     }
   }
@@ -231,22 +192,22 @@ export function TextInput(props: TextInputProps): JSX.Element {
     width,
     minHeight: 1,
     padding: { horizontal: 1 },
-    border: focused.value ? 'single' : 'none',
-    borderColor: validationError.value ? Colors.red : 
-                 focused.value ? Colors.blue : Colors.gray,
+    border: store.isFocused.value ? 'single' : 'none',
+    borderColor: store.validationError.value ? Colors.red : 
+                 store.isFocused.value ? Colors.blue : Colors.gray,
     background: props.disabled ? Colors.gray : undefined
   })
   
-  const cursorChar = getCursorChar(cursorStyle, showCursor.value)
+  const cursorChar = getCursorChar(cursorStyle, store.showCursor.value)
   
   return jsx('interactive', {
     onKeyPress: handleKeyPress,
     onFocus: () => {
-      focused.value = true
+      store.focus()
       props.onFocus?.()
     },
     onBlur: () => {
-      focused.value = false
+      store.blur()
       props.onBlur?.()
     },
     focusable: !props.disabled,
@@ -258,8 +219,8 @@ export function TextInput(props: TextInputProps): JSX.Element {
   })
   
   function renderInputContent(): JSX.Element {
-    const visible = visibleText.value
-    const cursorPos = cursor.value - offset.value
+    const visible = store.visibleText.value
+    const cursorPos = store.cursorPosition.value
     
     if (!visible && placeholder) {
       return jsx('text', {
@@ -268,8 +229,27 @@ export function TextInput(props: TextInputProps): JSX.Element {
       })
     }
     
-    if (!focused.value || !showCursor.value) {
+    if (!store.isFocused.value || !store.showCursor.value) {
       return jsx('text', { children: visible })
+    }
+    
+    // Handle selection rendering
+    if (store.hasSelection.value && store.selection.value) {
+      const [selStart, selEnd] = store.selection.value
+      const beforeSelection = visible.slice(0, selStart - store.offset.value)
+      const selection = visible.slice(selStart - store.offset.value, selEnd - store.offset.value)
+      const afterSelection = visible.slice(selEnd - store.offset.value)
+      
+      return jsx('hstack', {
+        children: [
+          beforeSelection && jsx('text', { children: beforeSelection }),
+          jsx('text', {
+            style: style({ background: Colors.blue, color: Colors.white }),
+            children: selection
+          }),
+          afterSelection && jsx('text', { children: afterSelection })
+        ].filter(Boolean)
+      })
     }
     
     // Render with cursor

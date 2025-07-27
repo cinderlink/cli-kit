@@ -6,8 +6,8 @@ describe('Debug Module', () => {
     test('should initialize with empty state', () => {
       const state = debugStore.getState()
       expect(state.events).toEqual([])
-      expect(state.performance).toEqual([])
-      expect(state.isPaused).toBe(false)
+      expect(state.performanceMetrics.size).toBe(0)
+      expect(state.paused).toBe(false)
     })
     
     test('should log events', () => {
@@ -15,9 +15,9 @@ describe('Debug Module', () => {
       debug.system('Test system event')
       
       const state = debugStore.getState()
-      expect(state.events.length).toBe(1)
-      expect(state.events[0].category).toBe('system')
-      expect(state.events[0].message).toBe('Test system event')
+      expect(state.events.length).toBe(2) // includes "Debug events cleared" message
+      expect(state.events[1].category).toBe('system')
+      expect(state.events[1].message).toBe('Test system event')
     })
     
     test('should track performance metrics', () => {
@@ -25,9 +25,9 @@ describe('Debug Module', () => {
       debug.performance('Test operation', 123.45)
       
       const state = debugStore.getState()
-      expect(state.performance.length).toBe(1)
-      expect(state.performance[0].name).toBe('Test operation')
-      expect(state.performance[0].duration).toBe(123.45)
+      expect(state.performanceMetrics.size).toBe(1)
+      expect(state.performanceMetrics.get('Test operation')?.name).toBe('Test operation')
+      expect(state.performanceMetrics.get('Test operation')?.totalTime).toBe(123.45)
     })
     
     test('should filter events', () => {
@@ -44,14 +44,17 @@ describe('Debug Module', () => {
     
     test('should pause/resume logging', () => {
       debugStore.clear()
+      const eventsAfterClear = debugStore.getState().events.length // 1 for "Debug events cleared"
       debugStore.setPaused(true)
+      const eventsAfterPause = debugStore.getState().events.length // +1 for "Debug recording paused"
       
-      debug.system('Should not be logged')
-      expect(debugStore.getState().events.length).toBe(0)
+      debug.render('Should not be logged') // non-system events should be ignored when paused
+      expect(debugStore.getState().events.length).toBe(eventsAfterPause)
       
       debugStore.setPaused(false)
-      debug.system('Should be logged')
-      expect(debugStore.getState().events.length).toBe(1)
+      const eventsAfterResume = debugStore.getState().events.length // +1 for "Debug recording resumed"
+      debug.render('Should be logged')
+      expect(debugStore.getState().events.length).toBe(eventsAfterResume + 1)
     })
   })
 })

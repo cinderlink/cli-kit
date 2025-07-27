@@ -235,7 +235,7 @@ function getCommandByPath(config: CLIConfig, commandPath: string[]): CommandConf
   let command: CommandConfig | null = null
   
   for (const part of commandPath) {
-    command = current[part]
+    command = current[part] ?? null
     if (!command) return null
     current = command.commands || {}
   }

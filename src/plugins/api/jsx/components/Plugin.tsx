@@ -1,10 +1,11 @@
 /**
- * Plugin Component
+ * Plugin Component - Core API
  * 
- * Defines a plugin scope that can contain commands
+ * Defines a basic plugin scope that can contain commands
+ * For CLI integration, use Plugin from '@plugins/integrations/cli/Plugin'
  */
 
-import { CommandLineScope } from '@cli/jsx/components/CommandLineScope'
+import { Scope } from '@core/model/scope/jsx/components'
 import type { JSX } from '@jsx/runtime'
 
 export interface PluginProps {
@@ -16,7 +17,7 @@ export interface PluginProps {
 
 export function Plugin(props: PluginProps): JSX.Element {
   return (
-    <CommandLineScope
+    <Scope
       type="plugin"
       name={props.name}
       description={props.description}
@@ -25,6 +26,6 @@ export function Plugin(props: PluginProps): JSX.Element {
       }}
     >
       {props.children}
-    </CommandLineScope>
+    </Scope>
   )
 }

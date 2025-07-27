@@ -181,4 +181,6 @@ export interface CLIContext {
   parsedArgs: ParsedArgs
   plugins: Plugin[]
   tuixConfig?: TuixConfig
+  debug?: boolean
+  options?: Record<string, unknown>
 }

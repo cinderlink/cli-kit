@@ -7,6 +7,7 @@ import { Colors } from '@core/terminal/ansi/styles'
 import { scopeManager } from '@core/model/scope/manager'
 import { debugStore } from '../../../core/store'
 import type { View } from '@core/types'
+import type { ScopeDef } from '@core/model/scope/types'
 
 export function DebugOverview(): View {
   const state = debugStore.getState()
@@ -45,7 +46,7 @@ export function DebugOverview(): View {
 
 function findMatchedScopes(commandPath: string[]) {
   const scopes = scopeManager.getAllScopes()
-  const matched: any[] = []
+  const matched: ScopeDef[] = []
   
   // Find root
   const root = scopes.find(s => s.type === 'cli')

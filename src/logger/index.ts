@@ -261,7 +261,7 @@ export const LoggerUtils = {
     try {
       return this.parseLevel(level)
     } catch {
-      console.warn(`Invalid log level in ${envVar}: ${level}, using ${defaultLevel}`)
+      process.stderr.write(`WARNING: Invalid log level in ${envVar}: ${level}, using ${defaultLevel}\n`)
       return defaultLevel
     }
   },

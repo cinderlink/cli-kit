@@ -9,7 +9,10 @@ import type { Component } from "@core/types"
 import { initAppModel, type AppModel, type AppMsg, type Cmd } from "./model"
 import { update } from "./update"
 import { CLIStoreAdapter, CommandStoreAdapter, PluginStoreAdapter } from "./storeAdapter"
-import { withComponentContext } from "@jsx/context"
+import { withComponentContext } from "@core/context"
+import { createConsoleLogger } from "@logger"
+
+const logger = createConsoleLogger('warn')
 
 // Global state for store adapters
 let currentModel: AppModel = initAppModel()
@@ -22,7 +25,7 @@ const storeContext = {
     if (currentDispatch) {
       currentDispatch(msg)
     } else {
-      console.warn('Store dispatch called before MVU app initialization')
+      Effect.runSync(logger.warn('Store dispatch called before MVU app initialization'))
     }
   }
 }
@@ -53,8 +56,8 @@ export function createCLIMVUComponent(
       const effects = cmds.map(cmd => 
         cmd.pipe(
           Effect.map(resultMsg => resultMsg),
-          Effect.catchAll(() => Effect.succeed(null as any)),
-          Effect.filterOrFail(msg => msg !== null)
+          Effect.catchAll(() => Effect.succeed(null as AppMsg | null)),
+          Effect.filterOrFail((msg): msg is AppMsg => msg !== null)
         )
       )
       
@@ -78,7 +81,7 @@ export function createCLIMVUComponent(
         () => view({ model, dispatch })
       )
       
-      return element as any
+      return element as import('@core/types').View
     },
     
     subscriptions: undefined

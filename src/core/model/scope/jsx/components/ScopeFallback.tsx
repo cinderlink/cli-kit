@@ -8,7 +8,8 @@
 import { scopeManager } from '../../manager'
 import { jsx } from '@jsx/runtime'
 import type { JSX } from '@jsx/runtime'
-import { CommandLineHelp } from '@cli/jsx/components'
+// Don't import CLI components directly - this violates module boundaries
+// Instead, accept a fallback component as a prop
 
 export interface ScopeFallbackProps {
   scopeId: string
@@ -32,6 +33,6 @@ export function ScopeFallback(props: ScopeFallbackProps): JSX.Element {
     return fallback
   }
   
-  // Default fallback is CommandLineHelp for this scope
-  return <CommandLineHelp scopeId={scopeId} />
+  // Default fallback is basic help text
+  return jsx('text', { children: `Help for scope: ${scopeId}` })
 }

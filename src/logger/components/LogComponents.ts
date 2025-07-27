@@ -288,14 +288,14 @@ export const logUtils = {
   },
   
   /**
-   * Quick console logging with proper formatting
+   * Quick logging with proper formatting - uses stdout/stderr directly to avoid logger circular dependencies
    */
-  trace: (message: string) => console.log(logUtils.formatLogLine("trace", message, { showEmoji: true })),
-  debug: (message: string) => console.log(logUtils.formatLogLine("debug", message, { showEmoji: true })),
-  info: (message: string) => console.log(logUtils.formatLogLine("info", message, { showEmoji: true })),
-  warn: (message: string) => console.log(logUtils.formatLogLine("warn", message, { showEmoji: true })),
-  error: (message: string) => console.log(logUtils.formatLogLine("error", message, { showEmoji: true })),
-  fatal: (message: string) => console.log(logUtils.formatLogLine("fatal", message, { showEmoji: true }))
+  trace: (message: string) => process.stdout.write(logUtils.formatLogLine("trace", message, { showEmoji: true }) + '\n'),
+  debug: (message: string) => process.stdout.write(logUtils.formatLogLine("debug", message, { showEmoji: true }) + '\n'),
+  info: (message: string) => process.stdout.write(logUtils.formatLogLine("info", message, { showEmoji: true }) + '\n'),
+  warn: (message: string) => process.stderr.write(logUtils.formatLogLine("warn", message, { showEmoji: true }) + '\n'),
+  error: (message: string) => process.stderr.write(logUtils.formatLogLine("error", message, { showEmoji: true }) + '\n'),
+  fatal: (message: string) => process.stderr.write(logUtils.formatLogLine("fatal", message, { showEmoji: true }) + '\n')
 }
 
 // Helper to format values

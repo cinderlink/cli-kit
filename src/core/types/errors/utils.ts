@@ -97,7 +97,8 @@ export const ErrorUtils = {
     if (Exit.isSuccess(exit)) {
       return { success: true, value: exit.value }
     } else {
-      return { success: false, error: Cause.failureOption(exit.cause) || new Error('Unknown error') as any }
+      const error = Cause.failureOption(exit.cause)
+      return { success: false, error: error !== undefined ? error : new Error('Unknown error') as E }
     }
   },
   

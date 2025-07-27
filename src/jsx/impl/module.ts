@@ -235,6 +235,23 @@ export class JSXModule extends ModuleBase {
       scope
     })
   }
+  
+  /**
+   * Create a CLI adapter with JSX rendering support
+   * This allows the CLI module to use JSX rendering without a direct dependency
+   */
+  createCLIAdapter(): any {
+    // Import the render function dynamically
+    const { renderToTerminal } = require('../impl/render')
+    
+    // Create the runtime with our render function
+    return {
+      renderFn: (view: any) => {
+        // Use the JSX render implementation
+        renderToTerminal(view)
+      }
+    }
+  }
 }
 
 import type { BaseEvent } from '@core/model/events/eventBus'

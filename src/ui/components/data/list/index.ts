@@ -1,2 +1,2 @@
-export { List, SingleSelectList, MultiSelectList } from './List'
-export type { ListProps, ListModel, ListMsg, ListItem, ListStyles } from './List'
+export { List, SimpleList, CheckList, NumberedList } from './List.js'
+export type { ListProps, SelectionMode } from './List.js'

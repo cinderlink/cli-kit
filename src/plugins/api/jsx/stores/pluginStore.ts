@@ -4,7 +4,7 @@
  * Manages plugin state without using Svelte 5 runes
  */
 
-import type { JSXPlugin } from '@cli/jsx/types'
+import type { CorePlugin } from '../app'
 
 export interface PluginRegistration {
   id: string
@@ -13,7 +13,7 @@ export interface PluginRegistration {
   description?: string
   enabled: boolean
   config: Record<string, any>
-  plugin: JSXPlugin
+  plugin: CorePlugin
 }
 
 class SimplePluginStore {
@@ -35,7 +35,7 @@ class SimplePluginStore {
   }
 
   // Methods
-  register(plugin: JSXPlugin): void {
+  register(plugin: CorePlugin): void {
     const registration: PluginRegistration = {
       id: plugin.name,
       name: plugin.name,

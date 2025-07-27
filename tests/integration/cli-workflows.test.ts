@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from "bun:test"
 import { Effect, Layer, Context } from "effect"
-import { createCLI, type CLI } from "@cli/index"
+import { defineConfig, runCLI } from "@cli/index"
 import { createHooks } from "@cli/hooks"
 import { EventBus } from "@core/model/events/eventBus"
 import { TerminalService, RendererService, InputService } from "@core/services"
@@ -112,24 +112,21 @@ describe("CLI Workflow Integration", () => {
 
   describe("Basic Command Execution", () => {
     it("should execute simple command", async () => {
-      const cli = createCLI({
+      const config = defineConfig({
         name: "test-cli",
-        version: "1.0.0"
+        version: "1.0.0",
+        commands: {
+          hello: {
+            description: "Say hello",
+            handler: () => Effect.gen(function* () {
+              yield* terminal.writeLine("Hello, World!")
+              return "success"
+            })
+          }
+        }
       })
       
-      cli.command("hello", {
-        description: "Say hello",
-        handler: () => Effect.gen(function* () {
-          yield* terminal.writeLine("Hello, World!")
-          return "success"
-        })
-      })
-      
-      await Effect.runPromise(
-        cli.run(["hello"]).pipe(
-          Effect.provide(createTestLayer())
-        )
-      )
+      await runCLI(config, ["hello"])
       
       expect(terminal.output).toContain("Hello, World!\n")
     })

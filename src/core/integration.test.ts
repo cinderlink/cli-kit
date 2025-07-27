@@ -57,10 +57,12 @@ describe("Core Module Integration", () => {
       const eventBus = getGlobalEventBus()
       const events: any[] = []
       
-      // Subscribe to events
-      eventBus.subscribe('test:integration', (event) => {
-        events.push(event)
-      })
+      // Subscribe to events - must run the Effect
+      await Effect.runPromise(
+        eventBus.subscribe('test:integration', (event) => 
+          Effect.sync(() => events.push(event))
+        )
+      )
 
       // Emit events from different subsystems
       await Effect.runPromise(
@@ -92,9 +94,11 @@ describe("Core Module Integration", () => {
       const eventBus = getGlobalEventBus()
       let eventCount = 0
       
-      const unsubscribe = eventBus.subscribe('lifecycle:test', () => {
-        eventCount++
-      })
+      const unsubscribe = await Effect.runPromise(
+        eventBus.subscribe('lifecycle:test', () => 
+          Effect.sync(() => eventCount++)
+        )
+      )
 
       // Emit before unsubscribe
       await Effect.runPromise(
@@ -109,7 +113,7 @@ describe("Core Module Integration", () => {
       expect(eventCount).toBe(1)
 
       // Unsubscribe and emit again
-      unsubscribe()
+      await Effect.runPromise(unsubscribe())
       
       await Effect.runPromise(
         eventBus.emit('lifecycle:test', {
@@ -136,9 +140,11 @@ describe("Core Module Integration", () => {
       const eventBus = getGlobalEventBus()
       const serviceEvents: any[] = []
 
-      eventBus.subscribe('service:test', (event) => {
-        serviceEvents.push(event)
-      })
+      await Effect.runPromise(
+        eventBus.subscribe('service:test', (event) => 
+          Effect.sync(() => serviceEvents.push(event))
+        )
+      )
 
       // Simulate service event
       await Effect.runPromise(
@@ -196,9 +202,11 @@ describe("Core Module Integration", () => {
       const eventBus = getGlobalEventBus()
       const errors: any[] = []
 
-      eventBus.subscribe('error:test', (event) => {
-        errors.push(event)
-      })
+      await Effect.runPromise(
+        eventBus.subscribe('error:test', (event) => 
+          Effect.sync(() => errors.push(event))
+        )
+      )
 
       // Simulate error from view system
       await Effect.runPromise(
@@ -222,9 +230,11 @@ describe("Core Module Integration", () => {
       const eventBus = getGlobalEventBus()
       let recoveryAttempted = false
 
-      eventBus.subscribe('error:recovery', () => {
-        recoveryAttempted = true
-      })
+      await Effect.runPromise(
+        eventBus.subscribe('error:recovery', () => 
+          Effect.sync(() => { recoveryAttempted = true })
+        )
+      )
 
       // Simulate error and recovery
       await Effect.runPromise(
@@ -264,9 +274,11 @@ describe("Core Module Integration", () => {
       const eventBus = getGlobalEventBus()
       let eventCount = 0
 
-      eventBus.subscribe('perf:test', () => {
-        eventCount++
-      })
+      await Effect.runPromise(
+        eventBus.subscribe('perf:test', () => 
+          Effect.sync(() => eventCount++)
+        )
+      )
 
       const start = Date.now()
       

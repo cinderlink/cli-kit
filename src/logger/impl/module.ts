@@ -154,9 +154,11 @@ export class LoggerModule extends ModuleBase {
    * Log service events
    */
   private logServiceEvent(event: BaseEvent): Effect<void, never> {
-    if (event.type === 'service-error' && 'error' in event) {
-      return this.log('error', `Service error: ${(event as any).serviceName}`, {
-        error: (event as any).error
+    if (event.type === 'service-error' && 'error' in event && 'serviceName' in event) {
+      // Type guard ensures properties exist
+      const serviceErrorEvent = event as BaseEvent & { error: unknown; serviceName: string }
+      return this.log('error', `Service error: ${serviceErrorEvent.serviceName}`, {
+        error: serviceErrorEvent.error
       })
     }
     return this.log('info', `Service ${event.type}`, { event })
@@ -166,10 +168,12 @@ export class LoggerModule extends ModuleBase {
    * Log config events
    */
   private logConfigEvent(event: BaseEvent): Effect<void, never> {
-    if (event.type === 'config-updated') {
+    if (event.type === 'config-updated' && 'section' in event && 'value' in event) {
+      // Type guard ensures properties exist
+      const configEvent = event as BaseEvent & { section: string; value: unknown }
       return this.log('info', 'Configuration updated', {
-        section: (event as any).section,
-        value: (event as any).value
+        section: configEvent.section,
+        value: configEvent.value
       })
     }
     return Effect.void

@@ -4,11 +4,10 @@
  * Provides utilities for lazy loading commands and plugins
  */
 
-import type { Component } from "../core/types"
-import type { Handler } from "./types"
+import type { Handler } from "../types"
 
 export interface LazyComponent<TModel = unknown, TMsg = unknown> {
-  (): Promise<Component<TModel, TMsg>>
+  (): Promise<any>
   preload?: () => Promise<void>
   isLoaded?: boolean
 }

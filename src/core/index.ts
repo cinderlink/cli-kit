@@ -158,3 +158,34 @@ export * as View from "./view/primitives/view"
  * improving performance in complex UI applications.
  */
 export * as ViewCache from "./view/viewCache"
+
+// =============================================================================
+// Event System
+// =============================================================================
+
+/**
+ * Event bus for inter-module communication
+ * 
+ * Provides a typed, Effect-based event bus for coordination
+ * between different modules without tight coupling.
+ */
+export { EventBus, getGlobalEventBus } from "./model/events/eventBus"
+export type { BaseEvent, EventHandler } from "./model/events/eventBus"
+
+// =============================================================================
+// Context System
+// =============================================================================
+
+/**
+ * Core context abstractions for cross-cutting concerns
+ * 
+ * Provides context utilities for component state management
+ * and cross-module communication patterns.
+ */
+export {
+  ComponentContext,
+  ComponentContextRef,
+  useComponentContext,
+  withComponentContext,
+  type ComponentContextValue
+} from "./context"

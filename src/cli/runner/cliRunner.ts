@@ -11,6 +11,8 @@ import { CLIRouter, CommandSuggestions } from "@cli/router"
 import { validateConfig } from "@cli/config"
 import { EventBus } from "@core/model/events/eventBus"
 import { createHooks, type Hooks } from "@cli/hooks"
+import { Effect } from "effect"
+import { Interactive } from "@core/runtime/interactive"
 
 import { HelpDisplay } from "./helpDisplay"
 import { ErrorHandler } from "./errorHandler"
@@ -83,7 +85,7 @@ export class CLIRunner {
       // If no command provided, show help
       if (!processed.hasCommand) {
         this.helpDisplay.showHelp()
-        process.exit(0)
+        await Effect.runPromise(Interactive.exit(0))
         return
       }
       
@@ -91,7 +93,7 @@ export class CLIRunner {
       const route = this.router.route(processed.parsedArgs)
       if (!route.handler) {
         this.errorHandler.handleUnknownCommand(processed.parsedArgs.command)
-        process.exit(1)
+        await Effect.runPromise(Interactive.exit(1))
         return
       }
       
@@ -103,7 +105,7 @@ export class CLIRunner {
       
     } catch (error) {
       this.errorHandler.handleError(error)
-      process.exit(1)
+      await Effect.runPromise(Interactive.exit(1))
     }
   }
   

@@ -8,15 +8,8 @@
 export { debugStore, debug } from './core/store'
 export type { DebugEvent, DebugState, DebugTab } from './types'
 
-// Debug components
-export { DebugWrapper } from './jsx/components/DebugWrapper'
-export { EventList } from './jsx/components/EventList'
-export { PerformanceView } from './jsx/components/PerformanceView'
-export { StateInspector } from './jsx/components/StateInspector'
-export { ScopeExplorer } from './jsx/components/ScopeExplorer'
-export { DebugToolbar } from './jsx/components/DebugToolbar'
-export { LogsView } from './jsx/components/LogsView'
-export { OutputView } from './jsx/components/OutputView'
+// Debug components - these should not be exported from main module
+// Use debug/jsx/components directly for JSX usage
 
 // CLI integration (removed - handled by JSX runtime)
 

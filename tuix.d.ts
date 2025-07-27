@@ -9,7 +9,7 @@ declare module "*.tuix" {
   import type { View } from "./src/core/types"
   
   // Allow default and named exports from .tuix files
-  const content: any
+  const content: View
   export default content
   export = content
 }
@@ -17,7 +17,7 @@ declare module "*.tuix" {
 // Global type augmentation for .tuix file support
 declare namespace NodeJS {
   interface Module {
-    exports: any
+    exports: unknown
   }
 }
 
@@ -25,7 +25,7 @@ declare namespace NodeJS {
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      [elemName: string]: any
+      [elemName: string]: Record<string, unknown>
     }
   }
 }

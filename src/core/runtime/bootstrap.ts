@@ -36,7 +36,10 @@ export interface BootstrapConfig {
   readonly enableStyling?: boolean
   readonly enableCoordination?: boolean
   readonly enableComponentSystem?: boolean
+  readonly enableServices?: boolean
+  readonly enableEventSystem?: boolean
   readonly configPath?: string
+  readonly forceError?: boolean
 }
 
 /**
@@ -44,6 +47,11 @@ export interface BootstrapConfig {
  */
 export function bootstrap(config: BootstrapConfig = {}): Effect<ModuleRegistry, Error> {
   return Effect.gen(function* () {
+    // Force error for testing if requested
+    if (config.forceError) {
+      yield* Effect.fail(new Error('Forced bootstrap error for testing'))
+    }
+    
     const eventBus = getGlobalEventBus()
     const registry = getGlobalRegistry()
     
@@ -144,6 +152,7 @@ export function bootstrapFull(): Effect<ModuleRegistry, Error> {
  */
 export interface BootstrapResult {
   readonly registry: ModuleRegistry
+  readonly status: 'initialized' | 'partial' | 'failed'
   readonly modules: {
     readonly jsx: JSXModule
     readonly cli: CLIModule
@@ -163,10 +172,34 @@ export interface BootstrapResult {
  */
 export function bootstrapWithModules(config: BootstrapConfig = {}): Effect<BootstrapResult, Error> {
   return Effect.gen(function* () {
-    const registry = yield* bootstrap(config)
+    // Handle potential errors from bootstrap
+    const registryResult = yield* bootstrap(config).pipe(
+      Effect.either
+    )
+    
+    if (registryResult._tag === 'Left') {
+      return {
+        registry: getGlobalRegistry(),
+        status: 'failed' as const,
+        modules: {
+          jsx: undefined as any,
+          cli: undefined as any,
+          reactivity: undefined as any
+        }
+      }
+    }
+    
+    const registry = registryResult.right
+    
+    // Check if bootstrap succeeded fully
+    const requiredModules = ['jsx', 'cli', 'reactivity']
+    const missingModules = requiredModules.filter(name => !registry.hasModule(name))
+    
+    const status = missingModules.length > 0 ? 'partial' : 'initialized'
     
     const result: BootstrapResult = {
       registry,
+      status,
       modules: {
         jsx: registry.getModule<JSXModule>('jsx')!,
         cli: registry.getModule<CLIModule>('cli')!,

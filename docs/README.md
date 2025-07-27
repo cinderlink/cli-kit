@@ -1,15 +1,38 @@
-# TUIX Documentation
+# Tuix Framework Documentation
 
-Terminal User Interface eXtensions - A comprehensive framework for building modern terminal-based applications.
+## Framework Documentation
 
-## Quick Links
+### Core Documentation
+- **[RULES.md](./RULES.md)** - Framework-wide NEVER/ALWAYS rules
+- **[STANDARDS.md](./STANDARDS.md)** - Code quality standards
+- **[CONVENTIONS.md](./CONVENTIONS.md)** - File naming and organization conventions
+- **[DEPENDENCIES.md](./DEPENDENCIES.md)** - Framework dependencies guide
+- **[MODULES.md](./MODULES.md)** - Module system overview
+- **[PLUGINS.md](./PLUGINS.md)** - Plugin system documentation
 
-- [Getting Started](#getting-started)
-- [Core Concepts](#core-concepts)
-- [Component Guide](#components)
-- [API Reference](#api-reference)
+### Architecture Documentation
+- **[ARCHITECTURE_AND_DATA_FLOWS.md](./ARCHITECTURE_AND_DATA_FLOWS.md)** - Core architecture and data flow patterns
+- **[ADVANCED_PATTERNS_AND_INTERNALS.md](./ADVANCED_PATTERNS_AND_INTERNALS.md)** - Advanced architectural patterns and internals
 
-## Getting Started
+### Guides
+- **[AGENTS.md](./AGENTS.md)** - AI agents guide for working with the framework
+
+### Diagrams
+- **[diagrams/](./diagrams/)** - Architecture and data flow diagrams
+  - **[features/](./diagrams/features/)** - Feature-specific architecture diagrams
+  - **[patterns/](./diagrams/patterns/)** - Usage pattern diagrams
+
+## Reports and Status
+
+### Historical Reports (Archived)
+These reports document past work and are kept for historical reference:
+
+- **[COMPLIANCE_AUDIT_REPORT.md](./COMPLIANCE_AUDIT_REPORT.md)** - Final compliance audit report (January 2025 - COMPLETED)
+- **[DOCUMENTATION_COMPLIANCE_SUMMARY.md](./DOCUMENTATION_COMPLIANCE_SUMMARY.md)** - Documentation compliance verification
+- **[BROKEN_ITEMS_REPORT.md](./BROKEN_ITEMS_REPORT.md)** - Historical broken items report
+- **[PRIORITY_TODO.md](./PRIORITY_TODO.md)** - Historical priority task list
+
+## Getting Started with Tuix
 
 TUIX is a powerful framework for creating rich terminal user interfaces with TypeScript and Effect.ts.
 
@@ -32,93 +55,52 @@ const app = box(vstack(
 console.log(await Effect.runPromise(app.render()))
 ```
 
-## Core Concepts
+## Module Documentation
 
-### Views
-Views are the fundamental building blocks - composable units that render content:
-- [View System](../src/core/view.md) - Basic view primitives and composition
+Each module maintains its own documentation within its directory structure:
 
-### Error Handling
-Comprehensive error system built on Effect.ts patterns:
-- [Error System](../src/core/errors.md) - Typed errors, recovery, and boundaries
-
-### Performance
-Optimizations for smooth terminal experiences:
-- [View Cache](../src/core/view-cache.md) - Render caching and memoization
-
-### Lifecycle Management
-Component lifecycle and state management:
-- [Component Lifecycle](../src/core/lifecycle.md) - Hooks, effects, and timing
-
-### Scope System
-Hierarchical context management for CLI applications:
-- [Scope Architecture](../src/core/model/scope/architecture.md) - Core scope system design
-- [Scope Usage Guide](../src/core/model/scope/usage-guide.md) - Building nested CLI structures
-
-### Reactivity
-State management with runes and hooks:
-- [Hooks Integration](../src/core/update/reactivity/hooks-integration.md) - Integrating hooks with runes
-- [Migration Guide](../src/core/update/reactivity/migration-guide.md) - Upgrading to new reactivity system
-
-## Components
-
-Interactive UI components with state management:
-
-- Button - Clickable buttons with styling
-- TextInput - Text input fields with validation
-- List - Scrollable lists with selection
-- Table - Data tables with sorting and filtering
-- Modal - Overlay dialogs and popups
-- Tabs - Tabbed interfaces
-- ProgressBar - Progress indicators
-- Spinner - Loading animations
-
-## API Reference
+```
+src/module-name/
+├── README.md       # Module overview and usage
+├── ISSUES.md       # Known issues and improvements
+├── PLANNING.md     # Future development plans
+└── index.ts        # Public API exports
+```
 
 ### Core Modules
-For detailed documentation, see the README.md files in each module:
 
 - [Core System](../src/core/README.md) - View primitives, lifecycle, and runtime
 - [CLI Framework](../src/cli/README.md) - Command-line interface building
 - [JSX Runtime](../src/jsx/README.md) - Declarative UI development
-- [Components](../src/components/README.md) - Pre-built UI components
+- [UI Components](../src/ui/README.md) - Pre-built UI components
 - [Styling System](../src/styling/README.md) - Colors, borders, and themes
-- [Layout System](../src/layout/README.md) - Flexbox, grid, and layouts
 - [Services](../src/services/README.md) - Terminal, input, and rendering
-- [Reactivity](../src/reactivity/README.md) - State management with runes
 - [Testing](../src/testing/README.md) - Testing utilities and harnesses
 - [Process Manager](../src/process-manager/README.md) - Process lifecycle management
 - [Logger](../src/logger/README.md) - Structured logging system
-- [Health Monitoring](../src/health/README.md) - Health checks and diagnostics
 - [Configuration](../src/config/README.md) - Configuration management
 - [Plugins](../src/plugins/README.md) - Plugin system and built-ins
-- [TEA Architecture](../src/tea/README.md) - The Elm Architecture components
-- [Utilities](../src/utils/README.md) - Shared utility functions
-- [Alignment Tools](../src/alignment/README.md) - Documentation and AI integration
+- [Debug](../src/debug/README.md) - Debug tools and utilities
+- [Screenshot](../src/screenshot/README.md) - Terminal screenshot capabilities
 
-## Architecture
+## Getting Started
 
-TUIX follows functional programming principles with Effect.ts:
+1. Read **[RULES.md](./RULES.md)** first to understand framework constraints
+2. Review **[STANDARDS.md](./STANDARDS.md)** for code quality expectations
+3. Follow **[CONVENTIONS.md](./CONVENTIONS.md)** for consistent naming and organization
+4. Explore **[MODULES.md](./MODULES.md)** to understand the module system
+5. Check **[ARCHITECTURE_AND_DATA_FLOWS.md](./ARCHITECTURE_AND_DATA_FLOWS.md)** for architectural patterns
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Components    │────│     Views       │────│    Services     │
-│                 │    │                 │    │                 │
-│ - Interactive   │    │ - Composable    │    │ - Terminal      │
-│ - Stateful      │    │ - Renderable    │    │ - Input         │
-│ - Event-driven  │    │ - Cacheable     │    │ - Storage       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-          │                       │                       │
-          └───────────────────────┼───────────────────────┘
-                                  │
-                    ┌─────────────────┐
-                    │   Effect.ts     │
-                    │                 │
-                    │ - Error Safe    │
-                    │ - Async         │
-                    │ - Composable    │
-                    └─────────────────┘
-```
+## Documentation Standards
+
+All documentation follows these conventions:
+
+- **UPPERCASE.md** for documentation files (README.md, ISSUES.md, etc.)
+- **lowercase** path-based naming for directories
+- **PascalCase** for component files
+- **camelCase** for store files
+
+See [CONVENTIONS.md](./CONVENTIONS.md) for complete naming guidelines.
 
 ## Development
 
@@ -129,44 +111,16 @@ TUIX follows functional programming principles with Effect.ts:
 bun test
 
 # Run specific module tests
-bun test src/core/view.test.ts
+bun test src/core/
 
-# Watch mode
-bun test --watch
-```
-
-### Building
-
-```bash
 # Type checking
 bun run tsc --noEmit
-
-# Lint code  
-bun run eslint src/
-
-# Build for production
-bun build src/index.ts
 ```
 
 ### Contributing
 
-1. Follow the existing code patterns
-2. Use Effect.ts for async operations and error handling
-3. Write comprehensive tests for all new features
-4. Update documentation for public APIs
-5. Ensure TypeScript compiles without errors
-
-## Examples
-
-See the `examples/` directory for complete applications:
-
-- `examples/git-dashboard.ts` - Git repository dashboard
-- `examples/process-monitor.ts` - System process monitor  
-- `examples/log-viewer.ts` - Log file viewer with search
-- `examples/table-showcase.ts` - Data table demonstrations
-
-## Support
-
-- [GitHub Issues](https://github.com/cinderlink/tuix/issues)
-- [Documentation](https://docs.tuix.dev)
-- [Examples](https://github.com/cinderlink/tuix/tree/main/examples)
+1. Follow the framework [RULES.md](./RULES.md)
+2. Adhere to [STANDARDS.md](./STANDARDS.md) for code quality
+3. Use [CONVENTIONS.md](./CONVENTIONS.md) for naming
+4. Write comprehensive tests for all new features
+5. Update module documentation as needed

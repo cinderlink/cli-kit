@@ -43,11 +43,11 @@ export const PluginEvents = {
     pluginVersion: string,
     source: string
   ) {
-    return eventBus.emit({
+    return eventBus.emit('hook:pluginLoad', {
       id: generateId(),
       type: 'hook:pluginLoad',
       source,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       pluginName,
       pluginVersion
     })
@@ -59,11 +59,11 @@ export const PluginEvents = {
     pluginVersion: string,
     source: string
   ) {
-    return eventBus.emit({
+    return eventBus.emit('hook:pluginUnload', {
       id: generateId(),
       type: 'hook:pluginUnload',
       source,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       pluginName,
       pluginVersion
     })
@@ -74,11 +74,11 @@ export const PluginEvents = {
     argv: string[],
     source: string
   ) {
-    return eventBus.emit({
+    return eventBus.emit('hook:beforeParse', {
       id: generateId(),
       type: 'hook:beforeParse',
       source,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       argv
     })
   },
@@ -89,11 +89,11 @@ export const PluginEvents = {
     parsed: Record<string, unknown>,
     source: string
   ) {
-    return eventBus.emit({
+    return eventBus.emit('hook:afterParse', {
       id: generateId(),
       type: 'hook:afterParse',
       source,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       argv,
       parsed
     })
@@ -105,11 +105,11 @@ export const PluginEvents = {
     command: string[],
     source: string
   ) {
-    return eventBus.emit({
+    return eventBus.emit('hook:beforeValidate', {
       id: generateId(),
       type: 'hook:beforeValidate',
       source,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       args,
       command
     })
@@ -122,11 +122,11 @@ export const PluginEvents = {
     valid: boolean,
     source: string
   ) {
-    return eventBus.emit({
+    return eventBus.emit('hook:afterValidate', {
       id: generateId(),
       type: 'hook:afterValidate',
       source,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       args,
       command,
       valid
@@ -140,11 +140,11 @@ export const PluginEvents = {
     args: Record<string, unknown>,
     source: string
   ) {
-    return eventBus.emit({
+    return eventBus.emit('hook:onError', {
       id: generateId(),
       type: 'hook:onError',
       source,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       error,
       command,
       args

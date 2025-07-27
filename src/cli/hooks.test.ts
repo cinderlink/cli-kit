@@ -232,7 +232,7 @@ describe("Hook System", () => {
 
       await Effect.runPromise(
         hooks.beforeCommand.tap('failing', () => {
-          throw new Error('Handler failed')
+          return Effect.fail(new Error('Handler failed'))
         })
       )
 

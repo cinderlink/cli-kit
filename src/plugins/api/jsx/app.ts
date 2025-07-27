@@ -1,14 +1,21 @@
 /**
  * Plugin JSX Application Helpers
  * 
- * Utilities for creating and managing plugins
+ * Utilities for creating and managing core plugins
+ * For CLI integration, use '@plugins/integrations/cli/app'
  */
 
-import type { JSXPlugin } from '@cli/jsx/types'
+// Define basic plugin structure without CLI dependencies
+export interface CorePlugin {
+  name: string
+  version?: string
+  description?: string
+  commands?: any[]
+}
 
 /**
- * Create a JSX plugin with commands
+ * Create a basic JSX plugin
  */
-export function createJSXPlugin(config: JSXPlugin): JSXPlugin {
+export function createJSXPlugin(config: CorePlugin): CorePlugin {
   return config
 }

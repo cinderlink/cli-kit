@@ -12,6 +12,7 @@ import { LiveServices } from "@core/services/impl"
 import { InteractiveFiberRef } from "@core/runtime/interactive"
 import { validateJSXElement } from "./configValidator"
 import { renderDebug } from "@core/debug"
+import { log } from "@logger/core/logger"
 
 // Legacy debug function for backwards compatibility
 const debug = (message: string) => renderDebug.debug(message)
@@ -65,8 +66,9 @@ export async function renderToTerminal(element: JSX.Element | View): Promise<voi
     program.pipe(
       Effect.provide(LiveServices),
       Effect.catchAll((error) => 
-        Effect.sync(() => {
-          console.error('Render error:', error)
+        log.error('Render error', error instanceof Error ? error : undefined, {
+          context: 'jsx-render',
+          errorDetails: typeof error === 'object' ? JSON.stringify(error) : String(error)
         })
       )
     )

@@ -16,10 +16,10 @@ export function createHook<T extends BaseEvent>(
   eventBus: EventBus,
   eventType: T['type']
 ): Hook<T> {
-  const handlers = new Map<string, (event: T) => Effect<void, never> | void | Promise<void>>()
+  const handlers = new Map<string, (event: T) => Effect.Effect<void, never> | void | Promise<void>>()
 
   return {
-    tap(name: string, fn: (event: T) => Effect<void, never> | void): Effect<Subscription, never> {
+    tap(name: string, fn: (event: T) => Effect.Effect<void, never> | void): Effect.Effect<Subscription, never> {
       handlers.set(name, fn)
       
       return Effect.gen(function* () {
@@ -44,7 +44,7 @@ export function createHook<T extends BaseEvent>(
       })
     },
 
-    tapAsync(name: string, fn: (event: T) => Promise<void>): Effect<Subscription, never> {
+    tapAsync(name: string, fn: (event: T) => Promise<void>): Effect.Effect<Subscription, never> {
       return this.tap(name, (event) => 
         Effect.tryPromise({
           try: () => fn(event),

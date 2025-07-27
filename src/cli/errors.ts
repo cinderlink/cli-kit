@@ -145,8 +145,8 @@ export const failWithCLIError = <E extends CLIErrorType>(error: E) =>
 
 export const catchCLIError = <A, E, R>(
   effect: Effect.Effect<A, E, R>
-) => 
-  Effect.catchAll(effect, (error) => {
+): Effect.Effect<A, CLIError, R> => 
+  Effect.catchAll(effect, (error): Effect.Effect<never, CLIError, never> => {
     if (error instanceof CLIError) {
       return Effect.fail(error)
     }

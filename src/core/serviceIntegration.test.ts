@@ -277,11 +277,15 @@ test("module registry provides statistics", async () => {
   const registry = await Effect.runPromise(bootstrapFull())
   const stats = registry.getStats()
   
-  expect(stats.totalModules).toBe(10) // All modules including coordination and component system
-  expect(stats.initializedModules).toBe(10) // All should be initialized
+  expect(stats.totalModules).toBe(9) // All modules including coordination (component system integrated into core/view)
+  expect(stats.initializedModules).toBe(9) // All should be initialized
   expect(stats.moduleStates['jsx']).toBe('ready')
   expect(stats.moduleStates['cli']).toBe('ready')
   expect(stats.moduleStates['logger']).toBe('ready')
   expect(stats.moduleStates['coordination']).toBe('ready')
-  expect(stats.moduleStates['component-system']).toBe('ready')
+  expect(stats.moduleStates['reactivity']).toBe('ready')
+  expect(stats.moduleStates['services']).toBe('ready')
+  expect(stats.moduleStates['config']).toBe('ready')
+  expect(stats.moduleStates['process-manager']).toBe('ready')
+  expect(stats.moduleStates['styling']).toBe('ready')
 })

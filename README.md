@@ -156,41 +156,60 @@ const MyComponent = ({ name }: { name: string }) => {
 }
 ```
 
-### Advanced TUI Application
+### Advanced TUI Application with MVU
 
 ```typescript
-import { Effect } from "effect"
-import { runApp } from "tuix"
-import { text, vstack } from "tuix"
-import { style, Colors } from "tuix/styling"
-import type { Component } from "tuix"
+import { Component, runApp, Effect, View, Sub, KeyUtils } from "tuix"
 
 interface Model {
   readonly count: number
+  readonly lastAction: string
 }
 
-type Msg = { readonly tag: "increment" }
+type Msg = 
+  | { readonly type: "increment" }
+  | { readonly type: "decrement" }
+  | { readonly type: "reset" }
 
 const counterApp: Component<Model, Msg> = {
-  init: Effect.succeed([{ count: 0 }, []]),
+  init: Effect.succeed([{ count: 0, lastAction: 'Started' }, []]),
   
   update: (msg: Msg, model: Model) => {
-    switch (msg.tag) {
+    switch (msg.type) {
       case "increment":
-        return Effect.succeed([{ ...model, count: model.count + 1 }, []])
+        return Effect.succeed([{ count: model.count + 1, lastAction: 'Incremented' }, []])
+      case "decrement":
+        return Effect.succeed([{ count: model.count - 1, lastAction: 'Decremented' }, []])
+      case "reset":
+        return Effect.succeed([{ count: 0, lastAction: 'Reset' }, []])
     }
   },
   
-  view: (model: Model) => (
-    <div>
-      <Text color="cyan" bold>TUIX Counter 🎯</Text>
-      <Text>Count: {model.count}</Text>
-      <Text color="gray">Press Space to increment, Ctrl+C to exit</Text>
-    </div>
-  )
+  view: (model: Model) => View.vstack(
+    View.bold(View.cyan(View.text('TUIX Counter 🎯'))),
+    View.text(`Count: ${model.count}`),
+    View.text(`Last action: ${model.lastAction}`),
+    View.empty,
+    View.gray(View.text('Controls:')),
+    View.gray(View.text('  [+] Increment  [-] Decrement  [r] Reset  [q] Quit'))
+  ),
+  
+  subscriptions: () => Sub.fromKeys((key) => {
+    if (KeyUtils.isChar(key, '+')) return { type: 'increment' }
+    if (KeyUtils.isChar(key, '-')) return { type: 'decrement' }
+    if (KeyUtils.isChar(key, 'r')) return { type: 'reset' }
+    if (KeyUtils.isChar(key, 'q')) return Sub.quit()
+    return null
+  })
 }
 
-runApp(counterApp)
+// Run with proper error handling and cleanup
+await Effect.runPromise(
+  runApp(counterApp, { 
+    fps: 60,
+    fullscreen: true 
+  })
+)
 ```
 
 ## 🏗️ Architecture
@@ -237,6 +256,78 @@ Interactive terminal applications following the **Model-View-Update (MVU)** patt
 ```
 
 Both frameworks are powered by **Effect.ts** for functional programming, error handling, and resource management, with **[Svelte](https://svelte.dev/)-inspired runes** providing reactive state management.
+
+### Model-View-Update (MVU) Pattern
+
+The MVU pattern provides a predictable way to build interactive terminal applications:
+
+- **Model**: Your application's state as an immutable data structure
+- **View**: A pure function that transforms the model into terminal output
+- **Update**: A pure function that handles messages and returns a new model
+
+Enhanced with Effect.ts:
+- **Commands**: Side effects that produce messages (HTTP requests, file I/O, etc.)
+- **Subscriptions**: Continuous streams of events (keyboard input, timers, etc.)
+- **Type Safety**: Full type inference throughout the entire application
+- **Error Handling**: Comprehensive error types with recovery strategies
+
+```typescript
+import { Component, runApp, Effect, View, Cmd, Sub } from 'tuix'
+
+// 1. Define your Model (state)
+type Model = {
+  todos: Todo[]
+  input: string
+  filter: 'all' | 'active' | 'completed'
+}
+
+// 2. Define your Messages (events)
+type Msg = 
+  | { type: 'add' }
+  | { type: 'toggle'; id: string }
+  | { type: 'updateInput'; value: string }
+  | { type: 'setFilter'; filter: Model['filter'] }
+
+// 3. Create your Component
+const todoApp: Component<Model, Msg> = {
+  // Initialize with commands
+  init: Effect.succeed([
+    { todos: [], input: '', filter: 'all' },
+    [Cmd.loadTodos()]  // Load todos from storage
+  ]),
+  
+  // Handle messages and update state
+  update: (msg, model) => {
+    switch (msg.type) {
+      case 'add':
+        const newTodo = { id: Date.now().toString(), text: model.input, done: false }
+        return Effect.succeed([
+          { ...model, todos: [...model.todos, newTodo], input: '' },
+          [Cmd.saveTodos([...model.todos, newTodo])]  // Save to storage
+        ])
+      // ... handle other messages
+    }
+  },
+  
+  // Render the UI
+  view: (model) => View.vstack(
+    View.text('Todo List'),
+    View.input(model.input, (value) => ({ type: 'updateInput', value })),
+    ...model.todos.map(todo => 
+      View.checkbox(todo.done, () => ({ type: 'toggle', id: todo.id }))
+    )
+  ),
+  
+  // Subscribe to external events
+  subscriptions: (model) => Sub.batch([
+    Sub.onKey('ctrl+a', { type: 'add' }),
+    Sub.interval(60000, { type: 'autosave' })
+  ])
+}
+
+// Run the app with Effect.ts
+await Effect.runPromise(runApp(todoApp))
+```
 
 ## 🌊 Stream Components
 

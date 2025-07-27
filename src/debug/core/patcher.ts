@@ -7,6 +7,10 @@
 import { debug } from './store'
 import { scopeManager } from '@core/model/scope/manager'
 import type { ScopeDef } from '@core/model/scope/types'
+import type { Component } from '@core/types'
+import type { JSXElement, JSXChildren } from '@jsx/types'
+import type { LogEntry, LoggerConfig, LogTransport } from '@logger/types'
+import type { TuixLogger } from '@logger/core/logger'
 import { DEBUG_DEFAULTS } from '../constants'
 
 export interface PatchOptions {
@@ -80,7 +84,7 @@ async function patchJSXRuntime() {
     
     // Patch createElement
     const originalCreateElement = jsxRuntime.createElement
-    jsxRuntime.createElement = function(type: any, props: any, ...children: any[]) {
+    jsxRuntime.createElement = function(type: string | Function, props: Record<string, unknown> | null, ...children: JSXChildren[]) {
       const componentName = typeof type === 'function' ? type.name : String(type)
       
       debug.jsx(`Creating element: ${componentName}`, {
@@ -111,7 +115,7 @@ async function patchRenderSystem() {
     
     // Patch runApp
     const originalRunApp = runtime.runApp
-    runtime.runApp = function(component: any) {
+    runtime.runApp = function<Model, Msg>(component: Component<Model, Msg>) {
       debug.render('Starting application render', { 
         componentName: component.name || 'App' 
       })
@@ -140,7 +144,7 @@ async function patchLoggerModule() {
     // Create debug transport
     const DebugTransport = {
       name: 'debug',
-      async write(entry: any) {
+      async write(entry: LogEntry) {
         debug.logger(entry.message, entry, { source: entry.logger || 'unknown' })
       },
       async close() {}
@@ -149,7 +153,7 @@ async function patchLoggerModule() {
     // Patch TuixLogger constructor
     const OriginalLogger = loggerModule.TuixLogger
     loggerModule.TuixLogger = class extends OriginalLogger {
-      constructor(config: any) {
+      constructor(config: LoggerConfig) {
         // Add debug transport
         const transports = config.transports || []
         transports.push(DebugTransport)

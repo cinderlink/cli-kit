@@ -51,11 +51,10 @@ describe("CLI Hooks", () => {
       })
 
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:beforeCommand',
+        hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test', 'command'],
           args: { foo: 'bar' }
-        })
+        }))
       )
 
       expect(called).toBe(true)
@@ -75,12 +74,11 @@ describe("CLI Hooks", () => {
       })
 
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:afterCommand',
+        hooks.emit(createHookEvent('hook:afterCommand', {
           command: ['test'],
           args: {},
           result: 'success'
-        })
+        }))
       )
 
       expect(called).toBe(true)
@@ -96,11 +94,10 @@ describe("CLI Hooks", () => {
       })
 
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:beforeCommand',
+        hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
           args: {}
-        })
+        }))
       )
 
       expect(called).toBe(true)
@@ -119,11 +116,10 @@ describe("CLI Hooks", () => {
       })
 
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:pluginLoad',
+        hooks.emit(createHookEvent('hook:pluginLoad', {
           pluginName: 'test-plugin',
           pluginVersion: '1.0.0'
-        })
+        }))
       )
 
       expect(pluginName).toBe('test-plugin')
@@ -139,12 +135,11 @@ describe("CLI Hooks", () => {
       })
 
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:onError',
+        hooks.emit(createHookEvent('hook:onError', {
           error: new Error('Test error'),
           command: ['test'],
           args: {}
-        })
+        }))
       )
 
       expect(errorMessage).toBe('Test error')
@@ -162,11 +157,10 @@ describe("CLI Hooks", () => {
 
       // First call should trigger
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:beforeCommand',
+        hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
           args: {}
-        })
+        }))
       )
 
       expect(callCount).toBe(1)
@@ -176,11 +170,10 @@ describe("CLI Hooks", () => {
 
       // Second call should not trigger
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:beforeCommand',
+        hooks.emit(createHookEvent('hook:beforeCommand', {
           command: ['test'],
           args: {}
-        })
+        }))
       )
 
       expect(callCount).toBe(1)
@@ -196,10 +189,9 @@ describe("CLI Hooks", () => {
 
       // First call should trigger
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:afterInit',
+        hooks.emit(createHookEvent('hook:afterInit', {
           config: {}
-        })
+        }))
       )
 
       expect(callCount).toBe(1)
@@ -209,10 +201,9 @@ describe("CLI Hooks", () => {
 
       // Second call should not trigger
       await Effect.runPromise(
-        hooks.emit({
-          type: 'hook:afterInit',
+        hooks.emit(createHookEvent('hook:afterInit', {
           config: {}
-        })
+        }))
       )
 
       expect(callCount).toBe(1)

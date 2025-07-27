@@ -4,7 +4,7 @@
  * The main runtime class implementation
  */
 
-import { Effect, Queue, Fiber, Ref, FiberRef, Layer, Context, Exit, Cause } from "effect"
+import { Effect, Queue, Fiber, Ref, FiberRef, Layer, Context, Exit, Cause, Duration } from "effect"
 import type { Component, View, Update, UpdateResult, Command, Subscription } from "../../../types"
 import { 
   TerminalService, 
@@ -47,8 +47,8 @@ export class Runtime<Model, Msg> {
       fullscreen: config.fullscreen ?? true,
       debug: config.debug ?? false,
       messageBufferSize: config.messageBufferSize ?? 1000,
-      updateTimeout: config.updateTimeout ?? "5 seconds" as any,
-      commandTimeout: config.commandTimeout ?? "30 seconds" as any,
+      updateTimeout: config.updateTimeout ?? Duration.seconds(5),
+      commandTimeout: config.commandTimeout ?? Duration.seconds(30),
       maxConcurrentCommands: config.maxConcurrentCommands ?? 10,
       performanceMonitoring: config.performanceMonitoring ?? false,
       onError: config.onError,
@@ -384,7 +384,7 @@ export class Runtime<Model, Msg> {
       while (true) {
         const state = yield* _(Ref.get(this.state))
         if (!state.isRunning) break
-        yield* _(Effect.sleep("100 millis" as any))
+        yield* _(Effect.sleep(Duration.millis(100)))
       }
     }.bind(this))
   }

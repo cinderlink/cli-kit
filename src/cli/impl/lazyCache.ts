@@ -4,7 +4,7 @@
  * Optimized caching system for lazy-loaded modules
  */
 
-import type { Handler, LazyHandler } from "./types"
+import type { Handler, LazyHandler } from "../types"
 
 /**
  * Represents a JavaScript module that can be loaded dynamically.

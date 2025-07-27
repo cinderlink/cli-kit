@@ -9,6 +9,11 @@
 
 import { defineConfig, runCLI } from "../src/cli/index"
 import { z } from "zod"
+import { createConsoleLogger } from "../src/logger"
+import { Effect } from "effect"
+import { Interactive } from "../src/core/runtime/interactive"
+
+const logger = createConsoleLogger('error')
 
 // Define the CLI configuration
 const cliConfig = defineConfig({
@@ -28,7 +33,7 @@ const cliConfig = defineConfig({
             interactive: z.boolean().optional().describe("Start interactive monitor after starting services"),
             timeout: z.number().optional().describe("Auto-stop watchers after specified seconds")
           },
-          handler: () => import("../src/cli/commands/dev/start")
+          handler: () => import("../src/cli/commands/dev/Start")
         },
         stop: {
           description: "Stop all development services",
@@ -39,7 +44,7 @@ const cliConfig = defineConfig({
           handler: () => import("../src/cli/commands/dev/status")
         }
       },
-      handler: () => import("../src/cli/commands/dev/start") // Default to start
+      handler: () => import("../src/cli/commands/dev/Start") // Default to start
     },
     
     pm: {
@@ -287,6 +292,7 @@ const cliConfig = defineConfig({
 
 // Run the CLI with automatic help generation, validation, and error handling
 runCLI(cliConfig).catch((error) => {
-  console.error(`❌ Error: ${error.message || error}`)
-  process.exit(1)
+  Effect.runSync(logger.error(`❌ Error: ${error.message || error}`))
+  // Use proper shutdown for CLI errors
+  Effect.runSync(Interactive.exit(1))
 })

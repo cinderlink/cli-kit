@@ -13,7 +13,7 @@ export interface DebugModel {
   activeTab: string
   logs: string[]
   output: string[]
-  events: Array<{ timestamp: number; type: string; data: any }>
+  events: Array<{ timestamp: number; type: string; data: unknown }>
   isVisible: boolean
   performance: {
     renderCount: number
@@ -28,7 +28,7 @@ export type DebugMsg =
   | { type: "ToggleVisibility" }
   | { type: "AddLog"; message: string }
   | { type: "AddOutput"; content: string }
-  | { type: "RecordEvent"; event: string; data: any }
+  | { type: "RecordEvent"; event: string; data: unknown }
   | { type: "UpdatePerformance"; renderTime: number }
 
 // Initialize debug model
@@ -243,7 +243,7 @@ function renderTabContent(model: DebugModel): View {
  */
 export const enableDebugIfNeeded = <Model, Msg>(
   app: Component<Model, Msg>
-): Component<any, any> => {
+): Component<DebugWrappedModel<Model> | Model, DebugWrappedMsg<Msg> | Msg> => {
   if (process.env.TUIX_DEBUG === 'true') {
     return wrapWithDebug(app)
   }

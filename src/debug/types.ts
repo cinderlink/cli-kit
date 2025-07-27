@@ -2,13 +2,21 @@
  * Debug Module Type Definitions
  */
 
+export interface RenderTreeNode {
+  id: string
+  type: string
+  props: Record<string, unknown>
+  children: RenderTreeNode[]
+  depth: number
+}
+
 export interface DebugEvent {
   id: string
   timestamp: Date
   category: 'scope' | 'jsx' | 'render' | 'lifecycle' | 'match' | 'performance' | 'error' | 'system' | 'logger'
   level: 'debug' | 'info' | 'warn' | 'error'
   message: string
-  data?: any
+  data?: unknown
   context?: {
     scopeId?: string
     componentName?: string
@@ -27,7 +35,7 @@ export interface DebugState {
   selectedScope: string | null
   commandPath: string[]
   matchedScopes: string[]
-  renderTree: any[]
+  renderTree: RenderTreeNode[]
   performanceMetrics: Map<string, PerformanceMetric>
   maxEvents: number
 }

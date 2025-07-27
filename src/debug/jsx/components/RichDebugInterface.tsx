@@ -13,15 +13,16 @@ import { Modal } from '@ui/components/feedback/modal/Modal'
 import { Flex } from '@ui/components/layout/flex/Flex'
 import { spacer } from '@core/view/layout'
 import type { View } from '@core/types'
+import type { ViewTreeNode, UpdateEvent, ScopeInfo, ComponentInfo } from '../../tea/DebugApp'
 
 interface DebugState {
   activeTab: 'app' | 'logs' | 'model' | 'view' | 'update' | 'cli' | 'jsx'
   logs: string[]
-  modelState: any
-  viewTree: any[]
-  updateHistory: any[]
-  cliScopes: any[]
-  jsxComponents: any[]
+  modelState: unknown
+  viewTree: ViewTreeNode[]
+  updateHistory: UpdateEvent[]
+  cliScopes: ScopeInfo[]
+  jsxComponents: ComponentInfo[]
   performance: {
     renderTime: number
     updateCount: number
@@ -213,7 +214,7 @@ export function RichDebugInterface({
           vstack(
             text('🌳 Component hierarchy:'),
             text(''),
-            ...debugState.viewTree.map(node => text(`- ${node}`)),
+            ...debugState.viewTree.map(node => text(`- ${node.type} (${node.id})`)),
             debugState.viewTree.length === 0 ? text('(No view tree captured)') : empty
           )
         ])
@@ -231,7 +232,7 @@ export function RichDebugInterface({
             ...debugState.updateHistory.slice(-10).map((update, i) => 
               vstack(
                 text(`${i + 1}. ${update.type || 'Update'}`),
-                text(`   Data: ${JSON.stringify(update.data || {})}`),
+                text(`   Duration: ${update.duration}ms`),
                 text('')
               )
             ),

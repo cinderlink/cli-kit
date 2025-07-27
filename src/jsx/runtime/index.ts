@@ -21,20 +21,7 @@ import {
 } from "@core/model/scope"
 import { getGlobalEventBus } from "@core/model/events/eventBus"
 import { getGlobalRegistry } from "@core/runtime/module/registry"
-import { 
-  CLI,
-  Plugin,
-  Command,
-  Arg,
-  Flag,
-  Option,
-  Help,
-  Example,
-  Exit,
-  LoadPlugin,
-  CommandLineScope,
-  CommandLineHelp
-} from "@cli/jsx/components"
+// CLI components will be imported dynamically to avoid circular dependencies
 import { Scope, ScopeContent, ScopeFallback } from "@core/model/scope/jsx/components"
 import { JSXModule } from "@jsx/module"
 import type { JSXPluginEvent, JSXCommandEvent } from "@jsx/events"
@@ -642,42 +629,23 @@ export const jsx = (
       const textContent = validChildren.join('')
       return styledText(textContent, safeProps.style || {})
     
-    // CLI Components (mapped from imports)
+    // CLI Components - these are not intrinsic elements
+    // They must be explicitly imported in user code
+    // Example: import { CLI, Command } from '@cli/jsx/components'
     case 'cli':
-      return CLI({ ...safeProps, children: validChildren })
-      
     case 'plugin':
-      return Plugin({ ...safeProps, children: validChildren })
-      
     case 'command':
-      return Command({ ...safeProps, children: validChildren })
-      
     case 'arg':
-      return Arg({ ...safeProps, children: validChildren })
-      
     case 'flag':
-      return Flag({ ...safeProps, children: validChildren })
-      
     case 'option':
-      return Option({ ...safeProps, children: validChildren })
-      
     case 'help':
-      return Help({ ...safeProps, children: validChildren })
-      
     case 'example':
-      return Example({ ...safeProps, children: validChildren })
-      
     case 'exit':
-      return Exit({ ...safeProps, children: validChildren })
-      
     case 'load-plugin':
-      return LoadPlugin({ ...safeProps, children: validChildren })
-      
     case 'command-line-scope':
-      return CommandLineScope({ ...safeProps, children: validChildren })
-      
     case 'command-line-help':
-      return CommandLineHelp({ ...safeProps, children: validChildren })
+      // These are not built-in - must be imported by user
+      return text(`[${type} component must be imported from @cli/jsx/components]`)
       
     // Scope Components
     case 'scope':

@@ -101,7 +101,7 @@ export class TuixConfig implements Config {
       this.notifyWatchers({
         key: fullKey,
         oldValue: oldEntry.value,
-        newValue: undefined as any,
+        newValue: undefined,
         source: "runtime",
         timestamp: new Date()
       })

@@ -5,6 +5,10 @@
 import type { Config, ConfigObject, ConfigSchema } from "@config/types"
 import { createConfig } from "@config/index"
 import { setGlobalConfig } from "@jsx/config/stores/configStore"
+import { createConsoleLogger } from "@logger/index"
+import { Effect } from "effect"
+
+const logger = createConsoleLogger("error")
 
 /**
  * Configuration provider component props
@@ -44,7 +48,11 @@ export function ConfigProvider(props: ConfigProviderProps): JSX.Element {
     }
     
     // Note: This should be called before JSX processing in real implementation
-    createConfigAsync().catch(console.error)
+    createConfigAsync().catch((error) => {
+      Effect.runSync(logger.error('Failed to create config', error instanceof Error ? error : undefined, {
+        context: 'ConfigProvider'
+      }))
+    })
   }
   
   // Return children wrapped in a fragment

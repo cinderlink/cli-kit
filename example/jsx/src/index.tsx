@@ -7,6 +7,7 @@ import { FileExplorerCommand } from './commands/explorer'
 import { TerminalCommand } from './commands/terminal'
 import { SettingsCommand } from './commands/settings'
 import { ShowcaseCommand } from './commands/showcase'
+import { UIComponentsDemo } from './commands/demo/ui-components'
 
 export const app = new JSXApp()
   .command(
@@ -140,5 +141,11 @@ export const app = new JSXApp()
           defaultValue={true}
         />
       </Command>
+
+      <Command
+        name="ui-demo"
+        description="Demo of re-enabled UI components (List, Table, Tabs)"
+        handler={UIComponentsDemo}
+      />
     </CLI>
   )

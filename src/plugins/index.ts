@@ -4,11 +4,11 @@
  * Pre-built plugins for common CLI functionality
  */
 
-export { LoggingPlugin } from "./logging"
+export { LoggingPlugin } from "./integrations/cli/builtin/logging"
 export { ProcessManagerPlugin } from "@process-manager/index"
 
-// Re-export plugin types for convenience
-export type { JSXPlugin } from "@jsx/app"
+// Re-export core plugin types for convenience
+export type { CorePlugin } from "./api/jsx/app"
 
 // Constants
 export * from "./constants"

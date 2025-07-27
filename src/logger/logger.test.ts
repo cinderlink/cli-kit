@@ -23,10 +23,14 @@ describe("Logger", () => {
       
       // Create a custom transport that captures messages
       class TestTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          messages.push(entry.message)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            messages.push(entry.message)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -43,10 +47,14 @@ describe("Logger", () => {
       const messages: string[] = []
       
       class TestTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          messages.push(entry.message)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            messages.push(entry.message)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -63,10 +71,14 @@ describe("Logger", () => {
       const messages: string[] = []
       
       class TestTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          messages.push(`${entry.level}: ${entry.message}`)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            messages.push(`${entry.level}: ${entry.message}`)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -95,10 +107,14 @@ describe("Logger", () => {
       const entries: LogEntry[] = []
       
       class TestTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          entries.push(entry)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            entries.push(entry)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -117,10 +133,14 @@ describe("Logger", () => {
       const entries: LogEntry[] = []
       
       class TestTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          entries.push(entry)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            entries.push(entry)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -141,10 +161,14 @@ describe("Logger", () => {
       const entries: LogEntry[] = []
       
       class TestTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          entries.push(entry)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            entries.push(entry)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -167,10 +191,14 @@ describe("Logger", () => {
       const entries: LogEntry[] = []
       
       class TestTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          entries.push(entry)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            entries.push(entry)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -195,17 +223,25 @@ describe("Logger", () => {
       const transport2Messages: string[] = []
       
       class TestTransport1 implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          transport1Messages.push(entry.message)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            transport1Messages.push(entry.message)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       class TestTransport2 implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          transport2Messages.push(entry.message)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            transport2Messages.push(entry.message)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -221,10 +257,12 @@ describe("Logger", () => {
     
     test("should not fail on transport errors", async () => {
       class FailingTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          throw new Error("Transport failed")
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.fail(new Error("Transport failed"))
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const logger = new TuixLogger({
@@ -244,10 +282,14 @@ describe("Logger", () => {
       const messages: string[] = []
       
       class TestTransport implements LogTransport {
-        async write(entry: LogEntry): Promise<void> {
-          messages.push(entry.message)
+        write(entry: LogEntry): Effect.Effect<void, never, never> {
+          return Effect.sync(() => {
+            messages.push(entry.message)
+          })
         }
-        async close(): Promise<void> {}
+        close(): Effect.Effect<void, never, never> {
+          return Effect.void
+        }
       }
       
       const loggerLayer = makeLoggerLayer({

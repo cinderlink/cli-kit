@@ -3,6 +3,10 @@
  */
 
 import { getGlobalConfig } from "@jsx/config/stores/configStore"
+import { createConsoleLogger } from "@logger/index"
+import { Effect } from "effect"
+
+const logger = createConsoleLogger("warn")
 
 /**
  * JSX component for loading config from file
@@ -31,7 +35,10 @@ export function LoadConfig(props: LoadConfigProps): JSX.Element | null {
     if (props.required) {
       throw error
     }
-    console.warn(`Failed to load config file ${props.file}:`, error)
+    Effect.runSync(logger.warn(`Failed to load config file ${props.file}`, {
+      file: props.file,
+      error: error instanceof Error ? error.message : String(error)
+    }))
   })
   
   return props.children ? <>{props.children}</> : null

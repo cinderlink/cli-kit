@@ -3,7 +3,7 @@
  */
 
 import { Effect } from 'effect'
-import type { DebugEvent, DebugState, PerformanceMetric } from '../types'
+import type { DebugEvent, DebugState, PerformanceMetric, RenderTreeNode } from '../types'
 import { DEBUG_DEFAULTS, DEBUG_CATEGORIES, DEBUG_LEVELS } from '../constants'
 
 class DebugStore {
@@ -40,7 +40,7 @@ class DebugStore {
     category: DebugEvent['category'],
     level: DebugEvent['level'],
     message: string,
-    data?: any,
+    data?: unknown,
     context?: DebugEvent['context']
   ) {
     if (this.state.paused && category !== DEBUG_CATEGORIES.SYSTEM) return
@@ -117,7 +117,7 @@ class DebugStore {
     this.notify()
   }
   
-  updateRenderTree(tree: any[]) {
+  updateRenderTree(tree: RenderTreeNode[]) {
     this.state.renderTree = tree
     this.notify()
   }
@@ -139,7 +139,7 @@ class DebugStore {
       event.category.includes(filter) ||
       event.level.includes(filter) ||
       (event.context?.componentName?.toLowerCase().includes(filter)) ||
-      JSON.stringify(event.data).toLowerCase().includes(filter)
+      (event.data ? JSON.stringify(event.data).toLowerCase().includes(filter) : false)
     )
   }
   
@@ -158,10 +158,10 @@ export const debugStore = new DebugStore()
 
 // Convenience logging functions
 export const debug = {
-  scope: (message: string, data?: any) => 
+  scope: (message: string, data?: unknown) => 
     debugStore.log(DEBUG_CATEGORIES.SCOPE, DEBUG_LEVELS.DEBUG, message, data),
   
-  jsx: (message: string, data?: any) => 
+  jsx: (message: string, data?: unknown) => 
     debugStore.log(DEBUG_CATEGORIES.JSX, DEBUG_LEVELS.DEBUG, message, data),
   
   render: (message: string, context?: { componentName?: string, phase?: string }) => 
@@ -170,7 +170,7 @@ export const debug = {
   lifecycle: (message: string, context?: { componentName?: string, phase?: string }) => 
     debugStore.log(DEBUG_CATEGORIES.LIFECYCLE, DEBUG_LEVELS.DEBUG, message, undefined, context),
   
-  match: (message: string, data?: any) => 
+  match: (message: string, data?: unknown) => 
     debugStore.log(DEBUG_CATEGORIES.MATCH, DEBUG_LEVELS.INFO, message, data),
   
   performance: (message: string, duration: number, context?: { componentName?: string }) => 
@@ -182,6 +182,6 @@ export const debug = {
   system: (message: string) => 
     debugStore.log(DEBUG_CATEGORIES.SYSTEM, DEBUG_LEVELS.INFO, message),
   
-  logger: (message: string, data?: any, context?: { source?: string }) => 
+  logger: (message: string, data?: unknown, context?: { source?: string }) => 
     debugStore.log(DEBUG_CATEGORIES.LOGGER, DEBUG_LEVELS.DEBUG, message, data, context)
 }

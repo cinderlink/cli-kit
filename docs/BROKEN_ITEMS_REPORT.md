@@ -1,5 +1,7 @@
 # Broken Items Report
 
+> **⚠️ ARCHIVED DOCUMENT**: This is a historical report documenting issues that existed at a specific point in time. It is kept for reference only. For current issues, run tests and check active GitHub issues.
+
 ## 1. Test Suite Failures
 
 ### Primary Test Failure

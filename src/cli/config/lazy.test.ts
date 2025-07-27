@@ -33,7 +33,7 @@ describe("Lazy Loading", () => {
       await handler({ test: true } as any)
       
       expect(loaded).toBe(true)
-      expect(receivedArgs as Record<string, unknown>).toEqual({ test: true })
+      expect(receivedArgs).toEqual({ test: true })
     })
 
     it("should attach metadata", () => {

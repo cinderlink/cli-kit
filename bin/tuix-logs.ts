@@ -105,12 +105,12 @@ const cli = createCLI({
         
         if (args.tail) {
           // TODO: Implement file watching
-          console.log("Tail mode not yet implemented")
+          process.stdout.write("Tail mode not yet implemented\n")
           
           // Handle timeout for tail mode
           const timeoutSeconds = args.timeout as number || 0
           if (timeoutSeconds > 0) {
-            console.log(`⏰ Would timeout after ${timeoutSeconds}s`)
+            process.stdout.write(`⏰ Would timeout after ${timeoutSeconds}s\n`)
           }
           return
         }
@@ -118,12 +118,12 @@ const cli = createCLI({
         // Handle timeout for interactive mode
         const timeoutSeconds = args.timeout as number || 0
         if (timeoutSeconds > 0) {
-          console.log(`📝 Interactive log viewer for ${args.file} (auto-close in ${timeoutSeconds}s)...`)
-          console.log()
+          process.stdout.write(`📝 Interactive log viewer for ${args.file} (auto-close in ${timeoutSeconds}s)...\n`)
+          process.stdout.write('\n')
           
           // Set up timeout
           setTimeout(() => {
-            console.log(`\n⏰ Timeout reached (${timeoutSeconds}s), closing log viewer`)
+            process.stdout.write(`\n⏰ Timeout reached (${timeoutSeconds}s), closing log viewer\n`)
             process.exit(0)
           }, timeoutSeconds * 1000)
         }
@@ -173,7 +173,7 @@ const cli = createCLI({
         }
 
         if (args.format === "json") {
-          console.log(JSON.stringify(stats, null, 2))
+          process.stdout.write(JSON.stringify(stats, null, 2) + '\n')
           return
         }
 
@@ -258,7 +258,7 @@ const cli = createCLI({
         
         output.end()
 
-        console.log(`Merged ${allEntries.length} entries from ${files.length} files into ${args.output}`)
+        process.stdout.write(`Merged ${allEntries.length} entries from ${files.length} files into ${args.output}\n`)
       }
     },
 
@@ -279,8 +279,8 @@ const cli = createCLI({
       },
       handler: async (args) => {
         // This would set up a server to receive logs
-        console.log("Log streaming server not yet implemented")
-        console.log(`Would listen on port ${args.port} for ${args.format} logs`)
+        process.stdout.write("Log streaming server not yet implemented\n")
+        process.stdout.write(`Would listen on port ${args.port} for ${args.format} logs\n`)
       }
     }
   }

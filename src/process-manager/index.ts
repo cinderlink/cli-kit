@@ -8,6 +8,7 @@
 export type {
   ProcessConfig,
   ProcessState,
+  ProcessStatus,
   ProcessLog,
   ProcessManagerConfig
 } from "./types"
@@ -34,7 +35,7 @@ export async function createProcessManager(
 export { ProcessMonitor } from "./components/ProcessMonitor"
 
 // Export the plugin
-export { ProcessManagerPlugin } from "./plugin"
+export { ProcessManagerPlugin } from "./Plugin"
 
 // Export default manager
 export default ProcessManager

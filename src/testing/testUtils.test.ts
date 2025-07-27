@@ -22,7 +22,7 @@ import {
   testInteraction,
   testLifecycle,
   MockInputService
-} from './test-utils'
+} from './testUtils'
 import { createRuntime } from '@core/runtime'
 import { text, vstack } from '@core/view'
 import type { Component } from '@core/types'

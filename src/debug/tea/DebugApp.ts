@@ -9,19 +9,20 @@ import { scopeManager } from '@core/model/scope/manager'
 import { EventBus } from '@core/model/events/eventBus'
 import type { Component } from '@core/types'
 import type { View } from '@core/types'
+import type { JSXElement } from '@jsx/types'
 import { RichDebugInterface } from '../jsx/components/RichDebugInterface'
 
 // Debug Model - the complete state of our debug application
 export interface DebugModel {
   activeTab: 'app' | 'logs' | 'model' | 'view' | 'update' | 'cli' | 'jsx'
   logs: DebugLog[]
-  modelState: any
+  modelState: unknown
   viewTree: ViewTreeNode[]
   updateHistory: UpdateEvent[]
   cliScopes: ScopeInfo[]
   jsxComponents: ComponentInfo[]
   performance: PerformanceMetrics
-  appComponent: (() => JSX.Element) | JSX.Element | null
+  appComponent: (() => JSXElement) | JSXElement | null
   commandOutput: string
   commandError: string | null
   commandExecuting: boolean
@@ -34,13 +35,13 @@ export interface DebugLog {
   level: 'debug' | 'info' | 'warn' | 'error'
   message: string
   source: string
-  data?: any
+  data?: unknown
 }
 
 export interface ViewTreeNode {
   id: string
   type: string
-  props: Record<string, any>
+  props: Record<string, unknown>
   children: ViewTreeNode[]
   depth: number
 }
@@ -49,8 +50,8 @@ export interface UpdateEvent {
   id: string
   timestamp: Date
   type: string
-  previousState: any
-  newState: any
+  previousState: unknown
+  newState: unknown
   duration: number
 }
 
@@ -65,8 +66,8 @@ export interface ScopeInfo {
 export interface ComponentInfo {
   id: string
   name: string
-  props: Record<string, any>
-  state: any
+  props: Record<string, unknown>
+  state: unknown
   renderTime: number
 }
 
@@ -82,7 +83,7 @@ export interface PerformanceMetrics {
 export type DebugMsg = 
   | { _tag: 'SwitchTab'; tab: DebugModel['activeTab'] }
   | { _tag: 'AddLog'; log: DebugLog }
-  | { _tag: 'UpdateModelState'; state: any }
+  | { _tag: 'UpdateModelState'; state: unknown }
   | { _tag: 'UpdateViewTree'; tree: ViewTreeNode[] }
   | { _tag: 'AddUpdateEvent'; event: UpdateEvent }
   | { _tag: 'RefreshScopes' }
@@ -99,7 +100,7 @@ export type DebugMsg =
 export type DebugCommand = Effect.Effect<DebugMsg>
 
 // Initial state
-export const initDebugModel = (appComponent?: (() => JSX.Element) | JSX.Element): DebugModel => ({
+export const initDebugModel = (appComponent?: (() => JSXElement) | JSXElement): DebugModel => ({
   activeTab: 'app',
   logs: [],
   modelState: null,
@@ -345,7 +346,7 @@ export const debugSubscriptions = (model: DebugModel): Effect.Effect<DebugMsg>[]
 
 // Complete TEA component
 export const createDebugComponent = (
-  appComponent?: (() => JSX.Element) | JSX.Element
+  appComponent?: (() => JSXElement) | JSXElement
 ): Component<DebugModel, DebugMsg> => ({
   init: Effect.succeed([initDebugModel(appComponent), []]),
   update: updateDebugModel,

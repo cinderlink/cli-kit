@@ -94,7 +94,9 @@ export class CommandExecutor {
       config: this.config,
       parsedArgs,
       plugins,
-      tuixConfig: this.tuixConfig
+      tuixConfig: this.tuixConfig,
+      debug: parsedArgs.options?.debug as boolean | undefined,
+      options: parsedArgs.options
     }
   }
   

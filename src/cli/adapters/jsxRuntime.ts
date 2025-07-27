@@ -1,17 +1,16 @@
 /**
- * CLI View Runtime Adapter for JSX
+ * JSX Runtime Adapter for CLI
  * 
- * Adapts the JSX runtime to implement the CLI's ViewRuntime interface.
- * This allows the JSX module to render CLI help and output while maintaining
- * proper module boundaries.
+ * Provides a JSX-based implementation of the CLI's ViewRuntime interface.
+ * This adapter allows the CLI module to use JSX for rendering help and output
+ * without creating a direct dependency on the JSX module.
  */
 
-import type { ViewRuntime } from "@cli/core/viewRuntime"
-import type { HelpData, HelpSection, HelpItem } from "@cli/core/helpData"
-import type { CLIContext } from "@cli/types"
+import type { ViewRuntime } from "../core/viewRuntime"
+import type { HelpData, HelpSection, HelpItem } from "../core/helpData"
+import type { CLIContext } from "../types"
 import { text, vstack, hstack, styledText } from "@core/view"
 import { style, Colors } from "@core/terminal/ansi/styles"
-import { render } from "@jsx/app"
 import type { View } from "@core/types"
 
 /**
@@ -21,9 +20,11 @@ export class JSXCLIViewRuntime implements ViewRuntime {
   readonly name = 'jsx'
   readonly supportsInteractive = true
   
+  constructor(private renderFn?: (view: View) => void) {}
+  
   renderHelp(data: HelpData): void {
     const view = this.createHelpView(data)
-    render(view)
+    this.renderView(view)
   }
   
   renderError(error: Error, context?: CLIContext): void {
@@ -40,13 +41,13 @@ export class JSXCLIViewRuntime implements ViewRuntime {
       )
     }
     
-    render(vstack(...elements))
+    this.renderView(vstack(...elements))
   }
   
   renderOutput(output: unknown, context?: CLIContext): void {
     // If output is already a View, render it directly
     if (output && typeof output === 'object' && 'render' in output) {
-      render(output as View)
+      this.renderView(output as View)
       return
     }
     
@@ -60,7 +61,23 @@ export class JSXCLIViewRuntime implements ViewRuntime {
       view = text(JSON.stringify(output, null, 2))
     }
     
-    render(view)
+    this.renderView(view)
+  }
+  
+  /**
+   * Render a view to the terminal
+   * This method should be provided by the JSX module when creating the runtime
+   */
+  private renderView(view: View): void {
+    // Default implementation: directly render to stdout
+    // The JSX module can provide a more sophisticated implementation
+    if (this.renderFn) {
+      this.renderFn(view)
+    } else {
+      // Fallback: use the view's render method directly
+      const output = view.render()
+      process.stdout.write(output + '\n')
+    }
   }
   
   async startInteractive(context: CLIContext): Promise<void> {
@@ -245,7 +262,10 @@ export class JSXCLIViewRuntime implements ViewRuntime {
 
 /**
  * Create and return a JSX CLI view runtime instance
+ * 
+ * @param renderFn - Optional custom render function. If not provided, 
+ *                   uses a basic stdout renderer
  */
-export function createJSXCLIRuntime(): JSXCLIViewRuntime {
-  return new JSXCLIViewRuntime()
+export function createJSXCLIRuntime(renderFn?: (view: View) => void): JSXCLIViewRuntime {
+  return new JSXCLIViewRuntime(renderFn)
 }

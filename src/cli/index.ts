@@ -135,6 +135,9 @@ export {
   type ViewRuntime 
 } from "./core/viewRuntime"
 
+/** JSX runtime adapter for CLI rendering */
+export { JSXCLIViewRuntime, createJSXCLIRuntime } from "./adapters/jsxRuntime"
+
 /** Application execution and lifecycle management */
 export { CLIRunner, runCLI, cli, ensureConfig } from "./runner"
 export { runCLI as createCLI } from "./runner" // Alias for compatibility

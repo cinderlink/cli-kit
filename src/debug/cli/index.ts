@@ -12,7 +12,7 @@ export async function patchCLICommands() {
     const cliModule = await import('@cli/core/runner')
     const originalExecute = cliModule.execute
     
-    cliModule.execute = async function(command: any, context: any) {
+    cliModule.execute = async function(command: unknown, context: unknown) {
       const commandName = command.name || 'unknown'
       debug.match(`Executing command: ${commandName}`, { command, context })
       

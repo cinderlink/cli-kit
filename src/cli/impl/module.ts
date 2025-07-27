@@ -24,7 +24,7 @@ export class CLIModule extends ModuleBase {
   /**
    * Initialize the CLI module
    */
-  initialize(): Effect<void, ModuleError> {
+  initialize(): Effect.Effect<void, ModuleError> {
     return Effect.gen(function* () {
       this.state = 'initializing'
       
@@ -33,13 +33,13 @@ export class CLIModule extends ModuleBase {
       
       // Mark as ready
       yield* this.setReady()
-    }.bind(this))
+    }.bind(this) as any)
   }
   
   /**
    * Subscribe to events from other modules
    */
-  private subscribeToEvents(): Effect<void, never> {
+  private subscribeToEvents(): Effect.Effect<void, never> {
     return this.subscribeMany([
       {
         channel: 'scope-events',
@@ -55,7 +55,7 @@ export class CLIModule extends ModuleBase {
   /**
    * Handle scope events from core
    */
-  private handleScopeEvent(event: BaseEvent): Effect<void, never> {
+  private handleScopeEvent(event: BaseEvent): Effect.Effect<void, never> {
     return Effect.gen(function* () {
       if (event.type === 'scope-registered' && 'scope' in event) {
         const scope = (event as { scope: ScopeContext }).scope
@@ -63,13 +63,13 @@ export class CLIModule extends ModuleBase {
           yield* this.registerScopeAsCommand(scope)
         }
       }
-    }.bind(this))
+    }.bind(this) as any)
   }
   
   /**
    * Handle JSX scope events
    */
-  private handleJSXScopeEvent(event: BaseEvent): Effect<void, never> {
+  private handleJSXScopeEvent(event: BaseEvent): Effect.Effect<void, never> {
     return Effect.gen(function* () {
       if (event.type === 'jsx-scope-created' && 'scope' in event) {
         const scope = (event as { scope: ScopeContext }).scope
@@ -85,13 +85,13 @@ export class CLIModule extends ModuleBase {
           })
         }
       }
-    }.bind(this))
+    }.bind(this) as any)
   }
   
   /**
    * Register a scope as a command
    */
-  private registerScopeAsCommand(scope: ScopeContext): Effect<void, never> {
+  private registerScopeAsCommand(scope: ScopeContext): Effect.Effect<void, never> {
     if (!scope.handler) {
       return Effect.void
     }
@@ -118,7 +118,7 @@ export class CLIModule extends ModuleBase {
     flags?: ScopeContext['flags']
     options?: ScopeContext['options']
     aliases?: string[]
-  }): Effect<void, never> {
+  }): Effect.Effect<void, never> {
     return Effect.gen(function* () {
       // Update command tree
       let current = this.commandTree
@@ -145,13 +145,13 @@ export class CLIModule extends ModuleBase {
       
       // Emit registration event
       yield* this.emitCommandRegistered(config.path)
-    }.bind(this))
+    }.bind(this) as any)
   }
   
   /**
    * Unregister a command
    */
-  unregisterCommand(path: string[]): Effect<void, never> {
+  unregisterCommand(path: string[]): Effect.Effect<void, never> {
     return Effect.gen(function* () {
       // Navigate to parent in tree
       let current = this.commandTree
@@ -170,13 +170,13 @@ export class CLIModule extends ModuleBase {
       
       // Emit unregistration event
       yield* this.emitCommandUnregistered(path)
-    }.bind(this))
+    }.bind(this) as any)
   }
   
   /**
    * Update the entire command tree
    */
-  updateCommandTree(tree: CommandTree): Effect<void, never> {
+  updateCommandTree(tree: CommandTree): Effect.Effect<void, never> {
     return Effect.sync(() => {
       this.commandTree = tree
     })
@@ -185,7 +185,7 @@ export class CLIModule extends ModuleBase {
   /**
    * Parse CLI input
    */
-  parseInput(input: string[]): Effect<ParsedArgs, ParseError> {
+  parseInput(input: string[]): Effect.Effect<ParsedArgs, ParseError> {
     return Effect.gen(function* () {
       yield* this.emitParseStart(input)
       
@@ -237,13 +237,13 @@ export class CLIModule extends ModuleBase {
           input
         ))
       }
-    }.bind(this))
+    }.bind(this) as any)
   }
   
   /**
    * Execute a command
    */
-  executeCommand(path: string[], args: ParsedArgs): Effect<ExitCode, ExecutionError> {
+  executeCommand(path: string[], args: ParsedArgs): Effect.Effect<ExitCode, ExecutionError> {
     return Effect.gen(function* () {
       const startTime = Date.now()
       
@@ -269,7 +269,7 @@ export class CLIModule extends ModuleBase {
         yield* this.emitCommandFailed(path, args, error as Error)
         return yield* Effect.fail(error as ExecutionError)
       }
-    }.bind(this))
+    }.bind(this) as any)
   }
   
   /**
@@ -290,7 +290,7 @@ export class CLIModule extends ModuleBase {
   /**
    * Show help for a command path
    */
-  showHelp(path: string[]): Effect<ExitCode, never> {
+  showHelp(path: string[]): Effect.Effect<ExitCode, never> {
     return Effect.gen(function* () {
       yield* this.emitEvent(CLIEventChannels.HELP, {
         type: 'cli-help-requested',
@@ -306,19 +306,19 @@ export class CLIModule extends ModuleBase {
       })
       
       return 0 as ExitCode
-    }.bind(this))
+    }.bind(this) as any)
   }
   
   // Event emission helpers
   
-  private emitCommandRegistered(path: string[]): Effect<void, never> {
+  private emitCommandRegistered(path: string[]): Effect.Effect<void, never> {
     return this.emitEvent<CLICommandEvent>(CLIEventChannels.COMMAND, {
       type: 'cli-command-registered',
       path
     })
   }
   
-  private emitCommandUnregistered(path: string[]): Effect<void, never> {
+  private emitCommandUnregistered(path: string[]): Effect.Effect<void, never> {
     return this.emitEvent<CLICommandEvent>(CLIEventChannels.COMMAND, {
       type: 'cli-command-registered',
       path
@@ -330,7 +330,7 @@ export class CLIModule extends ModuleBase {
     args: ParsedArgs,
     result: unknown,
     executionTime: number
-  ): Effect<void, never> {
+  ): Effect.Effect<void, never> {
     return this.emitEvent<CLICommandEvent>(CLIEventChannels.COMMAND, {
       type: 'cli-command-executed',
       path,
@@ -340,7 +340,7 @@ export class CLIModule extends ModuleBase {
     })
   }
   
-  private emitCommandFailed(path: string[], args: ParsedArgs, error: Error): Effect<void, never> {
+  private emitCommandFailed(path: string[], args: ParsedArgs, error: Error): Effect.Effect<void, never> {
     return this.emitEvent<CLICommandEvent>(CLIEventChannels.COMMAND, {
       type: 'cli-command-failed',
       path,
@@ -349,14 +349,14 @@ export class CLIModule extends ModuleBase {
     })
   }
   
-  private emitParseStart(input: string[]): Effect<void, never> {
+  private emitParseStart(input: string[]): Effect.Effect<void, never> {
     return this.emitEvent<CLIParseEvent>(CLIEventChannels.PARSE, {
       type: 'cli-parse-start',
       input
     })
   }
   
-  private emitParseSuccess(input: string[], result: ParsedArgs): Effect<void, never> {
+  private emitParseSuccess(input: string[], result: ParsedArgs): Effect.Effect<void, never> {
     return this.emitEvent<CLIParseEvent>(CLIEventChannels.PARSE, {
       type: 'cli-parse-success',
       input,
@@ -364,7 +364,7 @@ export class CLIModule extends ModuleBase {
     })
   }
   
-  private emitParseError(input: string[], error: Error): Effect<void, never> {
+  private emitParseError(input: string[], error: Error): Effect.Effect<void, never> {
     return this.emitEvent<CLIParseEvent>(CLIEventChannels.PARSE, {
       type: 'cli-parse-error',
       input,
@@ -372,7 +372,7 @@ export class CLIModule extends ModuleBase {
     })
   }
   
-  emitRouteFound(path: string[], handler: Function): Effect<void, never> {
+  emitRouteFound(path: string[], handler: Function): Effect.Effect<void, never> {
     return this.emitEvent<CLIRouteEvent>(CLIEventChannels.ROUTE, {
       type: 'cli-route-found',
       path,
@@ -380,7 +380,7 @@ export class CLIModule extends ModuleBase {
     })
   }
   
-  emitRouteNotFound(path: string[]): Effect<void, never> {
+  emitRouteNotFound(path: string[]): Effect.Effect<void, never> {
     return this.emitEvent<CLIRouteEvent>(CLIEventChannels.ROUTE, {
       type: 'cli-route-not-found',
       path

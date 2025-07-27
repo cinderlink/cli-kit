@@ -3,16 +3,24 @@
 ## Core Modules
 
 ### 🎯 core
-**Purpose**: Core runtime, view system, and lifecycle management
+**Purpose**: Core runtime with Model-View-Update (MVU) architecture and Effect.ts integration
 **Status**: Stable
 **Documentation**: [src/core/README.md](src/core/README.md)
 
 Key Features:
-- View tree management
-- Lifecycle hooks
-- Event system
-- Type definitions
-- Runtime coordination
+- MVU architecture with Effect.ts
+- View rendering primitives
+- Event bus system
+- Type-safe error handling
+- Context system for component state
+- Keyboard input processing
+- Service abstractions (terminal, input, renderer, storage)
+
+Sub-modules:
+- **view**: View primitives and layout algorithms (flexbox, grid, spacer)
+- **runtime**: MVU runtime and application lifecycle
+- **model**: Event bus, scope management, and state handling
+- **terminal**: ANSI styling, input handling, and terminal capabilities
 
 ### 🖥️ cli
 **Purpose**: CLI framework for building command-line applications
@@ -26,17 +34,19 @@ Key Features:
 - Help generation
 - Lazy loading
 
-### 🎨 components
-**Purpose**: Pre-built UI components and component system
+### 🖼️ ui
+**Purpose**: Pre-built UI components for terminal applications
 **Status**: Stable
-**Documentation**: [src/components/README.md](src/components/README.md)
+**Documentation**: [src/ui/README.md](src/ui/README.md)
 
 Key Features:
-- Base component classes
-- Layout components
-- Interactive components
-- Component lifecycle
-- Reactivity integration
+- Data components (List, Table, FilterBox)
+- Display components (Text, Markdown, LargeText)
+- Feedback components (Modal, ProgressBar, Spinner)
+- Form components (Button, TextInput, FilePicker)
+- Layout components (Box, Flex, ScrollableBox, Viewport)
+- Navigation components (Tabs, Help)
+- System components (Exit)
 
 ### 🔤 jsx
 **Purpose**: JSX runtime for declarative UI development
@@ -74,29 +84,6 @@ Key Features:
 - Storage service
 - Mouse support
 
-### 🔄 reactivity
-**Purpose**: Reactive state management with runes
-**Status**: Stable
-**Documentation**: [src/reactivity/readme.md](src/reactivity/readme.md)
-
-Key Features:
-- Svelte-like runes
-- Reactive stores
-- Effect system
-- State derivation
-- Subscription management
-
-### 🏗️ layout
-**Purpose**: Layout algorithms and components
-**Status**: Stable
-**Documentation**: [src/layout/readme.md](src/layout/readme.md)
-
-Key Features:
-- Flexbox layout
-- Grid layout
-- Box model
-- Spacer utilities
-- Dynamic layouts
 
 ### 🔬 testing
 **Purpose**: Testing utilities and harnesses
@@ -146,6 +133,16 @@ Key Features:
 - Log streaming
 - Health checks
 
+### 📸 screenshot
+**Purpose**: Terminal screenshot capture and rendering
+**Status**: Experimental
+**Documentation**: [src/screenshot/README.md](src/screenshot/README.md)
+
+Key Features:
+- Terminal output capture
+- Screenshot rendering
+- Export utilities
+
 ### 🔍 scope
 **Purpose**: Scope management for isolated execution contexts
 **Status**: Experimental
@@ -170,53 +167,18 @@ Key Features:
 - Live reloading
 - Default values
 
-### 🏥 health
-**Purpose**: Health monitoring and diagnostics
-**Status**: Beta
-**Documentation**: [src/health/readme.md](src/health/readme.md)
-
-Key Features:
-- Health checks
-- System monitoring
-- Performance metrics
-- Resource tracking
-- Alerting
-
-### 🎭 tea
-**Purpose**: TEA (The Elm Architecture) components
-**Status**: Experimental
-**Documentation**: [src/tea/readme.md](src/tea/readme.md)
-
-Key Features:
-- Functional architecture
-- Immutable state
-- Message passing
-- Predictable updates
-- Time travel debugging
-
-### 🛠️ utils
-**Purpose**: Shared utility functions
+### 🔬 debug
+**Purpose**: Debugging tools and development utilities
 **Status**: Stable
-**Documentation**: [src/utils/readme.md](src/utils/readme.md)
+**Documentation**: [src/debug/README.md](src/debug/README.md)
 
 Key Features:
-- String utilities
-- ANSI handling
-- Type utilities
-- Common helpers
-- Performance optimized
-
-### 📐 alignment
-**Purpose**: Documentation alignment and AI assistant integration
-**Status**: Planning
-**Documentation**: [src/alignment/readme.md](src/alignment/readme.md)
-
-Key Features:
-- Documentation parsing
-- Rule validation
-- AI assistant tools
-- Standards enforcement
-- Convention checking
+- Debug toolbar and wrapper components
+- Performance monitoring
+- Event tracking
+- State inspection
+- Scope exploration
+- Rich debug interface
 
 ## Module Relationships
 
@@ -224,17 +186,15 @@ Key Features:
 ┌─────────────────────────────────────────────────────┐
 │                    Application                       │
 ├─────────────────────────────────────────────────────┤
-│  JSX Runtime  │  CLI Framework  │  Components       │
+│  JSX Runtime  │  CLI Framework  │  UI Components    │
 ├─────────────────────────────────────────────────────┤
-│  Reactivity   │  Styling        │  Layout           │
-├─────────────────────────────────────────────────────┤
-│  Services     │  Core           │  Testing          │
+│  Core (MVU + Effect.ts) │  Styling     │  Services  │
 ├─────────────────────────────────────────────────────┤
 │  Logger       │  Process Mgr    │  Config           │
 ├─────────────────────────────────────────────────────┤
-│  Plugins      │  Scope          │  Health           │
+│  Plugins      │  Scope          │  Testing          │
 ├─────────────────────────────────────────────────────┤
-│  TEA          │  Utils          │  Alignment        │
+│  Debug        │  Screenshot     │                   │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -312,14 +272,30 @@ function App() {
 render(<App />)
 ```
 
-### Component Creation
+### MVU Component
 ```typescript
-import { Component } from '@tuix/components'
-import { View } from '@tuix/core'
+import { Component, runApp, Effect, View } from '@tuix/core'
 
-export class MyComponent extends Component {
-  render(): View {
-    return View.text('My Component')
-  }
+// Define model and messages
+type Model = { count: number }
+type Msg = { type: 'increment' } | { type: 'decrement' }
+
+// Create component
+const counter: Component<Model, Msg> = {
+  init: Effect.succeed([{ count: 0 }, []]),
+  
+  update: (msg, model) => {
+    switch (msg.type) {
+      case 'increment':
+        return Effect.succeed([{ count: model.count + 1 }, []])
+      case 'decrement':
+        return Effect.succeed([{ count: model.count - 1 }, []])
+    }
+  },
+  
+  view: (model) => View.text(`Count: ${model.count}`)
 }
+
+// Run the app
+await Effect.runPromise(runApp(counter))
 ```

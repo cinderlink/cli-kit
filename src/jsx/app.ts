@@ -10,11 +10,13 @@ import { LiveServices } from "@core/services/impl"
 import type { View } from "@core/types"
 import { Interactive, InteractiveContextLive, InteractiveFiberRef } from "@core/runtime/interactive"
 import { EventBus } from "@core/model/events/eventBus"
+import { createConsoleLogger } from "@logger"
 
 // Debug logging
 const DEBUG = process.env.TUIX_DEBUG === 'true'
+const logger = createConsoleLogger(DEBUG ? 'debug' : 'info')
 const debug = (msg: string, ...args: any[]) => {
-  if (DEBUG) console.log(`[TUIX JSX] ${msg}`, ...args)
+  if (DEBUG) Effect.runSync(logger.debug(`[TUIX JSX] ${msg}`, { args }))
 }
 
 
@@ -38,21 +40,8 @@ export {
   withLifecycle
 } from '@core/update/reactivity/jsxLifecycle'
 
-// Export JSX components from their new modules
-export { 
-  CLI, 
-  Plugin,
-  Command, 
-  Arg, 
-  Flag,
-  Option,
-  Help,
-  Example,
-  Exit,
-  LoadPlugin,
-  CommandLineScope,
-  CommandLineHelp
-} from '@cli/jsx/components'
+// CLI components are exported dynamically to avoid circular dependencies
+// They can be imported from '@cli/jsx/components' when needed
 
 export {
   Scope,
@@ -65,7 +54,7 @@ export {
   RegisterPlugin,
   EnablePlugin,
   ConfigurePlugin
-} from '@plugins/api/jsx/components'
+} from '@plugins/api/jsx/Components'
 
 /**
  * Create a text element for displaying strings in the terminal
@@ -214,15 +203,7 @@ export interface JSXAppConfig {
   onExit?: () => void | Promise<void>
 }
 
-// CLI-specific types moved to cli/jsx/types
-export type {
-  JSXCommandConfig,
-  JSXArgConfig,
-  JSXFlagConfig,
-  JSXCommandHandler,
-  JSXCommandContext,
-  JSXPlugin
-} from '@cli/jsx/types'
+// CLI-specific types are available from '@cli/jsx/types' when needed
 
 /**
  * Create and run a JSX-based tuix application
@@ -322,7 +303,7 @@ export function createJSXApp<Model = {}, Msg = never>(
         const element = mvuConfig.view({ 
           model, 
           dispatch: currentDispatch || (() => {
-            console.warn('Dispatch called before initialization')
+            Effect.runSync(logger.warn('Dispatch called before initialization'))
           })
         })
         return element as import('@core/types').View
@@ -354,20 +335,20 @@ export function createJSXApp<Model = {}, Msg = never>(
       if (typeof AppComponent === 'function') {
         const result = AppComponent()
         if (!result) {
-          console.error('[render] ERROR: App component function returned null/undefined')
+          Effect.runSync(logger.error('[render] ERROR: App component function returned null/undefined'))
           // Return empty element as fallback
           return jsxFactory('vstack', { children: [] })
         }
         return result
       } else {
         if (!AppComponent) {
-          console.error('[render] ERROR: App component is null/undefined')
+          Effect.runSync(logger.error('[render] ERROR: App component is null/undefined'))
           return jsxFactory('vstack', { children: [] })
         }
         return AppComponent
       }
     } catch (error) {
-      console.error('[render] ERROR: Exception in getAppElement:', error)
+      Effect.runSync(logger.error('[render] ERROR: Exception in getAppElement:', { error }))
       return jsxFactory('vstack', { children: [] })
     }
   }
@@ -376,7 +357,7 @@ export function createJSXApp<Model = {}, Msg = never>(
   if (config?.onInit) {
     const initResult = config.onInit()
     if (initResult instanceof Promise) {
-      initResult.catch(console.error)
+      initResult.catch(error => Effect.runSync(logger.error('Init error:', { error })))
     }
   }
 
@@ -397,7 +378,7 @@ export function createJSXApp<Model = {}, Msg = never>(
     if (config?.onExit) {
       const exitResult = config.onExit()
       if (exitResult instanceof Promise) {
-        exitResult.catch(console.error)
+        exitResult.catch(error => Effect.runSync(logger.error('Exit error:', { error })))
       }
     }
   }
@@ -427,14 +408,14 @@ export function createJSXApp<Model = {}, Msg = never>(
         debug('App element type:', typeof view)
         debug('App element keys:', view ? Object.keys(view) : 'null/undefined')
         if (!view) {
-          console.error('ERROR: getAppElement() returned null/undefined')
-          console.error('This usually means the JSX component returned nothing')
+          Effect.runSync(logger.error('ERROR: getAppElement() returned null/undefined'))
+          Effect.runSync(logger.error('This usually means the JSX component returned nothing'))
         }
         const { renderToTerminal } = yield* Effect.promise(() => import('./impl/render'))
         yield* Effect.promise(() => renderToTerminal(view))
         debug('Finished rendering')
         // Explicitly exit since we're done
-        process.exit(0)
+        yield* Interactive.exit(0)
       }
     }).pipe(
       Effect.provide(InteractiveContextLive),
@@ -444,9 +425,7 @@ export function createJSXApp<Model = {}, Msg = never>(
   ).finally(cleanup)
 }
 
-// CLI-specific functions moved to cli/jsx/app
-// CLI-specific functions moved to cli/jsx/app
-export { defineJSXCommand, jsxCommand } from '@cli/jsx/app'
+// CLI-specific functions are available from '@cli/jsx/app' when needed
 
 /**
  * Simple wrapper for single-component apps
@@ -502,53 +481,62 @@ export function render(AppComponent: (() => JSX.Element) | JSX.Element): Promise
   
   // Check for concurrent render calls
   if (renderInProgress) {
-    console.error('[render] ERROR: render() called while already rendering!')
-    console.error('[render] This usually indicates a problem with the app structure')
+    Effect.runSync(logger.error('[render] ERROR: render() called while already rendering!'))
+    Effect.runSync(logger.error('[render] This usually indicates a problem with the app structure'))
     return Promise.resolve()
   }
   
   // Check for runaway renders
   renderCount++
   if (renderCount > MAX_FPS) {
-    console.error(`[render] ERROR: Too many render calls (${renderCount}) in short time period!`)
-    console.error('[render] This indicates a runaway render loop - terminating to prevent system hang')
-    console.error('[render] The app will now forcefully exit')
-    process.exit(1)
+    Effect.runSync(logger.error(`[render] ERROR: Too many render calls (${renderCount}) in short time period!`))
+    Effect.runSync(logger.error('[render] This indicates a runaway render loop - terminating to prevent system hang'))
+    Effect.runSync(logger.error('[render] The app will now forcefully exit'))
+    // Use Effect-based exit for critical errors
+    Effect.runSync(Interactive.exit(1))
+    return Promise.reject(new Error('Runaway render loop detected'))
   }
   
   if (renderCount > MAX_TOTAL_RENDERS) {
-    console.error(`[render] ERROR: Maximum render calls (${MAX_TOTAL_RENDERS}) exceeded!`)
-    console.error('[render] This indicates a severe runaway render issue - terminating immediately')
-    process.exit(1)
+    Effect.runSync(logger.error(`[render] ERROR: Maximum render calls (${MAX_TOTAL_RENDERS}) exceeded!`))
+    Effect.runSync(logger.error('[render] This indicates a severe runaway render issue - terminating immediately'))
+    // Use Effect-based exit for critical errors
+    Effect.runSync(Interactive.exit(1))
+    return Promise.reject(new Error('Maximum render calls exceeded'))
   }
   
   renderInProgress = true
   
   // First, check if this is a CLI app by looking for CLI commands
-  const { hasCliCommands } = require('../cli/jsx/stores')
-  const { runCLIApp } = require('../cli/jsx/app')
-  
-  // Process the component once to trigger scope registrations
-  const element = typeof AppComponent === 'function' ? AppComponent() : AppComponent
-  
-  // Wrap in debug if enabled
-  let finalComponent = AppComponent
-  if (process.env.TUIX_DEBUG === 'true' && process.env.TUIX_DEBUG_AUTO_WRAP !== 'false') {
-    debug('Debug mode enabled, wrapping component')
-    try {
-      const { DebugWrapper } = require('./debug/wrapper')
-      finalComponent = () => DebugWrapper({ children: typeof AppComponent === 'function' ? AppComponent() : AppComponent })
-    } catch (error) {
-      debug('Failed to load debug wrapper:', error)
+  try {
+    const { hasCliCommands } = require('@cli/jsx/stores')
+    const { runCLIApp } = require('@cli/jsx/app')
+    
+    // Process the component once to trigger scope registrations
+    const element = typeof AppComponent === 'function' ? AppComponent() : AppComponent
+    
+    // Wrap in debug if enabled
+    let finalComponent = AppComponent
+    if (process.env.TUIX_DEBUG === 'true' && process.env.TUIX_DEBUG_AUTO_WRAP !== 'false') {
+      debug('Debug mode enabled, wrapping component')
+      try {
+        const { DebugWrapper } = require('./debug/Wrapper')
+        finalComponent = () => DebugWrapper({ children: typeof AppComponent === 'function' ? AppComponent() : AppComponent })
+      } catch (error) {
+        debug('Failed to load debug wrapper:', error)
+      }
     }
-  }
-  
-  // Check if we have CLI commands registered
-  if (hasCliCommands()) {
-    debug('CLI commands detected, delegating to runCLIApp')
-    return runCLIApp(finalComponent).finally(() => {
-      renderInProgress = false
-    })
+    
+    // Check if we have CLI commands registered
+    if (hasCliCommands()) {
+      debug('CLI commands detected, delegating to runCLIApp')
+      return runCLIApp(finalComponent).finally(() => {
+        renderInProgress = false
+      })
+    }
+  } catch (error) {
+    // CLI module not available, continue as regular app
+    debug('CLI module not available, continuing as regular app:', error)
   }
   
   // Otherwise run as regular app
@@ -561,9 +549,7 @@ export function render(AppComponent: (() => JSX.Element) | JSX.Element): Promise
 // Plugin creation moved to plugin module
 export { createJSXPlugin } from '@plugins/api/jsx/app'
 
-// CLI-specific runners moved to cli/jsx/app
-export { runJSXCLI } from '@cli/jsx/app'
-// All CLI-specific implementation has been moved to cli/jsx/app module
+// CLI-specific runners are available from '@cli/jsx/app' when needed
 
 /**
  * Re-export JSX intrinsic element types for better developer experience
@@ -580,17 +566,7 @@ export type {
   CommandPipelineProps as CommandPipeline
 } from "./runtime"
 
-// CLI-specific types are exported from CLI module
-export type {
-  CLIProps as CLI,
-  PluginProps as Plugin,
-  CommandProps as Command,
-  ArgProps as Arg,
-  FlagProps as Flag,
-  HelpProps as Help,
-  ExampleProps as Example,
-  LoadPluginProps as LoadPlugin
-} from "@cli/jsx/types"
+// CLI-specific types are available from '@cli/jsx/types' when needed
 
 // Plugin-specific types are exported from plugin module
 export type {

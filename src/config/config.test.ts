@@ -17,7 +17,7 @@ describe("Config", () => {
 
     test("should handle empty configuration", async () => {
       const cfg = await config.simple({})
-      expect(cfg.toJSON()).toEqual({})
+      expect(cfg.toObject()).toEqual({})
     })
   })
 
@@ -32,13 +32,18 @@ describe("Config", () => {
     })
 
     test("should merge multiple sources", async () => {
+      // Set environment variable for testing
+      process.env.TEST_A = "env-value"
+      
       const cfg = await createConfig()
         .defaults({ a: 1, b: 2 })
-        .env({ A: "env-value" })
+        .envPrefix("TEST_")
         .build()
       
       expect(cfg.get("a")).toBe("env-value")
       expect(cfg.get("b")).toBe(2)
+      
+      delete process.env.TEST_A
     })
 
     test("should support nested values", async () => {
@@ -76,7 +81,7 @@ describe("Config", () => {
 
     test("should return default value for missing key", async () => {
       const cfg = await config.simple({ test: "value" })
-      expect(cfg.get("missing", "default")).toBe("default")
+      expect(cfg.getOrDefault("missing", "default")).toBe("default")
     })
   })
 
@@ -124,7 +129,7 @@ describe("Config", () => {
         array: [1, 2, 3]
       }
       const cfg = await config.simple(data)
-      expect(cfg.toJSON()).toEqual(data)
+      expect(cfg.toObject()).toEqual(data)
     })
   })
 
@@ -136,11 +141,11 @@ describe("Config", () => {
       delete process.env.TEST_VAR
     })
 
-    test("should handle empty prefix", async () => {
-      process.env.GLOBAL_VAR = "global-value"
+    test("should use default TUIX prefix when no prefix specified", async () => {
+      process.env.TUIX_GLOBAL_VAR = "global-value"
       const cfg = await config.env()
-      expect(cfg.get("GLOBAL_VAR")).toBe("global-value")
-      delete process.env.GLOBAL_VAR
+      expect(cfg.get("global.var")).toBe("global-value")
+      delete process.env.TUIX_GLOBAL_VAR
     })
   })
 

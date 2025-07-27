@@ -67,8 +67,8 @@ describe("Help System", () => {
       
       const commandsSection = sections.find(s => s.type === 'commands')
       expect(commandsSection?.items).toHaveLength(2)
-      expect(commandsSection?.items?.[0].name).toBe("build")
-      expect(commandsSection?.items?.[1].name).toBe("test")
+      expect(commandsSection?.items?.[0]?.name).toBe("build")
+      expect(commandsSection?.items?.[1]?.name).toBe("test")
     })
     
     it("should generate command-specific help data", () => {
@@ -81,7 +81,7 @@ describe("Help System", () => {
       
       const argsSection = data.sections.find(s => s.type === 'arguments')
       expect(argsSection?.items).toHaveLength(1)
-      expect(argsSection?.items?.[0].name).toBe("<target>")
+      expect(argsSection?.items?.[0]?.name).toBe("<target>")
       
       const optionsSection = data.sections.find(s => s.type === 'options')
       expect(optionsSection?.items).toHaveLength(2)
@@ -92,8 +92,8 @@ describe("Help System", () => {
       
       const commandsSection = data.sections.find(s => s.type === 'commands')
       expect(commandsSection?.items).toHaveLength(2)
-      expect(commandsSection?.items?.[0].name).toBe("unit")
-      expect(commandsSection?.items?.[1].name).toBe("integration")
+      expect(commandsSection?.items?.[0]?.name).toBe("unit")
+      expect(commandsSection?.items?.[1]?.name).toBe("integration")
     })
   })
   

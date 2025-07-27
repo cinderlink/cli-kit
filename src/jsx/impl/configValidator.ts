@@ -6,6 +6,10 @@
 
 import * as fs from "fs"
 import * as path from "path"
+import { createConsoleLogger } from "@logger/index"
+import { Effect } from "effect"
+
+const logger = createConsoleLogger("error")
 
 export interface JSXConfigIssue {
   level: 'error' | 'warning' | 'info'
@@ -227,12 +231,12 @@ export function validateJSXElement(element: any, context: string = 'unknown'): v
   }
   
   if (typeof element.render !== 'function') {
-    console.error('Invalid JSX element:', {
+    Effect.runSync(logger.error('Invalid JSX element', undefined, {
       context,
       type: typeof element,
       keys: Object.keys(element),
-      element
-    })
+      elementInfo: typeof element === 'object' ? Object.keys(element) : String(element)
+    }))
     
     // Check for common issues
     const suggestions: string[] = []

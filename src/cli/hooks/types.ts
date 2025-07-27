@@ -131,7 +131,7 @@ export interface Subscription {
  * Hook interface
  */
 export interface Hook<T extends BaseEvent> {
-  tap(name: string, fn: (event: T) => Effect<void, never> | void): Effect<Subscription, never>
-  tapAsync(name: string, fn: (event: T) => Promise<void>): Effect<Subscription, never>
+  tap(name: string, fn: (event: T) => Effect.Effect<void, never> | void): Effect.Effect<Subscription, never>
+  tapAsync(name: string, fn: (event: T) => Promise<void>): Effect.Effect<Subscription, never>
   untap(name: string): void
 }

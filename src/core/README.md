@@ -2,133 +2,271 @@
 
 ## Overview
 
-The core module provides the fundamental runtime, view system, and lifecycle management for the Tuix framework. It handles view tree management, component lifecycle, event coordination, and the core abstractions that all other modules build upon.
+The core module provides a Model-View-Update (MVU) architecture powered by Effect.ts for building type-safe, functional terminal applications. It combines the predictability of MVU with the composability and error handling capabilities of Effect.ts.
+
+## Architecture
+
+### Model-View-Update (MVU) Pattern
+
+The MVU pattern separates your application into three distinct parts:
+
+1. **Model**: The immutable state of your application
+2. **View**: A pure function that renders the model to the terminal
+3. **Update**: A pure function that transforms the model based on messages
+
+Enhanced with Effect.ts:
+- **Commands**: Asynchronous operations that produce messages
+- **Subscriptions**: Continuous streams of external events
+- **Effects**: Type-safe error handling and dependency injection
 
 ## Installation
 
 ```bash
 # Core is included with tuix
-import { View, Component } from '@tuix/core'
+import { Component, runApp, Effect, View } from '@tuix/core'
 ```
 
 ## Quick Start
 
 ```typescript
-import { View, Component } from '@tuix/core'
+import { Component, runApp, Effect, View } from '@tuix/core'
 
-// Create a simple component
-class MyComponent extends Component {
-  render(): View {
-    return View.text('Hello from Core!')
-  }
+// Define your model and messages
+type Model = { count: number }
+type Msg = 
+  | { type: 'increment' }
+  | { type: 'decrement' }
+  | { type: 'reset' }
+
+// Create an MVU component
+const counter: Component<Model, Msg> = {
+  // Initialize the model
+  init: Effect.succeed([{ count: 0 }, []]),
+  
+  // Update the model based on messages
+  update: (msg, model) => {
+    switch (msg.type) {
+      case 'increment':
+        return Effect.succeed([{ count: model.count + 1 }, []])
+      case 'decrement':
+        return Effect.succeed([{ count: model.count - 1 }, []])
+      case 'reset':
+        return Effect.succeed([{ count: 0 }, []])
+    }
+  },
+  
+  // Render the model to a view
+  view: (model) => View.vstack(
+    View.text(`Count: ${model.count}`),
+    View.text('Press +/- to change, r to reset')
+  )
 }
 
-// Use the view system
-const view = View.text('Simple text view')
-const box = View.box({ children: [view] })
+// Run the application
+await Effect.runPromise(runApp(counter))
 ```
 
 ## Core Concepts
 
-### View System
-The View abstraction represents all visual elements in Tuix. Views form a tree structure that gets rendered to the terminal.
-
-### Component Lifecycle
-Components have `onMount`, `onUpdate`, and `onDestroy` hooks for managing resources and side effects.
-
-### Runtime Coordination
-The runtime manages the application lifecycle, coordinates updates, and handles the main event loop.
-
-## API Reference
-
-### View
-
-The main abstraction for visual elements:
-
+### Component Type
 ```typescript
-class View {
-  static text(content: string): View
-  static box(props: BoxProps): View
-  static empty(): View
-  
-  // Lifecycle methods
-  onMount(callback: () => void): void
-  onDestroy(callback: () => void): void
+interface Component<Model, Msg, Deps = never> {
+  init: Effect<[Model, Cmd<Msg>], ComponentError, Deps>
+  update: (msg: Msg, model: Model) => Effect<[Model, Cmd<Msg>], ComponentError, Deps>
+  view: (model: Model) => View<Msg>
+  subscriptions?: (model: Model) => Sub<Msg>
 }
 ```
 
-### Component
-
-Base class for reusable components:
+### Commands and Effects
+Commands represent asynchronous operations that produce messages:
 
 ```typescript
-abstract class Component {
-  abstract render(): View
-  
-  // Lifecycle hooks
-  onMount?(): void | (() => void)
-  onUpdate?(): void
-  onDestroy?(): void
-}
+import { Cmd } from '@tuix/core'
+
+// Create a command that fetches data
+const fetchData = Cmd.perform(
+  Effect.tryPromise({
+    try: () => fetch('/api/data').then(r => r.json()),
+    catch: (error) => new Error(`Fetch failed: ${error}`)
+  }),
+  (data) => ({ type: 'dataLoaded', data } as const),
+  (error) => ({ type: 'dataError', error } as const)
+)
+```
+
+### Subscriptions
+Subscriptions provide continuous streams of messages:
+
+```typescript
+import { Sub, KeyUtils } from '@tuix/core'
+
+// Subscribe to keyboard events
+const keySub = Sub.fromKeys((key) => {
+  if (KeyUtils.isChar(key, '+')) return { type: 'increment' }
+  if (KeyUtils.isChar(key, '-')) return { type: 'decrement' }
+  if (KeyUtils.isChar(key, 'r')) return { type: 'reset' }
+  return null
+})
+```
+
+## API Reference
+
+### View Primitives
+
+The View module provides functional primitives for building terminal UIs:
+
+```typescript
+import { View } from '@tuix/core'
+
+// Text views
+View.text('Hello, World!')
+
+// Layout
+View.vstack(view1, view2, view3)  // Vertical stack
+View.hstack(view1, view2, view3)  // Horizontal stack
+View.box(content)                 // Box with borders
+View.center(content, width)       // Center within width
+
+// Styling
+View.bold(content)
+View.italic(content)
+View.blue(content)
+View.green(content)
+View.red(content)
 ```
 
 ### Runtime
 
-Manages application execution:
+The runtime manages the MVU lifecycle:
 
 ```typescript
-interface Runtime {
-  start(): Promise<void>
-  stop(): Promise<void>
-  render(view: View): void
+import { runApp, Runtime } from '@tuix/core'
+
+// Simple usage
+await Effect.runPromise(runApp(component))
+
+// With configuration
+const runtime = new Runtime(component, {
+  fps: 60,
+  enableMouse: true,
+  fullscreen: true
+})
+
+await Effect.runPromise(
+  Effect.provide(runtime.run(), services)
+)
+```
+
+### Error Handling
+
+Comprehensive error types with recovery strategies:
+
+```typescript
+import { ComponentError, withErrorBoundary, RecoveryStrategies } from '@tuix/core'
+
+// Wrap components with error boundaries
+const safeComponent = withErrorBoundary(
+  component,
+  RecoveryStrategies.retry(3)
+)
+
+// Handle errors in update function
+update: (msg, model) => {
+  return Effect.tryPromise({
+    try: async () => {
+      // risky operation
+      return [newModel, []]
+    },
+    catch: (error) => new ComponentError('Update failed', { cause: error })
+  })
 }
+```
+
+### Event Bus
+
+Inter-module communication without tight coupling:
+
+```typescript
+import { EventBus, getGlobalEventBus } from '@tuix/core'
+
+// Publish events
+const eventBus = yield* getGlobalEventBus
+yield* eventBus.publish({
+  type: 'user.login',
+  payload: { userId: '123' }
+})
+
+// Subscribe to events
+yield* eventBus.subscribe('user.*', (event) => {
+  console.log('User event:', event)
+})
 ```
 
 ## Examples
 
-### Basic Component
+### Timer Component
 ```typescript
-import { Component, View } from '@tuix/core'
-
-class Counter extends Component {
-  private count = 0
+const timer: Component<{ time: Date }, { type: 'tick' }> = {
+  init: Effect.succeed([{ time: new Date() }, []]),
   
-  render(): View {
-    return View.box({
-      children: [
-        View.text(`Count: ${this.count}`),
-        View.text('Press space to increment')
-      ]
-    })
-  }
+  update: (msg, model) => {
+    switch (msg.type) {
+      case 'tick':
+        return Effect.succeed([{ time: new Date() }, []])
+    }
+  },
   
-  increment() {
-    this.count++
-    this.update() // Trigger re-render
-  }
+  view: (model) => View.text(model.time.toLocaleTimeString()),
+  
+  subscriptions: () => Sub.interval(1000, { type: 'tick' })
 }
 ```
 
-### Lifecycle Management
+### HTTP Request Component
 ```typescript
-class TimerComponent extends Component {
-  private timer?: NodeJS.Timeout
+type Model = {
+  loading: boolean
+  data: string | null
+  error: string | null
+}
+
+type Msg = 
+  | { type: 'fetch' }
+  | { type: 'success'; data: string }
+  | { type: 'error'; error: string }
+
+const fetcher: Component<Model, Msg> = {
+  init: Effect.succeed([
+    { loading: false, data: null, error: null },
+    []
+  ]),
   
-  onMount() {
-    this.timer = setInterval(() => {
-      this.update()
-    }, 1000)
-    
-    // Return cleanup function
-    return () => {
-      if (this.timer) {
-        clearInterval(this.timer)
-      }
+  update: (msg, model) => {
+    switch (msg.type) {
+      case 'fetch':
+        return Effect.succeed([
+          { ...model, loading: true },
+          [fetchData]  // Command defined earlier
+        ])
+      case 'success':
+        return Effect.succeed([
+          { loading: false, data: msg.data, error: null },
+          []
+        ])
+      case 'error':
+        return Effect.succeed([
+          { loading: false, data: null, error: msg.error },
+          []
+        ])
     }
-  }
+  },
   
-  render(): View {
-    return View.text(`Time: ${new Date().toLocaleTimeString()}`)
+  view: (model) => {
+    if (model.loading) return View.text('Loading...')
+    if (model.error) return View.red(View.text(`Error: ${model.error}`))
+    if (model.data) return View.text(model.data)
+    return View.text('Press f to fetch')
   }
 }
 ```
@@ -137,11 +275,11 @@ class TimerComponent extends Component {
 
 The core module integrates with all other Tuix modules:
 
-- **CLI**: Provides component base classes for CLI apps
-- **JSX**: Renders JSX elements to View objects
-- **Styling**: Applies styles to View elements
-- **Layout**: Calculates positioning for View trees
-- **Services**: Manages terminal interaction through Views
+- **CLI**: MVU components can be used as CLI command handlers
+- **JSX**: JSX elements compile to View primitives
+- **UI**: Pre-built components follow the MVU pattern
+- **Services**: Terminal, input, and storage services integrate via Effect.ts
+- **Styling**: View primitives support ANSI styling
 
 ## Testing
 
@@ -150,7 +288,7 @@ The core module integrates with all other Tuix modules:
 bun test src/core
 
 # Run specific test
-bun test src/core/runtime.test.ts
+bun test src/core/runtime/mvu/runtime.test.ts
 ```
 
 ## Contributing
