@@ -1,6 +1,6 @@
 /**
  * Scope Manager Tests
- * 
+ *
  * Comprehensive tests for the scope management system including:
  * - Scope registration and removal
  * - Scope hierarchy and parent-child relationships
@@ -27,13 +27,11 @@ describe('ScopeManager', () => {
         path: ['app', 'test'],
         type: 'component',
         name: 'Test Scope',
-        metadata: { test: true }
+        metadata: { test: true },
       }
 
-      await Effect.runPromise(
-        scopeManager.registerScope(scopeDef)
-      )
-      
+      await Effect.runPromise(scopeManager.registerScope(scopeDef))
+
       // Verify scope was registered
       const registeredDef = scopeManager.getScopeDef('test-scope')
       expect(registeredDef).toBeDefined()
@@ -46,24 +44,22 @@ describe('ScopeManager', () => {
         id: 'conflict-scope',
         path: ['app'],
         type: 'component',
-        name: 'Original Scope'
+        name: 'Original Scope',
       }
 
       const scopeDef2: ScopeDef = {
         id: 'conflict-scope', // Same ID
         path: ['app'],
         type: 'command', // Different type
-        name: 'Conflicting Scope'
+        name: 'Conflicting Scope',
       }
 
       // First registration should succeed
       await Effect.runPromise(scopeManager.registerScope(scopeDef1))
 
       // Second registration with different properties should fail
-      const result = await Effect.runPromise(
-        Effect.either(scopeManager.registerScope(scopeDef2))
-      )
-      
+      const result = await Effect.runPromise(Effect.either(scopeManager.registerScope(scopeDef2)))
+
       expect(result._tag).toBe('Left')
     })
 
@@ -72,14 +68,14 @@ describe('ScopeManager', () => {
         id: 'parent',
         path: ['app'],
         type: 'component',
-        name: 'Parent'
+        name: 'Parent',
       }
 
       const childDef: ScopeDef = {
         id: 'child',
         path: ['app', 'child'],
         type: 'component',
-        name: 'Child'
+        name: 'Child',
       }
 
       await Effect.runPromise(scopeManager.registerScope(parentDef))
@@ -89,7 +85,7 @@ describe('ScopeManager', () => {
       const childScopes = scopeManager.getChildScopes('parent')
       expect(childScopes).toHaveLength(1)
       expect(childScopes[0].id).toBe('child')
-      
+
       const parentScope = scopeManager.getParentScope('child')
       expect(parentScope?.id).toBe('parent')
     })
@@ -101,7 +97,7 @@ describe('ScopeManager', () => {
         id: 'removable',
         path: ['app'],
         type: 'component',
-        name: 'Removable'
+        name: 'Removable',
       }
 
       await Effect.runPromise(scopeManager.registerScope(scopeDef))
@@ -121,21 +117,21 @@ describe('ScopeManager', () => {
         id: 'grandparent',
         path: ['app'],
         type: 'component',
-        name: 'Grandparent'
+        name: 'Grandparent',
       }
 
       const parentDef: ScopeDef = {
         id: 'parent',
         path: ['app', 'parent'],
         type: 'component',
-        name: 'Parent'
+        name: 'Parent',
       }
 
       const childDef: ScopeDef = {
         id: 'child',
         path: ['app', 'parent', 'child'],
         type: 'component',
-        name: 'Child'
+        name: 'Child',
       }
 
       await Effect.runPromise(scopeManager.registerScope(grandparentDef))
@@ -157,7 +153,7 @@ describe('ScopeManager', () => {
         id: 'activatable',
         path: ['app'],
         type: 'component',
-        name: 'Activatable'
+        name: 'Activatable',
       }
 
       await Effect.runPromise(scopeManager.registerScope(scopeDef))
@@ -170,7 +166,7 @@ describe('ScopeManager', () => {
       const result = await Effect.runPromise(
         Effect.either(scopeManager.activateScope('non-existent'))
       )
-      
+
       expect(result._tag).toBe('Left')
     })
   })
@@ -181,7 +177,7 @@ describe('ScopeManager', () => {
         id: 'status-scope',
         path: ['app'],
         type: 'component',
-        name: 'Status Scope'
+        name: 'Status Scope',
       }
 
       await Effect.runPromise(scopeManager.registerScope(scopeDef))
@@ -203,11 +199,11 @@ describe('ScopeManager', () => {
         id: 'context-scope',
         path: ['app'],
         type: 'component',
-        name: 'Context Scope'
+        name: 'Context Scope',
       }
 
       await Effect.runPromise(scopeManager.registerScope(scopeDef))
-      
+
       const contextData = { userId: '123', theme: 'dark' }
       await Effect.runPromise(scopeManager.setScopeContext('context-scope', contextData))
 
@@ -222,7 +218,7 @@ describe('ScopeManager', () => {
         id: 'clearable',
         path: ['app'],
         type: 'component',
-        name: 'Clearable'
+        name: 'Clearable',
       }
 
       await Effect.runPromise(scopeManager.registerScope(scopeDef))

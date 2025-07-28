@@ -1,14 +1,13 @@
 /**
  * Interactive Mode Management
- * 
+ *
  * Context-based interactive mode that works across the entire framework
  * using Effect.ts for proper scoping and lifecycle management
  */
 
-import { Effect, Context, Layer, Ref, FiberRef } from "effect"
-import { runApp } from "./mvu/runtime"
-import { LiveServices } from "@core/services/impl"
-import type { View } from "@core/view/primitives/view"
+import { Effect, Context, Layer, Ref, FiberRef } from 'effect'
+import { runApp } from './mvu/runtime'
+import type { View } from '@core/view/primitives/view'
 
 /**
  * Interactive mode configuration
@@ -31,7 +30,7 @@ export interface InteractiveConfig {
 /**
  * Interactive context service
  */
-export class InteractiveContext extends Context.Tag("InteractiveContext")<
+export class InteractiveContext extends Context.Tag('InteractiveContext')<
   InteractiveContext,
   {
     readonly config: Ref.Ref<InteractiveConfig>
@@ -56,8 +55,8 @@ export const InteractiveFiberRef = FiberRef.unsafeMake<boolean>(false)
 const defaultConfig: InteractiveConfig = {
   enabled: false,
   exitOn: {
-    error: true
-  }
+    error: true,
+  },
 }
 
 /**
@@ -68,71 +67,74 @@ export const InteractiveContextLive = Layer.effect(
   Effect.gen(function* () {
     const config = yield* Ref.make(defaultConfig)
     const isActive = yield* Ref.make(false)
-    
+
     return {
       config,
       isActive,
-      
-      enter: (overrides) => Effect.gen(function* () {
-        const currentConfig = yield* Ref.get(config)
-        const newConfig = { ...currentConfig, ...overrides, enabled: true }
-        yield* Ref.set(config, newConfig)
-        yield* Ref.set(isActive, true)
-        yield* FiberRef.set(InteractiveFiberRef, true)
-        
-        // Set up timeout if configured
-        if (newConfig.timeout) {
-          yield* Effect.fork(
-            Effect.sleep(newConfig.timeout).pipe(
-              Effect.zipRight(Ref.set(isActive, false)),
-              Effect.zipRight(Effect.log("Interactive mode timed out"))
+
+      enter: overrides =>
+        Effect.gen(function* () {
+          const currentConfig = yield* Ref.get(config)
+          const newConfig = { ...currentConfig, ...overrides, enabled: true }
+          yield* Ref.set(config, newConfig)
+          yield* Ref.set(isActive, true)
+          yield* FiberRef.set(InteractiveFiberRef, true)
+
+          // Set up timeout if configured
+          if (newConfig.timeout) {
+            yield* Effect.fork(
+              Effect.sleep(newConfig.timeout).pipe(
+                Effect.zipRight(Ref.set(isActive, false)),
+                Effect.zipRight(Effect.log('Interactive mode timed out'))
+              )
             )
-          )
-        }
-      }),
-      
-      exit: (code = 0) => Effect.gen(function* () {
-        yield* Ref.set(isActive, false)
-        yield* FiberRef.set(InteractiveFiberRef, false)
-        const cfg = yield* Ref.get(config)
-        
-        if (cfg.onExit) {
-          yield* Effect.sync(() => cfg.onExit(code))
-        }
-        
-        // Exit the process if we're in a CLI context
-        if (typeof process !== 'undefined' && process.exit) {
-          yield* Effect.sync(() => process.exit(code))
-        }
-      }),
-      
+          }
+        }),
+
+      exit: (code = 0) =>
+        Effect.gen(function* () {
+          yield* Ref.set(isActive, false)
+          yield* FiberRef.set(InteractiveFiberRef, false)
+          const cfg = yield* Ref.get(config)
+
+          if (cfg.onExit) {
+            yield* Effect.sync(() => cfg.onExit(code))
+          }
+
+          // Exit the process if we're in a CLI context
+          if (typeof process !== 'undefined' && process.exit) {
+            yield* Effect.sync(() => process.exit(code))
+          }
+        }),
+
       withInteractive: <R, E, A>(
         effect: Effect.Effect<A, E, R>,
         overrides?: Partial<InteractiveConfig>
-      ) => Effect.gen(function* () {
-        // Save current state
-        const wasActive = yield* Ref.get(isActive)
-        const oldConfig = yield* Ref.get(config)
-        
-        try {
-          // Enter interactive mode
-          yield* Effect.gen(function* () {
-            const currentConfig = yield* Ref.get(config)
-            const newConfig = { ...currentConfig, ...overrides, enabled: true }
-            yield* Ref.set(config, newConfig)
-            yield* Ref.set(isActive, true)
-            yield* FiberRef.set(InteractiveFiberRef, true)
-          })
-          
-          // Run the effect
-          return yield* effect
-        } finally {
-          // Restore previous state
-          yield* Ref.set(isActive, wasActive)
-          yield* Ref.set(config, oldConfig)
-          yield* FiberRef.set(InteractiveFiberRef, wasActive)
-        }
-      })
+      ) =>
+        Effect.gen(function* () {
+          // Save current state
+          const wasActive = yield* Ref.get(isActive)
+          const oldConfig = yield* Ref.get(config)
+
+          try {
+            // Enter interactive mode
+            yield* Effect.gen(function* () {
+              const currentConfig = yield* Ref.get(config)
+              const newConfig = { ...currentConfig, ...overrides, enabled: true }
+              yield* Ref.set(config, newConfig)
+              yield* Ref.set(isActive, true)
+              yield* FiberRef.set(InteractiveFiberRef, true)
+            })
+
+            // Run the effect
+            return yield* effect
+          } finally {
+            // Restore previous state
+            yield* Ref.set(isActive, wasActive)
+            yield* Ref.set(config, oldConfig)
+            yield* FiberRef.set(InteractiveFiberRef, wasActive)
+          }
+        }),
     }
   })
 )
@@ -150,10 +152,11 @@ export const isInteractive = Effect.gen(function* () {
 export const runInteractive = <R, E, A>(
   effect: Effect.Effect<A, E, R>,
   config?: Partial<InteractiveConfig>
-) => Effect.gen(function* () {
-  const ctx = yield* InteractiveContext
-  return yield* ctx.withInteractive(effect, config)
-})
+) =>
+  Effect.gen(function* () {
+    const ctx = yield* InteractiveContext
+    return yield* ctx.withInteractive(effect, config)
+  })
 
 /**
  * Conditionally run as interactive based on context
@@ -161,49 +164,50 @@ export const runInteractive = <R, E, A>(
 export const maybeInteractive = <R, E, A>(
   effect: Effect.Effect<A, E, R>,
   shouldBeInteractive: boolean | Effect.Effect<boolean, never, never>
-) => Effect.gen(function* () {
-  const interactive = typeof shouldBeInteractive === 'boolean' 
-    ? shouldBeInteractive 
-    : yield* shouldBeInteractive
-    
-  if (interactive) {
-    return yield* runInteractive(effect)
-  } else {
-    return yield* effect
-  }
-})
+) =>
+  Effect.gen(function* () {
+    const interactive =
+      typeof shouldBeInteractive === 'boolean' ? shouldBeInteractive : yield* shouldBeInteractive
+
+    if (interactive) {
+      return yield* runInteractive(effect)
+    } else {
+      return yield* effect
+    }
+  })
 
 /**
  * Run a view in interactive mode (with event loop)
+ * Note: This function requires LiveServices to be provided externally
  */
 export const runViewInteractive = (
   view: View | (() => View),
   config?: Partial<InteractiveConfig>
-) => Effect.gen(function* () {
-  const ctx = yield* InteractiveContext
-  
-  yield* ctx.enter(config)
-  
-  const component = {
-    init: Effect.succeed([{}, []] as const),
-    update: () => Effect.succeed([{}, []] as const),
-    view: typeof view === 'function' ? view : () => view,
-    subscription: () => Effect.succeed([])
-  }
-  
-  yield* runApp(component).pipe(
-    Effect.provide(LiveServices),
-    Effect.catchAll(() => Effect.void)
-  )
-})
+) =>
+  Effect.gen(function* () {
+    const ctx = yield* InteractiveContext
+
+    yield* ctx.enter(config)
+
+    const component = {
+      init: Effect.succeed([{}, []] as const),
+      update: () => Effect.succeed([{}, []] as const),
+      view: typeof view === 'function' ? view : () => view,
+      subscription: () => Effect.succeed([]),
+    }
+
+    // Note: LiveServices must be provided by the caller
+    yield* runApp(component).pipe(Effect.catchAll(() => Effect.void))
+  })
 
 /**
  * Exit interactive mode
  */
-export const exitInteractive = (code = 0) => Effect.gen(function* () {
-  const ctx = yield* InteractiveContext
-  yield* ctx.exit(code)
-})
+export const exitInteractive = (code = 0) =>
+  Effect.gen(function* () {
+    const ctx = yield* InteractiveContext
+    yield* ctx.exit(code)
+  })
 
 /**
  * Interactive mode utilities
@@ -212,41 +216,41 @@ export const Interactive = {
   /**
    * Enter interactive mode
    */
-  enter: (config?: Partial<InteractiveConfig>) => Effect.gen(function* () {
-    const ctx = yield* InteractiveContext
-    yield* ctx.enter(config)
-  }),
-  
+  enter: (config?: Partial<InteractiveConfig>) =>
+    Effect.gen(function* () {
+      const ctx = yield* InteractiveContext
+      yield* ctx.enter(config)
+    }),
+
   /**
    * Exit interactive mode
    */
   exit: exitInteractive,
-  
+
   /**
    * Check if in interactive mode
    */
   isActive: isInteractive,
-  
+
   /**
    * Run effect in interactive mode
    */
   run: runInteractive,
-  
+
   /**
    * Run view in interactive mode
+   * Note: Caller must provide LiveServices
    */
   runView: runViewInteractive,
-  
+
   /**
    * Conditionally interactive
    */
   maybe: maybeInteractive,
-  
+
   /**
    * Create a scoped interactive region
    */
-  scope: <R, E, A>(
-    effect: Effect.Effect<A, E, R>,
-    config?: Partial<InteractiveConfig>
-  ) => runInteractive(effect, config)
+  scope: <R, E, A>(effect: Effect.Effect<A, E, R>, config?: Partial<InteractiveConfig>) =>
+    runInteractive(effect, config),
 }

@@ -1,6 +1,6 @@
 /**
  * Core Context Module
- * 
+ *
  * Provides context abstractions for cross-cutting concerns
  * that need to be shared between different parts of the framework.
  */
@@ -11,5 +11,5 @@ export {
   ComponentContextRef,
   useComponentContext,
   withComponentContext,
-  type ComponentContextValue
+  type ComponentContextValue,
 } from './component'

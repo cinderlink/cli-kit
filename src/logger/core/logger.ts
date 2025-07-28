@@ -1,20 +1,20 @@
 /**
  * Core Logger Implementation
- * 
+ *
  * Effect-based logger with rich features
  */
 
-import { Effect, Ref, Context, Layer, Queue, Stream, Fiber, Option } from "effect"
-import * as os from "os"
+import { Effect, Ref, Context, Layer, Queue, Stream, Fiber, Option } from 'effect'
+import * as os from 'os'
 import type {
   LoggerConfig,
   LogEntry,
   LogLevel,
   LogTransport,
   SpanContext,
-  Serializers
-} from "../types"
-import { Logger, LogLevels, defaultSerializers } from "../types"
+  Serializers,
+} from '../types'
+import { Logger, LogLevels, defaultSerializers } from '../types'
 
 export class TuixLogger implements Logger {
   private levelValue: number
@@ -36,27 +36,35 @@ export class TuixLogger implements Logger {
   }
 
   trace(message: string, metadata?: Record<string, any>): Effect.Effect<void, never, never> {
-    return this.log({ level: "trace", message, metadata })
+    return this.log({ level: 'trace', message, metadata })
   }
 
   debug(message: string, metadata?: Record<string, any>): Effect.Effect<void, never, never> {
-    return this.log({ level: "debug", message, metadata })
+    return this.log({ level: 'debug', message, metadata })
   }
 
   info(message: string, metadata?: Record<string, any>): Effect.Effect<void, never, never> {
-    return this.log({ level: "info", message, metadata })
+    return this.log({ level: 'info', message, metadata })
   }
 
   warn(message: string, metadata?: Record<string, any>): Effect.Effect<void, never, never> {
-    return this.log({ level: "warn", message, metadata })
+    return this.log({ level: 'warn', message, metadata })
   }
 
-  error(message: string, error?: Error, metadata?: Record<string, any>): Effect.Effect<void, never, never> {
-    return this.log({ level: "error", message, error, metadata })
+  error(
+    message: string,
+    error?: Error,
+    metadata?: Record<string, any>
+  ): Effect.Effect<void, never, never> {
+    return this.log({ level: 'error', message, error, metadata })
   }
 
-  fatal(message: string, error?: Error, metadata?: Record<string, any>): Effect.Effect<void, never, never> {
-    return this.log({ level: "fatal", message, error, metadata })
+  fatal(
+    message: string,
+    error?: Error,
+    metadata?: Record<string, any>
+  ): Effect.Effect<void, never, never> {
+    return this.log({ level: 'fatal', message, error, metadata })
   }
 
   log(entry: Partial<LogEntry>): Effect.Effect<void, never, never> {
@@ -66,7 +74,7 @@ export class TuixLogger implements Logger {
 
     const fullEntry: LogEntry = {
       level: entry.level,
-      message: entry.message || "",
+      message: entry.message || '',
       timestamp: entry.timestamp || new Date(),
       context: [...this.contextPath, ...(entry.context || [])],
       metadata: this.serializeMetadata({ ...this.metadata, ...entry.metadata }),
@@ -76,19 +84,17 @@ export class TuixLogger implements Logger {
       hostname: os.hostname(),
       name: this.config.name,
       v: 1,
-      src: this.getSourceInfo()
+      src: this.getSourceInfo(),
     }
 
-    return Effect.forEach(this.config.transports, transport =>
-      transport.write(fullEntry)
-    ).pipe(
+    return Effect.forEach(this.config.transports, transport => transport.write(fullEntry)).pipe(
       Effect.asVoid,
       Effect.catchAll(() => Effect.void) // Don't fail on transport errors
     )
   }
 
   child(context: string | Record<string, any>): Logger {
-    if (typeof context === "string") {
+    if (typeof context === 'string') {
       return new TuixLogger(
         this.config,
         [...this.contextPath, context],
@@ -110,10 +116,12 @@ export class TuixLogger implements Logger {
     return Effect.gen(function* (_) {
       const startTime = Date.now()
       const spanId = `${name}-${startTime}-${Math.random()}`
-      
-      yield* _(Effect.sync(() => {
-        self.spans.set(spanId, { startTime, attributes: {} })
-      }))
+
+      yield* _(
+        Effect.sync(() => {
+          self.spans.set(spanId, { startTime, attributes: {} })
+        })
+      )
 
       const result = yield* _(
         effect.pipe(
@@ -122,15 +130,15 @@ export class TuixLogger implements Logger {
             if (span) {
               const duration = Date.now() - span.startTime
               self.spans.delete(spanId)
-              
+
               return self.log({
-                level: "trace",
+                level: 'trace',
                 message: `Span completed: ${name}`,
                 span: {
                   name,
                   duration,
-                  attributes: span.attributes
-                }
+                  attributes: span.attributes,
+                },
               })
             }
             return Effect.void
@@ -140,15 +148,15 @@ export class TuixLogger implements Logger {
             if (span) {
               const duration = Date.now() - span.startTime
               self.spans.delete(spanId)
-              
+
               return self.log({
-                level: "error",
+                level: 'error',
                 message: `Span failed: ${name}`,
                 span: {
                   name,
                   duration,
-                  attributes: { ...span.attributes, error: true }
-                }
+                  attributes: { ...span.attributes, error: true },
+                },
               })
             }
             return Effect.void
@@ -163,9 +171,9 @@ export class TuixLogger implements Logger {
   startSpan(name: string, attributes?: Record<string, any>): SpanContext {
     const startTime = Date.now()
     const spanId = `${name}-${startTime}-${Math.random()}`
-    
+
     this.spans.set(spanId, { startTime, attributes: attributes || {} })
-    
+
     return {
       name,
       startTime,
@@ -175,19 +183,19 @@ export class TuixLogger implements Logger {
         if (span) {
           const duration = Date.now() - span.startTime
           this.spans.delete(spanId)
-          
+
           return this.log({
-            level: "trace",
+            level: 'trace',
             message: `Span: ${name}`,
             span: {
               name,
               duration,
-              attributes: { ...span.attributes, ...endAttributes }
-            }
+              attributes: { ...span.attributes, ...endAttributes },
+            },
           })
         }
         return Effect.void
-      }
+      },
     }
   }
 
@@ -198,12 +206,10 @@ export class TuixLogger implements Logger {
   }
 
   addSerializer(field: string, serializer: (value: any) => any): Logger {
-    return new TuixLogger(
-      this.config,
-      this.contextPath,
-      this.metadata,
-      { ...this.serializers, [field]: serializer }
-    )
+    return new TuixLogger(this.config, this.contextPath, this.metadata, {
+      ...this.serializers,
+      [field]: serializer,
+    })
   }
 
   level(): LogLevel {
@@ -221,9 +227,9 @@ export class TuixLogger implements Logger {
 
   private serializeMetadata(metadata?: Record<string, any>): Record<string, any> | undefined {
     if (!metadata) return undefined
-    
+
     const serialized: Record<string, any> = {}
-    
+
     for (const [key, value] of Object.entries(metadata)) {
       if (key in this.serializers) {
         serialized[key] = this.serializers[key](value)
@@ -231,11 +237,11 @@ export class TuixLogger implements Logger {
         serialized[key] = value
       }
     }
-    
+
     return serialized
   }
 
-  private getSourceInfo(): LogEntry["src"] | undefined {
+  private getSourceInfo(): LogEntry['src'] | undefined {
     // This would use stack trace to get source info
     // For now, returning undefined
     return undefined
@@ -256,7 +262,7 @@ export interface LoggerQueue {
   readonly processor: Fiber.RuntimeFiber<never, never>
 }
 
-export const LoggerQueue = Context.GenericTag<LoggerQueue>("tuix/LoggerQueue")
+export const LoggerQueue = Context.GenericTag<LoggerQueue>('tuix/LoggerQueue')
 
 /**
  * Create a queued logger layer for high-performance async logging
@@ -268,28 +274,30 @@ export const makeQueuedLoggerLayer = (
   Layer.effectDiscard(
     Effect.gen(function* (_) {
       const queue = yield* _(Queue.bounded<LogEntry>(queueSize))
-      
+
       // Create a logger that writes to the queue
       const queuedLogger = new TuixLogger({
         ...config,
-        transports: [{
-          write: (entry) => Queue.offer(queue, entry)
-        }]
+        transports: [
+          {
+            write: entry => Queue.offer(queue, entry),
+          },
+        ],
       })
-      
+
       // Process queue in background
       const processor = yield* _(
         Stream.fromQueue(queue).pipe(
           Stream.tap(entry =>
-            Effect.forEach(config.transports, transport =>
-              transport.write(entry)
-            ).pipe(Effect.asVoid)
+            Effect.forEach(config.transports, transport => transport.write(entry)).pipe(
+              Effect.asVoid
+            )
           ),
           Stream.runDrain,
           Effect.fork
         )
       )
-      
+
       yield* _(Layer.succeed(Logger, queuedLogger))
       yield* _(Layer.succeed(LoggerQueue, { queue, processor }))
     })
@@ -306,7 +314,7 @@ export const setGlobalLogger = (logger: Logger) => {
 
 export const getGlobalLogger = (): Logger => {
   if (!globalLogger) {
-    throw new Error("Global logger not initialized. Call setGlobalLogger first.")
+    throw new Error('Global logger not initialized. Call setGlobalLogger first.')
   }
   return globalLogger
 }
@@ -317,19 +325,19 @@ export const getGlobalLogger = (): Logger => {
 export const log = {
   trace: (message: string, metadata?: Record<string, any>) =>
     Effect.flatMap(Logger, logger => logger.trace(message, metadata)),
-  
+
   debug: (message: string, metadata?: Record<string, any>) =>
     Effect.flatMap(Logger, logger => logger.debug(message, metadata)),
-  
+
   info: (message: string, metadata?: Record<string, any>) =>
     Effect.flatMap(Logger, logger => logger.info(message, metadata)),
-  
+
   warn: (message: string, metadata?: Record<string, any>) =>
     Effect.flatMap(Logger, logger => logger.warn(message, metadata)),
-  
+
   error: (message: string, error?: Error, metadata?: Record<string, any>) =>
     Effect.flatMap(Logger, logger => logger.error(message, error, metadata)),
-  
+
   fatal: (message: string, error?: Error, metadata?: Record<string, any>) =>
     Effect.flatMap(Logger, logger => logger.fatal(message, error, metadata)),
 }
@@ -337,7 +345,8 @@ export const log = {
 /**
  * Create a child logger with additional context
  */
-export const withLoggerContext = (context: string | Record<string, any>) =>
+export const withLoggerContext =
+  (context: string | Record<string, any>) =>
   <R, E, A>(effect: Effect.Effect<A, E, R>): Effect.Effect<A, E, R | Logger> =>
     Effect.flatMap(Logger, logger =>
       Effect.provide(effect, Layer.succeed(Logger, logger.child(context)))

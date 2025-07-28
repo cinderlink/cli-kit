@@ -1,6 +1,6 @@
 /**
  * Scope Explorer Component
- * 
+ *
  * Displays registered scopes
  */
 

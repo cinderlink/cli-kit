@@ -1,20 +1,16 @@
 /**
  * Spacer and Divider - Layout utilities for spacing and separation
- * 
+ *
  * Provides:
  * - Fixed and flexible spacers
  * - Horizontal and vertical dividers
  * - Custom divider styles
  */
 
-import { Effect } from "effect"
-import type { View } from "@core/types"
-import { style, type Style, renderStyledSync } from "@core/terminal/ansi/styles"
-import {
-  type SpacerProps,
-  type DividerProps,
-  DividerOrientation
-} from "./types"
+import { Effect } from 'effect'
+import type { View } from '@core/types'
+import { style, type Style, renderStyledSync } from '@core/terminal/ansi/styles'
+import { type SpacerProps, type DividerProps, DividerOrientation } from './types'
 
 // =============================================================================
 // Spacer
@@ -34,12 +30,12 @@ interface FlexView extends View {
 export const spacer = (props: SpacerProps = {}): FlexView => {
   const size = props.size ?? 1
   const flex = props.flex ?? 0
-  
+
   return {
-    render: () => Effect.succeed(" ".repeat(size)),
+    render: () => Effect.succeed(' '.repeat(size)),
     width: size,
     height: 1,
-    flex
+    flex,
   }
 }
 
@@ -49,9 +45,9 @@ export const spacer = (props: SpacerProps = {}): FlexView => {
  */
 export const hspace = (width: number): View => {
   return {
-    render: () => Effect.succeed(" ".repeat(width)),
+    render: () => Effect.succeed(' '.repeat(width)),
     width,
-    height: 1
+    height: 1,
   }
 }
 
@@ -61,9 +57,9 @@ export const hspace = (width: number): View => {
  */
 export const vspace = (height: number): View => {
   return {
-    render: () => Effect.succeed(Array(height).fill("").join("\n")),
+    render: () => Effect.succeed(Array(height).fill('').join('\n')),
     width: 1,
-    height
+    height,
   }
 }
 
@@ -85,32 +81,34 @@ export const flexSpacer = (flex: number = 1): View => {
  */
 export const divider = (props: DividerProps = {}): View => {
   const orientation = props.orientation ?? DividerOrientation.Horizontal
-  const char = props.char ?? (orientation === DividerOrientation.Horizontal ? "─" : "│")
+  const char = props.char ?? (orientation === DividerOrientation.Horizontal ? '─' : '│')
   const dividerStyle = props.style ?? style()
-  
+
   if (orientation === DividerOrientation.Horizontal) {
     return {
-      render: () => Effect.gen(function* (_) {
-        // For horizontal divider, we need to know the width
-        // This is a simplified version - in practice, the layout system
-        // would provide the actual width
-        const width = 40 // Default width
-        const line = char.repeat(width)
-        return renderStyledSync(line, dividerStyle)
-      }),
+      render: () =>
+        Effect.gen(function* (_) {
+          // For horizontal divider, we need to know the width
+          // This is a simplified version - in practice, the layout system
+          // would provide the actual width
+          const width = 40 // Default width
+          const line = char.repeat(width)
+          return renderStyledSync(line, dividerStyle)
+        }),
       width: 40, // This would be determined by the container
-      height: 1
+      height: 1,
     }
   } else {
     return {
-      render: () => Effect.gen(function* (_) {
-        // For vertical divider, create multiple lines
-        const height = 10 // Default height
-        const lines = Array(height).fill(char)
-        return lines.map(line => renderStyledSync(line, dividerStyle)).join("\n")
-      }),
+      render: () =>
+        Effect.gen(function* (_) {
+          // For vertical divider, create multiple lines
+          const height = 10 // Default height
+          const lines = Array(height).fill(char)
+          return lines.map(line => renderStyledSync(line, dividerStyle)).join('\n')
+        }),
       width: 1,
-      height: 10 // This would be determined by the container
+      height: 10, // This would be determined by the container
     }
   }
 }
@@ -123,11 +121,11 @@ export const divider = (props: DividerProps = {}): View => {
  * Divider style presets with their respective characters
  */
 const DIVIDER_STYLES = {
-  solid: { horizontal: "─", vertical: "│" },
-  dotted: { horizontal: "·", vertical: "⋮" },
-  dashed: { horizontal: "╌", vertical: "┊" },
-  double: { horizontal: "═", vertical: "║" },
-  thick: { horizontal: "━", vertical: "┃" }
+  solid: { horizontal: '─', vertical: '│' },
+  dotted: { horizontal: '·', vertical: '⋮' },
+  dashed: { horizontal: '╌', vertical: '┊' },
+  double: { horizontal: '═', vertical: '║' },
+  thick: { horizontal: '━', vertical: '┃' },
 } as const
 
 /**
@@ -146,38 +144,38 @@ const createStyledDivider = (
 /**
  * Create a horizontal divider with optional character and style
  */
-export const hdivider = (char?: string, style?: Style): View => 
+export const hdivider = (char?: string, style?: Style): View =>
   divider({ orientation: DividerOrientation.Horizontal, char, style })
 
 /**
  * Create a vertical divider with optional character and style
  */
-export const vdivider = (char?: string, style?: Style): View => 
+export const vdivider = (char?: string, style?: Style): View =>
   divider({ orientation: DividerOrientation.Vertical, char, style })
 
 /**
  * Create a dotted divider (horizontal by default)
  */
-export const dottedDivider = (style?: Style, orientation?: DividerOrientation): View => 
-  createStyledDivider("dotted", orientation, style)
+export const dottedDivider = (style?: Style, orientation?: DividerOrientation): View =>
+  createStyledDivider('dotted', orientation, style)
 
 /**
  * Create a dashed divider (horizontal by default)
  */
-export const dashedDivider = (style?: Style, orientation?: DividerOrientation): View => 
-  createStyledDivider("dashed", orientation, style)
+export const dashedDivider = (style?: Style, orientation?: DividerOrientation): View =>
+  createStyledDivider('dashed', orientation, style)
 
 /**
  * Create a double-line divider (horizontal by default)
  */
-export const doubleDivider = (style?: Style, orientation?: DividerOrientation): View => 
-  createStyledDivider("double", orientation, style)
+export const doubleDivider = (style?: Style, orientation?: DividerOrientation): View =>
+  createStyledDivider('double', orientation, style)
 
 /**
  * Create a thick divider (horizontal by default)
  */
-export const thickDivider = (style?: Style, orientation?: DividerOrientation): View => 
-  createStyledDivider("thick", orientation, style)
+export const thickDivider = (style?: Style, orientation?: DividerOrientation): View =>
+  createStyledDivider('thick', orientation, style)
 
 // =============================================================================
 // Layout Helpers
@@ -190,14 +188,12 @@ export const thickDivider = (style?: Style, orientation?: DividerOrientation): V
 export const spaced = (
   views: ReadonlyArray<View>,
   spacing: number,
-  orientation: "horizontal" | "vertical" = "vertical"
+  orientation: 'horizontal' | 'vertical' = 'vertical'
 ): ReadonlyArray<View> => {
   if (views.length <= 1) return views
-  
-  const spacerView = orientation === "horizontal" 
-    ? hspace(spacing)
-    : vspace(spacing)
-  
+
+  const spacerView = orientation === 'horizontal' ? hspace(spacing) : vspace(spacing)
+
   const result: View[] = []
   views.forEach((view, index) => {
     result.push(view)
@@ -205,7 +201,7 @@ export const spaced = (
       result.push(spacerView)
     }
   })
-  
+
   return result
 }
 
@@ -218,7 +214,7 @@ export const separated = (
   dividerView: View = hdivider()
 ): ReadonlyArray<View> => {
   if (views.length <= 1) return views
-  
+
   const result: View[] = []
   views.forEach((view, index) => {
     result.push(view)
@@ -226,6 +222,6 @@ export const separated = (
       result.push(dividerView)
     }
   })
-  
+
   return result
 }

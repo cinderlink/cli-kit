@@ -1,6 +1,6 @@
 /**
  * Plugin Component - CLI Integration
- * 
+ *
  * Defines a plugin scope that can contain commands
  * This is the CLI-integrated version that uses CommandLineScope
  */
@@ -22,7 +22,7 @@ export function Plugin(props: PluginProps): JSX.Element {
       name={props.name}
       description={props.description}
       metadata={{
-        version: props.version
+        version: props.version,
       }}
     >
       {props.children}

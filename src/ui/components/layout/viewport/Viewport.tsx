@@ -1,6 +1,6 @@
 /**
  * Viewport Component - JSX version for scrollable content areas
- * 
+ *
  * A scrollable container component that provides:
  * - Vertical and horizontal scrolling
  * - Scroll indicators/scrollbars
@@ -8,14 +8,14 @@
  * - Keyboard navigation (arrow keys, page up/down)
  * - Content that can be larger than the viewport
  * - Smooth scrolling behavior
- * 
+ *
  * @example
  * ```tsx
  * import { Viewport } from 'tuix/components/containers/viewport'
- * 
+ *
  * function MyScrollableContent() {
  *   return (
- *     <Viewport 
+ *     <Viewport
  *       width={80}
  *       height={20}
  *       showScrollbars={true}
@@ -40,22 +40,22 @@ import { createViewportStore, type ViewportStore } from '@ui/stores/viewportStor
 // Types
 export interface ViewportProps {
   children?: JSX.Element | JSX.Element[]
-  
+
   // Sizing
   width: number
   height: number
-  
+
   // Scrolling
   showScrollbars?: boolean
   smoothScroll?: boolean
   scrollStep?: number
   pageSize?: number
-  
+
   // Styling
   style?: Style
   borderStyle?: keyof typeof Borders
   scrollbarStyle?: Style
-  
+
   // Callbacks
   onScroll?: (x: number, y: number) => void
   onScrollUp?: () => void
@@ -93,19 +93,19 @@ export const Viewport = (props: ViewportProps) => {
     scrollStep,
     pageSize,
     smoothScroll,
-    wrapContent: false
+    wrapContent: false,
   })
-  
+
   // Update store settings for scrollbars
   store.showScrollbars.value = showScrollbars
 
   // Convert children to content lines
   const processChildren = (children: JSX.Element | JSX.Element[]) => {
     if (!children) return []
-    
+
     const childArray = Array.isArray(children) ? children : [children]
     const lines: string[] = []
-    
+
     childArray.forEach(child => {
       if (typeof child === 'string') {
         lines.push(child)
@@ -119,7 +119,7 @@ export const Viewport = (props: ViewportProps) => {
         lines.push(String(child))
       }
     })
-    
+
     return lines
   }
 
@@ -128,7 +128,7 @@ export const Viewport = (props: ViewportProps) => {
     const contentLines = processChildren(children)
     store.setContent(contentLines)
   })
-  
+
   // Handle dimension changes
   $effect(() => {
     store.updateDimensions(width, height)
@@ -141,7 +141,7 @@ export const Viewport = (props: ViewportProps) => {
       onScroll(store.scrollX.value, store.scrollY.value)
     }
   })
-  
+
   // Scroll method wrappers that include callbacks
   const scrollUp = (amount?: number) => {
     store.scrollUp(amount)
@@ -213,7 +213,7 @@ export const Viewport = (props: ViewportProps) => {
   // Main content area
   visibleLines.forEach((line, index) => {
     const contentLine = <text>{line}</text>
-    
+
     if (showScrollbars && verticalScrollbar && index < verticalScrollbar.length) {
       lines.push(
         <hstack>
@@ -229,7 +229,7 @@ export const Viewport = (props: ViewportProps) => {
   // Horizontal scrollbar
   if (showScrollbars && horizontalScrollbar) {
     const hScrollLine = <text>{horizontalScrollbar}</text>
-    
+
     if (verticalScrollbar) {
       lines.push(
         <hstack>
@@ -244,11 +244,7 @@ export const Viewport = (props: ViewportProps) => {
 
   // Apply styling
   const viewportStyle = customStyle || style()
-  const styledViewport = (
-    <vstack style={viewportStyle}>
-      {lines}
-    </vstack>
-  )
+  const styledViewport = <vstack style={viewportStyle}>{lines}</vstack>
 
   // Add keyboard handlers (simplified for JSX)
   // In a real implementation, this would integrate with the input system

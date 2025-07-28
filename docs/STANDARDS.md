@@ -3,12 +3,14 @@
 ## Code Standards
 
 ### TypeScript Requirements
-- **Strict Mode**: Always enabled in tsconfig.json
+- **Strict Mode**: Always enabled in tsconfig.src.json with full strict checks
+- **Environment Types**: All env vars typed in types/process-env.d.ts
 - **Type Coverage**: 100% of exports must be typed
 - **Discriminated Unions**: Use for all message/event types
 - **Generic Constraints**: Always specify constraints on generics
 - **Return Types**: Explicitly type all function returns
 - **No Implicit Any**: Zero tolerance policy
+- **Strict Checks**: noUncheckedIndexedAccess, exactOptionalPropertyTypes enabled
 
 ### Type Patterns
 ```typescript
@@ -184,17 +186,26 @@ export function processUserInput(input: unknown): Result {
 ## Module Standards
 
 ### Module Structure
-Each module must follow standard organization:
+Each module must follow this organization:
 ```
 module/
-├── index.ts       # Public API only
-├── types.ts       # Type definitions
-├── errors.ts      # Error definitions
-├── README.md      # Module documentation
-├── PLANNING.md    # Module development planning
-├── ISSUES.md      # Module-specific issues tracking
-└── impl/          # Internal implementation
+├── index.ts            # Public API only
+├── types.ts            # Type definitions
+├── errors.ts           # Error definitions
+├── constants.ts        # Module constants
+├── feature.ts          # Feature implementation (one per feature)
+├── feature.test.ts     # Tests for the feature, beside the code
+├── feature.md          # Documentation for the feature, beside the code
+├── README.md           # Module documentation
+├── PLANNING.md         # Module development planning
+├── ISSUES.md           # Module-specific issues tracking
 ```
+- **No impl/ or integrations/ folders.**
+- **No tests/ folder.**
+- **No one-off scripts or examples.**
+- **Integration tests live in `src/tests/integration/`.**
+- **Every feature must be in its own file with a matching `.test.ts` and `.md` file.**
+- **Code, tests, and docs must always be kept in alignment.**
 
 ### Project vs Module Documentation
 **Project-level docs (root only):**
@@ -220,11 +231,17 @@ module/
 ## Build Standards
 
 ### Configuration
-- **TypeScript**: Strict mode, no implicit any
-- **Bundling**: Use Bun's built-in bundler
+- **TypeScript**: Strict mode via tsconfig.src.json
+- **Bundling**: Use build.config.ts with Bun's built-in bundler
 - **Testing**: Use Bun test runner
-- **Linting**: ESLint with project config
-- **Formatting**: Consistent code style
+- **Linting**: oxlint for primary linting (fast performance)
+- **Formatting**: Biome for code formatting and import organization
+- **Pre-commit**: Husky hooks run `bun run check` automatically
+
+### Quality Commands
+- **Combined Check**: `bun run check` (format + lint + typecheck)
+- **Auto-fix**: `bun run check:fix` (format + imports + lint fixes)
+- **Individual**: `bun run format`, `bun run lint`, `bun run typecheck:tsc`
 
 ### Output Requirements
 - **No Console**: Remove debug logs in production
@@ -235,11 +252,13 @@ module/
 ## Quality Gates
 
 ### Pre-Commit
-1. All tests pass
-2. No TypeScript errors
-3. Coverage thresholds met
-4. Documentation complete
-5. No linting warnings
+1. Husky hook runs `bun run check` automatically
+2. All tests pass (`bun test`)
+3. No TypeScript errors (strict mode)
+4. No formatting issues (Biome)
+5. No linting warnings (oxlint)
+6. Coverage thresholds met
+7. Documentation complete
 
 ### Pre-Merge
 1. Code review approved
@@ -265,7 +284,8 @@ module/
 
 ## Compliance Checklist
 
-- [ ] TypeScript strict mode enabled
+- [ ] TypeScript strict mode enabled (tsconfig.src.json)
+- [ ] Environment variables typed (types/process-env.d.ts)
 - [ ] 100% type coverage on exports
 - [ ] Test coverage meets minimums
 - [ ] All exports have JSDoc
@@ -274,4 +294,8 @@ module/
 - [ ] Security validations in place
 - [ ] Performance targets met
 - [ ] Module structure correct
-- [ ] Build configuration proper
+- [ ] Build configuration proper (build.config.ts)
+- [ ] Code formatted with Biome
+- [ ] Linted with oxlint
+- [ ] Pre-commit hooks working
+- [ ] `bun run check` passes

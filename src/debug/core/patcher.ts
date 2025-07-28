@@ -1,6 +1,6 @@
 /**
  * Framework Patcher
- * 
+ *
  * Patches framework internals to capture debug information
  */
 
@@ -25,21 +25,21 @@ let patchesApplied = false
 export function applyDebugPatches(options: PatchOptions = {}) {
   if (patchesApplied) return
   patchesApplied = true
-  
+
   const {
     patchScope = true,
     patchJSX = true,
     patchRender = true,
-    patchLogger = DEBUG_DEFAULTS.CAPTURE_LOGGER
+    patchLogger = DEBUG_DEFAULTS.CAPTURE_LOGGER,
   } = options
-  
+
   debug.system('Applying debug patches')
-  
+
   if (patchScope) patchScopeManager()
   if (patchJSX) patchJSXRuntime()
   if (patchRender) patchRenderSystem()
   if (patchLogger) patchLoggerModule()
-  
+
   // Install error handlers
   installErrorHandlers()
 }
@@ -51,22 +51,22 @@ function patchScopeManager() {
     debug.scope(`Registering scope: ${scope.type}:${scope.name}`, {
       id: scope.id,
       path: scope.path,
-      parent: scope.metadata?.parentId
+      parent: scope.metadata?.parentId,
     })
     return originalRegister(scope)
   }
-  
+
   // Patch activateScope
   const originalActivate = scopeManager.activateScope.bind(scopeManager)
   scopeManager.activateScope = (scopeId: string) => {
     const scope = scopeManager.getAllScopes().find(s => s.id === scopeId)
-    debug.scope(`Activating scope: ${scope?.name || scopeId}`, { 
+    debug.scope(`Activating scope: ${scope?.name || scopeId}`, {
       scopeId,
-      path: scope?.path 
+      path: scope?.path,
     })
     return originalActivate(scopeId)
   }
-  
+
   // Patch deactivateScope
   const originalDeactivate = scopeManager.deactivateScope.bind(scopeManager)
   scopeManager.deactivateScope = (scopeId: string) => {
@@ -74,24 +74,28 @@ function patchScopeManager() {
     debug.scope(`Deactivating scope: ${scope?.name || scopeId}`, { scopeId })
     return originalDeactivate(scopeId)
   }
-  
+
   debug.system('Scope manager patched')
 }
 
 async function patchJSXRuntime() {
   try {
     const jsxRuntime = await import('@jsx/runtime')
-    
+
     // Patch createElement
     const originalCreateElement = jsxRuntime.createElement
-    jsxRuntime.createElement = function(type: string | Function, props: Record<string, unknown> | null, ...children: JSXChildren[]) {
+    jsxRuntime.createElement = function (
+      type: string | Function,
+      props: Record<string, unknown> | null,
+      ...children: JSXChildren[]
+    ) {
       const componentName = typeof type === 'function' ? type.name : String(type)
-      
+
       debug.jsx(`Creating element: ${componentName}`, {
         props: Object.keys(props || {}),
-        childCount: children.length
+        childCount: children.length,
       })
-      
+
       if (DEBUG_DEFAULTS.CAPTURE_PERFORMANCE) {
         const start = performance.now()
         const result = originalCreateElement.call(this, type, props, ...children)
@@ -99,10 +103,10 @@ async function patchJSXRuntime() {
         debug.performance(`createElement ${componentName}`, duration, { componentName })
         return result
       }
-      
+
       return originalCreateElement.call(this, type, props, ...children)
     }
-    
+
     debug.system('JSX runtime patched')
   } catch (error) {
     debug.error('Failed to patch JSX runtime', error as Error)
@@ -112,14 +116,14 @@ async function patchJSXRuntime() {
 async function patchRenderSystem() {
   try {
     const runtime = await import('@core/runtime')
-    
+
     // Patch runApp
     const originalRunApp = runtime.runApp
-    runtime.runApp = function<Model, Msg>(component: Component<Model, Msg>) {
-      debug.render('Starting application render', { 
-        componentName: component.name || 'App' 
+    runtime.runApp = function <Model, Msg>(component: Component<Model, Msg>) {
+      debug.render('Starting application render', {
+        componentName: component.name || 'App',
       })
-      
+
       if (DEBUG_DEFAULTS.CAPTURE_PERFORMANCE) {
         const start = performance.now()
         const result = originalRunApp.call(this, component)
@@ -127,10 +131,10 @@ async function patchRenderSystem() {
         debug.performance('Application startup', duration)
         return result
       }
-      
+
       return originalRunApp.call(this, component)
     }
-    
+
     debug.system('Render system patched')
   } catch (error) {
     debug.error('Failed to patch render system', error as Error)
@@ -140,16 +144,16 @@ async function patchRenderSystem() {
 async function patchLoggerModule() {
   try {
     const loggerModule = await import('@logger')
-    
+
     // Create debug transport
     const DebugTransport = {
       name: 'debug',
       async write(entry: LogEntry) {
         debug.logger(entry.message, entry, { source: entry.logger || 'unknown' })
       },
-      async close() {}
+      async close() {},
     }
-    
+
     // Patch TuixLogger constructor
     const OriginalLogger = loggerModule.TuixLogger
     loggerModule.TuixLogger = class extends OriginalLogger {
@@ -160,7 +164,7 @@ async function patchLoggerModule() {
         super({ ...config, transports })
       }
     }
-    
+
     debug.system('Logger module patched')
   } catch (error) {
     debug.error('Failed to patch logger module', error as Error)
@@ -168,13 +172,13 @@ async function patchLoggerModule() {
 }
 
 function installErrorHandlers() {
-  process.on('uncaughtException', (error) => {
+  process.on('uncaughtException', error => {
     debug.error('Uncaught exception', error)
   })
-  
+
   process.on('unhandledRejection', (reason, promise) => {
     debug.error('Unhandled rejection', reason as Error)
   })
-  
+
   debug.system('Error handlers installed')
 }

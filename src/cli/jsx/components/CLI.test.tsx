@@ -1,6 +1,6 @@
 /**
  * CLI JSX Component Tests
- * 
+ *
  * Tests for the CLI JSX components used in exemplar including:
  * - CLI root component with plugins and commands
  * - Plugin component registration and nesting
@@ -14,17 +14,17 @@
 import { test, expect, describe, beforeEach, mock } from 'bun:test'
 import { Effect } from 'effect'
 import { jsx } from '@jsx/runtime'
-import { 
-  CLI, 
-  Plugin, 
-  Command, 
-  Arg, 
-  Flag, 
-  Help, 
+import {
+  CLI,
+  Plugin,
+  Command,
+  Arg,
+  Flag,
+  Help,
   Example,
   type CLIProps,
   type PluginProps,
-  type CommandProps
+  type CommandProps,
 } from './index'
 import { scopeManager } from '@core/model/scope/manager'
 import { createMockTerminalService, createTestHarness } from '@testing/testUtils'
@@ -97,9 +97,7 @@ describe('CLI JSX Components', () => {
         <CLI name="myapp">
           <Plugin name="dev" description="Development tools">
             <Plugin name="db" description="Database tools">
-              <Command name="migrate">
-                {() => <text>Running migrations...</text>}
-              </Command>
+              <Command name="migrate">{() => <text>Running migrations...</text>}</Command>
             </Plugin>
           </Plugin>
         </CLI>
@@ -111,7 +109,7 @@ describe('CLI JSX Components', () => {
       const dbScopes = scopeManager.getScopesByPath(['myapp', 'dev', 'db'])
       expect(dbScopes).toHaveLength(1)
       expect(dbScopes[0].type).toBe('plugin')
-      
+
       // Check command under nested plugin
       const cmdScopes = scopeManager.getScopesByPath(['myapp', 'dev', 'db', 'migrate'])
       expect(cmdScopes).toHaveLength(1)
@@ -146,7 +144,11 @@ describe('CLI JSX Components', () => {
           <Command name="greet" description="Greet someone">
             <Arg name="name" description="Name to greet" required />
             <Arg name="title" description="Optional title" />
-            {(ctx) => <text>Hello {ctx.args.title} {ctx.args.name}</text>}
+            {ctx => (
+              <text>
+                Hello {ctx.args.title} {ctx.args.name}
+              </text>
+            )}
           </Command>
         </CLI>
       )
@@ -154,8 +156,7 @@ describe('CLI JSX Components', () => {
       const rendered = app
 
       const cmdScopes = scopeManager.getScopesByPath(['myapp', 'greet'])
-      const argScopes = scopeManager.getChildScopes(cmdScopes[0].id)
-        .filter(s => s.type === 'arg')
+      const argScopes = scopeManager.getChildScopes(cmdScopes[0].id).filter(s => s.type === 'arg')
 
       expect(argScopes).toHaveLength(2)
       expect(argScopes.find(s => s.name === 'name')?.metadata?.required).toBe(true)
@@ -168,7 +169,7 @@ describe('CLI JSX Components', () => {
           <Command name="deploy">
             <Flag name="force" alias="f" description="Force deployment" />
             <Flag name="env" description="Environment" type="string" default="production" />
-            {(ctx) => <text>Deploying to {ctx.flags.env}</text>}
+            {ctx => <text>Deploying to {ctx.flags.env}</text>}
           </Command>
         </CLI>
       )
@@ -176,14 +177,13 @@ describe('CLI JSX Components', () => {
       const rendered = app
 
       const cmdScopes = scopeManager.getScopesByPath(['myapp', 'deploy'])
-      const flagScopes = scopeManager.getChildScopes(cmdScopes[0].id)
-        .filter(s => s.type === 'flag')
+      const flagScopes = scopeManager.getChildScopes(cmdScopes[0].id).filter(s => s.type === 'flag')
 
       expect(flagScopes).toHaveLength(2)
-      
+
       const forceFlag = flagScopes.find(s => s.name === 'force')
       expect(forceFlag?.metadata?.alias).toBe('f')
-      
+
       const envFlag = flagScopes.find(s => s.name === 'env')
       expect(envFlag?.metadata?.type).toBe('string')
       expect(envFlag?.metadata?.default).toBe('production')
@@ -196,12 +196,8 @@ describe('CLI JSX Components', () => {
         <CLI name="myapp">
           <Command name="sync" description="Sync data">
             <Help>
-              Synchronizes data between local and remote.
-              
-              This command will:
-              - Fetch latest from remote
-              - Merge with local changes
-              - Push updates back
+              Synchronizes data between local and remote. This command will: - Fetch latest from
+              remote - Merge with local changes - Push updates back
             </Help>
             {() => <text>Syncing...</text>}
           </Command>
@@ -211,8 +207,7 @@ describe('CLI JSX Components', () => {
       const rendered = app
 
       const cmdScopes = scopeManager.getScopesByPath(['myapp', 'sync'])
-      const helpScopes = scopeManager.getChildScopes(cmdScopes[0].id)
-        .filter(s => s.type === 'help')
+      const helpScopes = scopeManager.getChildScopes(cmdScopes[0].id).filter(s => s.type === 'help')
 
       expect(helpScopes).toHaveLength(1)
       expect(helpScopes[0].metadata?.text).toContain('Synchronizes data')
@@ -224,9 +219,7 @@ describe('CLI JSX Components', () => {
       const app = (
         <CLI name="myapp">
           <Command name="convert">
-            <Example description="Convert JPEG to PNG">
-              myapp convert input.jpg output.png
-            </Example>
+            <Example description="Convert JPEG to PNG">myapp convert input.jpg output.png</Example>
             <Example description="Convert with quality setting">
               myapp convert --quality=90 input.jpg output.png
             </Example>
@@ -238,7 +231,8 @@ describe('CLI JSX Components', () => {
       const rendered = app
 
       const cmdScopes = scopeManager.getScopesByPath(['myapp', 'convert'])
-      const exampleScopes = scopeManager.getChildScopes(cmdScopes[0].id)
+      const exampleScopes = scopeManager
+        .getChildScopes(cmdScopes[0].id)
         .filter(s => s.type === 'example')
 
       expect(exampleScopes).toHaveLength(2)
@@ -256,7 +250,7 @@ describe('CLI JSX Components', () => {
           <Command name="test">
             <Arg name="file" />
             <Flag name="verbose" alias="v" />
-            {(ctx) => {
+            {ctx => {
               executedContext = ctx
               return <text>Executed</text>
             }}
@@ -272,12 +266,12 @@ describe('CLI JSX Components', () => {
 
       const result = handler({
         args: { file: 'test.js' },
-        flags: { verbose: true }
+        flags: { verbose: true },
       })
 
       expect(executedContext).toEqual({
         args: { file: 'test.js' },
-        flags: { verbose: true }
+        flags: { verbose: true },
       })
     })
 
@@ -285,7 +279,7 @@ describe('CLI JSX Components', () => {
       const app = (
         <CLI name="myapp">
           <Command name="fetch">
-            {async (ctx) => {
+            {async ctx => {
               await new Promise(resolve => setTimeout(resolve, 10))
               return <text>Data fetched</text>
             }}
@@ -320,32 +314,24 @@ describe('CLI JSX Components', () => {
       const app = (
         <CLI name="exemplar" alias="ex" version="1.0.0" description="Exemplar toolkit">
           <ProcessManagerPlugin name="dev" />
-          
+
           <Plugin name="auth" description="Authentication">
             <Command name="login" description="Login to service">
               <Arg name="username" required />
               <Flag name="remember" description="Remember credentials" />
-              {(ctx) => <text>Logging in as {ctx.args.username}</text>}
+              {ctx => <text>Logging in as {ctx.args.username}</text>}
             </Command>
-            <Command name="logout">
-              {() => <text>Logged out</text>}
-            </Command>
+            <Command name="logout">{() => <text>Logged out</text>}</Command>
           </Plugin>
 
           <Command name="init" description="Initialize project">
             <Arg name="template" description="Project template" />
             <Help>
-              Initializes a new Exemplar project.
-              
-              Available templates:
-              - api: REST API template
-              - web: Web application template
-              - cli: CLI tool template
+              Initializes a new Exemplar project. Available templates: - api: REST API template -
+              web: Web application template - cli: CLI tool template
             </Help>
-            <Example description="Create API project">
-              exemplar init api
-            </Example>
-            {(ctx) => (
+            <Example description="Create API project">exemplar init api</Example>
+            {ctx => (
               <vstack gap={1}>
                 <text bold>Initializing {ctx.args.template || 'default'} project...</text>
                 <text color="green">✓ Project created successfully</text>
@@ -368,7 +354,7 @@ describe('CLI JSX Components', () => {
       // Check init command has help and example
       const initScope = scopeManager.getScopesByPath(['exemplar', 'init'])[0]
       const children = scopeManager.getChildScopes(initScope.id)
-      
+
       expect(children.some(c => c.type === 'help')).toBe(true)
       expect(children.some(c => c.type === 'example')).toBe(true)
       expect(children.some(c => c.type === 'arg' && c.name === 'template')).toBe(true)
@@ -425,7 +411,9 @@ describe('CLI JSX Components', () => {
             {() => (
               <box borderStyle="rounded" borderColor="green" padding={1}>
                 <vstack gap={1}>
-                  <text bold color="green">✓ All systems operational</text>
+                  <text bold color="green">
+                    ✓ All systems operational
+                  </text>
                   <hstack gap={2}>
                     <text>CPU:</text>
                     <text color="cyan">45%</text>

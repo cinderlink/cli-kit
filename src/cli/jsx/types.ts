@@ -1,6 +1,6 @@
 /**
  * CLI JSX Type Definitions
- * 
+ *
  * Types for CLI-specific JSX components and functionality
  */
 

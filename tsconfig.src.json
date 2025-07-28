@@ -5,26 +5,39 @@
     "jsx": "react-jsx",
     "jsxImportSource": "..",
     
-    // Bun-optimized settings
-    "target": "ES2022",
-    "module": "ESNext", 
+    // Bun-optimized settings (Bun works great with strict mode!)
+    "target": "ESNext",
+    "module": "Preserve", 
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": false,
-    "downlevelIteration": true,
+    "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noEmit": true,
     
-    // Less strict for Bun compatibility
-    "strict": false,
-    "noImplicitAny": false,
-    "exactOptionalPropertyTypes": false
+    // Enable strict mode - Bun fully supports this
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    
+    // Additional strictness
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "src/**/*.test.ts",
-    "src/**/*.spec.ts"
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx"
   ]
 }

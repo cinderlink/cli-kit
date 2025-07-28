@@ -1,6 +1,6 @@
 /**
  * Plugin JSX Application Helpers - CLI Integration
- * 
+ *
  * Utilities for creating and managing CLI-integrated plugins
  */
 

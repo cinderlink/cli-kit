@@ -1,18 +1,20 @@
 /**
  * Terminal Service - Low-level terminal operations and state management
- * 
+ *
  * This service provides an abstraction over terminal operations, handling
  * ANSI escape sequences, terminal state, and cross-platform compatibility.
  */
 
-import { Effect, Context } from "effect"
-import type { TerminalError, WindowSize, TerminalCapabilities } from "../core/types"
+import { Effect, Context } from 'effect'
+import type { TerminalError, WindowSize, TerminalCapabilities } from '@core/types'
+
+export type { TerminalError, WindowSize, TerminalCapabilities }
 
 /**
  * The TerminalService interface defines all low-level terminal operations.
  * This is implemented as an Effect service for dependency injection and testing.
  */
-export class TerminalService extends Context.Tag("TerminalService")<
+export class TerminalService extends Context.Tag('TerminalService')<
   TerminalService,
   {
     // =============================================================================
@@ -43,7 +45,10 @@ export class TerminalService extends Context.Tag("TerminalService")<
     /**
      * Move the cursor relative to current position.
      */
-    readonly moveCursorRelative: (dx: number, dy: number) => Effect.Effect<void, TerminalError, never>
+    readonly moveCursorRelative: (
+      dx: number,
+      dy: number
+    ) => Effect.Effect<void, TerminalError, never>
 
     /**
      * Hide the cursor from view.
@@ -173,7 +178,9 @@ export class TerminalService extends Context.Tag("TerminalService")<
     /**
      * Set cursor shape/style.
      */
-    readonly setCursorShape: (shape: 'block' | 'underline' | 'bar') => Effect.Effect<void, TerminalError, never>
+    readonly setCursorShape: (
+      shape: 'block' | 'underline' | 'bar'
+    ) => Effect.Effect<void, TerminalError, never>
 
     /**
      * Enable/disable cursor blinking.

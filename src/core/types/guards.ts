@@ -1,6 +1,6 @@
 /**
  * Type Guards for TUIX
- * 
+ *
  * Provides type guard functions for runtime type checking
  */
 

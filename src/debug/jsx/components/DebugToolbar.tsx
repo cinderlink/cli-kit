@@ -1,6 +1,6 @@
 /**
  * Debug Toolbar Component
- * 
+ *
  * Tab navigation toolbar
  */
 
@@ -17,19 +17,19 @@ export function DebugToolbar({ activeTab, onTabChange }: DebugToolbarProps) {
     { key: 'scopes', label: 'Scopes' },
     { key: 'events', label: 'Events' },
     { key: 'performance', label: 'Performance' },
-    { key: 'state', label: 'State' }
+    { key: 'state', label: 'State' },
   ]
-  
+
   return hstack({
     gap: 2,
-    children: tabs.map((tab, i) => 
+    children: tabs.map((tab, i) =>
       text({
-        style: { 
+        style: {
           color: activeTab === tab.key ? 'white' : 'gray',
-          bold: activeTab === tab.key
+          bold: activeTab === tab.key,
         },
-        children: `[${i + 1}] ${tab.label}`
+        children: `[${i + 1}] ${tab.label}`,
       })
-    )
+    ),
   })
 }

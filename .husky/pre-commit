@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running formatting check, linting, and type checking..."
+bun run check
+
+# Check if any checks failed
+if [ $? -ne 0 ]; then
+  echo "❌ Pre-commit checks failed. Please fix them before committing."
+  echo "💡 Run 'bun run check:fix' to auto-fix formatting and some linting issues"
+  echo "💡 Run 'bun run typecheck:tsc' to see type errors"
+  exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"

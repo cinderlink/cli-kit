@@ -1,14 +1,14 @@
 /**
  * FilterBox Component
- * 
+ *
  * A reusable filtering UI component with preset filters and search
  * Can be used for logs, processes, and any filterable content
  */
 
-import { Effect } from "effect"
-import type { View } from "@core/view/primitives/view"
-import * as ViewUtils from "@core/view/primitives/view"
-import { style, Colors } from "@core/terminal/ansi/styles"
+import { Effect } from 'effect'
+import type { View } from '@core/view/primitives/view'
+import * as ViewUtils from '@core/view/primitives/view'
+import { style, Colors } from '@core/terminal/ansi/styles'
 
 const { vstack, hstack, text, styledText } = ViewUtils
 
@@ -36,76 +36,80 @@ export interface FilterBoxProps {
  */
 export const FilterBox = (props: FilterBoxProps): View => {
   const {
-    title = "Filters",
+    title = 'Filters',
     presets = [],
     activePreset,
-    searchTerm = "",
+    searchTerm = '',
     showSearch = true,
-    searchPlaceholder = "Search...",
-    compact = false
+    searchPlaceholder = 'Search...',
+    compact = false,
   } = props
 
-  const content = compact ? (
-    // Compact horizontal layout
-    hstack(
-      // Presets
-      presets.length > 0 && hstack(
-        styledText("Filter: ", style().foreground(Colors.gray)),
-        ...presets.map(preset => 
-          styledText(
-            `${preset.icon || '•'} ${preset.label}`,
-            style()
-              .foreground(activePreset === preset.name ? Colors.cyan : Colors.gray)
-              .bold(activePreset === preset.name)
-          )
-        ).reduce((acc, item, i) => 
-          i === 0 ? [item] : [...acc, text(" | "), item], 
-          [] as View[]
-        )
-      ),
-      
-      // Search
-      showSearch && hstack(
-        text("  "),
-        text("🔍 "),
-        searchTerm 
-          ? styledText(searchTerm, style().foreground(Colors.yellow))
-          : styledText(searchPlaceholder, style().foreground(Colors.gray).italic())
-      )
-    )
-  ) : (
-    // Full layout
-    vstack(
-      // Preset buttons
-      presets.length > 0 && vstack(
-        styledText("Quick Filters:", style().foreground(Colors.cyan).bold()),
-        text(""),
-        ...presets.map(preset => 
+  const content = compact
+    ? // Compact horizontal layout
+      hstack(
+        // Presets
+        presets.length > 0 &&
           hstack(
-            styledText(
-              activePreset === preset.name ? "▶" : " ",
-              style().foreground(activePreset === preset.name ? Colors.green : Colors.gray)
-            ),
-            text(preset.icon || "•"),
-            styledText(
-              preset.label,
-              style()
-                .foreground(activePreset === preset.name ? Colors.cyan : Colors.white)
-                .bold(activePreset === preset.name)
-            )
+            styledText('Filter: ', style().foreground(Colors.gray)),
+            ...presets
+              .map(preset =>
+                styledText(
+                  `${preset.icon || '•'} ${preset.label}`,
+                  style()
+                    .foreground(activePreset === preset.name ? Colors.cyan : Colors.gray)
+                    .bold(activePreset === preset.name)
+                )
+              )
+              .reduce(
+                (acc, item, i) => (i === 0 ? [item] : [...acc, text(' | '), item]),
+                [] as View[]
+              )
+          ),
+
+        // Search
+        showSearch &&
+          hstack(
+            text('  '),
+            text('🔍 '),
+            searchTerm
+              ? styledText(searchTerm, style().foreground(Colors.yellow))
+              : styledText(searchPlaceholder, style().foreground(Colors.gray).italic())
           )
-        )
-      ),
-      
-      // Search box
-      showSearch && hstack(
-        text("🔍"),
-        searchTerm 
-          ? styledText(searchTerm, style().foreground(Colors.yellow))
-          : styledText(searchPlaceholder, style().foreground(Colors.gray).italic())
       )
-    )
-  )
+    : // Full layout
+      vstack(
+        // Preset buttons
+        presets.length > 0 &&
+          vstack(
+            styledText('Quick Filters:', style().foreground(Colors.cyan).bold()),
+            text(''),
+            ...presets.map(preset =>
+              hstack(
+                styledText(
+                  activePreset === preset.name ? '▶' : ' ',
+                  style().foreground(activePreset === preset.name ? Colors.green : Colors.gray)
+                ),
+                text(preset.icon || '•'),
+                styledText(
+                  preset.label,
+                  style()
+                    .foreground(activePreset === preset.name ? Colors.cyan : Colors.white)
+                    .bold(activePreset === preset.name)
+                )
+              )
+            )
+          ),
+
+        // Search box
+        showSearch &&
+          hstack(
+            text('🔍'),
+            searchTerm
+              ? styledText(searchTerm, style().foreground(Colors.yellow))
+              : styledText(searchPlaceholder, style().foreground(Colors.gray).italic())
+          )
+      )
 
   return content
 }
@@ -118,26 +122,26 @@ export const LOG_FILTER_PRESETS: FilterPreset[] = [
     name: 'errors',
     label: 'Errors Only',
     icon: '❌',
-    filter: (log: any) => log.level === 'error' || log.level === 'fatal'
+    filter: (log: any) => log.level === 'error' || log.level === 'fatal',
   },
   {
     name: 'warnings',
     label: 'Warnings & Errors',
     icon: '⚠️',
-    filter: (log: any) => ['warn', 'error', 'fatal'].includes(log.level)
+    filter: (log: any) => ['warn', 'error', 'fatal'].includes(log.level),
   },
   {
     name: 'debug',
     label: 'Debug & Above',
     icon: '🔍',
-    filter: (log: any) => log.level !== 'trace'
+    filter: (log: any) => log.level !== 'trace',
   },
   {
     name: 'recent',
     label: 'Last 5 minutes',
     icon: '🕐',
-    filter: (log: any) => Date.now() - log.timestamp.getTime() < 5 * 60 * 1000
-  }
+    filter: (log: any) => Date.now() - log.timestamp.getTime() < 5 * 60 * 1000,
+  },
 ]
 
 export const PROCESS_FILTER_PRESETS: FilterPreset[] = [
@@ -145,26 +149,26 @@ export const PROCESS_FILTER_PRESETS: FilterPreset[] = [
     name: 'running',
     label: 'Running Only',
     icon: '🟢',
-    filter: (proc: any) => proc.status === 'running'
+    filter: (proc: any) => proc.status === 'running',
   },
   {
     name: 'stopped',
     label: 'Stopped Only',
     icon: '⚪',
-    filter: (proc: any) => proc.status === 'stopped'
+    filter: (proc: any) => proc.status === 'stopped',
   },
   {
     name: 'errors',
     label: 'Errors Only',
     icon: '🔴',
-    filter: (proc: any) => proc.status === 'error'
+    filter: (proc: any) => proc.status === 'error',
   },
   {
     name: 'active',
     label: 'Active (Running/Starting)',
     icon: '⚡',
-    filter: (proc: any) => ['running', 'starting'].includes(proc.status)
-  }
+    filter: (proc: any) => ['running', 'starting'].includes(proc.status),
+  },
 ]
 
 /**
@@ -187,8 +191,8 @@ export const FilterableContent = <T extends Record<string, any>>(
     renderItem,
     filters = [],
     searchFields = [],
-    title = "Filterable Content",
-    emptyMessage = "No items match the current filters"
+    title = 'Filterable Content',
+    emptyMessage = 'No items match the current filters',
   } = props
 
   // In a real implementation, this would be stateful
@@ -200,24 +204,25 @@ export const FilterableContent = <T extends Record<string, any>>(
     FilterBox({
       presets: filters,
       compact: true,
-      showSearch: searchFields.length > 0
+      showSearch: searchFields.length > 0,
     }),
-    
-    text(""),
-    styledText("─".repeat(80), style().foreground(Colors.gray)),
-    text(""),
-    
+
+    text(''),
+    styledText('─'.repeat(80), style().foreground(Colors.gray)),
+    text(''),
+
     // Content
-    filteredItems.length === 0 ? (
-      styledText(emptyMessage, style().foreground(Colors.yellow))
-    ) : (
-      vstack(...filteredItems.map(renderItem))
-    ),
-    
+    filteredItems.length === 0
+      ? styledText(emptyMessage, style().foreground(Colors.yellow))
+      : vstack(...filteredItems.map(renderItem)),
+
     // Status bar
-    text(""),
+    text(''),
     hstack(
-      styledText(`Showing ${filteredItems.length} of ${items.length} items`, style().foreground(Colors.gray))
+      styledText(
+        `Showing ${filteredItems.length} of ${items.length} items`,
+        style().foreground(Colors.gray)
+      )
     )
   )
 }

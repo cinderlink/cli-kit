@@ -1,6 +1,6 @@
 /**
  * Form Components
- * 
+ *
  * Interactive form elements for terminal UIs
  */
 

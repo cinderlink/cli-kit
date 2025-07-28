@@ -2,10 +2,10 @@
  * CLI Configuration Types
  */
 
-import type { CLIConfig, CommandConfig, LazyHandler, Handler } from "@cli/types"
+import type { CLIConfig, CommandConfig, LazyHandler, Handler } from '@cli/types'
 
 // Re-export core types
-export type { CLIConfig, CommandConfig, LazyHandler, Handler } from "@cli/types"
+export type { CLIConfig, CommandConfig, LazyHandler, Handler } from '@cli/types'
 
 /**
  * CLI-specific configuration options

@@ -1,6 +1,6 @@
 /**
  * Plugin Scope Integration
- * 
+ *
  * Plugins are scopes with type='plugin' and additional helpers
  */
 
@@ -14,9 +14,9 @@ import { currentScopeStore, parentScopeStore } from '@core/model/scope/jsx/store
  */
 export function getPluginScopes(): ScopeDef[] {
   return Effect.runSync(
-    scopeManager.getAllScopes().pipe(
-      Effect.map(scopes => scopes.filter(scope => scope.type === 'plugin'))
-    )
+    scopeManager
+      .getAllScopes()
+      .pipe(Effect.map(scopes => scopes.filter(scope => scope.type === 'plugin')))
   )
 }
 
@@ -40,7 +40,7 @@ export function isPluginEnabled(name: string): boolean {
 export function getPluginCommands(pluginName: string): ScopeDef[] {
   const plugin = getPluginScope(pluginName)
   if (!plugin) return []
-  
+
   return plugin.children.filter(child => child.type === 'command')
 }
 
@@ -50,18 +50,18 @@ export function getPluginCommands(pluginName: string): ScopeDef[] {
 export function getPluginState(pluginName: string, key: string, defaultValue?: any): any {
   const plugin = getPluginScope(pluginName)
   if (!plugin) return defaultValue
-  
+
   return plugin.metadata?.[key] ?? defaultValue
 }
 
 export function setPluginState(pluginName: string, key: string, value: any): void {
   const plugin = getPluginScope(pluginName)
   if (!plugin) return
-  
+
   Effect.runSync(
     scopeManager.updateScopeMetadata(plugin.id, {
       ...plugin.metadata,
-      [key]: value
+      [key]: value,
     })
   )
 }
@@ -80,14 +80,14 @@ export function getPluginConfig(pluginName: string): Record<string, any> {
 export function configurePlugin(pluginName: string, config: Record<string, any>): void {
   const plugin = getPluginScope(pluginName)
   if (!plugin) return
-  
+
   Effect.runSync(
     scopeManager.updateScopeMetadata(plugin.id, {
       ...plugin.metadata,
       config: {
         ...plugin.metadata?.config,
-        ...config
-      }
+        ...config,
+      },
     })
   )
 }

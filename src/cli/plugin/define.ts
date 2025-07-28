@@ -1,16 +1,16 @@
 /**
  * Plugin Definition Functions
- * 
+ *
  * Functions for creating and defining plugins
  */
 
-import type { Plugin, PluginMetadata, PluginAPI, JSXPlugin, JSXCommandConfig } from "./types"
-import type { Command } from "@cli/types"
-import { z } from "zod"
+import type { Plugin, PluginMetadata, PluginAPI, JSXPlugin, JSXCommandConfig } from './types'
+import type { Command } from '@cli/types'
+import { z } from 'zod'
 
 /**
  * Define a plugin with type safety
- * 
+ *
  * @example
  * ```typescript
  * const myPlugin = definePlugin({
@@ -32,13 +32,13 @@ import { z } from "zod"
 export function definePlugin(plugin: Plugin): Plugin {
   // Validate plugin structure
   if (!plugin.metadata?.name) {
-    throw new Error("Plugin must have a name in metadata")
+    throw new Error('Plugin must have a name in metadata')
   }
-  
+
   if (!plugin.metadata?.version) {
-    throw new Error("Plugin must have a version in metadata")
+    throw new Error('Plugin must have a version in metadata')
   }
-  
+
   // Ensure all commands have handlers
   if (plugin.commands) {
     for (const [name, command] of Object.entries(plugin.commands)) {
@@ -47,20 +47,23 @@ export function definePlugin(plugin: Plugin): Plugin {
       }
     }
   }
-  
+
   return plugin
 }
 
 /**
  * Create a plugin using builder pattern or direct configuration
  */
-export function createPlugin(options: Plugin | ((api: PluginAPI) => void), metadata?: PluginMetadata): Plugin {
+export function createPlugin(
+  options: Plugin | ((api: PluginAPI) => void),
+  metadata?: PluginMetadata
+): Plugin {
   if (typeof options === 'function') {
     const builder = new PluginBuilder(metadata)
     options(builder)
     return builder.build()
   }
-  
+
   return definePlugin(options)
 }
 
@@ -76,7 +79,7 @@ export class PluginBuilder implements PluginAPI {
       commands: {},
       extensions: {},
       wrappers: [],
-      services: {}
+      services: {},
     }
   }
 
@@ -153,7 +156,9 @@ export class PluginBuilder implements PluginAPI {
 /**
  * Create plugin from builder function
  */
-export function createPluginFromBuilder(builderFn: (builder: PluginBuilder) => PluginBuilder): Plugin
+export function createPluginFromBuilder(
+  builderFn: (builder: PluginBuilder) => PluginBuilder
+): Plugin
 export function createPluginFromBuilder(builder: PluginBuilder): Plugin
 export function createPluginFromBuilder(arg: unknown): Plugin {
   if (typeof arg === 'function') {
@@ -163,7 +168,7 @@ export function createPluginFromBuilder(arg: unknown): Plugin {
   } else if (arg instanceof PluginBuilder) {
     return arg.build()
   }
-  
+
   throw new Error('Invalid argument to createPluginFromBuilder')
 }
 
@@ -175,8 +180,8 @@ export function jsxToPlugin(jsxPlugin: JSXPlugin): Plugin {
     metadata: {
       name: jsxPlugin.name,
       version: jsxPlugin.version || '0.0.0',
-      description: jsxPlugin.description
-    }
+      description: jsxPlugin.description,
+    },
   }
 
   // Convert JSX commands to standard commands
@@ -202,11 +207,13 @@ function jsxCommandToCommand(jsxCommand: JSXCommandConfig): Command {
     options: jsxCommand.options,
     flags: jsxCommand.flags,
     arguments: jsxCommand.arguments,
-    subcommands: jsxCommand.subcommands ? 
-      Object.fromEntries(
-        Object.entries(jsxCommand.subcommands).map(([name, sub]) => 
-          [name, jsxCommandToCommand(sub)]
+    subcommands: jsxCommand.subcommands
+      ? Object.fromEntries(
+          Object.entries(jsxCommand.subcommands).map(([name, sub]) => [
+            name,
+            jsxCommandToCommand(sub),
+          ])
         )
-      ) : undefined
+      : undefined,
   }
 }

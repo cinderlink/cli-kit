@@ -1,21 +1,21 @@
 /**
  * Input Service - Keyboard, mouse, and terminal event handling
- * 
+ *
  * This service manages all input events from the terminal, including keyboard
  * input with modifier keys, mouse events, and terminal resize events.
  */
 
-import { Effect, Context, Stream } from "effect"
-import type { InputError, KeyEvent, MouseEvent, WindowSize } from "../core/types"
+import { Effect, Context, Stream } from 'effect'
+import type { InputError, KeyEvent, MouseEvent, WindowSize } from '../core/types'
 
 // Re-export types for convenience
-export type { KeyEvent, MouseEvent } from "../core/types"
+export type { KeyEvent, MouseEvent } from '../core/types'
 
 /**
  * The InputService interface defines all input event handling capabilities.
  * Events are delivered as Effect Streams for reactive programming patterns.
  */
-export class InputService extends Context.Tag("InputService")<
+export class InputService extends Context.Tag('InputService')<
   InputService,
   {
     // =============================================================================
@@ -156,9 +156,7 @@ export class InputService extends Context.Tag("InputService")<
      * Debounce key events to prevent rapid repeated events.
      * Useful for handling key repeat in text input.
      */
-    readonly debounceKeys: (
-      ms: number
-    ) => Stream.Stream<KeyEvent, InputError, never>
+    readonly debounceKeys: (ms: number) => Stream.Stream<KeyEvent, InputError, never>
 
     // =============================================================================
     // Advanced Input Processing
@@ -205,7 +203,16 @@ export const KeyUtils = {
    * Check if a key event is a navigation key (arrow keys, home, end, etc.).
    */
   isNavigation: (key: KeyEvent): boolean => {
-    const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown']
+    const navKeys = [
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'Home',
+      'End',
+      'PageUp',
+      'PageDown',
+    ]
     return navKeys.includes(key.code)
   },
 
@@ -227,23 +234,25 @@ export const KeyUtils = {
   /**
    * Create a key binding matcher for common patterns.
    */
-  matches: (pattern: string) => (key: KeyEvent): boolean => {
-    // Pattern format: "Ctrl+C", "Alt+Enter", "Shift+F1", etc.
-    const parts = pattern.split('+')
-    const keyPart = parts[parts.length - 1]!
-    const modifiers = parts.slice(0, -1)
+  matches:
+    (pattern: string) =>
+    (key: KeyEvent): boolean => {
+      // Pattern format: "Ctrl+C", "Alt+Enter", "Shift+F1", etc.
+      const parts = pattern.split('+')
+      const keyPart = parts[parts.length - 1]!
+      const modifiers = parts.slice(0, -1)
 
-    if (key.key !== keyPart && key.code !== keyPart) {
-      return false
-    }
+      if (key.key !== keyPart && key.code !== keyPart) {
+        return false
+      }
 
-    return (
-      modifiers.includes('Ctrl') === key.ctrl &&
-      modifiers.includes('Alt') === key.alt &&
-      modifiers.includes('Shift') === key.shift &&
-      modifiers.includes('Meta') === key.meta
-    )
-  },
+      return (
+        modifiers.includes('Ctrl') === key.ctrl &&
+        modifiers.includes('Alt') === key.alt &&
+        modifiers.includes('Shift') === key.shift &&
+        modifiers.includes('Meta') === key.meta
+      )
+    },
 
   /**
    * Format a key event as a human-readable string.
@@ -256,7 +265,7 @@ export const KeyUtils = {
     if (key.meta) parts.push('Meta')
     parts.push(key.key)
     return parts.join('+')
-  }
+  },
 } as const
 
 /**
@@ -298,7 +307,7 @@ export const MouseUtils = {
    * Check if a position is within a rectangular bounds.
    */
   isWithinBounds: (
-    event: MouseEvent, 
+    event: MouseEvent,
     bounds: { x: number; y: number; width: number; height: number }
   ): boolean => {
     return (
@@ -307,5 +316,5 @@ export const MouseUtils = {
       event.y >= bounds.y &&
       event.y < bounds.y + bounds.height
     )
-  }
+  },
 } as const

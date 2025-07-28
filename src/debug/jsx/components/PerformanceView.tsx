@@ -1,6 +1,6 @@
 /**
  * Performance View Component
- * 
+ *
  * Displays performance metrics
  */
 

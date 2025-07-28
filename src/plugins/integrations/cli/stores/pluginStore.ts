@@ -1,6 +1,6 @@
 /**
  * CLI Plugin Store - CLI Integration
- * 
+ *
  * Manages CLI-integrated plugin state
  */
 
@@ -43,9 +43,9 @@ class CLIPluginStore {
       description: plugin.description,
       enabled: false,
       config: {},
-      plugin
+      plugin,
     }
-    
+
     this.plugins.set(registration.id, registration)
   }
 

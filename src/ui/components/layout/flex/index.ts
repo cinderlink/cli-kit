@@ -1,10 +1,10 @@
 /**
  * Flex Layout Components Export
- * 
+ *
  * Flexbox-like layout system for terminal UIs
  */
 
-export { 
+export {
   Flex,
   FlexItem,
   Row,
@@ -17,5 +17,5 @@ export {
   Sidebar,
   Header,
   type FlexProps,
-  type FlexItemProps
+  type FlexItemProps,
 } from './Flex'

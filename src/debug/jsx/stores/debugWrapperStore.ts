@@ -1,6 +1,6 @@
 /**
  * Debug Wrapper Store
- * 
+ *
  * Manages state for the debug wrapper component including tabs, logs, and output
  */
 
@@ -29,12 +29,24 @@ class DebugWrapperStore {
   #outputCount = $derived(() => this.#output.length)
 
   // Getters
-  get activeTab() { return this.#activeTab }
-  get isVisible() { return this.#isVisible }
-  get logs() { return this.#logs }
-  get output() { return this.#output }
-  get logCount() { return this.#logCount }
-  get outputCount() { return this.#outputCount }
+  get activeTab() {
+    return this.#activeTab
+  }
+  get isVisible() {
+    return this.#isVisible
+  }
+  get logs() {
+    return this.#logs
+  }
+  get output() {
+    return this.#output
+  }
+  get logCount() {
+    return this.#logCount
+  }
+  get outputCount() {
+    return this.#outputCount
+  }
 
   // Actions
   setActiveTab(tab: ExtendedDebugTab) {
@@ -129,7 +141,7 @@ class DebugWrapperStore {
     const isActive = this.#activeTab === tab
     const prefix = isActive ? '[' : ' '
     const suffix = isActive ? ']' : ' '
-    
+
     switch (tab) {
       case 'app':
         return `${prefix}1${suffix} App `

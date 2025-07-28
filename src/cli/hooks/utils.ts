@@ -1,29 +1,32 @@
 /**
  * Hook Utilities
- * 
+ *
  * Helper functions for creating and managing hooks
  */
 
-import { Effect } from "effect"
-import type { EventBus, BaseEvent } from "@core/model/events/eventBus"
-import { generateId } from "@core/model/events/eventBus"
-import type { Hook, Subscription, HookEvent } from "./types"
+import { Effect } from 'effect'
+import type { EventBus, BaseEvent } from '@core/model/events/eventBus'
+import { generateId } from '@core/model/events/eventBus'
+import type { Hook, Subscription, HookEvent } from './types'
 
 /**
  * Create a hook for a specific event type
  */
-export function createHook<T extends BaseEvent>(
-  eventBus: EventBus,
-  eventType: T['type']
-): Hook<T> {
-  const handlers = new Map<string, (event: T) => Effect.Effect<void, never> | void | Promise<void>>()
+export function createHook<T extends BaseEvent>(eventBus: EventBus, eventType: T['type']): Hook<T> {
+  const handlers = new Map<
+    string,
+    (event: T) => Effect.Effect<void, never> | void | Promise<void>
+  >()
 
   return {
-    tap(name: string, fn: (event: T) => Effect.Effect<void, never> | void): Effect.Effect<Subscription, never> {
+    tap(
+      name: string,
+      fn: (event: T) => Effect.Effect<void, never> | void
+    ): Effect.Effect<Subscription, never> {
       handlers.set(name, fn)
-      
+
       return Effect.gen(function* () {
-        const unsubscribe = yield* eventBus.subscribe(eventType, (event) => {
+        const unsubscribe = yield* eventBus.subscribe(eventType, event => {
           const handler = handlers.get(name)
           if (handler) {
             const result = handler(event as T)
@@ -39,23 +42,23 @@ export function createHook<T extends BaseEvent>(
           unsubscribe: () => {
             handlers.delete(name)
             Effect.runSync(unsubscribe())
-          }
+          },
         }
       })
     },
 
     tapAsync(name: string, fn: (event: T) => Promise<void>): Effect.Effect<Subscription, never> {
-      return this.tap(name, (event) => 
+      return this.tap(name, event =>
         Effect.tryPromise({
           try: () => fn(event),
-          catch: (error) => new Error(`Hook ${name} failed: ${error}`)
+          catch: error => new Error(`Hook ${name} failed: ${error}`),
         })
       )
     },
 
     untap(name: string): void {
       handlers.delete(name)
-    }
+    },
   }
 }
 
@@ -72,7 +75,7 @@ export function createHookEvent<T extends HookEvent>(
     type,
     source,
     timestamp: new Date(),
-    ...data
+    ...data,
   } as T
 }
 
@@ -97,7 +100,7 @@ export function getHookCategory(event: HookEvent): 'lifecycle' | 'plugin' | 'err
     case 'hook:beforeRender':
     case 'hook:afterRender':
       return 'lifecycle'
-    
+
     case 'hook:pluginLoad':
     case 'hook:pluginUnload':
     case 'hook:beforeParse':
@@ -105,7 +108,7 @@ export function getHookCategory(event: HookEvent): 'lifecycle' | 'plugin' | 'err
     case 'hook:beforeValidate':
     case 'hook:afterValidate':
       return 'plugin'
-    
+
     case 'hook:onError':
       return 'error'
   }

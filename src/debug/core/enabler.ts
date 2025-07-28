@@ -11,15 +11,15 @@ let debugEnabled = false
 export function enableDebugMode() {
   if (debugEnabled) return
   debugEnabled = true
-  
+
   debug.system('Debug mode enabled')
-  
+
   // Apply all patches
   applyDebugPatches({
     patchScope: true,
     patchJSX: true,
     patchRender: true,
-    patchLogger: DEBUG_DEFAULTS.CAPTURE_LOGGER
+    patchLogger: DEBUG_DEFAULTS.CAPTURE_LOGGER,
   })
 }
 

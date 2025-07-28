@@ -45,3 +45,6 @@ Read module docs first:
 - Scope: src/scope/README.md
 - Styling: src/styling/README.md
 - Layout: src/layout/README.md
+- dependencies/consult-docs: Consult docs/DEPENDENCIES.md for APIs and caveats of dependencies like Effect.ts, Bun, Zod before implementing features.
+
+When misusing dep or hitting issue, update docs/dependencies/[dep]/README.md with learnings from web search.

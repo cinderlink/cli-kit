@@ -2,10 +2,10 @@
  * Testing Input Adapter - Programmatic key simulation for testing TUI apps
  */
 
-import { Effect, Layer, Queue, Stream, Ref, Option } from "effect"
-import { InputService } from "../services/input"
-import type { KeyEvent, MouseEvent, Component } from "@core/types"
-import { KeyType } from "../core/keys"
+import { Effect, Layer, Queue, Stream, Option } from 'effect'
+import { InputService } from '../services/input'
+import type { KeyEvent, MouseEvent, Component } from '@core/types'
+import { KeyType } from '../core/keys'
 
 /**
  * Test input adapter that allows programmatic key injection
@@ -15,10 +15,7 @@ export class TestInputAdapter {
   private mouseQueue: Queue.Queue<MouseEvent>
   private running = false
 
-  constructor(
-    keyQueue: Queue.Queue<KeyEvent>,
-    mouseQueue: Queue.Queue<MouseEvent>
-  ) {
+  constructor(keyQueue: Queue.Queue<KeyEvent>, mouseQueue: Queue.Queue<MouseEvent>) {
     this.keyQueue = keyQueue
     this.mouseQueue = mouseQueue
   }
@@ -27,9 +24,7 @@ export class TestInputAdapter {
    * Simulate a key press
    */
   pressKey(key: string | KeyEvent): Promise<void> {
-    const keyEvent: KeyEvent = typeof key === 'string' 
-      ? this.createKeyEvent(key)
-      : key
+    const keyEvent: KeyEvent = typeof key === 'string' ? this.createKeyEvent(key) : key
 
     return Effect.runPromise(Queue.offer(this.keyQueue, keyEvent))
   }
@@ -57,7 +52,9 @@ export class TestInputAdapter {
   /**
    * Simulate special keys
    */
-  async pressSpecialKey(key: 'enter' | 'escape' | 'up' | 'down' | 'left' | 'right' | 'tab' | 'space'): Promise<void> {
+  async pressSpecialKey(
+    key: 'enter' | 'escape' | 'up' | 'down' | 'left' | 'right' | 'tab' | 'space'
+  ): Promise<void> {
     await this.pressKey(this.createSpecialKeyEvent(key))
   }
 
@@ -72,7 +69,7 @@ export class TestInputAdapter {
       ctrl: true,
       alt: false,
       shift: false,
-      meta: false
+      meta: false,
     })
   }
 
@@ -87,7 +84,7 @@ export class TestInputAdapter {
       ctrl: false,
       alt: false,
       shift: false,
-      meta: false
+      meta: false,
     }
   }
 
@@ -103,7 +100,7 @@ export class TestInputAdapter {
       left: KeyType.Left,
       right: KeyType.Right,
       tab: KeyType.Tab,
-      space: KeyType.Space
+      space: KeyType.Space,
     }
 
     return {
@@ -113,7 +110,7 @@ export class TestInputAdapter {
       ctrl: false,
       alt: false,
       shift: false,
-      meta: false
+      meta: false,
     }
   }
 }
@@ -127,17 +124,17 @@ export const createTestInputService = (): Layer.Layer<InputService, never, never
     Effect.gen(function* (_) {
       const keyQueue = yield* _(Queue.unbounded<KeyEvent>())
       const mouseQueue = yield* _(Queue.unbounded<MouseEvent>())
-      
+
       // Create the adapter for external control
       const adapter = new TestInputAdapter(keyQueue, mouseQueue)
-      
+
       // Store adapter globally for test access
       ;(globalThis as Record<string, unknown>).__testInputAdapter = adapter
 
       return {
         keyEvents: Stream.fromQueue(keyQueue),
         mouseEvents: Stream.fromQueue(mouseQueue),
-        
+
         allEvents: Stream.merge(
           Stream.fromQueue(keyQueue).pipe(
             Stream.map(key => ({ _tag: 'key' as const, event: key }))
@@ -146,36 +143,30 @@ export const createTestInputService = (): Layer.Layer<InputService, never, never
             Stream.map(mouse => ({ _tag: 'mouse' as const, event: mouse }))
           )
         ),
-        
+
         waitForKey: Queue.take(keyQueue),
         waitForMouse: Queue.take(mouseQueue),
-        
+
         clearInputBuffer: Effect.gen(function* (_) {
           yield* _(Queue.takeAll(keyQueue))
           yield* _(Queue.takeAll(mouseQueue))
         }),
-        
-        filterKeys: (predicate) =>
+
+        filterKeys: predicate => Stream.fromQueue(keyQueue).pipe(Stream.filter(predicate)),
+
+        mapKeys: mapper =>
           Stream.fromQueue(keyQueue).pipe(
-            Stream.filter(predicate)
-          ),
-          
-        mapKeys: (mapper) =>
-          Stream.fromQueue(keyQueue).pipe(
-            Stream.filterMap((key) => {
+            Stream.filterMap(key => {
               const result = mapper(key)
               return result !== null ? Option.some(result) : Option.none()
             })
           ),
-          
-        debounceKeys: (ms) =>
-          Stream.fromQueue(keyQueue).pipe(
-            Stream.debounce(ms)
-          ),
-          
-        parseAnsiSequence: (sequence) => Effect.succeed(null),
+
+        debounceKeys: ms => Stream.fromQueue(keyQueue).pipe(Stream.debounce(ms)),
+
+        parseAnsiSequence: sequence => Effect.succeed(null),
         rawInput: Stream.empty,
-        setEcho: (enabled) => Effect.sync(() => {})
+        setEcho: enabled => Effect.sync(() => {}),
       }
     })
   )
@@ -185,7 +176,7 @@ export const createTestInputService = (): Layer.Layer<InputService, never, never
  * Get the global test input adapter (for use in tests)
  */
 export const getTestInputAdapter = (): TestInputAdapter | null => {
-  return (globalThis as Record<string, unknown>).__testInputAdapter as TestInputAdapter || null
+  return ((globalThis as Record<string, unknown>).__testInputAdapter as TestInputAdapter) || null
 }
 
 /**
@@ -196,36 +187,32 @@ export const runTestApp = async <Model, Msg>(
   testScript: (adapter: TestInputAdapter) => Promise<void>,
   config?: Record<string, unknown>
 ): Promise<void> => {
-  const { runApp } = await import("../core/runtime")
-  const { TerminalServiceLive } = await import("../core/services/impl/terminal")
-  const { RendererServiceLive } = await import("../core/services/impl/renderer")
-  const { StorageServiceLive } = await import("../core/services/impl/storage")
-  const { Layer } = await import("effect")
-  
+  const { runApp } = await import('../core/runtime')
+  const { TerminalServiceLive } = await import('../core/services/impl/terminal')
+  const { RendererServiceLive } = await import('../core/services/impl/renderer')
+  const { StorageServiceLive } = await import('../core/services/impl/storage')
+  const { Layer } = await import('effect')
+
   // Create test services with test input
   const TestServices = Layer.mergeAll([
     TerminalServiceLive,
     createTestInputService(),
     RendererServiceLive,
-    StorageServiceLive
+    StorageServiceLive,
   ])
-  
+
   // Start the app
-  const appPromise = Effect.runPromise(
-    runApp(component, config).pipe(
-      Effect.provide(TestServices)
-    )
-  )
-  
+  await runApp(component, config).pipe(Effect.provide(TestServices))
+
   // Wait a bit for app to start
   await new Promise(resolve => setTimeout(resolve, 100))
-  
+
   // Get the adapter and run the test script
   const adapter = getTestInputAdapter()
   if (adapter) {
     await testScript(adapter)
   }
-  
+
   // Let the app run a bit more
   await new Promise(resolve => setTimeout(resolve, 500))
 }

@@ -3,4 +3,4 @@
  * @module core/model/events
  */
 
-export * from "./model/events/eventBus"
+export * from './event-bus'

@@ -1,11 +1,11 @@
 /**
  * Style Types and Interfaces
- * 
+ *
  * Core type definitions for the style system
  */
 
-import type { Color } from "@core/terminal/ansi/styles/color"
-import type { Border, BorderSide } from "@core/terminal/ansi/styles/borders"
+import type { Color } from '@core/terminal/ansi/styles/color'
+import type { Border, BorderSide } from '@core/terminal/ansi/styles/borders'
 
 /**
  * Style transform function type
@@ -30,7 +30,7 @@ export interface StyleProps {
   // Colors
   readonly foreground?: Color
   readonly background?: Color
-  
+
   // Typography
   readonly bold?: boolean
   readonly italic?: boolean
@@ -40,7 +40,7 @@ export interface StyleProps {
   readonly blink?: boolean
   readonly reverse?: boolean
   readonly invisible?: boolean
-  
+
   // Layout
   readonly paddingTop?: number
   readonly paddingRight?: number
@@ -50,7 +50,7 @@ export interface StyleProps {
   readonly marginRight?: number
   readonly marginBottom?: number
   readonly marginLeft?: number
-  
+
   // Dimensions
   readonly width?: number
   readonly height?: number
@@ -58,20 +58,20 @@ export interface StyleProps {
   readonly maxHeight?: number
   readonly minWidth?: number
   readonly minHeight?: number
-  
+
   // Borders
   readonly border?: Border
   readonly borderSides?: BorderSide
   readonly borderForeground?: Color
   readonly borderBackground?: Color
-  
+
   // Alignment
   readonly align?: HorizontalAlign
   readonly valign?: VerticalAlign
-  
+
   // Transform
   readonly transform?: StyleTransform
-  
+
   // Internal
   readonly inline?: boolean
   readonly inherit?: boolean

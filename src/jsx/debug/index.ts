@@ -1,16 +1,17 @@
 /**
  * JSX Debug Module
- * 
+ *
  * Provides debug wrapper and extensibility for JSX applications
  */
 
-export { DebugWrapper } from './DebugWrapper'
+import { DebugWrapper } from './DebugWrapper'
+import { JSX } from 'react' // or appropriate JSX type import
 
 // Global debug tab registry for plugins
 export interface DebugTabRegistration {
   id: string
   name: string
-  component: () => any
+  component: () => JSX.Element
   order?: number
 }
 

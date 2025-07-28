@@ -4,7 +4,7 @@
  */
 
 export * from './primitives/view'
-export * from './viewCache'
+export * from './view-cache'
 
 // Re-export commonly used layout components
 export { spacer } from './layout/spacer'

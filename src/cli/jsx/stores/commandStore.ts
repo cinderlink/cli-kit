@@ -1,6 +1,6 @@
 /**
  * Scope-based Command Store
- * 
+ *
  * Replaces the old command store with a scope-system based implementation.
  * Uses the scope manager as the single source of truth for command state.
  */
@@ -19,10 +19,11 @@ class CommandStore {
   get currentPath() {
     return $derived(() => {
       // Get all active scopes sorted by path depth
-      const activeScopes = scopeManager.getAllScopes()
+      const activeScopes = scopeManager
+        .getAllScopes()
         .filter(scope => scopeManager.getScopeStatus(scope.id) === 'active')
         .sort((a, b) => b.path.length - a.path.length) // Deepest first
-      
+
       // Return the path of the deepest active scope
       return activeScopes[0]?.path || []
     })
@@ -35,15 +36,15 @@ class CommandStore {
   get availableCommands() {
     return $derived(() => {
       const path = this.currentPath
-      
+
       // Find the active scope at current path
       const currentScope = this.getScopeByPath(path)
       if (!currentScope) return []
-      
+
       // Get executable children
-      return scopeManager.getChildScopes(currentScope.id)
-        .filter(child => child.executable && 
-          (child.type === 'command' || child.type === 'plugin'))
+      return scopeManager
+        .getChildScopes(currentScope.id)
+        .filter(child => child.executable && (child.type === 'command' || child.type === 'plugin'))
     })
   }
 
@@ -64,7 +65,7 @@ class CommandStore {
         this.getScopeByPath(path),
         () => new Error(`No command found at path: ${path.join(' ')}`)
       )
-      
+
       // Activate the scope
       yield* scopeManager.activateScope(scope.id)
     }).bind(this)
@@ -73,28 +74,29 @@ class CommandStore {
   /**
    * Execute a command by path with given context
    */
-  executeCommand(path: string[], context: JSXCommandContext): Effect.Effect<JSX.Element | null, Error> {
+  executeCommand(
+    path: string[],
+    context: JSXCommandContext
+  ): Effect.Effect<JSX.Element | null, Error> {
     return Effect.gen(function* () {
       // Set the context
       this.#commandContext = context
-      
+
       // Activate the command scope
       yield* this.setCommandPath(path)
-      
+
       // Get the command scope
       const scope = yield* Effect.fromNullable(
         this.getScopeByPath(path),
         () => new Error(`Command not found: ${path.join(' ')}`)
       )
-      
+
       // Execute the handler if it exists
       if (scope.handler) {
-        const result = yield* Effect.promise(() => 
-          Promise.resolve(scope.handler!(context))
-        )
+        const result = yield* Effect.promise(() => Promise.resolve(scope.handler!(context)))
         return result
       }
-      
+
       // No handler - this might be a parent command, show help
       return null
     }).bind(this)
@@ -105,10 +107,10 @@ class CommandStore {
    */
   getScopeByPath(path: string[]): ScopeDef | undefined {
     const allScopes = scopeManager.getAllScopes()
-    
-    return allScopes.find(scope => 
-      scope.path.length === path.length &&
-      scope.path.every((segment, i) => segment === path[i])
+
+    return allScopes.find(
+      scope =>
+        scope.path.length === path.length && scope.path.every((segment, i) => segment === path[i])
     )
   }
 
@@ -133,18 +135,17 @@ class CommandStore {
   getSubcommands(path: string[]): ScopeDef[] {
     const parentScope = this.getScopeByPath(path)
     if (!parentScope) return []
-    
-    return scopeManager.getChildScopes(parentScope.id)
-      .filter(child => child.executable && 
-        (child.type === 'command' || child.type === 'plugin'))
+
+    return scopeManager
+      .getChildScopes(parentScope.id)
+      .filter(child => child.executable && (child.type === 'command' || child.type === 'plugin'))
   }
 
   /**
    * Get CLI root scope
    */
   getCLIScope(): ScopeDef | undefined {
-    return scopeManager.getAllScopes()
-      .find(scope => scope.type === 'cli')
+    return scopeManager.getAllScopes().find(scope => scope.type === 'cli')
   }
 
   /**
@@ -160,9 +161,8 @@ class CommandStore {
   getHelpScope(path: string[]): ScopeDef | undefined {
     const parentScope = this.getScopeByPath(path)
     if (!parentScope) return undefined
-    
-    return scopeManager.getChildScopes(parentScope.id)
-      .find(child => child.type === 'help')
+
+    return scopeManager.getChildScopes(parentScope.id).find(child => child.type === 'help')
   }
 
   /**
@@ -179,16 +179,16 @@ class CommandStore {
   subscribe(callback: (store: this) => void): () => void {
     // Use effect to track derived values
     let unsubscribed = false
-    
+
     const effect = Effect.gen(function* () {
       while (!unsubscribed) {
         callback(this)
         yield* Effect.sleep(16) // ~60fps polling
       }
     }).bind(this)
-    
+
     Effect.runFork(effect)
-    
+
     return () => {
       unsubscribed = true
     }

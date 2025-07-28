@@ -1,10 +1,10 @@
 /**
  * TextInput Component Export
- * 
+ *
  * A fully-featured text input component for terminal UIs
  */
 
-export { 
+export {
   TextInput,
   textInput,
   passwordInput,
@@ -12,5 +12,5 @@ export {
   numberInput,
   type TextInputProps,
   type EchoMode,
-  type CursorStyle
+  type CursorStyle,
 } from './TextInput'

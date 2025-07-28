@@ -2,157 +2,157 @@
  * Command Resolver Tests
  */
 
-import { describe, it, expect } from "bun:test"
-import { CommandResolver } from "./commandResolver"
-import type { CLIConfig } from "@cli/types"
-import { z } from "zod"
+import { describe, it, expect } from 'bun:test'
+import { CommandResolver } from './commandResolver'
+import type { CLIConfig } from '../types'
+import { z } from 'zod'
 
-describe("CommandResolver", () => {
+describe('CommandResolver', () => {
   const testConfig: CLIConfig = {
-    name: "test-cli",
-    version: "1.0.0",
+    name: 'test-cli',
+    version: '1.0.0',
     commands: {
       build: {
-        description: "Build project",
+        description: 'Build project',
         handler: () => {},
-        aliases: ["b"],
+        aliases: ['b'],
         commands: {
           watch: {
-            description: "Build with watch mode",
-            handler: () => {}
-          }
-        }
+            description: 'Build with watch mode',
+            handler: () => {},
+          },
+        },
       },
       test: {
-        description: "Run tests",
+        description: 'Run tests',
         handler: () => {},
-        hidden: false
+        hidden: false,
       },
       hidden: {
-        description: "Hidden command",
+        description: 'Hidden command',
         handler: () => {},
-        hidden: true
-      }
-    }
+        hidden: true,
+      },
+    },
   }
-  
-  describe("findCommandConfig", () => {
-    it("should find top-level commands", () => {
+
+  describe('findCommandConfig', () => {
+    it('should find top-level commands', () => {
       const resolver = new CommandResolver(testConfig)
-      const config = resolver.findCommandConfig(["build"])
-      
+      const config = resolver.findCommandConfig(['build'])
+
       expect(config).toBeTruthy()
-      expect(config?.description).toBe("Build project")
+      expect(config?.description).toBe('Build project')
     })
-    
-    it("should find nested commands", () => {
+
+    it('should find nested commands', () => {
       const resolver = new CommandResolver(testConfig)
-      const config = resolver.findCommandConfig(["build", "watch"])
-      
+      const config = resolver.findCommandConfig(['build', 'watch'])
+
       expect(config).toBeTruthy()
-      expect(config?.description).toBe("Build with watch mode")
+      expect(config?.description).toBe('Build with watch mode')
     })
-    
-    it("should return null for unknown commands", () => {
+
+    it('should return null for unknown commands', () => {
       const resolver = new CommandResolver(testConfig)
-      const config = resolver.findCommandConfig(["unknown"])
-      
+      const config = resolver.findCommandConfig(['unknown'])
+
       expect(config).toBeNull()
     })
-    
-    it("should return null for invalid nested paths", () => {
+
+    it('should return null for invalid nested paths', () => {
       const resolver = new CommandResolver(testConfig)
-      const config = resolver.findCommandConfig(["build", "unknown"])
-      
+      const config = resolver.findCommandConfig(['build', 'unknown'])
+
       expect(config).toBeNull()
     })
   })
-  
-  describe("getAvailableCommands", () => {
-    it("should get top-level commands", () => {
+
+  describe('getAvailableCommands', () => {
+    it('should get top-level commands', () => {
       const resolver = new CommandResolver(testConfig)
       const commands = resolver.getAvailableCommands()
-      
-      expect(commands).toContain("build")
-      expect(commands).toContain("test")
-      expect(commands).not.toContain("hidden")
+
+      expect(commands).toContain('build')
+      expect(commands).toContain('test')
+      expect(commands).not.toContain('hidden')
     })
-    
-    it("should get nested commands", () => {
+
+    it('should get nested commands', () => {
       const resolver = new CommandResolver(testConfig)
-      const commands = resolver.getAvailableCommands(["build"])
-      
-      expect(commands).toContain("watch")
+      const commands = resolver.getAvailableCommands(['build'])
+
+      expect(commands).toContain('watch')
       expect(commands.length).toBe(1)
     })
-    
-    it("should return empty array for invalid paths", () => {
+
+    it('should return empty array for invalid paths', () => {
       const resolver = new CommandResolver(testConfig)
-      const commands = resolver.getAvailableCommands(["unknown"])
-      
+      const commands = resolver.getAvailableCommands(['unknown'])
+
       expect(commands).toEqual([])
     })
   })
-  
-  describe("getCommandAliases", () => {
-    it("should get command aliases", () => {
+
+  describe('getCommandAliases', () => {
+    it('should get command aliases', () => {
       const resolver = new CommandResolver(testConfig)
-      const aliases = resolver.getCommandAliases("build")
-      
-      expect(aliases).toEqual(["b"])
+      const aliases = resolver.getCommandAliases('build')
+
+      expect(aliases).toEqual(['b'])
     })
-    
-    it("should return empty array for commands without aliases", () => {
+
+    it('should return empty array for commands without aliases', () => {
       const resolver = new CommandResolver(testConfig)
-      const aliases = resolver.getCommandAliases("test")
-      
+      const aliases = resolver.getCommandAliases('test')
+
       expect(aliases).toEqual([])
     })
-    
-    it("should return empty array for unknown commands", () => {
+
+    it('should return empty array for unknown commands', () => {
       const resolver = new CommandResolver(testConfig)
-      const aliases = resolver.getCommandAliases("unknown")
-      
+      const aliases = resolver.getCommandAliases('unknown')
+
       expect(aliases).toEqual([])
     })
   })
-  
-  describe("resolveCommandName", () => {
-    it("should resolve direct command names", () => {
+
+  describe('resolveCommandName', () => {
+    it('should resolve direct command names', () => {
       const resolver = new CommandResolver(testConfig)
-      const resolved = resolver.resolveCommandName("build")
-      
-      expect(resolved).toBe("build")
+      const resolved = resolver.resolveCommandName('build')
+
+      expect(resolved).toBe('build')
     })
-    
-    it("should resolve aliases", () => {
+
+    it('should resolve aliases', () => {
       const resolver = new CommandResolver(testConfig)
-      const resolved = resolver.resolveCommandName("b")
-      
-      expect(resolved).toBe("build")
+      const resolved = resolver.resolveCommandName('b')
+
+      expect(resolved).toBe('build')
     })
-    
-    it("should return null for unknown commands", () => {
+
+    it('should return null for unknown commands', () => {
       const resolver = new CommandResolver(testConfig)
-      const resolved = resolver.resolveCommandName("unknown")
-      
+      const resolved = resolver.resolveCommandName('unknown')
+
       expect(resolved).toBeNull()
     })
   })
-  
-  describe("validateCommandPath", () => {
-    it("should validate valid paths", () => {
+
+  describe('validateCommandPath', () => {
+    it('should validate valid paths', () => {
       const resolver = new CommandResolver(testConfig)
-      
-      expect(resolver.validateCommandPath(["build"])).toBe(true)
-      expect(resolver.validateCommandPath(["build", "watch"])).toBe(true)
+
+      expect(resolver.validateCommandPath(['build'])).toBe(true)
+      expect(resolver.validateCommandPath(['build', 'watch'])).toBe(true)
     })
-    
-    it("should invalidate invalid paths", () => {
+
+    it('should invalidate invalid paths', () => {
       const resolver = new CommandResolver(testConfig)
-      
-      expect(resolver.validateCommandPath(["unknown"])).toBe(false)
-      expect(resolver.validateCommandPath(["build", "unknown"])).toBe(false)
+
+      expect(resolver.validateCommandPath(['unknown'])).toBe(false)
+      expect(resolver.validateCommandPath(['build', 'unknown'])).toBe(false)
     })
   })
 })

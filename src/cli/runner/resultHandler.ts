@@ -1,12 +1,12 @@
 /**
  * Result Handler Module
- * 
+ *
  * Handles different types of command execution results
  */
 
-import { Effect } from "effect"
-import { runApp } from "@core/runtime"
-import { LiveServices } from "@core/services/impl"
+import { Effect } from 'effect'
+import { runApp } from '@core/runtime'
+import { LiveServices } from '@core/services/impl'
 
 export class ResultHandler {
   /**
@@ -16,7 +16,7 @@ export class ResultHandler {
     if (!result) {
       return
     }
-    
+
     if (this.isComponent(result)) {
       // Full component - run with TUI runtime
       await this.runComponent(result)
@@ -25,10 +25,10 @@ export class ResultHandler {
       await this.renderView(result)
     } else if (typeof result === 'object') {
       // Log result for debugging
-      console.log("Command returned non-component result:", result)
+      console.log('Command returned non-component result:', result)
     }
   }
-  
+
   /**
    * Run a TUI component
    */
@@ -41,7 +41,7 @@ export class ResultHandler {
       )
     )
   }
-  
+
   /**
    * Render a view and print it
    */
@@ -49,25 +49,31 @@ export class ResultHandler {
     const rendered = await Effect.runPromise(view.render())
     console.log(rendered)
   }
-  
+
   /**
    * Check if a value is a TUI component
    */
   isComponent(value: unknown): value is { init?: Function; update?: Function; view?: Function } {
-    return value !== null && 
-           typeof value === 'object' &&
-           'init' in value && typeof (value as Record<string, unknown>).init === 'function'
+    return (
+      value !== null &&
+      typeof value === 'object' &&
+      'init' in value &&
+      typeof (value as Record<string, unknown>).init === 'function'
+    )
   }
-  
+
   /**
    * Check if a value is a View
    */
   isView(value: unknown): value is { render: Function } {
-    return value !== null && 
-           typeof value === 'object' &&
-           'render' in value && typeof (value as Record<string, unknown>).render === 'function'
+    return (
+      value !== null &&
+      typeof value === 'object' &&
+      'render' in value &&
+      typeof (value as Record<string, unknown>).render === 'function'
+    )
   }
-  
+
   /**
    * Convert a View to a simple Component
    */
@@ -84,7 +90,7 @@ export class ResultHandler {
         // Mark as done after first render to allow immediate exit
         return Effect.succeed([{ ...modelObj, done: true }, []])
       },
-      view: () => view
+      view: () => view,
     }
   }
 }

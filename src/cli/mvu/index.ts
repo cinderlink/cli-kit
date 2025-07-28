@@ -1,6 +1,6 @@
 /**
  * CLI MVU State Management
- * 
+ *
  * Unified state management for CLI applications using MVU pattern
  */
 

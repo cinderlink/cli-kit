@@ -1,6 +1,6 @@
 /**
  * Core Scope Types
- * 
+ *
  * Defines the fundamental types for the scope management system
  */
 
@@ -10,37 +10,37 @@
 export interface ScopeDef {
   /** Unique identifier for this scope */
   id: string
-  
+
   /** Type of scope */
   type: 'cli' | 'plugin' | 'command' | 'arg' | 'flag' | 'option' | 'component'
-  
+
   /** Name of the scope (used in path) */
   name: string
-  
+
   /** Full path from root to this scope */
   path: string[]
-  
+
   /** User-friendly description */
   description?: string
-  
+
   /** Whether this scope can be executed (commands/plugins) */
   executable?: boolean
-  
+
   /** Handler function for executable scopes */
   handler?: Handler // Will be properly typed when integrated with CLI
-  
+
   /** Arguments definition for commands */
   args?: Record<string, ArgDef>
-  
+
   /** Flags definition for commands */
   flags?: Record<string, FlagDef>
-  
+
   /** Command aliases */
   aliases?: string[]
-  
+
   /** Additional metadata */
   metadata?: Record<string, unknown>
-  
+
   /** Child scopes (populated by scope manager) */
   children: ScopeDef[]
 }
@@ -56,22 +56,22 @@ export type ScopeStatus = 'unmounted' | 'mounted' | 'rendered' | 'executed'
 export interface ScopeState {
   /** The scope definition */
   def: ScopeDef
-  
+
   /** Current status */
   status: ScopeStatus
-  
+
   /** Whether this scope is currently active */
   isActive: boolean
-  
+
   /** Context data for this scope */
   context: Record<string, unknown>
-  
+
   /** Transient state (reset between renders) */
   transient: Record<string, unknown>
-  
+
   /** Parent scope ID */
   parentId?: string
-  
+
   /** Child scope IDs */
   childIds: string[]
 }

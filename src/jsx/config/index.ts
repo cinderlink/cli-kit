@@ -1,6 +1,6 @@
 /**
  * JSX Configuration Module
- * 
+ *
  * Provides configuration integration for JSX applications
  */
 
@@ -8,14 +8,14 @@
 export {
   ConfigProvider,
   SetConfig,
-  LoadConfig
-} from "./components"
+  LoadConfig,
+} from './components'
 
 export type {
   ConfigProviderProps,
   SetConfigProps,
-  LoadConfigProps
-} from "./components"
+  LoadConfigProps,
+} from './components'
 
 // Hooks
 export {
@@ -23,23 +23,21 @@ export {
   useConfigValue,
   useConfigValues,
   useConfigObject,
-  createTypedConfig
-} from "./hooks"
+  createTypedConfig,
+} from './hooks'
 
 // Stores
 export {
   getGlobalConfig,
   setGlobalConfig,
-  hasGlobalConfig
-} from "./stores"
+  hasGlobalConfig,
+} from './stores'
 
 // Integration utilities
 export {
   ConfigLayer,
   createJSXConfigApp,
-  getConfigOptions
-} from "./integration"
+  getConfigOptions,
+} from './integration'
 
-export type {
-  ConfigOptionsHelper
-} from "./integration"
+export type { ConfigOptionsHelper } from './integration'

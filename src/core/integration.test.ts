@@ -1,17 +1,17 @@
 /**
  * Core Module Integration Tests
- * 
+ *
  * Tests module boundaries and integration between core subsystems
  * according to STANDARDS.md requirements.
  */
 
-import { test, expect, describe, beforeEach, afterEach } from "bun:test"
-import { Effect } from "effect"
-import { getGlobalEventBus, resetGlobalEventBus } from "./model/events/eventBus.js"
-import { resetGlobalRegistry } from "./runtime/module/registry.js"
-import { bootstrapWithModules, type BootstrapResult } from "./runtime/bootstrap.js"
+import { test, expect, describe, beforeEach, afterEach } from 'bun:test'
+import { Effect } from 'effect'
+import { getGlobalEventBus, resetGlobalEventBus } from './model/events/eventBus.js'
+import { resetGlobalRegistry } from './runtime/module/registry.js'
+import { bootstrapWithModules, type BootstrapResult } from './runtime/bootstrap.js'
 
-describe("Core Module Integration", () => {
+describe('Core Module Integration', () => {
   beforeEach(async () => {
     await Effect.runPromise(resetGlobalRegistry())
     await Effect.runPromise(resetGlobalEventBus())
@@ -22,15 +22,15 @@ describe("Core Module Integration", () => {
     await Effect.runPromise(resetGlobalEventBus())
   })
 
-  describe("Runtime Bootstrap Integration", () => {
-    test("should initialize all core subsystems", async () => {
-      const result = await Effect.runPromise(
+  describe('Runtime Bootstrap Integration', () => {
+    test('should initialize all core subsystems', async () => {
+      const result = (await Effect.runPromise(
         bootstrapWithModules({
           enableServices: true,
           enableEventSystem: true,
-          enableStyling: true
+          enableStyling: true,
         })
-      ) as BootstrapResult
+      )) as BootstrapResult
 
       expect(result.modules).toBeDefined()
       expect(result.modules.jsx).toBeDefined()
@@ -38,30 +38,26 @@ describe("Core Module Integration", () => {
       expect(result.status).toBe('initialized')
     })
 
-    test("should handle bootstrap failures gracefully", async () => {
+    test('should handle bootstrap failures gracefully', async () => {
       const result = await Effect.runPromise(
         bootstrapWithModules({
           enableServices: true,
-          forceError: true  // Trigger bootstrap failure
-        }).pipe(
-          Effect.catchAll(() => Effect.succeed({ status: 'failed' as const }))
-        )
+          forceError: true, // Trigger bootstrap failure
+        }).pipe(Effect.catchAll(() => Effect.succeed({ status: 'failed' as const })))
       )
 
       expect(result.status).toBe('failed')
     })
   })
 
-  describe("Event System Integration", () => {
-    test("should coordinate events between subsystems", async () => {
+  describe('Event System Integration', () => {
+    test('should coordinate events between subsystems', async () => {
       const eventBus = getGlobalEventBus()
       const events: any[] = []
-      
+
       // Subscribe to events - must run the Effect
       await Effect.runPromise(
-        eventBus.subscribe('test:integration', (event) => 
-          Effect.sync(() => events.push(event))
-        )
+        eventBus.subscribe('test:integration', event => Effect.sync(() => events.push(event)))
       )
 
       // Emit events from different subsystems
@@ -71,17 +67,17 @@ describe("Core Module Integration", () => {
           type: 'test:integration',
           source: 'view-system',
           timestamp: Date.now(),
-          data: { component: 'Button' }
+          data: { component: 'Button' },
         })
       )
 
       await Effect.runPromise(
         eventBus.emit('test:integration', {
-          id: 'test-2', 
+          id: 'test-2',
           type: 'test:integration',
           source: 'terminal-system',
           timestamp: Date.now(),
-          data: { output: 'Hello World' }
+          data: { output: 'Hello World' },
         })
       )
 
@@ -90,14 +86,12 @@ describe("Core Module Integration", () => {
       expect(events[1].source).toBe('terminal-system')
     })
 
-    test("should handle event subscription lifecycle", async () => {
+    test('should handle event subscription lifecycle', async () => {
       const eventBus = getGlobalEventBus()
       let eventCount = 0
-      
+
       const unsubscribe = await Effect.runPromise(
-        eventBus.subscribe('lifecycle:test', () => 
-          Effect.sync(() => eventCount++)
-        )
+        eventBus.subscribe('lifecycle:test', () => Effect.sync(() => eventCount++))
       )
 
       // Emit before unsubscribe
@@ -106,7 +100,7 @@ describe("Core Module Integration", () => {
           id: 'test',
           type: 'lifecycle:test',
           source: 'test',
-          timestamp: Date.now()
+          timestamp: Date.now(),
         })
       )
 
@@ -114,13 +108,13 @@ describe("Core Module Integration", () => {
 
       // Unsubscribe and emit again
       await Effect.runPromise(unsubscribe())
-      
+
       await Effect.runPromise(
         eventBus.emit('lifecycle:test', {
           id: 'test2',
-          type: 'lifecycle:test', 
+          type: 'lifecycle:test',
           source: 'test',
-          timestamp: Date.now()
+          timestamp: Date.now(),
         })
       )
 
@@ -128,22 +122,20 @@ describe("Core Module Integration", () => {
     })
   })
 
-  describe("Service Layer Integration", () => {
-    test("should integrate services with event system", async () => {
-      const result = await Effect.runPromise(
+  describe('Service Layer Integration', () => {
+    test('should integrate services with event system', async () => {
+      const result = (await Effect.runPromise(
         bootstrapWithModules({
           enableServices: true,
-          enableEventSystem: true
+          enableEventSystem: true,
         })
-      ) as BootstrapResult
+      )) as BootstrapResult
 
       const eventBus = getGlobalEventBus()
       const serviceEvents: any[] = []
 
       await Effect.runPromise(
-        eventBus.subscribe('service:test', (event) => 
-          Effect.sync(() => serviceEvents.push(event))
-        )
+        eventBus.subscribe('service:test', event => Effect.sync(() => serviceEvents.push(event)))
       )
 
       // Simulate service event
@@ -153,7 +145,7 @@ describe("Core Module Integration", () => {
           type: 'service:test',
           source: 'terminal-service',
           timestamp: Date.now(),
-          data: { status: 'ready' }
+          data: { status: 'ready' },
         })
       )
 
@@ -162,50 +154,46 @@ describe("Core Module Integration", () => {
     })
   })
 
-  describe("Module Boundary Validation", () => {
-    test("should enforce clean module APIs", async () => {
+  describe('Module Boundary Validation', () => {
+    test('should enforce clean module APIs', async () => {
       // Test that core module only exports what it should
       const coreExports = await import('./index.js')
-      
+
       // Core should export these categories
       expect(coreExports.View).toBeDefined()
-      expect(coreExports.Runtime).toBeDefined() 
+      expect(coreExports.Runtime).toBeDefined()
       expect(coreExports.Effect).toBeDefined()
       expect(coreExports.EventBus).toBeDefined()
-      
+
       // Core should not expose internal implementation
       expect((coreExports as any).bootstrap).toBeUndefined()
       expect((coreExports as any).internal).toBeUndefined()
     })
 
-    test("should validate type safety at module boundaries", async () => {
-      const result = await Effect.runPromise(
-        bootstrapWithModules({})
-      ) as BootstrapResult
+    test('should validate type safety at module boundaries', async () => {
+      const result = (await Effect.runPromise(bootstrapWithModules({}))) as BootstrapResult
 
       // Module results should be properly typed
       expect(typeof result.modules).toBe('object')
       expect(result.status).toMatch(/^(initialized|partial|failed)$/)
-      
+
       if (result.modules.jsx) {
         expect(typeof result.modules.jsx).toBe('object')
       }
-      
+
       if (result.modules.cli) {
         expect(typeof result.modules.cli).toBe('object')
       }
     })
   })
 
-  describe("Error Propagation Integration", () => {
-    test("should propagate errors across module boundaries", async () => {
+  describe('Error Propagation Integration', () => {
+    test('should propagate errors across module boundaries', async () => {
       const eventBus = getGlobalEventBus()
       const errors: any[] = []
 
       await Effect.runPromise(
-        eventBus.subscribe('error:test', (event) => 
-          Effect.sync(() => errors.push(event))
-        )
+        eventBus.subscribe('error:test', event => Effect.sync(() => errors.push(event)))
       )
 
       // Simulate error from view system
@@ -217,8 +205,8 @@ describe("Core Module Integration", () => {
           timestamp: Date.now(),
           error: {
             _tag: 'ViewError',
-            message: 'Component render failed'
-          }
+            message: 'Component render failed',
+          },
         })
       )
 
@@ -226,13 +214,15 @@ describe("Core Module Integration", () => {
       expect(errors[0].error._tag).toBe('ViewError')
     })
 
-    test("should handle error recovery patterns", async () => {
+    test('should handle error recovery patterns', async () => {
       const eventBus = getGlobalEventBus()
       let recoveryAttempted = false
 
       await Effect.runPromise(
-        eventBus.subscribe('error:recovery', () => 
-          Effect.sync(() => { recoveryAttempted = true })
+        eventBus.subscribe('error:recovery', () =>
+          Effect.sync(() => {
+            recoveryAttempted = true
+          })
         )
       )
 
@@ -243,7 +233,7 @@ describe("Core Module Integration", () => {
           type: 'error:recovery',
           source: 'error-handler',
           timestamp: Date.now(),
-          action: 'retry'
+          action: 'retry',
         })
       )
 
@@ -251,37 +241,35 @@ describe("Core Module Integration", () => {
     })
   })
 
-  describe("Performance Integration", () => {
-    test("should maintain performance across module integration", async () => {
+  describe('Performance Integration', () => {
+    test('should maintain performance across module integration', async () => {
       const start = Date.now()
-      
+
       const result = await Effect.runPromise(
         bootstrapWithModules({
           enableServices: true,
           enableEventSystem: true,
-          enableStyling: true
+          enableStyling: true,
         })
       )
 
       const initTime = Date.now() - start
-      
+
       // Should initialize within 100ms per STANDARDS.md
       expect(initTime).toBeLessThan(100)
       expect(result).toBeDefined()
     })
 
-    test("should handle high-frequency events efficiently", async () => {
+    test('should handle high-frequency events efficiently', async () => {
       const eventBus = getGlobalEventBus()
       let eventCount = 0
 
       await Effect.runPromise(
-        eventBus.subscribe('perf:test', () => 
-          Effect.sync(() => eventCount++)
-        )
+        eventBus.subscribe('perf:test', () => Effect.sync(() => eventCount++))
       )
 
       const start = Date.now()
-      
+
       // Emit 1000 events
       for (let i = 0; i < 1000; i++) {
         await Effect.runPromise(
@@ -290,13 +278,13 @@ describe("Core Module Integration", () => {
             type: 'perf:test',
             source: 'perf-test',
             timestamp: Date.now(),
-            data: { iteration: i }
+            data: { iteration: i },
           })
         )
       }
 
       const duration = Date.now() - start
-      
+
       expect(eventCount).toBe(1000)
       expect(duration).toBeLessThan(1000) // Should complete in under 1 second
     })

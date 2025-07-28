@@ -1,12 +1,12 @@
 /**
  * Configuration Hooks for JSX
- * 
+ *
  * Note: These are synchronous accessors since JSX doesn't have
  * React-style hooks. They simply access the global config store.
  */
 
-import { getGlobalConfig } from "@jsx/config/stores/configStore"
-import type { Config, ConfigObject } from "@config/types"
+import { getGlobalConfig } from '@jsx/config/stores/configStore'
+import type { Config, ConfigObject } from '@config/types'
 
 /**
  * Get configuration instance
@@ -26,16 +26,14 @@ export function useConfigValue<T = any>(key: string, defaultValue?: T): T {
 /**
  * Get multiple config values
  */
-export function useConfigValues<T extends Record<string, any>>(
-  keys: string[]
-): T {
+export function useConfigValues<T extends Record<string, any>>(keys: string[]): T {
   const config = getGlobalConfig()
   const values: any = {}
-  
+
   for (const key of keys) {
     values[key] = config.get(key)
   }
-  
+
   return values as T
 }
 
@@ -60,6 +58,6 @@ export function createTypedConfig<T extends ConfigObject>() {
     useValues: (): T => {
       const config = getGlobalConfig()
       return config.toObject() as T
-    }
+    },
   }
 }

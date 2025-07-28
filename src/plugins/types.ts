@@ -1,6 +1,6 @@
 /**
  * Plugins Module Type Definitions
- * 
+ *
  * Centralized type definitions for the plugin system, providing interfaces
  * for plugin creation, lifecycle management, and inter-plugin communication.
  */
@@ -12,11 +12,11 @@ import { Effect } from 'effect'
  */
 export enum PluginLifecycleState {
   REGISTERED = 'registered',
-  INITIALIZING = 'initializing', 
+  INITIALIZING = 'initializing',
   INITIALIZED = 'initialized',
   TEARING_DOWN = 'tearing_down',
   TORN_DOWN = 'torn_down',
-  FAILED = 'failed'
+  FAILED = 'failed',
 }
 
 /**
@@ -156,11 +156,17 @@ export interface PluginHooks {
  */
 export interface PluginCommunication {
   /** Send event to another plugin */
-  sendEvent(targetId: string, event: Omit<PluginEvent, 'source' | 'timestamp'>): Effect.Effect<void, PluginError>
+  sendEvent(
+    targetId: string,
+    event: Omit<PluginEvent, 'source' | 'timestamp'>
+  ): Effect.Effect<void, PluginError>
   /** Broadcast event to all plugins */
   broadcastEvent(event: Omit<PluginEvent, 'source' | 'timestamp'>): Effect.Effect<void, PluginError>
   /** Subscribe to events */
-  subscribe(eventType: string, handler: (event: PluginEvent) => Effect.Effect<void, PluginError>): Effect.Effect<void, PluginError>
+  subscribe(
+    eventType: string,
+    handler: (event: PluginEvent) => Effect.Effect<void, PluginError>
+  ): Effect.Effect<void, PluginError>
   /** Unsubscribe from events */
   unsubscribe(eventType: string): Effect.Effect<void, PluginError>
 }
@@ -182,7 +188,7 @@ export interface PluginLoader {
  */
 export class PluginError {
   readonly _tag = 'PluginError'
-  
+
   constructor(
     public readonly message: string,
     public readonly pluginId?: string,

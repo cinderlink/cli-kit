@@ -1,120 +1,126 @@
-import { test, expect, describe } from "bun:test"
-import { definePlugin, createPlugin, PluginBuilder, createPluginFromBuilder, jsxToPlugin } from "./define"
-import type { Plugin, JSXPlugin } from "./types"
+import { test, expect, describe } from 'bun:test'
+import {
+  definePlugin,
+  createPlugin,
+  PluginBuilder,
+  createPluginFromBuilder,
+  jsxToPlugin,
+} from './define'
+import type { Plugin, JSXPlugin } from './types'
 
-describe("Plugin Definition", () => {
-  describe("definePlugin", () => {
-    test("accepts a valid plugin", () => {
+describe('Plugin Definition', () => {
+  describe('definePlugin', () => {
+    test('accepts a valid plugin', () => {
       const plugin: Plugin = {
         metadata: {
-          name: "test-plugin",
-          version: "1.0.0"
-        }
+          name: 'test-plugin',
+          version: '1.0.0',
+        },
       }
 
       const defined = definePlugin(plugin)
       expect(defined).toBe(plugin)
     })
 
-    test("throws on missing name", () => {
+    test('throws on missing name', () => {
       const plugin = {
         metadata: {
-          version: "1.0.0"
-        }
+          version: '1.0.0',
+        },
       } as Plugin
 
-      expect(() => definePlugin(plugin)).toThrow("Plugin must have a name in metadata")
+      expect(() => definePlugin(plugin)).toThrow('Plugin must have a name in metadata')
     })
 
-    test("throws on missing version", () => {
+    test('throws on missing version', () => {
       const plugin = {
         metadata: {
-          name: "test-plugin"
-        }
+          name: 'test-plugin',
+        },
       } as Plugin
 
-      expect(() => definePlugin(plugin)).toThrow("Plugin must have a version in metadata")
+      expect(() => definePlugin(plugin)).toThrow('Plugin must have a version in metadata')
     })
 
-    test("throws on commands without handlers", () => {
+    test('throws on commands without handlers', () => {
       const plugin: Plugin = {
         metadata: {
-          name: "test-plugin",
-          version: "1.0.0"
+          name: 'test-plugin',
+          version: '1.0.0',
         },
         commands: {
           hello: {
-            description: "Say hello"
-          } as Command
-        }
+            description: 'Say hello',
+          } as Command,
+        },
       }
 
       expect(() => definePlugin(plugin)).toThrow("Command 'hello' must have a handler")
     })
   })
 
-  describe("createPlugin", () => {
-    test("creates plugin from object", () => {
+  describe('createPlugin', () => {
+    test('creates plugin from object', () => {
       const plugin: Plugin = {
         metadata: {
-          name: "test-plugin",
-          version: "1.0.0"
-        }
+          name: 'test-plugin',
+          version: '1.0.0',
+        },
       }
 
       const created = createPlugin(plugin)
-      expect(created.metadata.name).toBe("test-plugin")
+      expect(created.metadata.name).toBe('test-plugin')
     })
 
-    test("creates plugin using builder function", () => {
-      const plugin = createPlugin((api) => {
+    test('creates plugin using builder function', () => {
+      const plugin = createPlugin(api => {
         api.metadata({
-          name: "builder-plugin",
-          version: "2.0.0"
+          name: 'builder-plugin',
+          version: '2.0.0',
         })
-        api.command("hello", {
-          description: "Say hello",
-          handler: async () => {}
+        api.command('hello', {
+          description: 'Say hello',
+          handler: async () => {},
         })
       })
 
-      expect(plugin.metadata.name).toBe("builder-plugin")
-      expect(plugin.commands).toHaveProperty("hello")
+      expect(plugin.metadata.name).toBe('builder-plugin')
+      expect(plugin.commands).toHaveProperty('hello')
     })
   })
 
-  describe("PluginBuilder", () => {
-    test("builds a complete plugin", () => {
+  describe('PluginBuilder', () => {
+    test('builds a complete plugin', () => {
       const builder = new PluginBuilder({
-        name: "test-plugin",
-        version: "1.0.0"
+        name: 'test-plugin',
+        version: '1.0.0',
       })
 
       const plugin = builder
-        .command("hello", {
-          description: "Say hello",
-          handler: async () => {}
+        .command('hello', {
+          description: 'Say hello',
+          handler: async () => {},
         })
-        .extend("app.build", () => ({
-          preHook: async () => {}
+        .extend('app.build', () => ({
+          preHook: async () => {},
         }))
-        .service("logger", console)
+        .service('logger', console)
         .build()
 
-      expect(plugin.metadata.name).toBe("test-plugin")
-      expect(plugin.commands).toHaveProperty("hello")
+      expect(plugin.metadata.name).toBe('test-plugin')
+      expect(plugin.commands).toHaveProperty('hello')
       expect(plugin.extensions).toBeDefined()
-      expect(plugin.extensions!["app.build"]).toBeDefined()
-      expect(plugin.services).toHaveProperty("logger")
+      expect(plugin.extensions!['app.build']).toBeDefined()
+      expect(plugin.services).toHaveProperty('logger')
     })
 
-    test("allows chaining methods", () => {
+    test('allows chaining methods', () => {
       const builder = new PluginBuilder()
-      
+
       const result = builder
-        .metadata({ name: "chain-test", version: "1.0.0" })
-        .command("cmd1", { description: "Command 1", handler: async () => {} })
-        .command("cmd2", { description: "Command 2", handler: async () => {} })
+        .metadata({ name: 'chain-test', version: '1.0.0' })
+        .command('cmd1', { description: 'Command 1', handler: async () => {} })
+        .command('cmd2', { description: 'Command 2', handler: async () => {} })
         .wrapper(async (ctx, next) => await next())
         .onInstall(async () => {})
         .onActivate(async () => {})
@@ -123,10 +129,10 @@ describe("Plugin Definition", () => {
         .onUninstall(async () => {})
 
       expect(result).toBe(builder)
-      
+
       const plugin = result.build()
-      expect(plugin.commands).toHaveProperty("cmd1")
-      expect(plugin.commands).toHaveProperty("cmd2")
+      expect(plugin.commands).toHaveProperty('cmd1')
+      expect(plugin.commands).toHaveProperty('cmd2')
       expect(plugin.wrappers).toHaveLength(1)
       expect(plugin.install).toBeDefined()
       expect(plugin.activate).toBeDefined()
@@ -135,122 +141,130 @@ describe("Plugin Definition", () => {
       expect(plugin.uninstall).toBeDefined()
     })
 
-    test("merges metadata correctly", () => {
-      const builder = new PluginBuilder({ name: "initial", version: "1.0.0" })
-      builder.metadata({ description: "A test plugin" })
-      
+    test('merges metadata correctly', () => {
+      const builder = new PluginBuilder({ name: 'initial', version: '1.0.0' })
+      builder.metadata({ description: 'A test plugin' })
+
       const plugin = builder.build()
-      expect(plugin.metadata.name).toBe("initial")
-      expect(plugin.metadata.version).toBe("1.0.0")
-      expect(plugin.metadata.description).toBe("A test plugin")
+      expect(plugin.metadata.name).toBe('initial')
+      expect(plugin.metadata.version).toBe('1.0.0')
+      expect(plugin.metadata.description).toBe('A test plugin')
     })
   })
 
-  describe("createPluginFromBuilder", () => {
-    test("creates from builder instance", () => {
+  describe('createPluginFromBuilder', () => {
+    test('creates from builder instance', () => {
       const builder = new PluginBuilder({
-        name: "builder-test",
-        version: "1.0.0"
+        name: 'builder-test',
+        version: '1.0.0',
       })
 
       const plugin = createPluginFromBuilder(builder)
-      expect(plugin.metadata.name).toBe("builder-test")
+      expect(plugin.metadata.name).toBe('builder-test')
     })
 
-    test("creates from builder function", () => {
-      const plugin = createPluginFromBuilder((builder) => {
+    test('creates from builder function', () => {
+      const plugin = createPluginFromBuilder(builder => {
         builder.metadata({
-          name: "function-test",
-          version: "1.0.0"
+          name: 'function-test',
+          version: '1.0.0',
         })
         return builder
       })
 
-      expect(plugin.metadata.name).toBe("function-test")
+      expect(plugin.metadata.name).toBe('function-test')
     })
 
-    test("throws on invalid argument", () => {
-      expect(() => createPluginFromBuilder("invalid" as unknown as (api: PluginAPI) => Plugin)).toThrow("Invalid argument to createPluginFromBuilder")
+    test('throws on invalid argument', () => {
+      expect(() =>
+        createPluginFromBuilder('invalid' as unknown as (api: PluginAPI) => Plugin)
+      ).toThrow('Invalid argument to createPluginFromBuilder')
     })
   })
 
-  describe("jsxToPlugin", () => {
-    test("converts JSX plugin format", () => {
+  describe('jsxToPlugin', () => {
+    test('converts JSX plugin format', () => {
       const jsxPlugin: JSXPlugin = {
-        name: "jsx-plugin",
-        version: "1.5.0",
-        description: "A JSX plugin",
+        name: 'jsx-plugin',
+        version: '1.5.0',
+        description: 'A JSX plugin',
         commands: {
           hello: {
-            description: "Say hello",
-            handler: async () => {}
-          }
-        }
+            description: 'Say hello',
+            handler: async () => {},
+          },
+        },
       }
 
       const plugin = jsxToPlugin(jsxPlugin)
-      expect(plugin.metadata.name).toBe("jsx-plugin")
-      expect(plugin.metadata.version).toBe("1.5.0")
-      expect(plugin.metadata.description).toBe("A JSX plugin")
-      expect(plugin.commands).toHaveProperty("hello")
+      expect(plugin.metadata.name).toBe('jsx-plugin')
+      expect(plugin.metadata.version).toBe('1.5.0')
+      expect(plugin.metadata.description).toBe('A JSX plugin')
+      expect(plugin.commands).toHaveProperty('hello')
     })
 
-    test("uses default version when not provided", () => {
+    test('uses default version when not provided', () => {
       const jsxPlugin: JSXPlugin = {
-        name: "jsx-plugin"
+        name: 'jsx-plugin',
       }
 
       const plugin = jsxToPlugin(jsxPlugin)
-      expect(plugin.metadata.version).toBe("0.0.0")
+      expect(plugin.metadata.version).toBe('0.0.0')
     })
 
-    test("converts lifecycle hooks", async () => {
+    test('converts lifecycle hooks', async () => {
       let installed = false
       let activated = false
       let deactivated = false
 
       const jsxPlugin: JSXPlugin = {
-        name: "jsx-plugin",
-        onInstall: async () => { installed = true },
-        onActivate: async () => { activated = true },
-        onDeactivate: async () => { deactivated = true }
+        name: 'jsx-plugin',
+        onInstall: async () => {
+          installed = true
+        },
+        onActivate: async () => {
+          activated = true
+        },
+        onDeactivate: async () => {
+          deactivated = true
+        },
       }
 
       const plugin = jsxToPlugin(jsxPlugin)
-      
+
       await plugin.install?.({} as PluginContext)
       expect(installed).toBe(true)
-      
+
       await plugin.activate?.({} as PluginContext)
       expect(activated).toBe(true)
-      
+
       await plugin.deactivate?.({} as PluginContext)
       expect(deactivated).toBe(true)
     })
 
-    test("converts nested subcommands", () => {
+    test('converts nested subcommands', () => {
       const jsxPlugin: JSXPlugin = {
-        name: "jsx-plugin",
+        name: 'jsx-plugin',
         commands: {
           app: {
-            description: "Application commands",
+            description: 'Application commands',
             subcommands: {
               build: {
-                description: "Build the app",
-                handler: async () => {}
+                description: 'Build the app',
+                handler: async () => {},
               },
               test: {
-                description: "Test the app",
-                handler: async () => {}
-              }
-            }
-          }
-        }
+                description: 'Test the app',
+                handler: async () => {},
+              },
+            },
+          },
+        },
       }
 
       const plugin = jsxToPlugin(jsxPlugin)
-      expect(plugin.commands?.app.subcommands).toHaveProperty("build")
-      expect(plugin.commands?.app.subcommands).toHaveProperty("test")
+      expect(plugin.commands?.app.subcommands).toHaveProperty('build')
+      expect(plugin.commands?.app.subcommands).toHaveProperty('test')
     })
   })
 })

@@ -1,6 +1,6 @@
 /**
  * Core Module Error Definitions
- * 
+ *
  * Centralized error types and factories for the core module.
  * All errors use tagged error patterns for proper Effect.ts integration.
  */
@@ -13,7 +13,7 @@ import { Effect } from 'effect'
 export abstract class CoreError {
   abstract readonly _tag: string
   abstract readonly message: string
-  
+
   constructor(public readonly cause?: unknown) {}
 }
 
@@ -22,7 +22,7 @@ export abstract class CoreError {
  */
 export class RuntimeInitializationError extends CoreError {
   readonly _tag = 'RuntimeInitializationError'
-  
+
   constructor(
     public readonly message: string,
     cause?: unknown
@@ -36,7 +36,7 @@ export class RuntimeInitializationError extends CoreError {
  */
 export class ViewSystemError extends CoreError {
   readonly _tag = 'ViewSystemError'
-  
+
   constructor(
     public readonly message: string,
     cause?: unknown
@@ -50,7 +50,7 @@ export class ViewSystemError extends CoreError {
  */
 export class LifecycleError extends CoreError {
   readonly _tag = 'LifecycleError'
-  
+
   constructor(
     public readonly message: string,
     cause?: unknown
@@ -64,7 +64,7 @@ export class LifecycleError extends CoreError {
  */
 export class ServiceIntegrationError extends CoreError {
   readonly _tag = 'ServiceIntegrationError'
-  
+
   constructor(
     public readonly message: string,
     cause?: unknown
@@ -78,7 +78,7 @@ export class ServiceIntegrationError extends CoreError {
  */
 export class EventSystemError extends CoreError {
   readonly _tag = 'EventSystemError'
-  
+
   constructor(
     public readonly message: string,
     cause?: unknown
@@ -89,38 +89,32 @@ export class EventSystemError extends CoreError {
 
 // Error factories for common scenarios
 export const CoreErrors = {
-  runtimeInitialization: (message: string, cause?: unknown) => 
+  runtimeInitialization: (message: string, cause?: unknown) =>
     new RuntimeInitializationError(message, cause),
-    
-  viewSystem: (message: string, cause?: unknown) =>
-    new ViewSystemError(message, cause),
-    
-  lifecycle: (message: string, cause?: unknown) =>
-    new LifecycleError(message, cause),
-    
+
+  viewSystem: (message: string, cause?: unknown) => new ViewSystemError(message, cause),
+
+  lifecycle: (message: string, cause?: unknown) => new LifecycleError(message, cause),
+
   serviceIntegration: (message: string, cause?: unknown) =>
     new ServiceIntegrationError(message, cause),
-    
-  eventSystem: (message: string, cause?: unknown) =>
-    new EventSystemError(message, cause)
+
+  eventSystem: (message: string, cause?: unknown) => new EventSystemError(message, cause),
 } as const
 
 // Type union for all core errors
-export type CoreErrorType = 
+export type CoreErrorType =
   | RuntimeInitializationError
-  | ViewSystemError  
+  | ViewSystemError
   | LifecycleError
   | ServiceIntegrationError
   | EventSystemError
 
 // Effect helpers
-export const failWithCoreError = <E extends CoreErrorType>(error: E) =>
-  Effect.fail(error)
+export const failWithCoreError = <E extends CoreErrorType>(error: E) => Effect.fail(error)
 
-export const catchCoreError = <A, E, R>(
-  effect: Effect.Effect<A, E, R>
-) => 
-  Effect.catchAll(effect, (error) => {
+export const catchCoreError = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+  Effect.catchAll(effect, error => {
     if (error instanceof CoreError) {
       return Effect.fail(error)
     }

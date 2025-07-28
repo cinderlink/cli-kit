@@ -1,6 +1,6 @@
 /**
  * Scoped Component
- * 
+ *
  * Wrapper that only renders children if within an active scope
  */
 
@@ -14,16 +14,16 @@ export interface ScopedProps {
 
 export function Scoped(props: ScopedProps): JSX.Element | null {
   const currentScope = currentScopeStore.get()
-  
+
   if (!currentScope) {
     return null
   }
-  
+
   const isActive = scopeManager.isScopeActive(currentScope.id)
-  
+
   if (!isActive) {
     return null
   }
-  
+
   return <>{props.children}</>
 }

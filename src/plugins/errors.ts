@@ -1,6 +1,6 @@
 /**
  * Plugins Module Error Definitions
- * 
+ *
  * Centralized error types and factories for the plugin system.
  * All errors use tagged error patterns for proper Effect.ts integration.
  */
@@ -13,7 +13,7 @@ import { Effect } from 'effect'
 export abstract class PluginSystemError {
   abstract readonly _tag: string
   abstract readonly message: string
-  
+
   constructor(public readonly cause?: unknown) {}
 }
 
@@ -22,7 +22,7 @@ export abstract class PluginSystemError {
  */
 export class PluginRegistrationError extends PluginSystemError {
   readonly _tag = 'PluginRegistrationError'
-  
+
   constructor(
     public readonly message: string,
     public readonly pluginId?: string,
@@ -37,7 +37,7 @@ export class PluginRegistrationError extends PluginSystemError {
  */
 export class PluginInitializationError extends PluginSystemError {
   readonly _tag = 'PluginInitializationError'
-  
+
   constructor(
     public readonly message: string,
     public readonly pluginId?: string,
@@ -52,7 +52,7 @@ export class PluginInitializationError extends PluginSystemError {
  */
 export class PluginDependencyError extends PluginSystemError {
   readonly _tag = 'PluginDependencyError'
-  
+
   constructor(
     public readonly message: string,
     public readonly pluginId?: string,
@@ -68,7 +68,7 @@ export class PluginDependencyError extends PluginSystemError {
  */
 export class PluginLifecycleError extends PluginSystemError {
   readonly _tag = 'PluginLifecycleError'
-  
+
   constructor(
     public readonly message: string,
     public readonly pluginId?: string,
@@ -84,7 +84,7 @@ export class PluginLifecycleError extends PluginSystemError {
  */
 export class PluginCommunicationError extends PluginSystemError {
   readonly _tag = 'PluginCommunicationError'
-  
+
   constructor(
     public readonly message: string,
     public readonly sourcePluginId?: string,
@@ -100,7 +100,7 @@ export class PluginCommunicationError extends PluginSystemError {
  */
 export class PluginLoadingError extends PluginSystemError {
   readonly _tag = 'PluginLoadingError'
-  
+
   constructor(
     public readonly message: string,
     public readonly pluginPath?: string,
@@ -115,7 +115,7 @@ export class PluginLoadingError extends PluginSystemError {
  */
 export class PluginConfigError extends PluginSystemError {
   readonly _tag = 'PluginConfigError'
-  
+
   constructor(
     public readonly message: string,
     public readonly pluginId?: string,
@@ -130,28 +130,32 @@ export class PluginConfigError extends PluginSystemError {
 export const PluginErrors = {
   registration: (message: string, pluginId?: string, cause?: unknown) =>
     new PluginRegistrationError(message, pluginId, cause),
-    
+
   initialization: (message: string, pluginId?: string, cause?: unknown) =>
     new PluginInitializationError(message, pluginId, cause),
-    
+
   dependency: (message: string, pluginId?: string, missingDependency?: string, cause?: unknown) =>
     new PluginDependencyError(message, pluginId, missingDependency, cause),
-    
+
   lifecycle: (message: string, pluginId?: string, state?: string, cause?: unknown) =>
     new PluginLifecycleError(message, pluginId, state, cause),
-    
-  communication: (message: string, sourcePluginId?: string, targetPluginId?: string, cause?: unknown) =>
-    new PluginCommunicationError(message, sourcePluginId, targetPluginId, cause),
-    
+
+  communication: (
+    message: string,
+    sourcePluginId?: string,
+    targetPluginId?: string,
+    cause?: unknown
+  ) => new PluginCommunicationError(message, sourcePluginId, targetPluginId, cause),
+
   loading: (message: string, pluginPath?: string, cause?: unknown) =>
     new PluginLoadingError(message, pluginPath, cause),
-    
+
   config: (message: string, pluginId?: string, configKey?: string, cause?: unknown) =>
-    new PluginConfigError(message, pluginId, configKey, cause)
+    new PluginConfigError(message, pluginId, configKey, cause),
 } as const
 
 // Type union for all plugin errors
-export type PluginErrorType = 
+export type PluginErrorType =
   | PluginRegistrationError
   | PluginInitializationError
   | PluginDependencyError
@@ -161,13 +165,10 @@ export type PluginErrorType =
   | PluginConfigError
 
 // Effect helpers
-export const failWithPluginError = <E extends PluginErrorType>(error: E) =>
-  Effect.fail(error)
+export const failWithPluginError = <E extends PluginErrorType>(error: E) => Effect.fail(error)
 
-export const catchPluginError = <A, E, R>(
-  effect: Effect.Effect<A, E, R>
-) => 
-  Effect.catchAll(effect, (error) => {
+export const catchPluginError = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+  Effect.catchAll(effect, error => {
     if (error instanceof PluginSystemError) {
       return Effect.fail(error)
     }

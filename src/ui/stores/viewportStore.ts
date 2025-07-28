@@ -1,12 +1,12 @@
 /**
  * Viewport Store
- * 
+ *
  * Manages state for scrollable viewport components including:
  * - Scroll position and bounds
  * - Content dimensions
  * - Visible area calculations
  * - Smooth scrolling behavior
- * 
+ *
  * This store is designed to be instantiated per Viewport component,
  * not as a global singleton.
  */
@@ -44,25 +44,25 @@ export interface ViewportStore {
   scrollY: StateRune<number>
   contentLines: StateRune<string[]>
   dimensions: StateRune<ViewportDimensions>
-  
+
   // UI state
   isFocused: StateRune<boolean>
   isScrolling: StateRune<boolean>
   showScrollbars: StateRune<boolean>
-  
+
   // Derived state
-  maxScrollX: { value: number }
-  maxScrollY: { value: number }
-  visibleLines: { value: string[] }
-  scrollPercentageX: { value: number }
-  scrollPercentageY: { value: number }
-  hasHorizontalScroll: { value: boolean }
-  hasVerticalScroll: { value: boolean }
-  verticalThumbSize: { value: number }
-  verticalThumbPosition: { value: number }
-  horizontalThumbSize: { value: number }
-  horizontalThumbPosition: { value: number }
-  
+  maxScrollX: () => number
+  maxScrollY: () => number
+  visibleLines: () => string[]
+  scrollPercentageX: () => number
+  scrollPercentageY: () => number
+  hasHorizontalScroll: () => boolean
+  hasVerticalScroll: () => boolean
+  verticalThumbSize: () => number
+  verticalThumbPosition: () => number
+  horizontalThumbSize: () => number
+  horizontalThumbPosition: () => number
+
   // Methods
   setContent: (lines: string[]) => void
   scrollTo: (x: number, y: number) => void
@@ -95,9 +95,9 @@ export function createViewportStore(options: ViewportStoreOptions): ViewportStor
     scrollStep = 1,
     pageSize = Math.max(1, height - 2),
     smoothScroll = true,
-    wrapContent = false
+    wrapContent = false,
   } = options
-  
+
   // Core state
   const scrollX = $state(0)
   const scrollY = $state(0)
@@ -106,231 +106,236 @@ export function createViewportStore(options: ViewportStoreOptions): ViewportStor
     width,
     height,
     contentWidth,
-    contentHeight
+    contentHeight,
   })
-  
+
   // UI state
   const isFocused = $state(false)
   const isScrolling = $state(false)
   const showScrollbars = $state(true)
-  
+
   // Derived state
   const maxScrollX = $derived(() => {
-    const viewportWidth = showScrollbars.value ? dimensions.value.width - 1 : dimensions.value.width
-    return Math.max(0, dimensions.value.contentWidth - viewportWidth)
+    const viewportWidth = showScrollbars() ? dimensions().width - 1 : dimensions().width
+    return Math.max(0, dimensions().contentWidth - viewportWidth)
   })
-  
+
   const maxScrollY = $derived(() => {
-    const viewportHeight = showScrollbars.value ? dimensions.value.height - 1 : dimensions.value.height
-    return Math.max(0, dimensions.value.contentHeight - viewportHeight)
+    const viewportHeight = showScrollbars() ? dimensions().height - 1 : dimensions().height
+    return Math.max(0, dimensions().contentHeight - viewportHeight)
   })
-  
+
   const visibleLines = $derived(() => {
-    const viewportWidth = showScrollbars.value ? dimensions.value.width - 1 : dimensions.value.width
-    const viewportHeight = showScrollbars.value ? dimensions.value.height - 1 : dimensions.value.height
-    
+    const viewportWidth = showScrollbars() ? dimensions().width - 1 : dimensions().width
+    const viewportHeight = showScrollbars() ? dimensions().height - 1 : dimensions().height
+
     // Get the visible portion of content
-    const visibleContent = contentLines.value
-      .slice(scrollY.value, scrollY.value + viewportHeight)
+    const visibleContent = contentLines()
+      .slice(scrollY(), scrollY() + viewportHeight)
       .map(line => {
         if (wrapContent) {
           // Handle line wrapping
-          return wrapLine(line, viewportWidth, scrollX.value)
+          return wrapLine(line, viewportWidth, scrollX())
         } else {
           // Simple horizontal scrolling
-          const visiblePart = line.slice(scrollX.value, scrollX.value + viewportWidth)
+          const visiblePart = line.slice(scrollX(), scrollX() + viewportWidth)
           return visiblePart.padEnd(viewportWidth)
         }
       })
-    
+
     // Pad with empty lines if needed
     while (visibleContent.length < viewportHeight) {
       visibleContent.push(' '.repeat(viewportWidth))
     }
-    
+
     return visibleContent
   })
-  
+
   const scrollPercentageX = $derived(() => {
-    return maxScrollX.value > 0 ? (scrollX.value / maxScrollX.value) * 100 : 0
+    return maxScrollX() > 0 ? (scrollX() / maxScrollX()) * 100 : 0
   })
-  
+
   const scrollPercentageY = $derived(() => {
-    return maxScrollY.value > 0 ? (scrollY.value / maxScrollY.value) * 100 : 0
+    return maxScrollY() > 0 ? (scrollY() / maxScrollY()) * 100 : 0
   })
-  
+
   const hasHorizontalScroll = $derived(() => {
-    return maxScrollX.value > 0
+    return maxScrollX() > 0
   })
-  
+
   const hasVerticalScroll = $derived(() => {
-    return maxScrollY.value > 0
+    return maxScrollY() > 0
   })
-  
+
   const verticalThumbSize = $derived(() => {
-    if (!hasVerticalScroll.value) return 0
-    const viewportHeight = showScrollbars.value ? dimensions.value.height - 1 : dimensions.value.height
-    return Math.max(1, Math.floor((viewportHeight / dimensions.value.contentHeight) * viewportHeight))
+    if (!hasVerticalScroll()) return 0
+    const viewportHeight = showScrollbars() ? dimensions().height - 1 : dimensions().height
+    return Math.max(1, Math.floor((viewportHeight / dimensions().contentHeight) * viewportHeight))
   })
-  
+
   const verticalThumbPosition = $derived(() => {
-    if (!hasVerticalScroll.value) return 0
-    const viewportHeight = showScrollbars.value ? dimensions.value.height - 1 : dimensions.value.height
-    const availableSpace = viewportHeight - verticalThumbSize.value
-    return Math.floor((scrollY.value / maxScrollY.value) * availableSpace)
+    if (!hasVerticalScroll()) return 0
+    const viewportHeight = showScrollbars() ? dimensions().height - 1 : dimensions().height
+    const availableSpace = viewportHeight - verticalThumbSize()
+    return Math.floor((scrollY() / maxScrollY()) * availableSpace)
   })
-  
+
   const horizontalThumbSize = $derived(() => {
-    if (!hasHorizontalScroll.value) return 0
-    const viewportWidth = showScrollbars.value ? dimensions.value.width - 1 : dimensions.value.width
-    return Math.max(1, Math.floor((viewportWidth / dimensions.value.contentWidth) * viewportWidth))
+    if (!hasHorizontalScroll()) return 0
+    const viewportWidth = showScrollbars() ? dimensions().width - 1 : dimensions().width
+    return Math.max(1, Math.floor((viewportWidth / dimensions().contentWidth) * viewportWidth))
   })
-  
+
   const horizontalThumbPosition = $derived(() => {
-    if (!hasHorizontalScroll.value) return 0
-    const viewportWidth = showScrollbars.value ? dimensions.value.width - 1 : dimensions.value.width
-    const availableSpace = viewportWidth - horizontalThumbSize.value
-    return Math.floor((scrollX.value / maxScrollX.value) * availableSpace)
+    if (!hasHorizontalScroll()) return 0
+    const viewportWidth = showScrollbars() ? dimensions().width - 1 : dimensions().width
+    const availableSpace = viewportWidth - horizontalThumbSize()
+    return Math.floor((scrollX() / maxScrollX()) * availableSpace)
   })
-  
+
   // Helper function for line wrapping
   function wrapLine(line: string, width: number, offset: number): string {
     if (stringWidth(line) <= width) {
       return line.padEnd(width)
     }
-    
+
     // Find the portion that fits
     let result = ''
     let currentWidth = 0
     let startIndex = 0
-    
+
     // Skip to offset
     for (let i = 0; i < line.length && currentWidth < offset; i++) {
-      currentWidth += stringWidth(line[i])
+      const char = line[i]
+      if (char) {
+        currentWidth += stringWidth(char)
+      }
       startIndex = i + 1
     }
-    
+
     // Build visible portion
     currentWidth = 0
     for (let i = startIndex; i < line.length && currentWidth < width; i++) {
-      const charWidth = stringWidth(line[i])
+      const char = line[i]
+      if (!char) continue
+      const charWidth = stringWidth(char)
       if (currentWidth + charWidth > width) break
-      result += line[i]
+      result += char
       currentWidth += charWidth
     }
-    
+
     return result.padEnd(width)
   }
-  
+
   // Methods
   const setContent = (lines: string[]) => {
-    contentLines.value = lines
-    dimensions.value = {
-      ...dimensions.value,
+    contentLines.$set(lines)
+    dimensions.$set({
+      ...dimensions(),
       contentHeight: lines.length,
-      contentWidth: Math.max(...lines.map(line => stringWidth(line)), 0)
-    }
-    
+      contentWidth: Math.max(...lines.map(line => stringWidth(line)), 0),
+    })
+
     // Ensure scroll position is still valid
-    scrollX.value = Math.max(0, Math.min(scrollX.value, maxScrollX.value))
-    scrollY.value = Math.max(0, Math.min(scrollY.value, maxScrollY.value))
+    scrollX.$set(Math.max(0, Math.min(scrollX(), maxScrollX())))
+    scrollY.$set(Math.max(0, Math.min(scrollY(), maxScrollY())))
   }
-  
+
   const scrollTo = (x: number, y: number) => {
-    scrollX.value = Math.max(0, Math.min(x, maxScrollX.value))
-    scrollY.value = Math.max(0, Math.min(y, maxScrollY.value))
-    
+    scrollX.$set(Math.max(0, Math.min(x, maxScrollX())))
+    scrollY.$set(Math.max(0, Math.min(y, maxScrollY())))
+
     if (smoothScroll) {
-      isScrolling.value = true
+      isScrolling.$set(true)
       setTimeout(() => {
-        isScrolling.value = false
+        isScrolling.$set(false)
       }, 100)
     }
   }
-  
+
   const scrollBy = (dx: number, dy: number) => {
-    scrollTo(scrollX.value + dx, scrollY.value + dy)
+    scrollTo(scrollX() + dx, scrollY() + dy)
   }
-  
+
   const scrollUp = (amount = scrollStep) => {
     scrollBy(0, -amount)
   }
-  
+
   const scrollDown = (amount = scrollStep) => {
     scrollBy(0, amount)
   }
-  
+
   const scrollLeft = (amount = scrollStep) => {
     scrollBy(-amount, 0)
   }
-  
+
   const scrollRight = (amount = scrollStep) => {
     scrollBy(amount, 0)
   }
-  
+
   const scrollToTop = () => {
-    scrollTo(scrollX.value, 0)
+    scrollTo(scrollX(), 0)
   }
-  
+
   const scrollToBottom = () => {
-    scrollTo(scrollX.value, maxScrollY.value)
+    scrollTo(scrollX(), maxScrollY())
   }
-  
+
   const scrollToLeft = () => {
-    scrollTo(0, scrollY.value)
+    scrollTo(0, scrollY())
   }
-  
+
   const scrollToRight = () => {
-    scrollTo(maxScrollX.value, scrollY.value)
+    scrollTo(maxScrollX(), scrollY())
   }
-  
+
   const pageUp = () => {
     scrollUp(pageSize)
   }
-  
+
   const pageDown = () => {
     scrollDown(pageSize)
   }
-  
+
   const ensureVisible = (line: number, column = 0) => {
-    const viewportHeight = showScrollbars.value ? dimensions.value.height - 1 : dimensions.value.height
-    const viewportWidth = showScrollbars.value ? dimensions.value.width - 1 : dimensions.value.width
-    
+    const viewportHeight = showScrollbars() ? dimensions().height - 1 : dimensions().height
+    const viewportWidth = showScrollbars() ? dimensions().width - 1 : dimensions().width
+
     // Ensure line is visible vertically
-    if (line < scrollY.value) {
-      scrollY.value = line
-    } else if (line >= scrollY.value + viewportHeight) {
-      scrollY.value = line - viewportHeight + 1
+    if (line < scrollY()) {
+      scrollY.$set(line)
+    } else if (line >= scrollY() + viewportHeight) {
+      scrollY.$set(line - viewportHeight + 1)
     }
-    
+
     // Ensure column is visible horizontally
-    if (column < scrollX.value) {
-      scrollX.value = column
-    } else if (column >= scrollX.value + viewportWidth) {
-      scrollX.value = column - viewportWidth + 1
+    if (column < scrollX()) {
+      scrollX.$set(column)
+    } else if (column >= scrollX() + viewportWidth) {
+      scrollX.$set(column - viewportWidth + 1)
     }
   }
-  
+
   const updateDimensions = (width: number, height: number) => {
-    dimensions.value = {
-      ...dimensions.value,
+    dimensions.$set({
+      ...dimensions(),
       width,
-      height
-    }
-    
+      height,
+    })
+
     // Ensure scroll position is still valid
-    scrollX.value = Math.max(0, Math.min(scrollX.value, maxScrollX.value))
-    scrollY.value = Math.max(0, Math.min(scrollY.value, maxScrollY.value))
+    scrollX.$set(Math.max(0, Math.min(scrollX(), maxScrollX())))
+    scrollY.$set(Math.max(0, Math.min(scrollY(), maxScrollY())))
   }
-  
+
   const focus = () => {
-    isFocused.value = true
+    isFocused.$set(true)
   }
-  
+
   const blur = () => {
-    isFocused.value = false
+    isFocused.$set(false)
   }
-  
+
   return {
     // State
     scrollX,
@@ -340,7 +345,7 @@ export function createViewportStore(options: ViewportStoreOptions): ViewportStor
     isFocused,
     isScrolling,
     showScrollbars,
-    
+
     // Derived
     maxScrollX,
     maxScrollY,
@@ -353,7 +358,7 @@ export function createViewportStore(options: ViewportStoreOptions): ViewportStor
     verticalThumbPosition,
     horizontalThumbSize,
     horizontalThumbPosition,
-    
+
     // Methods
     setContent,
     scrollTo,
@@ -371,7 +376,7 @@ export function createViewportStore(options: ViewportStoreOptions): ViewportStor
     ensureVisible,
     updateDimensions,
     focus,
-    blur
+    blur,
   }
 }
 
@@ -381,26 +386,26 @@ export function createViewportStore(options: ViewportStoreOptions): ViewportStor
 export const scrollBehaviors = {
   instant: { smoothScroll: false },
   smooth: { smoothScroll: true },
-  
+
   // Common configurations
   editor: {
     scrollStep: 1,
     pageSize: 20,
     smoothScroll: false,
-    wrapContent: false
+    wrapContent: false,
   },
-  
+
   terminal: {
     scrollStep: 1,
     pageSize: 10,
     smoothScroll: true,
-    wrapContent: false
+    wrapContent: false,
   },
-  
+
   document: {
     scrollStep: 3,
     pageSize: 20,
     smoothScroll: true,
-    wrapContent: true
-  }
+    wrapContent: true,
+  },
 }

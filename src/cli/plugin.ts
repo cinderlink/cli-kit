@@ -1,40 +1,40 @@
 /**
  * Plugin System for CLI Framework
- * 
+ *
  * This module re-exports the complete plugin architecture for extending CLI applications
  * built with the TUIX framework. The system supports command registration, middleware,
  * lifecycle hooks, dependency management, and service provision.
- * 
+ *
  * ## Key Features:
- * 
+ *
  * ### Plugin Architecture
  * - Modular command registration and extension
  * - Handler wrapping for cross-cutting concerns
  * - Lifecycle management (install, activate, deactivate)
  * - Configuration schema validation
- * 
+ *
  * ### Middleware System
  * - Before/after command execution hooks
  * - Argument and result transformation
  * - Error handling and recovery
  * - Validation and preprocessing
- * 
+ *
  * ### Dependency Management
  * - Plugin dependency resolution
  * - Version compatibility checking
  * - Circular dependency detection
  * - Load order optimization
- * 
+ *
  * ### Service Provision
  * - Plugin-provided services
  * - Service injection and discovery
  * - Cross-plugin communication
  * - Resource sharing
- * 
+ *
  * @example
  * ```typescript
  * import { definePlugin, PluginBuilder } from './plugin'
- * 
+ *
  * // Simple plugin definition
  * const myPlugin = definePlugin({
  *   metadata: {
@@ -54,7 +54,7 @@
  *     }
  *   }
  * })
- * 
+ *
  * // Using the builder pattern
  * const builderPlugin = new PluginBuilder()
  *   .metadata({
@@ -72,9 +72,9 @@
  *   })
  *   .build()
  * ```
- * 
+ *
  * @module
  */
 
 // Re-export everything from the plugin module
-export * from "./plugin/index"
+export * from './plugin/index'

@@ -10,11 +10,12 @@
   ],
   "scripts": {
     "tuix": "./bin/tuix.ts",
-    "exemplar": "./bin/tuix.ts",
-    "ex": "bun run exemplar",
-    "build": "bun run build:packages && bun build src/index.ts --outdir dist --format esm --target bun",
+    "build": "bun run build:packages && bun run build.config.ts",
+    "build:dev": "NODE_ENV=development bun run build.config.ts",
+    "build:prod": "NODE_ENV=production bun run build.config.ts",
+    "build:lib": "NODE_ENV=library bun run build.config.ts",
+    "build:binary": "NODE_ENV=binary bun run build.config.ts",
     "build:packages": "for pkg in packages/*/; do (cd \"$pkg\" && bun run build); done",
-    "build:compile": "bun build --compile --minify --bytecode --target bun-linux-x64 --outfile dist/tuix src/index.ts",
     "dev": "bun --watch run src/index.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
@@ -45,11 +46,17 @@
     "typecheck:src": "bun check src/**/*.ts || true",
     "typecheck:tests": "bun test --dry-run || true",
     "typecheck:tsc": "tsc --noEmit --project tsconfig.src.json",
+    "prepare": "husky install",
+    "pre-commit": "bun run check",
+    "format": "biome format --write src/",
+    "format:check": "biome format src/",
+    "format:imports": "biome check --write --organize-imports-enabled=true --linter-enabled=false src/",
     "lint": "oxlint src/",
     "lint:fix": "oxlint src/ --fix",
     "lint:all": "oxlint .",
+    "check": "bun run format:check && bun run lint && bun run typecheck:tsc",
+    "check:fix": "bun run format && bun run format:imports && bun run lint:fix",
     "clean": "rm -rf dist coverage",
-    "check": "bun run typecheck && bun test",
     "pm2:start": "pm2 start ecosystem.config.cjs",
     "pm2:stop": "pm2 stop ecosystem.config.cjs",
     "pm2:restart": "pm2 restart ecosystem.config.cjs",
@@ -135,6 +142,10 @@
     "./jsx-dev-runtime": {
       "import": "./src/jsx/runtime/dev.ts",
       "types": "./src/jsx/runtime/dev.ts"
+    },
+    "./cli/jsx": {
+      "import": "./src/cli/jsx/components/index.ts",
+      "types": "./src/cli/jsx/components/index.ts"
     },
     "./debug": {
       "import": "./src/debug/index.ts",
@@ -226,6 +237,7 @@
     "@effect/platform-node": "^0.92.0",
     "@effect/schema": "^0.75.5",
     "@types/figlet": "^1.7.0",
+    "biome": "^0.3.3",
     "commander": "^11.1.0",
     "effect": "^3.16.9",
     "figlet": "^1.8.1",
@@ -233,11 +245,13 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.1.2",
     "@types/bun": "latest",
     "@types/strip-ansi": "^5.2.1",
     "@typescript-eslint/eslint-plugin": "^8.36.0",
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^9.31.0",
+    "husky": "^9.1.7",
     "node-pty": "^1.0.0",
     "oxlint": "^1.7.0",
     "pm2": "^6.0.8",

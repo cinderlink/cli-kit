@@ -1,10 +1,10 @@
 /**
  * Spinner Component Export
- * 
+ *
  * Animated loading indicators
  */
 
-export { 
+export {
   Spinner,
   spinner,
   loadingSpinner,
@@ -14,5 +14,5 @@ export {
   LoadingOverlay,
   type SpinnerProps,
   type SpinnerType,
-  type SpinnerSize
+  type SpinnerSize,
 } from './Spinner'

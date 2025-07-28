@@ -1,20 +1,20 @@
 /**
  * Error System
- * 
+ *
  * Comprehensive error handling for TUIX applications
  */
 
 // Base error classes
-export * from "./base"
+export * from './base'
 
 // Type definitions and guards
-export * from "./types"
+export * from './types'
 
 // Recovery strategies
-export * from "./recovery"
+export * from './recovery'
 
 // Error boundaries
-export * from "./boundary"
+export * from './boundary'
 
 // Utility functions
-export * from "./utils"
+export * from './utils'

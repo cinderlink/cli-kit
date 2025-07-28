@@ -1,0 +1,40 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Test-specific settings
+    "jsx": "react-jsx",
+    "jsxImportSource": "..",
+    
+    // Same strict settings as source
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    
+    // Additional strictness
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    
+    // Test-specific relaxations (if needed)
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    
+    // Include test types
+    "types": ["bun-types", "@types/bun"]
+  },
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts", 
+    "src/**/*.spec.tsx",
+    "tests/**/*",
+    "__tests__/**/*"
+  ]
+}

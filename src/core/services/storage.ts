@@ -1,19 +1,19 @@
 /**
  * Storage Service - Configuration and state persistence
- * 
+ *
  * This service handles saving and loading application state, configuration,
  * and other persistent data using Bun's optimized file operations.
  */
 
-import { Effect, Context } from "effect"
-import { z } from "zod"
-import type { StorageError } from "../core/types"
+import { Effect, Context } from 'effect'
+import { z } from 'zod'
+import type { StorageError } from '../core/types'
 
 /**
  * The StorageService interface defines persistent storage operations.
  * It uses Zod schemas for type-safe serialization/deserialization.
  */
-export class StorageService extends Context.Tag("StorageService")<
+export class StorageService extends Context.Tag('StorageService')<
   StorageService,
   {
     // =============================================================================
@@ -132,11 +132,15 @@ export class StorageService extends Context.Tag("StorageService")<
     /**
      * Get cache statistics.
      */
-    readonly getCacheStats: Effect.Effect<{
-      readonly totalEntries: number
-      readonly expiredEntries: number
-      readonly totalSize: number
-    }, StorageError, never>
+    readonly getCacheStats: Effect.Effect<
+      {
+        readonly totalEntries: number
+        readonly expiredEntries: number
+        readonly totalSize: number
+      },
+      StorageError,
+      never
+    >
 
     // =============================================================================
     // File Operations
@@ -196,13 +200,17 @@ export class StorageService extends Context.Tag("StorageService")<
     /**
      * Get file stats (size, modified time, etc.).
      */
-    readonly getFileStats: (path: string) => Effect.Effect<{
-      readonly size: number
-      readonly modified: Date
-      readonly created: Date
-      readonly isFile: boolean
-      readonly isDirectory: boolean
-    }, StorageError, never>
+    readonly getFileStats: (path: string) => Effect.Effect<
+      {
+        readonly size: number
+        readonly modified: Date
+        readonly created: Date
+        readonly isFile: boolean
+        readonly isDirectory: boolean
+      },
+      StorageError,
+      never
+    >
 
     // =============================================================================
     // Backup and Restore
@@ -261,9 +269,7 @@ export class StorageService extends Context.Tag("StorageService")<
     /**
      * Commit a transaction, applying all operations atomically.
      */
-    readonly commitTransaction: (
-      transactionId: string
-    ) => Effect.Effect<void, StorageError, never>
+    readonly commitTransaction: (transactionId: string) => Effect.Effect<void, StorageError, never>
 
     /**
      * Rollback a transaction, discarding all operations.
@@ -288,27 +294,27 @@ export const StorageUtils = {
   getConfigPaths: (appName: string) => {
     const home = process.env.HOME || process.env.USERPROFILE || '~'
     const platform = process.platform
-    
+
     switch (platform) {
       case 'darwin': // macOS
         return [
           `${home}/Library/Application Support/${appName}/config.json`,
           `${home}/.config/${appName}/config.json`,
-          `${home}/.${appName}rc`
+          `${home}/.${appName}rc`,
         ]
       case 'win32': // Windows
         const appData = process.env.APPDATA || `${home}/AppData/Roaming`
         return [
           `${appData}/${appName}/config.json`,
           `${home}/.config/${appName}/config.json`,
-          `${home}/.${appName}rc`
+          `${home}/.${appName}rc`,
         ]
       default: // Linux and others
         const xdgConfig = process.env.XDG_CONFIG_HOME || `${home}/.config`
         return [
           `${xdgConfig}/${appName}/config.json`,
           `${home}/.config/${appName}/config.json`,
-          `${home}/.${appName}rc`
+          `${home}/.${appName}rc`,
         ]
     }
   },
@@ -319,25 +325,16 @@ export const StorageUtils = {
   getDataPaths: (appName: string) => {
     const home = process.env.HOME || process.env.USERPROFILE || '~'
     const platform = process.platform
-    
+
     switch (platform) {
       case 'darwin': // macOS
-        return [
-          `${home}/Library/Application Support/${appName}`,
-          `${home}/.local/share/${appName}`
-        ]
+        return [`${home}/Library/Application Support/${appName}`, `${home}/.local/share/${appName}`]
       case 'win32': // Windows
         const appData = process.env.APPDATA || `${home}/AppData/Roaming`
-        return [
-          `${appData}/${appName}`,
-          `${home}/.local/share/${appName}`
-        ]
+        return [`${appData}/${appName}`, `${home}/.local/share/${appName}`]
       default: // Linux and others
         const xdgData = process.env.XDG_DATA_HOME || `${home}/.local/share`
-        return [
-          `${xdgData}/${appName}`,
-          `${home}/.local/share/${appName}`
-        ]
+        return [`${xdgData}/${appName}`, `${home}/.local/share/${appName}`]
     }
   },
 
@@ -347,25 +344,16 @@ export const StorageUtils = {
   getCachePaths: (appName: string) => {
     const home = process.env.HOME || process.env.USERPROFILE || '~'
     const platform = process.platform
-    
+
     switch (platform) {
       case 'darwin': // macOS
-        return [
-          `${home}/Library/Caches/${appName}`,
-          `${home}/.cache/${appName}`
-        ]
+        return [`${home}/Library/Caches/${appName}`, `${home}/.cache/${appName}`]
       case 'win32': // Windows
         const localAppData = process.env.LOCALAPPDATA || `${home}/AppData/Local`
-        return [
-          `${localAppData}/${appName}/Cache`,
-          `${home}/.cache/${appName}`
-        ]
+        return [`${localAppData}/${appName}/Cache`, `${home}/.cache/${appName}`]
       default: // Linux and others
         const xdgCache = process.env.XDG_CACHE_HOME || `${home}/.cache`
-        return [
-          `${xdgCache}/${appName}`,
-          `${home}/.cache/${appName}`
-        ]
+        return [`${xdgCache}/${appName}`, `${home}/.cache/${appName}`]
     }
   },
 
@@ -396,7 +384,7 @@ export const StorageUtils = {
       // Directory doesn't exist, create it
       const parts = path.split('/')
       let current = ''
-      
+
       for (const part of parts) {
         current += part + '/'
         try {
@@ -407,5 +395,5 @@ export const StorageUtils = {
         }
       }
     }
-  }
+  },
 } as const

@@ -1,6 +1,6 @@
 /**
  * Service Layer Event System
- * 
+ *
  * Defines events for service-level operations including terminal, input,
  * renderer, and storage services. These events enable coordination between
  * low-level services and higher-level modules.
@@ -62,7 +62,7 @@ export interface StorageEvent extends BaseEvent {
 /**
  * All service event types
  */
-export type ServiceLayerEvent = 
+export type ServiceLayerEvent =
   | ServiceEvent
   | TerminalEvent
   | InputEvent
@@ -77,7 +77,7 @@ export const ServiceEventChannels = {
   TERMINAL: 'terminal-events',
   INPUT: 'input-events',
   RENDER: 'render-events',
-  STORAGE: 'storage-events'
+  STORAGE: 'storage-events',
 } as const
 
-export type ServiceEventChannel = typeof ServiceEventChannels[keyof typeof ServiceEventChannels]
+export type ServiceEventChannel = (typeof ServiceEventChannels)[keyof typeof ServiceEventChannels]

@@ -17,7 +17,7 @@ function getReactivityModule(): ReactivityModule | null {
     try {
       const registry = getGlobalRegistry()
       reactivityModule = registry.getModule<ReactivityModule>('reactivity')
-      
+
       if (!reactivityModule) {
         // Create and register reactivity module
         const eventBus = getGlobalEventBus()
@@ -82,38 +82,38 @@ export function $state<T>(initial: T): StateRune<T> {
   let value = initial
   const listeners = new Set<(value: T) => void>()
   const runeId = `state_${Date.now()}_${Math.random()}`
-  
+
   // Emit rune created event
   const module = getReactivityModule()
   if (module) {
     Effect.runSync(module.emitStateChange(runeId, initial, 'user'))
   }
-  
+
   const rune = (() => {
     return value
   }) as StateRune<T>
-  
+
   rune.$type = 'state' as const
-  
+
   rune.$set = (newValue: T) => {
     if (value !== newValue) {
       const previousValue = value
       value = newValue
-      
+
       // Emit state change event
       if (module) {
         Effect.runSync(module.emitStateChange(runeId, newValue, 'user'))
       }
-      
+
       // Notify all listeners
       listeners.forEach(listener => listener(value))
     }
   }
-  
+
   rune.$update = (fn: (current: T) => T) => {
     rune.$set(fn(value))
   }
-  
+
   rune.$subscribe = (listener: (value: T) => void) => {
     listeners.add(listener)
     // Call listener immediately with current value
@@ -123,7 +123,7 @@ export function $state<T>(initial: T): StateRune<T> {
       listeners.delete(listener)
     }
   }
-  
+
   return rune
 }
 
@@ -134,30 +134,30 @@ export function $bindable<T>(initial: T, options: BindableOptions<T> = {}): Bind
   let value = initial
   const listeners = new Set<(value: T) => void>()
   const runeId = `bindable_${Date.now()}_${Math.random()}`
-  
+
   // Emit rune created event
   const module = getReactivityModule()
   if (module) {
     Effect.runSync(module.emitStateChange(runeId, initial, 'user'))
   }
-  
+
   const rune = (() => {
     return value
   }) as BindableRune<T>
-  
+
   rune.$type = 'bindable' as const
   rune.$bindable = true
   rune.$validate = options.validate
   rune.$transform = options.transform
-  
+
   rune.$set = (newValue: T) => {
     let finalValue = newValue
-    
+
     // Apply transformation
     if (options.transform) {
       finalValue = options.transform(finalValue)
     }
-    
+
     // Validate
     if (options.validate) {
       const result = options.validate(finalValue)
@@ -169,25 +169,25 @@ export function $bindable<T>(initial: T, options: BindableOptions<T> = {}): Bind
         return // Reject with error message
       }
     }
-    
+
     if (value !== finalValue) {
       const previousValue = value
       value = finalValue
-      
+
       // Emit state change event
       if (module) {
         Effect.runSync(module.emitStateChange(runeId, finalValue, 'user'))
       }
-      
+
       // Notify all listeners
       listeners.forEach(listener => listener(value))
     }
   }
-  
+
   rune.$update = (fn: (current: T) => T) => {
     rune.$set(fn(value))
   }
-  
+
   rune.$subscribe = (listener: (value: T) => void) => {
     listeners.add(listener)
     // Call listener immediately with current value
@@ -197,7 +197,7 @@ export function $bindable<T>(initial: T, options: BindableOptions<T> = {}): Bind
       listeners.delete(listener)
     }
   }
-  
+
   return rune
 }
 
@@ -209,9 +209,9 @@ export function $derived<T>(fn: () => T): DerivedRune<T> {
   const rune = (() => {
     return fn()
   }) as DerivedRune<T>
-  
+
   rune.$type = 'derived' as const
-  
+
   return rune
 }
 
@@ -220,14 +220,14 @@ export function $derived<T>(fn: () => T): DerivedRune<T> {
  * For now, this is a simple implementation that just runs the function once
  */
 // Re-export lifecycle-aware $effect and other lifecycle hooks
-export { 
+export {
   $effect,
   onMount,
   onDestroy,
   beforeUpdate,
   afterUpdate,
   tick,
-  untrack
+  untrack,
 } from './jsxLifecycle'
 
 /**
@@ -241,7 +241,12 @@ export function isStateRune<T>(value: any): value is StateRune<T> {
  * Type guard to check if a value is a bindable rune
  */
 export function isBindableRune<T>(value: any): value is BindableRune<T> {
-  return !!(value && typeof value === 'function' && value.$type === 'bindable' && value.$bindable === true)
+  return !!(
+    value &&
+    typeof value === 'function' &&
+    value.$type === 'bindable' &&
+    value.$bindable === true
+  )
 }
 
 /**
@@ -268,35 +273,38 @@ export function getValue<T>(rune: Rune<T>): T {
 /**
  * Converts a state rune to a bindable rune
  */
-export function toBindable<T>(state: StateRune<T>, options: BindableOptions<T> = {}): BindableRune<T> {
+export function toBindable<T>(
+  state: StateRune<T>,
+  options: BindableOptions<T> = {}
+): BindableRune<T> {
   // Create a bindable with the same initial value
   const bindable = $bindable(state(), options)
   const runeId = `toBindable_${Date.now()}_${Math.random()}`
-  
+
   // Get reactivity module for event emission
   const module = getReactivityModule()
-  
+
   // Override the set method to update both runes
   const originalSet = bindable.$set
   bindable.$set = (value: T) => {
     originalSet(value)
     state.$set(value)
-    
+
     // Emit state sync event
     if (module) {
       Effect.runSync(module.emitStateChange(runeId, value, 'sync'))
     }
   }
-  
+
   // Subscribe to state changes to keep bindable in sync
-  state.$subscribe((value) => {
+  state.$subscribe(value => {
     originalSet(value)
-    
+
     // Emit state sync event
     if (module) {
       Effect.runSync(module.emitStateChange(runeId, value, 'sync'))
     }
   })
-  
+
   return bindable
 }

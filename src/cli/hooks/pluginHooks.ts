@@ -1,12 +1,12 @@
 /**
  * Plugin Hooks
- * 
+ *
  * Hooks for plugin lifecycle and management
  */
 
-import { Effect } from "effect"
-import type { EventBus } from "@core/model/events/eventBus"
-import { generateId } from "@core/model/events/eventBus"
+import { Effect } from 'effect'
+import type { EventBus } from '@core/model/events/eventBus'
+import { generateId } from '@core/model/events/eventBus'
 import type {
   PluginLoadEvent,
   PluginUnloadEvent,
@@ -14,9 +14,9 @@ import type {
   AfterParseEvent,
   BeforeValidateEvent,
   AfterValidateEvent,
-  OnErrorEvent
-} from "./types"
-import { createHook } from "./utils"
+  OnErrorEvent,
+} from './types'
+import { createHook } from './utils'
 
 /**
  * Create plugin hooks
@@ -29,7 +29,7 @@ export function createPluginHooks(eventBus: EventBus, source: string) {
     afterParse: createHook<AfterParseEvent>(eventBus, 'hook:afterParse'),
     beforeValidate: createHook<BeforeValidateEvent>(eventBus, 'hook:beforeValidate'),
     afterValidate: createHook<AfterValidateEvent>(eventBus, 'hook:afterValidate'),
-    onError: createHook<OnErrorEvent>(eventBus, 'hook:onError')
+    onError: createHook<OnErrorEvent>(eventBus, 'hook:onError'),
   }
 }
 
@@ -37,49 +37,35 @@ export function createPluginHooks(eventBus: EventBus, source: string) {
  * Emit plugin events
  */
 export const PluginEvents = {
-  emitPluginLoad(
-    eventBus: EventBus,
-    pluginName: string,
-    pluginVersion: string,
-    source: string
-  ) {
+  emitPluginLoad(eventBus: EventBus, pluginName: string, pluginVersion: string, source: string) {
     return eventBus.emit('hook:pluginLoad', {
       id: generateId(),
       type: 'hook:pluginLoad',
       source,
       timestamp: new Date(),
       pluginName,
-      pluginVersion
+      pluginVersion,
     })
   },
 
-  emitPluginUnload(
-    eventBus: EventBus,
-    pluginName: string,
-    pluginVersion: string,
-    source: string
-  ) {
+  emitPluginUnload(eventBus: EventBus, pluginName: string, pluginVersion: string, source: string) {
     return eventBus.emit('hook:pluginUnload', {
       id: generateId(),
       type: 'hook:pluginUnload',
       source,
       timestamp: new Date(),
       pluginName,
-      pluginVersion
+      pluginVersion,
     })
   },
 
-  emitBeforeParse(
-    eventBus: EventBus,
-    argv: string[],
-    source: string
-  ) {
+  emitBeforeParse(eventBus: EventBus, argv: string[], source: string) {
     return eventBus.emit('hook:beforeParse', {
       id: generateId(),
       type: 'hook:beforeParse',
       source,
       timestamp: new Date(),
-      argv
+      argv,
     })
   },
 
@@ -95,7 +81,7 @@ export const PluginEvents = {
       source,
       timestamp: new Date(),
       argv,
-      parsed
+      parsed,
     })
   },
 
@@ -111,7 +97,7 @@ export const PluginEvents = {
       source,
       timestamp: new Date(),
       args,
-      command
+      command,
     })
   },
 
@@ -129,7 +115,7 @@ export const PluginEvents = {
       timestamp: new Date(),
       args,
       command,
-      valid
+      valid,
     })
   },
 
@@ -147,7 +133,7 @@ export const PluginEvents = {
       timestamp: new Date(),
       error,
       command,
-      args
+      args,
     })
-  }
+  },
 }

@@ -1,13 +1,13 @@
 /**
  * Hit Testing Service - Maps mouse coordinates to components
- * 
+ *
  * This service maintains a registry of component bounds and provides
  * hit testing functionality to determine which component is at a given
  * mouse coordinate.
  */
 
-import { Effect, Context, Ref, Layer } from "effect"
-import type { MouseEvent } from "../core/types"
+import { Effect, Context, Ref, Layer } from 'effect'
+import type { MouseEvent } from '../types'
 
 // =============================================================================
 // Types
@@ -19,7 +19,7 @@ import type { MouseEvent } from "../core/types"
 export interface ComponentBounds {
   readonly componentId: string
   readonly x: number
-  readonly y: number  
+  readonly y: number
   readonly width: number
   readonly height: number
   readonly zIndex: number // Higher values are on top
@@ -48,27 +48,27 @@ export interface HitTestServiceInterface {
    * Register a component's bounds
    */
   readonly registerComponent: (bounds: ComponentBounds) => Effect.Effect<void, never, never>
-  
+
   /**
    * Unregister a component
    */
   readonly unregisterComponent: (componentId: string) => Effect.Effect<void, never, never>
-  
+
   /**
    * Clear all registered components
    */
   readonly clearComponents: Effect.Effect<void, never, never>
-  
+
   /**
    * Find the topmost component at the given coordinates
    */
   readonly hitTest: (x: number, y: number) => Effect.Effect<HitTestResult | null, never, never>
-  
+
   /**
    * Find all components at the given coordinates (bottom to top)
    */
   readonly hitTestAll: (x: number, y: number) => Effect.Effect<Array<HitTestResult>, never, never>
-  
+
   /**
    * Get all registered component bounds
    */
@@ -78,7 +78,7 @@ export interface HitTestServiceInterface {
 /**
  * Hit testing service tag
  */
-export const HitTestService = Context.GenericTag<HitTestServiceInterface>("HitTestService")
+export const HitTestService = Context.GenericTag<HitTestServiceInterface>('HitTestService')
 
 // =============================================================================
 // Implementation
@@ -87,11 +87,8 @@ export const HitTestService = Context.GenericTag<HitTestServiceInterface>("HitTe
 /**
  * Check if a point is inside a rectangle
  */
-const pointInRect = (x: number, y: number, bounds: ComponentBounds): boolean => 
-  x >= bounds.x && 
-  x < bounds.x + bounds.width &&
-  y >= bounds.y && 
-  y < bounds.y + bounds.height
+const pointInRect = (x: number, y: number, bounds: ComponentBounds): boolean =>
+  x >= bounds.x && x < bounds.x + bounds.width && y >= bounds.y && y < bounds.y + bounds.height
 
 /**
  * Convert bounds to hit test result
@@ -100,13 +97,17 @@ const boundsToHitResult = (x: number, y: number, bounds: ComponentBounds): HitTe
   componentId: bounds.componentId,
   bounds,
   localX: x - bounds.x,
-  localY: y - bounds.y
+  localY: y - bounds.y,
 })
 
 /**
  * Find all components that contain the given point
  */
-const findHitsAtPoint = (x: number, y: number, components: Array<ComponentBounds>): Array<HitTestResult> =>
+const findHitsAtPoint = (
+  x: number,
+  y: number,
+  components: Array<ComponentBounds>
+): Array<HitTestResult> =>
   components
     .filter(bounds => pointInRect(x, y, bounds))
     .map(bounds => boundsToHitResult(x, y, bounds))
@@ -116,7 +117,7 @@ const findHitsAtPoint = (x: number, y: number, components: Array<ComponentBounds
  */
 export const HitTestServiceLive = Effect.gen(function* (_) {
   const componentsRef = yield* _(Ref.make<Array<ComponentBounds>>([]))
-  
+
   return {
     registerComponent: (bounds: ComponentBounds) =>
       Ref.update(componentsRef, components => {
@@ -125,30 +126,30 @@ export const HitTestServiceLive = Effect.gen(function* (_) {
         // Add new bounds, keeping sorted by zIndex (lowest first)
         return [...filtered, bounds].sort((a, b) => a.zIndex - b.zIndex)
       }),
-    
+
     unregisterComponent: (componentId: string) =>
       Ref.update(componentsRef, components =>
         components.filter(c => c.componentId !== componentId)
       ),
-    
+
     clearComponents: Ref.set(componentsRef, []),
-    
+
     hitTest: (x: number, y: number) =>
       Effect.gen(function* (_) {
         const components = yield* _(Ref.get(componentsRef))
         const hits = findHitsAtPoint(x, y, components)
-        
+
         // Return the topmost hit (last in the sorted array)
         return hits.length > 0 ? hits[hits.length - 1] : null
       }),
-    
+
     hitTestAll: (x: number, y: number) =>
       Effect.gen(function* (_) {
         const components = yield* _(Ref.get(componentsRef))
         return findHitsAtPoint(x, y, components)
       }),
-    
-    getAllBounds: Ref.get(componentsRef)
+
+    getAllBounds: Ref.get(componentsRef),
   }
 })
 
@@ -172,16 +173,14 @@ export const createBounds = (
   y,
   width,
   height,
-  zIndex
+  zIndex,
 })
 
 /**
  * Check if a mouse event hits a component
  */
-export const mouseEventHitsComponent = (
-  mouseEvent: MouseEvent,
-  bounds: ComponentBounds
-): boolean => pointInRect(mouseEvent.x, mouseEvent.y, bounds)
+export const mouseEventHitsComponent = (mouseEvent: MouseEvent, bounds: ComponentBounds): boolean =>
+  pointInRect(mouseEvent.x, mouseEvent.y, bounds)
 
 /**
  * Create a layer with the HitTestService implementation

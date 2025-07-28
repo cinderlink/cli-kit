@@ -2,18 +2,18 @@
  * CLI Configuration Validation
  */
 
-import type { CLIConfig, CommandConfig } from "@cli/types"
-import { RESERVED_NAMES, VERSION_PATTERN } from "./schema"
+import type { CLIConfig, CommandConfig } from '@cli/types'
+import { RESERVED_NAMES, VERSION_PATTERN } from './schema'
 
 /**
  * Validate a CLI configuration object
- * 
+ *
  * Checks for:
  * - Valid semver version string
  * - Reserved command names
  * - Valid command structure
  * - Option and argument schema validity
- * 
+ *
  * @param config - The configuration to validate
  * @throws Error if validation fails
  */
@@ -32,7 +32,7 @@ export function validateConfig(config: CLIConfig): void {
 
       const command = config.commands[commandName]
       if (!command) continue // Skip if command doesn't exist
-      
+
       // Validate sub-commands
       if (command.commands) {
         for (const subCommandName of Object.keys(command.commands)) {
@@ -55,7 +55,7 @@ export function validateConfig(config: CLIConfig): void {
   if (config.options) {
     const hasHelpOption = 'help' in config.options || 'h' in config.options
     const hasVersionOption = 'version' in config.options || 'v' in config.options
-    
+
     if (hasHelpOption) {
       console.warn("Global 'help' option may conflict with built-in help system")
     }
@@ -74,7 +74,7 @@ export function normalizeCommand(input: string | CommandConfig): string | Comman
   if (typeof input === 'string') {
     return input.toLowerCase().trim()
   }
-  
+
   // Normalize command config
   return {
     ...input,

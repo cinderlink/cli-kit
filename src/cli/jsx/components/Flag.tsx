@@ -1,6 +1,6 @@
 /**
  * Flag Component
- * 
+ *
  * Defines a command flag (boolean option)
  */
 
@@ -23,7 +23,7 @@ export function Flag(props: FlagProps): JSX.Element {
       description={props.description}
       metadata={{
         alias: props.alias,
-        default: props.default
+        default: props.default,
       }}
     >
       {props.children}

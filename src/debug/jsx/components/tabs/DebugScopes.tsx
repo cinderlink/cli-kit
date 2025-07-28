@@ -18,36 +18,37 @@ export function DebugScopes(): View {
   const state = debugStore.getState()
   const scopes = scopeManager.getAllScopes()
   const tree = buildScopeTree(scopes)
-  
+
   return vstack([
     text('🌳 Scope Tree', { color: Colors.cyan, bold: true }),
     text(`Total: ${scopes.length} scopes`),
     text(''),
-    renderScopeNode(tree, state.commandPath, 0)
+    renderScopeNode(tree, state.commandPath, 0),
   ])
 }
 
 function buildScopeTree(scopes: ScopeDef[]): ScopeTreeNode {
   const root = scopes.find(s => s.type === 'cli') || scopes[0]
   if (!root) {
-    return { 
-      scope: createDummyScope(), 
-      children: [] 
+    return {
+      scope: createDummyScope(),
+      children: [],
     }
   }
-  
+
   function buildNode(scope: ScopeDef): ScopeTreeNode {
-    const children = scopes.filter(s => 
-      s.path.length === scope.path.length + 1 &&
-      s.path.slice(0, -1).join('/') === scope.path.join('/')
+    const children = scopes.filter(
+      s =>
+        s.path.length === scope.path.length + 1 &&
+        s.path.slice(0, -1).join('/') === scope.path.join('/')
     )
-    
+
     return {
       scope,
-      children: children.map(buildNode)
+      children: children.map(buildNode),
     }
   }
-  
+
   return buildNode(root)
 }
 
@@ -55,19 +56,19 @@ function renderScopeNode(node: ScopeTreeNode, commandPath: string[], depth: numb
   const indent = '  '.repeat(depth)
   const isMatched = commandPath.includes(node.scope.name)
   const isActive = scopeManager.isScopeActive(node.scope.id)
-  
+
   const marker = isActive ? '●' : '○'
-  const color = isMatched ? Colors.green : (isActive ? Colors.cyan : Colors.gray)
-  
+  const color = isMatched ? Colors.green : isActive ? Colors.cyan : Colors.gray
+
   const lines: View[] = [
-    text(`${indent}${marker} ${node.scope.name} [${node.scope.type}]`, { color })
+    text(`${indent}${marker} ${node.scope.name} [${node.scope.type}]`, { color }),
   ]
-  
+
   // Add children
   node.children.forEach(child => {
     lines.push(renderScopeNode(child, commandPath, depth + 1))
   })
-  
+
   return vstack(lines)
 }
 
@@ -80,6 +81,6 @@ function createDummyScope(): ScopeDef {
     description: '',
     executable: false,
     metadata: {},
-    children: []
+    children: [],
   }
 }

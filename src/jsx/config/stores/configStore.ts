@@ -1,10 +1,10 @@
 /**
  * Configuration Store for JSX
- * 
+ *
  * Global configuration state management
  */
 
-import type { Config } from "@config/types"
+import type { Config } from '@config/types'
 
 // Global config instance for JSX components
 let globalConfig: Config | null = null
@@ -21,7 +21,7 @@ export function setGlobalConfig(config: Config): void {
  */
 export function getGlobalConfig(): Config {
   if (!globalConfig) {
-    throw new Error("No global config set. Call setGlobalConfig() first or use ConfigProvider")
+    throw new Error('No global config set. Call setGlobalConfig() first or use ConfigProvider')
   }
   return globalConfig
 }

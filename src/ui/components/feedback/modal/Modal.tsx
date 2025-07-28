@@ -1,6 +1,6 @@
 /**
  * Modal/Dialog Component - Overlay dialogs with backdrop
- * 
+ *
  * Features:
  * - Modal overlay with backdrop
  * - Centered content positioning
@@ -11,16 +11,16 @@
  * - Confirmation dialogs
  */
 
-import { Effect } from "effect"
-import type { View, Cmd, AppServices, KeyEvent, MouseEvent } from "@core/types"
-import { style, Colors, Borders, type Style } from "@core/terminal/ansi/styles"
-import { stringWidth } from "@core/terminal/output/string/width"
-import { Box, BoxProps } from "@ui/components/layout/box/Box"
-import { Text } from "@ui/components/display/text/Text"
-import { Button } from "@ui/components/forms/button/Button"
-import { Flex } from "@ui/components/layout/flex/Flex"
-import { Spinner } from "@ui/components/feedback/spinner/Spinner"
-import { vstack, hstack } from "@core/view/primitives/view"
+import { Effect } from 'effect'
+import type { View, Cmd, AppServices, KeyEvent, MouseEvent } from '@core/types'
+import { style, Colors, Borders, type Style } from '@core/terminal/ansi/styles'
+import { stringWidth } from '@core/terminal/output/string/width'
+import { Box, BoxProps } from '@ui/components/layout/box/Box'
+import { Text } from '@ui/components/display/text/Text'
+import { Button } from '@ui/components/forms/button/Button'
+import { Flex } from '@ui/components/layout/flex/Flex'
+import { Spinner } from '@ui/components/feedback/spinner/Spinner'
+import { vstack, hstack } from '@core/view/primitives/view'
 
 // =============================================================================
 // Types
@@ -51,12 +51,12 @@ export interface ModalModel {
 }
 
 export type ModalMsg =
-  | { readonly _tag: "SetTerminalSize"; readonly width: number; readonly height: number }
-  | { readonly _tag: "FocusNext" }
-  | { readonly _tag: "FocusPrevious" }
-  | { readonly _tag: "Activate" }
-  | { readonly _tag: "BackdropClick" }
-  | { readonly _tag: "Close" }
+  | { readonly _tag: 'SetTerminalSize'; readonly width: number; readonly height: number }
+  | { readonly _tag: 'FocusNext' }
+  | { readonly _tag: 'FocusPrevious' }
+  | { readonly _tag: 'Activate' }
+  | { readonly _tag: 'BackdropClick' }
+  | { readonly _tag: 'Close' }
 
 // =============================================================================
 // Default Configurations
@@ -70,83 +70,86 @@ const defaultProps: Partial<ModalProps> = {
   closeOnBackdrop: true,
   backdropStyle: style().background(Colors.black).foreground(Colors.gray),
   modalStyle: style().background(Colors.white).foreground(Colors.black),
-  titleStyle: style().foreground(Colors.blue).bold()
+  titleStyle: style().foreground(Colors.blue).bold(),
 }
 
 // =============================================================================
 // Helper Components
 // =============================================================================
 
-const Backdrop = ({ width, height, style: backdropStyle }: { width: number, height: number, style: Style }) => {
+const Backdrop = ({
+  width,
+  height,
+  style: backdropStyle,
+}: {
+  width: number
+  height: number
+  style: Style
+}) => {
   const backdropLine = '▓'.repeat(width)
   const lines: View[] = []
-  
+
   for (let i = 0; i < height; i++) {
     lines.push(<Text style={backdropStyle}>{backdropLine}</Text>)
   }
-  
+
   return vstack(...lines)
 }
 
-const ModalContent = ({ 
-  model, 
-  children 
-}: { 
-  model: ModalModel, 
-  children: View[] 
-}) => {
+const ModalContent = ({ model, children }: { model: ModalModel; children: View[] }) => {
   const { props } = model
   const actualWidth = props.width ?? defaultProps.width ?? 60
   const actualHeight = props.height ?? defaultProps.height ?? 20
-  
+
   const titleStyle = props.titleStyle ?? defaultProps.titleStyle ?? style()
   const modalStyle = props.modalStyle ?? defaultProps.modalStyle ?? style()
-  
+
   // Create header with title and optional close button
   const header: View[] = []
-  
+
   if (props.title) {
     if (props.showCloseButton) {
       const spacerWidth = Math.max(0, actualWidth - stringWidth(props.title) - 3)
       header.push(
         <Flex direction="row">
           <Text style={titleStyle}>{props.title}</Text>
-          <Text>{" ".repeat(spacerWidth)}</Text>
+          <Text>{' '.repeat(spacerWidth)}</Text>
           <Text style={style().foreground(Colors.red).bold()}>[×]</Text>
         </Flex>
       )
     } else {
       header.push(<Text style={titleStyle}>{props.title}</Text>)
     }
-    header.push(<Text>{""}</Text>) // Spacing
+    header.push(<Text>{''}</Text>) // Spacing
   }
-  
+
   // Combine header and content
   const allContent = [...header, ...children]
-  
+
   // Create the modal box
   const boxProps: BoxProps = {
     border: Borders.Rounded,
     padding: { top: 1, right: 2, bottom: 1, left: 2 },
     width: actualWidth,
     height: actualHeight,
-    style: modalStyle
+    style: modalStyle,
   }
-  
-  return (
-    <Box {...boxProps}>
-      {vstack(...allContent)}
-    </Box>
-  )
+
+  return <Box {...boxProps}>{vstack(...allContent)}</Box>
 }
 
 // =============================================================================
 // Component
 // =============================================================================
 
-export const Modal = (props: ModalProps = {}): {
+export const Modal = (
+  props: ModalProps = {}
+): {
   init: Effect.Effect<[ModalModel, Cmd<ModalMsg>[]], never, AppServices>
-  update: (msg: ModalMsg, model: ModalModel) => Effect.Effect<[ModalModel, Cmd<ModalMsg>[]], never, AppServices>
+  update: (
+    msg: ModalMsg,
+    model: ModalModel
+  ) => Effect.Effect<[ModalModel, Cmd<ModalMsg>[]], never, AppServices>
   view: (model: ModalModel) => View
   handleKey?: (key: KeyEvent, model: ModalModel) => ModalMsg | null
 } => ({
@@ -155,49 +158,49 @@ export const Modal = (props: ModalProps = {}): {
       props: { ...defaultProps, ...props },
       terminalWidth: 80,
       terminalHeight: 24,
-      focusedButton: 0
+      focusedButton: 0,
     },
-    []
+    [],
   ]),
-  
+
   update(msg: ModalMsg, model: ModalModel) {
     switch (msg._tag) {
-      case "Close":
+      case 'Close':
         if (model.props.onClose) {
           model.props.onClose()
         }
         return Effect.succeed([model, []])
-      
-      case "SetTerminalSize":
+
+      case 'SetTerminalSize':
         return Effect.succeed([
           {
             ...model,
             terminalWidth: msg.width,
-            terminalHeight: msg.height
+            terminalHeight: msg.height,
           },
-          []
+          [],
         ])
-      
-      case "FocusNext":
+
+      case 'FocusNext':
         // Simple focus cycling for buttons within modal
         return Effect.succeed([
           {
             ...model,
-            focusedButton: (model.focusedButton + 1) % 2 // Assuming max 2 buttons
+            focusedButton: (model.focusedButton + 1) % 2, // Assuming max 2 buttons
           },
-          []
+          [],
         ])
-      
-      case "FocusPrevious":
+
+      case 'FocusPrevious':
         return Effect.succeed([
           {
             ...model,
-            focusedButton: model.focusedButton === 0 ? 1 : 0
+            focusedButton: model.focusedButton === 0 ? 1 : 0,
           },
-          []
+          [],
         ])
-      
-      case "Activate":
+
+      case 'Activate':
         // Handle activation of focused element
         if (model.props.onConfirm && model.focusedButton === 0) {
           model.props.onConfirm()
@@ -205,90 +208,81 @@ export const Modal = (props: ModalProps = {}): {
           model.props.onCancel()
         }
         return Effect.succeed([model, []])
-      
-      case "BackdropClick":
+
+      case 'BackdropClick':
         if (model.props.closeOnBackdrop && model.props.onClose) {
           model.props.onClose()
         }
         return Effect.succeed([model, []])
     }
   },
-  
+
   view(model: ModalModel): View {
     if (!model.props.isOpen) {
-      return <Text>{""}</Text> // Empty view when modal is closed
+      return <Text>{''}</Text> // Empty view when modal is closed
     }
-    
+
     const backdropStyle = model.props.backdropStyle ?? defaultProps.backdropStyle ?? style()
     const modalWidth = model.props.width ?? defaultProps.width ?? 60
     const modalHeight = model.props.height ?? defaultProps.height ?? 20
-    
+
     // Calculate position
     const x = Math.max(0, Math.floor((model.terminalWidth - modalWidth) / 2))
     const y = Math.max(0, Math.floor((model.terminalHeight - modalHeight) / 2))
-    
+
     // Create backdrop
-    const backdrop = <Backdrop 
-      width={model.terminalWidth} 
-      height={model.terminalHeight} 
-      style={backdropStyle} 
-    />
-    
-    // Create modal content
-    const modalContent = (
-      <ModalContent model={model}>
-        {model.props.children || []}
-      </ModalContent>
+    const backdrop = (
+      <Backdrop width={model.terminalWidth} height={model.terminalHeight} style={backdropStyle} />
     )
-    
+
+    // Create modal content
+    const modalContent = <ModalContent model={model}>{model.props.children || []}</ModalContent>
+
     // For now, we'll render the modal without true overlay positioning
     // In a real implementation, we'd need absolute positioning support
-    return vstack(
-      backdrop,
-      modalContent
-    )
+    return vstack(backdrop, modalContent)
   },
-  
+
   handleKey(key: KeyEvent, model: ModalModel): ModalMsg | null {
     if (!model.props.isOpen) {
       return null
     }
-    
+
     switch (key.key) {
       case 'escape':
         if (model.props.closeOnEscape) {
-          return { _tag: "Close" }
+          return { _tag: 'Close' }
         }
         break
       case 'tab':
         if (key.shift) {
-          return { _tag: "FocusPrevious" }
+          return { _tag: 'FocusPrevious' }
         } else {
-          return { _tag: "FocusNext" }
+          return { _tag: 'FocusNext' }
         }
       case 'enter':
       case ' ':
-        return { _tag: "Activate" }
+        return { _tag: 'Activate' }
     }
-    
+
     return null
-  }
+  },
 })
 
 // =============================================================================
 // Modal Presets
 // =============================================================================
 
-export const InfoModal = ({ 
-  title, 
+export const InfoModal = ({
+  title,
   message,
-  ...props 
-}: { 
+  ...props
+}: {
   title: string
-  message: string 
+  message: string
 } & Partial<ModalProps>) => {
   const width = Math.max(40, stringWidth(message) + 8)
-  
+
   return Modal({
     title,
     width,
@@ -296,43 +290,43 @@ export const InfoModal = ({
     showCloseButton: true,
     ...props,
     children: [
-      <Text>{""}</Text>,
+      <Text>{''}</Text>,
       <Text style={style().foreground(Colors.black)}>{message}</Text>,
-      <Text>{""}</Text>,
-      <Text style={style().foreground(Colors.gray)}>Press Escape or click [×] to close</Text>
-    ]
+      <Text>{''}</Text>,
+      <Text style={style().foreground(Colors.gray)}>Press Escape or click [×] to close</Text>,
+    ],
   })
 }
 
-export const ConfirmModal = ({ 
-  title, 
+export const ConfirmModal = ({
+  title,
   message,
   onConfirm,
   onCancel,
-  ...props 
-}: { 
+  ...props
+}: {
   title: string
   message: string
   onConfirm: () => void
   onCancel?: () => void
 } & Partial<ModalProps>) => {
   const width = Math.max(50, stringWidth(message) + 8)
-  
+
   const buttonRow = (
     <Flex direction="row" gap={3} justify="center">
-      <Button 
-        label="Yes" 
+      <Button
+        label="Yes"
         style={style().background(Colors.green).foreground(Colors.white).bold()}
         onPress={onConfirm}
       />
-      <Button 
-        label="No" 
+      <Button
+        label="No"
         style={style().background(Colors.red).foreground(Colors.white).bold()}
         onPress={onCancel || (() => {})}
       />
     </Flex>
   )
-  
+
   return Modal({
     title,
     width,
@@ -341,27 +335,27 @@ export const ConfirmModal = ({
     closeOnBackdrop: false,
     ...props,
     children: [
-      <Text>{""}</Text>,
+      <Text>{''}</Text>,
       <Text style={style().foreground(Colors.black)}>{message}</Text>,
-      <Text>{""}</Text>,
-      <Text>{""}</Text>,
+      <Text>{''}</Text>,
+      <Text>{''}</Text>,
       buttonRow,
-      <Text>{""}</Text>,
-      <Text style={style().foreground(Colors.gray)}>Use Tab to navigate, Enter to select</Text>
-    ]
+      <Text>{''}</Text>,
+      <Text style={style().foreground(Colors.gray)}>Use Tab to navigate, Enter to select</Text>,
+    ],
   })
 }
 
-export const LoadingModal = ({ 
-  title, 
+export const LoadingModal = ({
+  title,
   message,
-  ...props 
-}: { 
+  ...props
+}: {
   title: string
   message: string
 } & Partial<ModalProps>) => {
   const width = Math.max(40, stringWidth(message) + 8)
-  
+
   return Modal({
     title,
     width,
@@ -371,28 +365,28 @@ export const LoadingModal = ({
     closeOnBackdrop: false,
     ...props,
     children: [
-      <Text>{""}</Text>,
+      <Text>{''}</Text>,
       <Flex direction="row" gap={1}>
-        <Text>{"  "}</Text>
+        <Text>{'  '}</Text>
         <Spinner size="small" style={style().foreground(Colors.blue).bold()} />
-        <Text>{" "}</Text>
+        <Text> </Text>
         <Text style={style().foreground(Colors.black)}>{message}</Text>
       </Flex>,
-      <Text>{""}</Text>
-    ]
+      <Text>{''}</Text>,
+    ],
   })
 }
 
-export const ErrorModal = ({ 
-  title, 
+export const ErrorModal = ({
+  title,
   error,
-  ...props 
-}: { 
+  ...props
+}: {
   title: string
   error: string
 } & Partial<ModalProps>) => {
   const width = Math.max(50, stringWidth(error) + 8)
-  
+
   return Modal({
     title,
     width,
@@ -401,10 +395,10 @@ export const ErrorModal = ({
     titleStyle: style().foreground(Colors.red).bold(),
     ...props,
     children: [
-      <Text>{""}</Text>,
+      <Text>{''}</Text>,
       <Text style={style().foreground(Colors.red)}>⚠ {error}</Text>,
-      <Text>{""}</Text>,
-      <Text style={style().foreground(Colors.gray)}>Press Escape to close</Text>
-    ]
+      <Text>{''}</Text>,
+      <Text style={style().foreground(Colors.gray)}>Press Escape to close</Text>,
+    ],
   })
 }

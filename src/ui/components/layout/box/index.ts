@@ -1,15 +1,15 @@
 /**
  * Box Component Export
- * 
+ *
  * Flexible container component for layouts
  */
 
-export { 
+export {
   Box,
   box,
   card,
   panel,
   centerBox,
   scrollBox,
-  type BoxProps
+  type BoxProps,
 } from './Box'

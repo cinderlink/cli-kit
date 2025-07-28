@@ -29,11 +29,12 @@ The Tuix JSX CLI system provides:
 When using TUIX JSX CLI components, you **must import the components explicitly**. The JSX transform treats uppercase elements as component references, not intrinsic elements:
 
 ```tsx
-// ✅ Correct - Import CLI components
-import { jsx, CLI, Plugin, Command, Flag, Arg } from 'tuix/jsx';
+// ✅ Correct - Import CLI components from the CLI JSX module
+import { jsx } from 'tuix/jsx';
+import { CLI, Plugin, Command, Flag, Arg } from 'tuix/cli/jsx';
 
-// ❌ Incorrect - Missing imports will cause "not defined" errors
-// Just using <CLI> without importing won't work
+// ❌ Incorrect - CLI components are not available from main JSX module
+// import { CLI, Command, Arg } from 'tuix/jsx'; // This won't work
 ```
 
 ## Core Concepts
@@ -59,7 +60,8 @@ import { jsx, CLI, Plugin, Command, Flag, Arg } from 'tuix/jsx';
 ```tsx
 #!/usr/bin/env bun
 /** @jsxImportSource tuix */
-import { jsx, CLI, Plugin, Command, Arg } from 'tuix/jsx'
+import { jsx } from 'tuix/jsx'
+import { CLI, Plugin, Command, Arg } from 'tuix/cli/jsx'
 import { Effect } from 'effect'
 
 export default jsx(() => (
@@ -477,7 +479,8 @@ import { Help } from 'tuix/cli'
 
 ```tsx
 #!/usr/bin/env bun
-import { jsx, App, Command, Arg, Option } from 'tuix/cli'
+import { jsx } from 'tuix/jsx'
+import { CLI, Command, Arg, Option } from 'tuix/cli/jsx'
 import { Effect } from 'effect'
 import { Box, Text, Table, List } from 'tuix/components'
 import { $state, $derived, $effect } from 'tuix/runes'

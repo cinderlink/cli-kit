@@ -1,6 +1,6 @@
 /**
  * Plugin Component
- * 
+ *
  * Defines a plugin with its commands and subcommands
  */
 
@@ -25,7 +25,7 @@ export function Plugin(props: PluginProps): JSX.Element {
         name: props.name,
         version: props.version,
         description: props.description,
-        commands: []
+        commands: [],
       })
     })
   } catch {
@@ -35,17 +35,17 @@ export function Plugin(props: PluginProps): JSX.Element {
       name: props.name,
       version: props.version,
       description: props.description,
-      commands: []
+      commands: [],
     })
   }
-  
+
   return (
     <CommandLineScope
       type="plugin"
       name={props.name}
       description={props.description}
       metadata={{
-        version: props.version
+        version: props.version,
       }}
     >
       {props.children}

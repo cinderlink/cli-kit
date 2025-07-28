@@ -1,6 +1,6 @@
 /**
  * Value Utilities for TUIX
- * 
+ *
  * Provides utility types and functions for working with values
  */
 
@@ -13,7 +13,7 @@ import { UnknownRecord } from './guards'
 /**
  * Represents unknown JSON-serializable data
  */
-export type JSONValue = 
+export type JSONValue =
   | string
   | number
   | boolean
@@ -70,11 +70,7 @@ export function safeJsonParse(str: string): JSONValue | Error {
 /**
  * Safe property getter with default value
  */
-export function getProperty<T>(
-  obj: UnknownRecord,
-  key: string,
-  defaultValue: T
-): T {
+export function getProperty<T>(obj: UnknownRecord, key: string, defaultValue: T): T {
   if (obj && typeof obj === 'object' && key in obj) {
     return obj[key] as T
   }
@@ -96,14 +92,14 @@ export function memoize<TArgs extends readonly unknown[], TReturn>(
   keyFn?: (...args: TArgs) => string
 ): (...args: TArgs) => TReturn {
   const cache = new Map<string, TReturn>()
-  
+
   return (...args: TArgs): TReturn => {
     const key = keyFn ? keyFn(...args) : JSON.stringify(args)
-    
+
     if (cache.has(key)) {
       return cache.get(key)!
     }
-    
+
     const result = fn(...args)
     cache.set(key, result)
     return result
@@ -143,6 +139,6 @@ export function createEventEmitter<T extends Record<string, unknown[]>>(): Event
         return true
       }
       return false
-    }
+    },
   }
 }

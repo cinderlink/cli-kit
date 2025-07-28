@@ -1,19 +1,19 @@
 /**
  * Tuix Configuration System
- * 
+ *
  * Flexible, hierarchical configuration management with multiple sources
  */
 
-export * from "./types"
-export type { TuixConfig } from "./types"
-export * from "./sources/config"
-export * from "./impl/loader"
-export * from "./sources/utils"
-export * from "./jsxConfig"
+export * from './types'
+export type { TuixConfig } from './types'
+export * from './sources/config'
+export * from './impl/loader'
+export * from './sources/utils'
+export * from './jsxConfig'
 
-import { Effect, Layer } from "effect"
-import { Config as IConfig, ConfigOptions } from "./types"
-import { createConfig } from "./sources/config"
+import { Effect, Layer } from 'effect'
+import { Config as IConfig, ConfigOptions } from './types'
+import { createConfig } from './sources/config'
 
 /**
  * Create the default configuration layer
@@ -23,7 +23,7 @@ export const ConfigLayer = (options?: ConfigOptions) =>
     IConfig,
     Effect.gen(function* (_) {
       const builder = createConfig()
-      
+
       if (options?.name) builder.name(options.name)
       if (options?.defaults) builder.defaults(options.defaults)
       if (options?.schema) builder.schema(options.schema)
@@ -41,7 +41,7 @@ export const ConfigLayer = (options?: ConfigOptions) =>
           builder.searchPath(path)
         }
       }
-      
+
       return yield* _(Effect.promise(() => builder.build()))
     })
   )
@@ -53,9 +53,8 @@ export const config = {
   /**
    * Create a simple config with defaults
    */
-  simple: (defaults: Record<string, any>) =>
-    createConfig().defaults(defaults).build(),
-  
+  simple: (defaults: Record<string, any>) => createConfig().defaults(defaults).build(),
+
   /**
    * Create a config that loads from standard locations
    */
@@ -66,7 +65,7 @@ export const config = {
       .withProjectConfig()
       .envPrefix(`${name.toUpperCase()}_`)
       .build(),
-  
+
   /**
    * Create a config for CLI applications
    */
@@ -79,22 +78,19 @@ export const config = {
       .envPrefix(`${name.toUpperCase()}_`)
       .searchPath(process.cwd())
       .build(),
-  
+
   /**
    * Create a config from environment variables only
    */
   env: (prefix?: string) =>
     createConfig()
-      .envPrefix(prefix || "")
+      .envPrefix(prefix || '')
       .build(),
-  
+
   /**
    * Create a config from a specific file
    */
-  file: (path: string) =>
-    createConfig()
-      .file(path)
-      .build()
+  file: (path: string) => createConfig().file(path).build(),
 }
 
 /**
@@ -152,27 +148,32 @@ export default defineConfig({
   /**
    * Generate a JSON config template
    */
-  json: (appName: string) => JSON.stringify({
-    name: appName,
-    version: "1.0.0",
-    logger: {
-      level: "info",
-      format: "pretty",
-      showEmoji: true
-    },
-    processManager: {
-      tuixDir: ".tuix",
-      autoRestart: true,
-      maxRestarts: 5
-    },
-    cli: {
-      defaults: {
-        verbose: false,
-        quiet: false
-      }
-    },
-    custom: {}
-  }, null, 2),
+  json: (appName: string) =>
+    JSON.stringify(
+      {
+        name: appName,
+        version: '1.0.0',
+        logger: {
+          level: 'info',
+          format: 'pretty',
+          showEmoji: true,
+        },
+        processManager: {
+          tuixDir: '.tuix',
+          autoRestart: true,
+          maxRestarts: 5,
+        },
+        cli: {
+          defaults: {
+            verbose: false,
+            quiet: false,
+          },
+        },
+        custom: {},
+      },
+      null,
+      2
+    ),
 
   /**
    * Generate a .env template
@@ -191,15 +192,13 @@ ${appName.toUpperCase()}_PROCESS_MANAGER_MAX_RESTARTS=5
 
 # Custom configuration
 # ${appName.toUpperCase()}_CUSTOM_KEY=value
-`
+`,
 }
 
 /**
  * Helper to define a typed config
  */
-export function defineConfig<T extends Record<string, any>>(
-  config: T
-): T {
+export function defineConfig<T extends Record<string, any>>(config: T): T {
   return config
 }
 
@@ -213,11 +212,11 @@ export async function loadConfig(appName: string = 'tuix'): Promise<IConfig> {
     .withProjectConfig()
     .envPrefix(`${appName.toUpperCase()}_`)
     .searchPath(process.cwd())
-  
+
   return await configBuilder.build()
 }
 
 /**
  * Config constants
  */
-export * from "./constants"
+export * from './constants'

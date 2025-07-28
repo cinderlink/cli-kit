@@ -1,6 +1,6 @@
 /**
  * Layout Components
- * 
+ *
  * Components for structuring and organizing terminal UI layouts
  */
 

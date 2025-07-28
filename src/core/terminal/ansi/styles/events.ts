@@ -1,6 +1,6 @@
 /**
  * Styling Event System
- * 
+ *
  * Defines events for style application, theme management, and
  * layout computation in the terminal UI.
  */
@@ -99,11 +99,7 @@ export interface AnimationEvent extends BaseEvent {
 /**
  * All styling event types
  */
-export type StylingEvent = 
-  | StyleEvent
-  | ThemeEvent
-  | LayoutEvent
-  | AnimationEvent
+export type StylingEvent = StyleEvent | ThemeEvent | LayoutEvent | AnimationEvent
 
 /**
  * Styling event channel names
@@ -112,7 +108,7 @@ export const StylingEventChannels = {
   STYLE: 'style-events',
   THEME: 'theme-events',
   LAYOUT: 'layout-events',
-  ANIMATION: 'animation-events'
+  ANIMATION: 'animation-events',
 } as const
 
-export type StylingEventChannel = typeof StylingEventChannels[keyof typeof StylingEventChannels]
+export type StylingEventChannel = (typeof StylingEventChannels)[keyof typeof StylingEventChannels]

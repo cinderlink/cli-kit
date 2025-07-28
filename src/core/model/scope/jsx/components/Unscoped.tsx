@@ -1,6 +1,6 @@
 /**
  * Unscoped Component
- * 
+ *
  * Wrapper that renders children outside of scope tracking.
  * Useful for content that should always render regardless of scope.
  */

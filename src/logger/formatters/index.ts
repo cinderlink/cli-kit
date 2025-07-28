@@ -1,7 +1,7 @@
 /**
  * Log Formatters
- * 
+ *
  * Export all formatters
  */
 
-export * from "./formatters"
+export * from './formatters'

@@ -1,6 +1,6 @@
 /**
  * JSX Module Type Definitions
- * 
+ *
  * Centralized type definitions for the JSX module, providing types for
  * JSX elements, components, runtime, and integration with the core system.
  */
@@ -21,14 +21,7 @@ export interface JSXElement {
 /**
  * JSX Children type - can be elements, text, or arrays
  */
-export type JSXChildren = 
-  | JSXElement
-  | JSXElement[]
-  | string 
-  | number
-  | boolean
-  | null
-  | undefined
+export type JSXChildren = JSXElement | JSXElement[] | string | number | boolean | null | undefined
 
 /**
  * JSX Fragment props
@@ -55,7 +48,9 @@ export type JSXFunctionalComponent<P = {}> = (props: P & JSXComponentProps) => J
  * JSX Class Component interface
  */
 export interface JSXClassComponent<P = {}, S = {}> {
-  new (props: P & JSXComponentProps): {
+  new (
+    props: P & JSXComponentProps
+  ): {
     props: P & JSXComponentProps
     state?: S
     render(): JSXElement | null
@@ -65,9 +60,7 @@ export interface JSXClassComponent<P = {}, S = {}> {
 /**
  * JSX Component type union
  */
-export type JSXComponent<P = {}> = 
-  | JSXFunctionalComponent<P>
-  | JSXClassComponent<P>
+export type JSXComponent<P = {}> = JSXFunctionalComponent<P> | JSXClassComponent<P>
 
 /**
  * JSX Runtime configuration

@@ -5,5 +5,5 @@
 export {
   getGlobalConfig,
   setGlobalConfig,
-  hasGlobalConfig
-} from "./configStore"
+  hasGlobalConfig,
+} from './configStore'

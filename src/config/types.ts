@@ -1,11 +1,11 @@
 /**
  * Configuration System Types
- * 
+ *
  * Type definitions for the configuration system
  */
 
-import { Effect, Context } from "effect"
-import { z } from "zod"
+import { Effect, Context } from 'effect'
+import { z } from 'zod'
 
 /**
  * Configuration provider service
@@ -15,53 +15,62 @@ export interface Config {
    * Get a configuration value
    */
   readonly get: <T>(key: string, defaultValue?: T) => Effect.Effect<T, ConfigError>
-  
+
   /**
    * Get all configuration values
    */
   readonly getAll: () => Effect.Effect<Record<string, any>, ConfigError>
-  
+
   /**
    * Set a configuration value
    */
   readonly set: (key: string, value: any) => Effect.Effect<void, ConfigError>
-  
+
   /**
    * Check if a key exists
    */
   readonly has: (key: string) => Effect.Effect<boolean>
-  
+
   /**
    * Watch for configuration changes
    */
-  readonly watch: (key: string, callback: (value: any) => void) => Effect.Effect<() => void, ConfigError>
-  
+  readonly watch: (
+    key: string,
+    callback: (value: any) => void
+  ) => Effect.Effect<() => void, ConfigError>
+
   /**
    * Reload configuration from sources
    */
   readonly reload: () => Effect.Effect<void, ConfigError>
 }
 
-export const Config = Context.GenericTag<Config>("tuix/Config")
+export const Config = Context.GenericTag<Config>('tuix/Config')
 
 /**
  * Configuration error types
  */
 export class ConfigError {
-  readonly _tag = "ConfigError"
-  constructor(readonly message: string, readonly cause?: unknown) {}
+  readonly _tag = 'ConfigError'
+  constructor(
+    readonly message: string,
+    readonly cause?: unknown
+  ) {}
 }
 
 export class ConfigNotFoundError extends ConfigError {
-  readonly _tag = "ConfigNotFoundError"
+  readonly _tag = 'ConfigNotFoundError'
   constructor(readonly key: string) {
     super(`Configuration key not found: ${key}`)
   }
 }
 
 export class ConfigValidationError extends ConfigError {
-  readonly _tag = "ConfigValidationError"
-  constructor(readonly key: string, readonly validationError: z.ZodError) {
+  readonly _tag = 'ConfigValidationError'
+  constructor(
+    readonly key: string,
+    readonly validationError: z.ZodError
+  ) {
     super(`Configuration validation failed for key ${key}: ${validationError.message}`)
   }
 }
@@ -106,10 +115,10 @@ export interface ConfigSource {
 export interface TuixConfig {
   /** Application name */
   name: string
-  
+
   /** Application version */
   version?: string
-  
+
   /** Logger configuration */
   logger?: {
     level?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
@@ -118,7 +127,7 @@ export interface TuixConfig {
     colorize?: boolean
     logFile?: string
   }
-  
+
   /** Process manager configuration */
   processManager?: {
     tuixDir?: string
@@ -130,28 +139,28 @@ export interface TuixConfig {
       timeout?: number
     }
   }
-  
+
   /** CLI configuration */
   cli?: {
     defaults?: Record<string, any>
     aliases?: Record<string, string[]>
   }
-  
+
   /** JSX configuration */
   jsx?: {
     pragma?: string
     pragmaFrag?: string
   }
-  
+
   /** Styling configuration */
   styling?: {
     colorProfile?: 'none' | '16' | '256' | 'truecolor'
     theme?: string
   }
-  
+
   /** Custom configuration */
   custom?: Record<string, any>
-  
+
   /** Plugin configuration */
   plugins?: Array<{
     name: string

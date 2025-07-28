@@ -1,6 +1,6 @@
 /**
  * Plugin JSX Type Definitions
- * 
+ *
  * Types for plugin-specific JSX components
  */
 

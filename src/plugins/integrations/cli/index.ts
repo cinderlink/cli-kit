@@ -1,6 +1,6 @@
 /**
  * Plugins CLI Integration
- * 
+ *
  * Components that integrate the plugins module with CLI functionality
  */
 

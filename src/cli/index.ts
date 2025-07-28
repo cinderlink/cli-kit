@@ -1,37 +1,37 @@
 /**
  * CLI Framework Module - Complete command-line interface framework
- * 
+ *
  * This module provides a comprehensive CLI framework built on the TUIX architecture,
  * offering type-safe command definition, plugin extensibility, lazy loading,
  * and sophisticated argument parsing with validation.
- * 
+ *
  * ## Key Components:
- * 
+ *
  * ### Core System
  * - **Types**: Complete type system for CLI applications
  * - **Config**: Configuration management with validation
  * - **Parser**: Argument parsing with schema validation
  * - **Router**: Command routing and execution
- * 
+ *
  * ### Plugin Architecture
  * - **Plugin**: Extensible plugin system with lifecycle management
  * - **Registry**: Plugin registration and discovery
  * - **Hooks**: Lifecycle hooks for cross-cutting concerns
- * 
+ *
  * ### Performance Features
  * - **Lazy Loading**: On-demand command loading for faster startup
  * - **Lazy Cache**: Intelligent caching for lazy-loaded commands
  * - **Loader**: Dynamic module loading and resolution
- * 
+ *
  * ### User Experience
  * - **Help**: Automatic help generation and formatting
  * - **Runner**: Application execution and lifecycle management
  * - **Testing**: Utilities for testing CLI applications
- * 
+ *
  * @example
  * ```typescript
  * import { defineConfig, runCLI } from '@/cli'
- * 
+ *
  * const config = defineConfig({
  *   name: 'myapp',
  *   version: '1.0.0',
@@ -42,10 +42,10 @@
  *     }
  *   }
  * })
- * 
+ *
  * runCLI(config)
  * ```
- * 
+ *
  * @module cli
  */
 
@@ -63,8 +63,8 @@ export type {
   Plugin,
   CLIContext,
   PluginReference,
-  CommandExtension
-} from "./types"
+  CommandExtension,
+} from './types'
 
 /** Configuration management with validation and merging */
 export {
@@ -72,14 +72,14 @@ export {
   defineCommand,
   lazyLoad,
   commonOptions,
-  commonArgs
-} from "./config"
+  commonArgs,
+} from './config'
 
 /** Argument parsing with schema validation */
-export { CLIParser } from "./parser"
+export { CLIParser } from './parser'
 
 /** Command routing and execution management */
-export { CLIRouter, CommandSuggestions } from "./router"
+export { CLIRouter, CommandSuggestions } from './router'
 
 // =============================================================================
 // Plugin Architecture
@@ -95,13 +95,13 @@ export {
   PluginManager,
   createPluginManager,
   PluginBuilder,
-  PluginUtils
-} from "./plugin"
+  PluginUtils,
+} from './plugin'
 
 // Testing utilities should be imported from @tuix/testing, not from production code
 
 /** Plugin registration and discovery */
-export { PluginRegistry, createPluginRegistry } from "./registry"
+export { PluginRegistry, createPluginRegistry } from './registry'
 
 /** Event-driven hook system for cross-cutting concerns */
 export {
@@ -114,33 +114,33 @@ export {
   type BeforeCommandEvent,
   type AfterCommandEvent,
   type OnErrorEvent,
-  type Subscription
-} from "./hooks"
+  type Subscription,
+} from './hooks'
 
 // =============================================================================
 // User Experience
 // =============================================================================
 
 /** Automatic help generation and formatting */
-export { HelpGenerator } from "./core/help"
-export type { HelpData, HelpSection, HelpItem } from "./core/helpData"
-export { generateHelpData } from "./core/helpData"
+export { HelpGenerator } from './core/help'
+export type { HelpData, HelpSection, HelpItem } from './core/helpData'
+export { generateHelpData } from './core/helpData'
 
 /** View runtime system for rendering */
-export { 
-  registerViewRuntime, 
+export {
+  registerViewRuntime,
   getViewRuntime,
   TextViewRuntime,
   viewRuntimeRegistry,
-  type ViewRuntime 
-} from "./core/viewRuntime"
+  type ViewRuntime,
+} from './core/viewRuntime'
 
 /** JSX runtime adapter for CLI rendering */
-export { JSXCLIViewRuntime, createJSXCLIRuntime } from "./adapters/jsxRuntime"
+export { JSXCLIViewRuntime, createJSXCLIRuntime } from './adapters/jsxRuntime'
 
 /** Application execution and lifecycle management */
-export { CLIRunner, runCLI, cli, ensureConfig } from "./runner"
-export { runCLI as createCLI } from "./runner" // Alias for compatibility
+export { CLIRunner, runCLI, cli, ensureConfig } from './runner'
+export { runCLI as createCLI } from './runner' // Alias for compatibility
 
 // =============================================================================
 // Performance Features
@@ -151,18 +151,18 @@ export {
   lazyLoadCommand,
   lazyLoadPlugin,
   LazyCache as LazyCommandCache,
-  globalLazyCache as globalCommandCache
-} from "./impl/lazy"
+  globalLazyCache as globalCommandCache,
+} from './impl/lazy'
 
 /** Intelligent caching for lazy-loaded commands */
 export {
   createLazyHandler,
   LazyCache,
-  globalLazyCache
-} from "./impl/lazyCache"
+  globalLazyCache,
+} from './impl/lazyCache'
 
 /** Dynamic module loading and resolution */
-export { PluginLoader, createPluginLoader, loadAllPlugins, loadPluginByName } from "./core/loader"
+export { PluginLoader, createPluginLoader, loadAllPlugins, loadPluginByName } from './core/loader'
 
 // =============================================================================
 // CLI Components
@@ -177,4 +177,4 @@ export { PluginLoader, createPluginLoader, loadAllPlugins, loadPluginByName } fr
 // =============================================================================
 
 /** CLI constants */
-export * from "./constants"
+export * from './constants'

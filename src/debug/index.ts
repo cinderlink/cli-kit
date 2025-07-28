@@ -1,6 +1,6 @@
 /**
  * Debug Module
- * 
+ *
  * Interactive debugging tools for tuix applications
  */
 

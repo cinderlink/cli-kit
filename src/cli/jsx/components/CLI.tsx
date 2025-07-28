@@ -1,6 +1,6 @@
 /**
  * CLI Component
- * 
+ *
  * Top-level CLI component that establishes the root scope
  */
 
@@ -25,7 +25,7 @@ export function CLI(props: CLIProps): JSX.Element {
       description={props.description}
       metadata={{
         alias: props.alias,
-        version: props.version
+        version: props.version,
       }}
     >
       {props.children}

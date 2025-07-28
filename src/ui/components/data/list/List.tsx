@@ -1,6 +1,6 @@
 /**
  * List Component - Vertical scrollable list with selection
- * 
+ *
  * Features:
  * - Vertical scrolling with keyboard navigation
  * - Single/multi selection support
@@ -9,20 +9,20 @@
  * - Virtualization for large lists
  * - Focus management
  * - Customizable key bindings
- * 
+ *
  * @example
  * ```tsx
  * import { List } from 'tuix/components/data/list'
- * 
+ *
  * function MyApp() {
  *   const selectedIndex = $state(0)
  *   const items = ['Item 1', 'Item 2', 'Item 3']
- *   
+ *
  *   return (
  *     <List
  *       items={items}
  *       selectedIndex={selectedIndex}
- *       onSelect={(index) => selectedIndex.value = index}
+ *       onSelect={(index) => selectedIndex.$set(index)}
  *       renderItem={(item) => <text>{item}</text>}
  *     />
  *   )
@@ -73,61 +73,57 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
   const hovering = $state(false)
   const filterValue = $state('')
   const scrollOffset = $state(0)
-  
+
   // Selection state
   const internalSelectedIndex = $state(0)
   const internalSelectedIndices = $state<number[]>([])
-  
+
   // Determine selection mode
-  const selectionMode = props.selectionMode || 
-    (props.selectedIndices || props.onMultiSelect ? 'multi' : 'single')
-  
+  const selectionMode =
+    props.selectionMode || (props.selectedIndices || props.onMultiSelect ? 'multi' : 'single')
+
   // Get selected index(es) from props or internal state
   const selectedIndex = $derived(() => {
     if (props.selectedIndex !== undefined) {
-      return isStateRune(props.selectedIndex) 
-        ? props.selectedIndex.value 
-        : props.selectedIndex
+      return isStateRune(props.selectedIndex) ? props.selectedIndex() : props.selectedIndex
     }
-    return internalSelectedIndex.value
+    return internalSelectedIndex()
   })
-  
+
   const selectedIndices = $derived(() => {
     if (props.selectedIndices !== undefined) {
-      return isStateRune(props.selectedIndices)
-        ? props.selectedIndices.value
-        : props.selectedIndices
+      return isStateRune(props.selectedIndices) ? props.selectedIndices() : props.selectedIndices
     }
-    return internalSelectedIndices.value
+    return internalSelectedIndices()
   })
-  
+
   // Filtered items
   const filteredItems = $derived(() => {
-    if (!props.filter && !filterValue.value) return props.items
-    
+    if (!props.filter && !filterValue()) return props.items
+
     const filterFn = props.filter
       ? typeof props.filter === 'function'
         ? props.filter
         : (item: T) => String(item).toLowerCase().includes(props.filter.toLowerCase())
-      : (item: T) => String(item).toLowerCase().includes(filterValue.value.toLowerCase())
-    
+      : (item: T) => String(item).toLowerCase().includes(filterValue().toLowerCase())
+
     return props.items.filter(filterFn)
   })
-  
+
   // Visible items (for virtualization)
   const visibleItems = $derived(() => {
     const height = props.height || props.maxHeight || 10
-    const start = scrollOffset.value
+    const start = scrollOffset()
     const end = start + height
-    return filteredItems.value.slice(start, end)
+    return filteredItems().slice(start, end)
   })
-  
+
   // Calculate if scrolling is needed
   const canScroll = $derived(() => {
     const height = props.height || props.maxHeight || 10
-    return filteredItems.value.length > height
+    return filteredItems().length > height
   })
-  
+
   // Update scroll offset to keep selected item visible
   // Only run effect in component context (not in tests)
   if (typeof $effect !== 'undefined') {
@@ -135,12 +131,12 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
       $effect(() => {
         if (selectionMode === 'single') {
           const height = props.height || props.maxHeight || 10
-          const index = selectedIndex.value
-          
-          if (index < scrollOffset.value) {
-            scrollOffset.value = index
-          } else if (index >= scrollOffset.value + height) {
-            scrollOffset.value = index - height + 1
+          const index = selectedIndex()
+
+          if (index < scrollOffset()) {
+            scrollOffset.$set(index)
+          } else if (index >= scrollOffset() + height) {
+            scrollOffset.$set(index - height + 1)
           }
         }
       })
@@ -148,11 +144,11 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
       // Ignore effect errors in test environment
     }
   }
-  
+
   // Keyboard navigation
   function handleKeyPress(key: string) {
-    if (!focused.value || props.focusable === false) return
-    
+    if (!focused() || props.focusable === false) return
+
     switch (key) {
       case 'ArrowUp':
       case 'k':
@@ -166,7 +162,7 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
         selectIndex(0)
         break
       case 'End':
-        selectIndex(filteredItems.value.length - 1)
+        selectIndex(filteredItems().length - 1)
         break
       case 'PageUp':
         moveSelection(-(props.height || 10))
@@ -177,55 +173,55 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
       case 'Enter':
       case ' ':
         if (selectionMode === 'multi') {
-          toggleMultiSelect(selectedIndex.value)
+          toggleMultiSelect(selectedIndex())
         } else {
-          props.onSelect?.(selectedIndex.value)
+          props.onSelect?.(selectedIndex())
         }
         break
     }
   }
-  
+
   function moveSelection(delta: number) {
-    const newIndex = selectedIndex.value + delta
-    const maxIndex = filteredItems.value.length - 1
-    
+    const newIndex = selectedIndex() + delta
+    const maxIndex = filteredItems().length - 1
+
     if (props.wrap) {
-      selectIndex((newIndex + filteredItems.value.length) % filteredItems.value.length)
+      selectIndex((newIndex + filteredItems().length) % filteredItems().length)
     } else {
       selectIndex(Math.max(0, Math.min(maxIndex, newIndex)))
     }
   }
-  
+
   function selectIndex(index: number) {
     if (selectionMode === 'single') {
       if (isStateRune(props.selectedIndex)) {
-        props.selectedIndex.value = index
+        props.selectedIndex.$set(index)
       } else {
-        internalSelectedIndex.value = index
+        internalSelectedIndex.$set(index)
       }
       props.onSelect?.(index)
     }
   }
-  
+
   function toggleMultiSelect(index: number) {
-    const indices = [...selectedIndices.value]
+    const indices = [...selectedIndices()]
     const idx = indices.indexOf(index)
-    
+
     if (idx >= 0) {
       indices.splice(idx, 1)
     } else {
       indices.push(index)
       indices.sort((a, b) => a - b)
     }
-    
+
     if (isStateRune(props.selectedIndices)) {
-      props.selectedIndices.value = indices
+      props.selectedIndices.$set(indices)
     } else {
-      internalSelectedIndices.value = indices
+      internalSelectedIndices.$set(indices)
     }
     props.onMultiSelect?.(indices)
   }
-  
+
   // Click handling
   function handleItemClick(index: number) {
     if (selectionMode === 'multi') {
@@ -234,24 +230,27 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
       selectIndex(index)
     }
   }
-  
+
   // Render helpers
   function renderEmptyState(): JSX.Element {
     if (typeof props.emptyMessage === 'string') {
       return jsx('text', {
         style: style().foreground(Colors.gray).italic(),
-        children: props.emptyMessage || 'No items to display'
+        children: props.emptyMessage || 'No items to display',
       })
     }
-    return props.emptyMessage || jsx('text', {
-      style: style().foreground(Colors.gray).italic(),
-      children: 'No items to display'
-    })
+    return (
+      props.emptyMessage ||
+      jsx('text', {
+        style: style().foreground(Colors.gray).italic(),
+        children: 'No items to display',
+      })
+    )
   }
-  
+
   function renderFilter(): JSX.Element | null {
     if (!props.showFilter) return null
-    
+
     return jsx('hstack', {
       gap: 1,
       style: style().marginBottom(1),
@@ -260,40 +259,41 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
         jsx('text-input', {
           value: filterValue,
           placeholder: props.filterPlaceholder || 'Filter...',
-          onSubmit: (value) => {
-            filterValue.value = value
+          onSubmit: value => {
+            filterValue.$set(value)
             props.onFilter?.(value)
-          }
-        })
-      ]
+          },
+        }),
+      ],
     })
   }
-  
+
   function renderScrollbar(): JSX.Element | null {
-    if (!props.showScrollbar || !canScroll.value) return null
-    
+    if (!props.showScrollbar || !canScroll()) return null
+
     const height = props.height || props.maxHeight || 10
-    const scrollPercent = scrollOffset.value / (filteredItems.value.length - height)
+    const scrollPercent = scrollOffset() / (filteredItems().length - height)
     const thumbPosition = Math.floor(scrollPercent * (height - 1))
-    
+
     return jsx('vstack', {
       style: style().position('absolute').right(0).top(0),
-      children: Array.from({ length: height }, (_, i) => 
+      children: Array.from({ length: height }, (_, i) =>
         jsx('text', {
           children: i === thumbPosition ? '█' : '│',
-          style: style().foreground(i === thumbPosition ? Colors.white : Colors.gray)
+          style: style().foreground(i === thumbPosition ? Colors.white : Colors.gray),
         })
-      )
+      ),
     })
   }
-  
+
   function renderItem(item: T, index: number): JSX.Element {
-    const actualIndex = scrollOffset.value + index
-    const isSelected = selectionMode === 'single' 
-      ? actualIndex === selectedIndex.value
-      : selectedIndices.value.includes(actualIndex)
-    const isFocused = focused.value && actualIndex === selectedIndex.value
-    
+    const actualIndex = scrollOffset() + index
+    const isSelected =
+      selectionMode === 'single'
+        ? actualIndex === selectedIndex()
+        : selectedIndices().includes(actualIndex)
+    const isFocused = focused() && actualIndex === selectedIndex()
+
     return jsx('interactive', {
       onClick: () => handleItemClick(actualIndex),
       onMouseEnter: () => {
@@ -301,15 +301,10 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
           selectIndex(actualIndex)
         }
       },
-      children: props.renderItem(
-        item,
-        actualIndex,
-        isSelected,
-        isFocused
-      )
+      children: props.renderItem(item, actualIndex, isSelected, isFocused),
     })
   }
-  
+
   // Main render
   const listStyle = $derived(() => {
     const baseStyle = props.style || {}
@@ -318,95 +313,106 @@ export function List<T = any>(props: ListProps<T>): JSX.Element {
       position: 'relative',
       height: props.height,
       maxHeight: props.maxHeight,
-      overflow: 'hidden'
+      overflow: 'hidden',
     })
   })
-  
+
   return jsx('interactive', {
     onKeyPress: handleKeyPress,
-    onFocus: () => { focused.value = true },
-    onBlur: () => { focused.value = false },
-    onMouseEnter: () => { hovering.value = true },
-    onMouseLeave: () => { hovering.value = false },
+    onFocus: () => {
+      focused.$set(true)
+    },
+    onBlur: () => {
+      focused.$set(false)
+    },
+    onMouseEnter: () => {
+      hovering.$set(true)
+    },
+    onMouseLeave: () => {
+      hovering.$set(false)
+    },
     focusable: props.focusable !== false,
     className: props.className,
     children: jsx('vstack', {
-      style: listStyle.value,
+      style: listStyle(),
       children: [
         renderFilter(),
-        filteredItems.value.length === 0
+        filteredItems().length === 0
           ? renderEmptyState()
           : jsx('box', {
-              style: style().position('relative'),
+              style: style(),
               children: [
                 jsx('vstack', {
-                  children: visibleItems.value.map((item, index) => 
-                    renderItem(item, index)
-                  )
+                  children: visibleItems().map((item, index) => renderItem(item, index)),
                 }),
-                renderScrollbar()
-              ]
-            })
-      ]
-    })
+                renderScrollbar(),
+              ],
+            }),
+      ],
+    }),
   })
 }
 
 // Preset list styles
-export function SimpleList<T = any>(props: Omit<ListProps<T>, 'renderItem'> & {
-  renderItem?: (item: T, index: number, selected: boolean, focused: boolean) => JSX.Element
-}): JSX.Element {
+export function SimpleList<T = any>(
+  props: Omit<ListProps<T>, 'renderItem'> & {
+    renderItem?: (item: T, index: number, selected: boolean, focused: boolean) => JSX.Element
+  }
+): JSX.Element {
   return List({
     ...props,
-    renderItem: props.renderItem || ((item, _, selected, focused) => 
-      jsx('text', {
-        style: style()
-          .background(selected ? Colors.blue : 'transparent')
-          .foreground(selected ? Colors.white : Colors.white)
-          .bold(focused),
-        children: String(item)
-      })
-    )
+    renderItem:
+      props.renderItem ||
+      ((item, _, selected, focused) =>
+        jsx('text', {
+          style: style()
+            .background(selected ? Colors.blue : 'transparent')
+            .foreground(selected ? Colors.white : Colors.white)
+            .bold(focused),
+          children: String(item),
+        })),
   })
 }
 
-export function CheckList<T = any>(props: Omit<ListProps<T>, 'renderItem' | 'selectionMode'>): JSX.Element {
+export function CheckList<T = any>(
+  props: Omit<ListProps<T>, 'renderItem' | 'selectionMode'>
+): JSX.Element {
   return List({
     ...props,
     selectionMode: 'multi',
-    renderItem: (item, _, selected) => 
+    renderItem: (item, _, selected) =>
       jsx('hstack', {
         gap: 1,
         children: [
           jsx('text', {
             children: selected ? '☑' : '☐',
-            style: style().foreground(selected ? Colors.green : Colors.gray)
+            style: style().foreground(selected ? Colors.green : Colors.gray),
           }),
-          jsx('text', { children: String(item) })
-        ]
-      })
+          jsx('text', { children: String(item) }),
+        ],
+      }),
   })
 }
 
 export function NumberedList<T = any>(props: Omit<ListProps<T>, 'renderItem'>): JSX.Element {
   return List({
     ...props,
-    renderItem: (item, index, selected, focused) => 
+    renderItem: (item, index, selected, focused) =>
       jsx('hstack', {
         gap: 1,
         children: [
           jsx('text', {
             style: style().foreground(Colors.gray),
-            children: `${(index + 1).toString().padStart(3)}.`
+            children: `${(index + 1).toString().padStart(3)}.`,
           }),
           jsx('text', {
             style: style()
               .background(selected ? Colors.blue : 'transparent')
               .foreground(selected ? Colors.white : Colors.white)
               .bold(focused),
-            children: String(item)
-          })
-        ]
-      })
+            children: String(item),
+          }),
+        ],
+      }),
   })
 }

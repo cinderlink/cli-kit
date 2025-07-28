@@ -1,16 +1,16 @@
 /**
  * Terminal Service Implementation Tests
- * 
+ *
  * Tests for the terminal service that handles low-level terminal operations
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
-import { Effect } from "effect"
-import { TerminalServiceLive } from "./terminal"
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { Effect } from 'effect'
+import { TerminalServiceLive } from './terminal'
 
-describe("Terminal Service Implementation", () => {
-  describe("Basic operations", () => {
-    it("should get terminal size", async () => {
+describe('Terminal Service Implementation', () => {
+  describe('Basic operations', () => {
+    it('should get terminal size', async () => {
       const result = await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
@@ -18,12 +18,12 @@ describe("Terminal Service Implementation", () => {
           return size
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
+
       expect(result.width).toBeGreaterThan(0)
       expect(result.height).toBeGreaterThan(0)
     })
-    
-    it("should check terminal capabilities", async () => {
+
+    it('should check terminal capabilities', async () => {
       const result = await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
@@ -31,105 +31,105 @@ describe("Terminal Service Implementation", () => {
           return capabilities
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
+
       expect(result).toBeDefined()
-      expect(typeof result.colorDepth).toBe("number")
-      expect(typeof result.supportsUnicode).toBe("boolean")
+      expect(typeof result.colorDepth).toBe('number')
+      expect(typeof result.supportsUnicode).toBe('boolean')
     })
-    
-    it("should support truecolor detection", async () => {
+
+    it('should support truecolor detection', async () => {
       const result = await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           return yield* terminal.supportsTrueColor()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(typeof result).toBe("boolean")
+
+      expect(typeof result).toBe('boolean')
     })
-    
-    it("should support 256 color detection", async () => {
+
+    it('should support 256 color detection', async () => {
       const result = await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           return yield* terminal.supports256Colors()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(typeof result).toBe("boolean")
+
+      expect(typeof result).toBe('boolean')
     })
-    
-    it("should support unicode detection", async () => {
+
+    it('should support unicode detection', async () => {
       const result = await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           return yield* terminal.supportsUnicode()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(typeof result).toBe("boolean")
+
+      expect(typeof result).toBe('boolean')
     })
   })
-  
-  describe("Cursor operations", () => {
+
+  describe('Cursor operations', () => {
     let originalStdout: any
     let mockWrite: jest.Mock
-    
+
     beforeEach(() => {
       mockWrite = jest.fn()
       originalStdout = process.stdout.write
       process.stdout.write = mockWrite
     })
-    
+
     afterEach(() => {
       process.stdout.write = originalStdout
     })
-    
-    it("should move cursor to position", async () => {
+
+    it('should move cursor to position', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.moveCursor(10, 5)
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining("\x1b["))
+
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('\x1b['))
     })
-    
-    it("should move cursor relatively", async () => {
+
+    it('should move cursor relatively', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.moveCursorRelative(2, -1)
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining("\x1b["))
+
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('\x1b['))
     })
-    
-    it("should hide cursor", async () => {
+
+    it('should hide cursor', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.hideCursor()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[?25l")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[?25l')
     })
-    
-    it("should show cursor", async () => {
+
+    it('should show cursor', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.showCursor()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[?25h")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[?25h')
     })
-    
-    it("should save and restore cursor", async () => {
+
+    it('should save and restore cursor', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
@@ -137,282 +137,282 @@ describe("Terminal Service Implementation", () => {
           yield* terminal.restoreCursor()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[s")
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[u")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[s')
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[u')
     })
   })
-  
-  describe("Screen operations", () => {
+
+  describe('Screen operations', () => {
     let originalStdout: any
     let mockWrite: jest.Mock
-    
+
     beforeEach(() => {
       mockWrite = jest.fn()
       originalStdout = process.stdout.write
       process.stdout.write = mockWrite
     })
-    
+
     afterEach(() => {
       process.stdout.write = originalStdout
     })
-    
-    it("should clear screen", async () => {
+
+    it('should clear screen', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.clear()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[2J\x1b[H")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[2J\x1b[H')
     })
-    
-    it("should write text", async () => {
+
+    it('should write text', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
-          yield* terminal.write("Hello, World!")
+          yield* terminal.write('Hello, World!')
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("Hello, World!")
+
+      expect(mockWrite).toHaveBeenCalledWith('Hello, World!')
     })
-    
-    it("should write line", async () => {
+
+    it('should write line', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
-          yield* terminal.writeLine("Hello, World!")
+          yield* terminal.writeLine('Hello, World!')
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("Hello, World!\n")
+
+      expect(mockWrite).toHaveBeenCalledWith('Hello, World!\n')
     })
-    
-    it("should clear to end of line", async () => {
+
+    it('should clear to end of line', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.clearToEndOfLine()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[K")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[K')
     })
-    
-    it("should clear entire line", async () => {
+
+    it('should clear entire line', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.clearLine()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[2K")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[2K')
     })
   })
-  
-  describe("Screen modes", () => {
+
+  describe('Screen modes', () => {
     let originalStdout: any
     let mockWrite: jest.Mock
-    
+
     beforeEach(() => {
       mockWrite = jest.fn()
       originalStdout = process.stdout.write
       process.stdout.write = mockWrite
     })
-    
+
     afterEach(() => {
       process.stdout.write = originalStdout
     })
-    
-    it("should enable alternate screen", async () => {
+
+    it('should enable alternate screen', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.setAlternateScreen(true)
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[?47h")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[?47h')
     })
-    
-    it("should disable alternate screen", async () => {
+
+    it('should disable alternate screen', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.setAlternateScreen(false)
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[?47l")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[?47l')
     })
   })
-  
-  describe("Scrolling", () => {
+
+  describe('Scrolling', () => {
     let originalStdout: any
     let mockWrite: jest.Mock
-    
+
     beforeEach(() => {
       mockWrite = jest.fn()
       originalStdout = process.stdout.write
       process.stdout.write = mockWrite
     })
-    
+
     afterEach(() => {
       process.stdout.write = originalStdout
     })
-    
-    it("should scroll up", async () => {
+
+    it('should scroll up', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.scrollUp(3)
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[3S")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[3S')
     })
-    
-    it("should scroll down", async () => {
+
+    it('should scroll down', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.scrollDown(2)
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[2T")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[2T')
     })
   })
-  
-  describe("Terminal title and bell", () => {
+
+  describe('Terminal title and bell', () => {
     let originalStdout: any
     let mockWrite: jest.Mock
-    
+
     beforeEach(() => {
       mockWrite = jest.fn()
       originalStdout = process.stdout.write
       process.stdout.write = mockWrite
     })
-    
+
     afterEach(() => {
       process.stdout.write = originalStdout
     })
-    
-    it("should set terminal title", async () => {
+
+    it('should set terminal title', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
-          yield* terminal.setTitle("Test Application")
+          yield* terminal.setTitle('Test Application')
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b]2;Test Application\x1b\\")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b]2;Test Application\x1b\\')
     })
-    
-    it("should ring bell", async () => {
+
+    it('should ring bell', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
           yield* terminal.bell()
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x07")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x07')
     })
   })
-  
-  describe("Cursor style", () => {
+
+  describe('Cursor style', () => {
     let originalStdout: any
     let mockWrite: jest.Mock
-    
+
     beforeEach(() => {
       mockWrite = jest.fn()
       originalStdout = process.stdout.write
       process.stdout.write = mockWrite
     })
-    
+
     afterEach(() => {
       process.stdout.write = originalStdout
     })
-    
-    it("should set cursor shape to block", async () => {
+
+    it('should set cursor shape to block', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
-          yield* terminal.setCursorShape("block")
+          yield* terminal.setCursorShape('block')
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[1 q")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[1 q')
     })
-    
-    it("should set cursor shape to underline", async () => {
+
+    it('should set cursor shape to underline', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
-          yield* terminal.setCursorShape("underline")
+          yield* terminal.setCursorShape('underline')
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[3 q")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[3 q')
     })
-    
-    it("should set cursor shape to bar", async () => {
+
+    it('should set cursor shape to bar', async () => {
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
-          yield* terminal.setCursorShape("bar")
+          yield* terminal.setCursorShape('bar')
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(mockWrite).toHaveBeenCalledWith("\x1b[5 q")
+
+      expect(mockWrite).toHaveBeenCalledWith('\x1b[5 q')
     })
   })
-  
-  describe("Error handling", () => {
-    it("should handle write errors gracefully", async () => {
+
+  describe('Error handling', () => {
+    it('should handle write errors gracefully', async () => {
       const result = await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
-          
+
           // Mock a write error
           const originalWrite = process.stdout.write
           process.stdout.write = () => {
-            throw new Error("Write failed")
+            throw new Error('Write failed')
           }
-          
+
           try {
-            return yield* Effect.either(terminal.write("test"))
+            return yield* Effect.either(terminal.write('test'))
           } finally {
             process.stdout.write = originalWrite
           }
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
-      expect(result._tag).toBe("Left")
+
+      expect(result._tag).toBe('Left')
     })
   })
-  
-  describe("Performance", () => {
-    it("should handle many operations efficiently", async () => {
+
+  describe('Performance', () => {
+    it('should handle many operations efficiently', async () => {
       const startTime = performance.now()
-      
+
       await Effect.runPromise(
         Effect.gen(function* () {
           const terminal = yield* TerminalServiceLive
-          
+
           for (let i = 0; i < 1000; i++) {
             yield* terminal.moveCursor(i % 80, i % 24)
           }
         }).pipe(Effect.provide(TerminalServiceLive))
       )
-      
+
       const endTime = performance.now()
       const operationTime = endTime - startTime
-      
+
       expect(operationTime).toBeLessThan(1000) // Should complete within 1 second
     })
   })

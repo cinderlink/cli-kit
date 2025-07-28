@@ -1,12 +1,12 @@
 /**
  * Logger Types and Interfaces
- * 
+ *
  * Core types for the tuix logging system
  */
 
-import { Effect, Context, Option } from "effect"
+import { Effect, Context, Option } from 'effect'
 
-export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal"
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
 
 export const LogLevels = {
   trace: 10,
@@ -14,7 +14,7 @@ export const LogLevels = {
   info: 30,
   warn: 40,
   error: 50,
-  fatal: 60
+  fatal: 60,
 } as const
 
 export interface LogEntry {
@@ -64,25 +64,33 @@ export interface Logger {
   debug(message: string, metadata?: Record<string, any>): Effect.Effect<void, never, never>
   info(message: string, metadata?: Record<string, any>): Effect.Effect<void, never, never>
   warn(message: string, metadata?: Record<string, any>): Effect.Effect<void, never, never>
-  error(message: string, error?: Error, metadata?: Record<string, any>): Effect.Effect<void, never, never>
-  fatal(message: string, error?: Error, metadata?: Record<string, any>): Effect.Effect<void, never, never>
-  
+  error(
+    message: string,
+    error?: Error,
+    metadata?: Record<string, any>
+  ): Effect.Effect<void, never, never>
+  fatal(
+    message: string,
+    error?: Error,
+    metadata?: Record<string, any>
+  ): Effect.Effect<void, never, never>
+
   // Object-based logging (like bunyan)
   log(entry: Partial<LogEntry>): Effect.Effect<void, never, never>
-  
+
   // Child loggers with context
   child(context: string | Record<string, any>): Logger
-  
+
   // Tracing and spans
   span<R, E, A>(name: string, effect: Effect.Effect<A, E, R>): Effect.Effect<A, E, R>
   startSpan(name: string, attributes?: Record<string, any>): SpanContext
-  
+
   // Pretty printing for development
   pretty(): Logger
-  
+
   // Serializers
   addSerializer(field: string, serializer: (value: unknown) => unknown): Logger
-  
+
   // Level management
   level(): LogLevel
   level(level: LogLevel): void
@@ -189,23 +197,30 @@ export const defaultSerializers: Serializers = {
     message: err.message,
     name: err.name,
     stack: err.stack,
-    ...(err as Record<string, unknown>)
+    ...(err as Record<string, unknown>),
   }),
-  req: (req: { method?: string; url?: string; headers?: unknown; connection?: { remoteAddress?: string; remotePort?: number } }) => ({
+  req: (req: {
+    method?: string
+    url?: string
+    headers?: unknown
+    connection?: { remoteAddress?: string; remotePort?: number }
+  }) => ({
     method: req.method,
     url: req.url,
     headers: req.headers,
     remoteAddress: req.connection?.remoteAddress,
-    remotePort: req.connection?.remotePort
+    remotePort: req.connection?.remotePort,
   }),
   res: (res: { statusCode?: number; headers?: unknown }) => ({
     statusCode: res.statusCode,
-    headers: res.getHeaders?.()
-  })
+    headers: res.getHeaders?.(),
+  }),
 }
 
-export const Logger = Context.GenericTag<Logger>("tuix/Logger")
+export const Logger = Context.GenericTag<Logger>('tuix/Logger')
 
-export const LoggerConfig = Context.GenericTag<LoggerConfig>("tuix/LoggerConfig")
+export const LoggerConfig = Context.GenericTag<LoggerConfig>('tuix/LoggerConfig')
 
-export const InteractiveLogRenderer = Context.GenericTag<InteractiveLogRenderer>("tuix/InteractiveLogRenderer")
+export const InteractiveLogRenderer = Context.GenericTag<InteractiveLogRenderer>(
+  'tuix/InteractiveLogRenderer'
+)

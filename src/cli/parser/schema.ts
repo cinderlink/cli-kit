@@ -2,12 +2,12 @@
  * Schema Validation for Parser
  */
 
-import { z, type ZodTypeAny } from "zod"
-import type { ParsedArgs } from "./types"
+import { z, type ZodTypeAny } from 'zod'
+import type { ParsedArgs } from './types'
 
 /**
  * Validate and transform parsed arguments using Zod schemas
- * 
+ *
  * @param result - Parsed arguments to validate
  * @param optionSchemas - Option schemas
  * @param argSchemas - Argument schemas
@@ -36,16 +36,16 @@ export function validateAndTransform(
       throw error
     }
   }
-  
+
   // Validate and transform positional arguments
   if (Object.keys(argSchemas).length > 0) {
     const newArgs: Record<string, unknown> = {}
     const argEntries = Object.entries(argSchemas)
-    
+
     // Map positional args to named args
     argEntries.forEach(([name, schema], index) => {
       const value = result.args[index]
-      
+
       try {
         if (value !== undefined) {
           newArgs[name] = schema.parse(value)
@@ -59,14 +59,16 @@ export function validateAndTransform(
         throw error
       }
     })
-    
+
     // Check for extra arguments
     const providedCount = Object.keys(result.args).length
     const expectedCount = argEntries.length
     if (providedCount > expectedCount) {
-      throw new Error(`Too many arguments provided. Expected ${expectedCount}, got ${providedCount}`)
+      throw new Error(
+        `Too many arguments provided. Expected ${expectedCount}, got ${providedCount}`
+      )
     }
-    
+
     result.args = newArgs
   }
 }

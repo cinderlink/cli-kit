@@ -2,7 +2,7 @@
  * Router Types and Interfaces
  */
 
-import type { CommandConfig, Handler, LazyHandler } from "@cli/types"
+import type { CommandConfig, Handler, LazyHandler } from '@cli/types'
 
 /**
  * Result of routing a command

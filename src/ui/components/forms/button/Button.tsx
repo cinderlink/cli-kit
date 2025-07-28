@@ -1,27 +1,27 @@
 /**
  * Button Component - JSX version with interactive states
- * 
+ *
  * A versatile button component with:
  * - Multiple variants (primary, secondary, success, danger, etc.)
  * - Size options (small, medium, large)
  * - Loading and disabled states
  * - Keyboard and mouse interaction
  * - Icon support
- * 
+ *
  * @example
  * ```tsx
  * import { Button } from 'tuix/components/forms/button'
- * 
+ *
  * function MyApp() {
  *   const loading = $state(false)
- *   
+ *
  *   return (
  *     <vstack>
  *       <Button onClick={() => console.log('Clicked!')}>
  *         Click Me
  *       </Button>
- *       
- *       <Button 
+ *
+ *       <Button
  *         variant="primary"
  *         loading={loading.value}
  *         onClick={async () => {
@@ -45,7 +45,14 @@ import { text, hstack, vstack } from '@core/view/primitives/view'
 import { style, Colors } from '@core/terminal/ansi/styles'
 
 // Types
-export type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'ghost'
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'danger'
+  | 'warning'
+  | 'info'
+  | 'ghost'
 export type ButtonSize = 'small' | 'medium' | 'large'
 
 export interface ButtonProps {
@@ -73,84 +80,82 @@ export function Button(props: ButtonProps): JSX.Element {
   const focused = $state(props.autoFocus || false)
   const pressed = $state(false)
   const hovering = $state(false)
-  
+
   // Configuration
   const variant = props.variant || 'secondary'
   const size = props.size || 'medium'
   const disabled = props.disabled || props.loading
-  
+
   // Derived styles
   const buttonStyle = $derived(() => {
     const baseStyle = getVariantStyle(variant)
     const sizeStyle = getSizeStyle(size)
     const stateStyle = getStateStyle(focused.value, pressed.value, hovering.value, disabled)
-    
+
     return style({
       ...baseStyle,
       ...sizeStyle,
       ...stateStyle,
       width: props.fullWidth ? '100%' : undefined,
-      cursor: disabled ? 'not-allowed' : 'pointer'
+      cursor: disabled ? 'not-allowed' : 'pointer',
     })
   })
-  
+
   // Event handlers
   async function handleClick() {
     if (disabled) return
-    
+
     pressed.value = true
-    
+
     try {
       await props.onClick?.()
     } finally {
       pressed.value = false
     }
   }
-  
+
   function handleKeyPress(key: string) {
     if (disabled) return
-    
+
     if (key === 'Enter' || key === ' ') {
       handleClick()
     }
   }
-  
+
   // Render content
   function renderContent(): JSX.Element {
     const content = props.loading ? renderLoadingSpinner() : props.children
-    
+
     if (!props.icon) {
-      return typeof content === 'string' 
-        ? jsx('text', { children: content })
-        : content
+      return typeof content === 'string' ? jsx('text', { children: content }) : content
     }
-    
-    const icon = typeof props.icon === 'string'
-      ? jsx('text', { children: props.icon })
-      : props.icon
-      
-    const elements = props.iconPosition === 'right' 
-      ? [content, icon]
-      : [icon, content]
-      
+
+    const icon = typeof props.icon === 'string' ? jsx('text', { children: props.icon }) : props.icon
+
+    const elements = props.iconPosition === 'right' ? [content, icon] : [icon, content]
+
     return jsx('hstack', {
       gap: 1,
-      children: elements
+      children: elements,
     })
   }
-  
+
   function renderLoadingSpinner(): JSX.Element {
     return jsx('spinner', {
       type: 'dots',
-      size: 'small'
+      size: 'small',
     })
   }
-  
+
   // Main render
   return jsx('interactive', {
     onKeyPress: handleKeyPress,
-    onMouseEnter: () => { hovering.value = true },
-    onMouseLeave: () => { hovering.value = false },
+    onMouseEnter: () => {
+      hovering.value = true
+    },
+    onMouseLeave: () => {
+      hovering.value = false
+    },
     onFocus: () => {
       focused.value = true
       props.onFocus?.()
@@ -164,8 +169,8 @@ export function Button(props: ButtonProps): JSX.Element {
     className: props.className,
     children: jsx('box', {
       style: buttonStyle.value,
-      children: renderContent()
-    })
+      children: renderContent(),
+    }),
   })
 }
 
@@ -175,40 +180,40 @@ function getVariantStyle(variant: ButtonVariant) {
     primary: {
       background: Colors.blue,
       color: Colors.white,
-      borderColor: Colors.blue
+      borderColor: Colors.blue,
     },
     secondary: {
       background: Colors.gray,
       color: Colors.white,
-      borderColor: Colors.gray
+      borderColor: Colors.gray,
     },
     success: {
       background: Colors.green,
       color: Colors.white,
-      borderColor: Colors.green
+      borderColor: Colors.green,
     },
     danger: {
       background: Colors.red,
       color: Colors.white,
-      borderColor: Colors.red
+      borderColor: Colors.red,
     },
     warning: {
       background: Colors.yellow,
       color: Colors.black,
-      borderColor: Colors.yellow
+      borderColor: Colors.yellow,
     },
     info: {
       background: Colors.cyan,
       color: Colors.white,
-      borderColor: Colors.cyan
+      borderColor: Colors.cyan,
     },
     ghost: {
       background: 'transparent',
       color: Colors.white,
-      borderColor: Colors.gray
-    }
+      borderColor: Colors.gray,
+    },
   }
-  
+
   return variants[variant]
 }
 
@@ -216,40 +221,40 @@ function getSizeStyle(size: ButtonSize) {
   const sizes = {
     small: {
       padding: { horizontal: 2, vertical: 0 },
-      minHeight: 1
+      minHeight: 1,
     },
     medium: {
       padding: { horizontal: 3, vertical: 1 },
-      minHeight: 3
+      minHeight: 3,
     },
     large: {
       padding: { horizontal: 4, vertical: 2 },
-      minHeight: 5
-    }
+      minHeight: 5,
+    },
   }
-  
+
   return sizes[size]
 }
 
 function getStateStyle(focused: boolean, pressed: boolean, hovering: boolean, disabled: boolean) {
   const stateStyle: any = {
     border: 'single',
-    opacity: disabled ? 0.5 : 1
+    opacity: disabled ? 0.5 : 1,
   }
-  
+
   if (pressed) {
     stateStyle.transform = 'scale(0.95)'
   }
-  
+
   if (focused) {
     stateStyle.borderStyle = 'double'
     stateStyle.borderColor = Colors.white
   }
-  
+
   if (hovering && !disabled) {
     stateStyle.brightness = 1.2
   }
-  
+
   return stateStyle
 }
 
@@ -267,7 +272,7 @@ export const ghostButton = (props: ButtonProps) => <Button {...props} variant="g
 export function ButtonGroup({ children }: { children: JSX.Element[] }): JSX.Element {
   return jsx('hstack', {
     gap: 2,
-    children
+    children,
   })
 }
 
@@ -280,18 +285,10 @@ export function SubmitCancelButtons(props: {
 }): JSX.Element {
   return (
     <ButtonGroup>
-      <Button 
-        variant="primary" 
-        onClick={props.onSubmit}
-        loading={props.loading}
-      >
+      <Button variant="primary" onClick={props.onSubmit} loading={props.loading}>
         {props.submitText || 'Submit'}
       </Button>
-      <Button 
-        variant="secondary" 
-        onClick={props.onCancel}
-        disabled={props.loading}
-      >
+      <Button variant="secondary" onClick={props.onCancel} disabled={props.loading}>
         {props.cancelText || 'Cancel'}
       </Button>
     </ButtonGroup>

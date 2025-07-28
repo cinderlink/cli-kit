@@ -1,6 +1,6 @@
 /**
  * Error Type Definitions and Guards
- * 
+ *
  * Type aliases and utility functions for error handling
  */
 
@@ -12,15 +12,15 @@ import type {
   ConfigError,
   ComponentError,
   ApplicationError,
-  ValidationError
-} from "./base"
+  ValidationError,
+} from './base'
 
 /**
  * Union type of all application errors
- * 
+ *
  * This type represents any error that can occur in the TUIX framework.
  * Use this for exhaustive error handling in catch blocks.
- * 
+ *
  * @example
  * ```typescript
  * Effect.catchTag("TerminalError", (error) => ...)
@@ -29,7 +29,7 @@ import type {
  *   // ... handle all error types
  * ```
  */
-export type AppError = 
+export type AppError =
   | TerminalError
   | InputError
   | RenderError
@@ -41,7 +41,7 @@ export type AppError =
 
 /**
  * Type guard to check if a value is an AppError
- * 
+ *
  * @example
  * ```typescript
  * try {
@@ -56,19 +56,19 @@ export type AppError =
  */
 export function isAppError(value: unknown): value is AppError {
   if (!value || typeof value !== 'object') return false
-  
+
   const error = value as { _tag?: string }
   const validTags = [
-    "TerminalError",
-    "InputError", 
-    "RenderError",
-    "StorageError",
-    "ConfigError",
-    "ComponentError",
-    "ApplicationError",
-    "ValidationError"
+    'TerminalError',
+    'InputError',
+    'RenderError',
+    'StorageError',
+    'ConfigError',
+    'ComponentError',
+    'ApplicationError',
+    'ValidationError',
   ]
-  
+
   return typeof error._tag === 'string' && validTags.includes(error._tag)
 }
 
@@ -80,13 +80,18 @@ export type CriticalError = TerminalError | ApplicationError
 /**
  * Recoverable errors that can be handled without terminating
  */
-export type RecoverableError = InputError | RenderError | StorageError | ConfigError | ValidationError
+export type RecoverableError =
+  | InputError
+  | RenderError
+  | StorageError
+  | ConfigError
+  | ValidationError
 
 /**
  * Check if an error is critical
  */
 export function isCriticalError(error: AppError): error is CriticalError {
-  return error._tag === "TerminalError" || error._tag === "ApplicationError"
+  return error._tag === 'TerminalError' || error._tag === 'ApplicationError'
 }
 
 /**
@@ -103,22 +108,22 @@ export const ErrorCategories = {
   /**
    * Errors that should trigger immediate termination
    */
-  critical: ["TerminalError", "ApplicationError"] as const,
-  
+  critical: ['TerminalError', 'ApplicationError'] as const,
+
   /**
    * Errors that can be retried
    */
-  retryable: ["InputError", "StorageError", "RenderError"] as const,
-  
+  retryable: ['InputError', 'StorageError', 'RenderError'] as const,
+
   /**
    * Errors that need user intervention
    */
-  userFixable: ["ConfigError", "ValidationError"] as const,
-  
+  userFixable: ['ConfigError', 'ValidationError'] as const,
+
   /**
    * Errors that can be safely ignored
    */
-  ignorable: ["RenderError"] as const
+  ignorable: ['RenderError'] as const,
 } as const
 
 /**

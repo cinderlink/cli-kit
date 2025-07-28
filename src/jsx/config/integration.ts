@@ -2,10 +2,10 @@
  * JSX Config Integration Utilities
  */
 
-import { Effect } from "effect"
-import type { Config, ConfigObject, ConfigSchema } from "tuix/config/types"
-import { createConfig } from "tuix/config"
-import { setGlobalConfig, getGlobalConfig } from "./stores/configStore"
+import { Effect } from 'effect'
+import type { Config, ConfigObject, ConfigSchema } from 'tuix/config/types'
+import { createConfig } from 'tuix/config'
+import { setGlobalConfig, getGlobalConfig } from './stores/configStore'
 
 /**
  * Effect layer for configuration
@@ -17,24 +17,25 @@ export const ConfigLayer = (options?: {
   envPrefix?: string
   loadUserConfig?: boolean
   loadProjectConfig?: boolean
-}) => Effect.gen(function* (_) {
-  const builder = createConfig()
-  
-  if (options?.name) builder.name(options.name)
-  if (options?.defaults) builder.defaults(options.defaults)
-  if (options?.schema) builder.schema(options.schema)
-  if (options?.envPrefix) builder.envPrefix(options.envPrefix)
-  if (options?.loadUserConfig) builder.withUserConfig()
-  if (options?.loadProjectConfig) builder.withProjectConfig()
-  
-  const config = yield* _(Effect.promise(() => builder.build()))
-  
-  return config
-}).pipe(
-  Effect.map(config => ({
-    Config: config
-  }))
-)
+}) =>
+  Effect.gen(function* (_) {
+    const builder = createConfig()
+
+    if (options?.name) builder.name(options.name)
+    if (options?.defaults) builder.defaults(options.defaults)
+    if (options?.schema) builder.schema(options.schema)
+    if (options?.envPrefix) builder.envPrefix(options.envPrefix)
+    if (options?.loadUserConfig) builder.withUserConfig()
+    if (options?.loadProjectConfig) builder.withProjectConfig()
+
+    const config = yield* _(Effect.promise(() => builder.build()))
+
+    return config
+  }).pipe(
+    Effect.map(config => ({
+      Config: config,
+    }))
+  )
 
 /**
  * Create a JSX app with configuration
@@ -52,20 +53,20 @@ export async function createJSXConfigApp(
 ): Promise<{ config: Config; app: JSX.Element }> {
   // Create config
   const builder = createConfig()
-  
+
   if (configOptions?.name) builder.name(configOptions.name)
   if (configOptions?.defaults) builder.defaults(configOptions.defaults)
   if (configOptions?.schema) builder.schema(configOptions.schema)
   if (configOptions?.envPrefix) builder.envPrefix(configOptions.envPrefix)
   if (configOptions?.loadUserConfig) builder.withUserConfig()
   if (configOptions?.loadProjectConfig) builder.withProjectConfig()
-  
+
   const config = await builder.build()
   setGlobalConfig(config)
-  
+
   // Get app element
   const app = typeof AppComponent === 'function' ? AppComponent() : AppComponent
-  
+
   return { config, app }
 }
 
@@ -80,21 +81,21 @@ export interface ConfigOptionsHelper {
 
 export function getConfigOptions(): ConfigOptionsHelper {
   const config = getGlobalConfig()
-  
+
   return {
     getDefault: (key: string) => {
       // Look for option defaults in config
       return config.get(`cli.defaults.${key}`)
     },
-    
-    applyDefaults: (options) => {
-      const defaults = config.get("cli.defaults") as ConfigObject || {}
+
+    applyDefaults: options => {
+      const defaults = (config.get('cli.defaults') as ConfigObject) || {}
       return { ...defaults, ...options }
     },
-    
-    validateOptions: (options) => {
+
+    validateOptions: options => {
       // Validate against schema if available
-      const schema = config.get("cli.schema") as any
+      const schema = config.get('cli.schema') as any
       if (schema) {
         const result = schema.safeParse(options)
         if (!result.success) {
@@ -103,6 +104,6 @@ export function getConfigOptions(): ConfigOptionsHelper {
         return result.data
       }
       return options
-    }
+    },
   }
 }

@@ -1,13 +1,13 @@
 /**
  * UI Components Module
- * 
+ *
  * This module provides the complete collection of UI components organized by category.
  * All components follow the Tuix framework standards and provide consistent APIs.
- * 
+ *
  * @example
  * ```typescript
  * import { Button, Modal, Table } from 'tuix/components'
- * 
+ *
  * const app = (
  *   <Modal>
  *     <Table data={myData} />
@@ -20,7 +20,7 @@
 // Data Components
 export * from './data/index.js'
 
-// Display Components  
+// Display Components
 export * from './display/index.js'
 
 // Feedback Components

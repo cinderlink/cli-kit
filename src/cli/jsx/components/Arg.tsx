@@ -1,6 +1,6 @@
 /**
  * Arg Component
- * 
+ *
  * Defines a command argument
  */
 
@@ -27,7 +27,7 @@ export function Arg(props: ArgProps): JSX.Element {
         required: props.required,
         type: props.type,
         choices: props.choices,
-        default: props.default
+        default: props.default,
       }}
     >
       {props.children}

@@ -1,11 +1,11 @@
 /**
  * Hook Event Types
- * 
+ *
  * Type definitions for all hook events in the CLI framework
  */
 
-import type { Effect } from "effect"
-import type { BaseEvent } from "@core/model/events/eventBus"
+import type { Effect } from 'effect'
+import type { BaseEvent } from '@core/model/events/eventBus'
 
 /**
  * Hook event types
@@ -103,7 +103,7 @@ export interface AfterRenderEvent extends BaseEvent {
 /**
  * Union type of all hook events
  */
-export type HookEvent = 
+export type HookEvent =
   | BeforeInitEvent
   | AfterInitEvent
   | BeforeCommandEvent
@@ -131,7 +131,10 @@ export interface Subscription {
  * Hook interface
  */
 export interface Hook<T extends BaseEvent> {
-  tap(name: string, fn: (event: T) => Effect.Effect<void, never> | void): Effect.Effect<Subscription, never>
+  tap(
+    name: string,
+    fn: (event: T) => Effect.Effect<void, never> | void
+  ): Effect.Effect<Subscription, never>
   tapAsync(name: string, fn: (event: T) => Promise<void>): Effect.Effect<Subscription, never>
   untap(name: string): void
 }

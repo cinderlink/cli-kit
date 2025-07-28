@@ -1,6 +1,6 @@
 /**
  * Table Component - Tabular data display with advanced features
- * 
+ *
  * Features:
  * - Dynamic column configuration
  * - Row selection (single/multi)
@@ -9,23 +9,23 @@
  * - Keyboard navigation
  * - Custom cell rendering
  * - Responsive column widths
- * 
+ *
  * @example
  * ```tsx
  * import { Table } from 'tuix/components/data/table'
- * 
+ *
  * function MyApp() {
  *   const data = [
  *     { id: 1, name: 'John', age: 30 },
  *     { id: 2, name: 'Jane', age: 25 }
  *   ]
- *   
+ *
  *   const columns = [
  *     { key: 'id', label: 'ID', width: 10 },
  *     { key: 'name', label: 'Name', width: 20 },
  *     { key: 'age', label: 'Age', width: 10 }
  *   ]
- *   
+ *
  *   return (
  *     <Table
  *       data={data}
@@ -102,7 +102,7 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
   const showBorder = props.showBorder !== false
   const showRowNumbers = props.showRowNumbers || false
   const focusable = props.focusable !== false
-  
+
   // Internal state
   const focused = $state(props.autoFocus || false)
   const hovering = $state(false)
@@ -112,54 +112,46 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
   const internalSelectedIndices = $state<number[]>([])
   const internalSortColumn = $state<string | null>(null)
   const internalSortDirection = $state<'asc' | 'desc'>('asc')
-  
+
   // Selection mode
-  const selectionMode = props.selectionMode || 
-    (props.selectedIndices || props.onMultiSelect ? 'multi' : 'single')
-  
+  const selectionMode =
+    props.selectionMode || (props.selectedIndices || props.onMultiSelect ? 'multi' : 'single')
+
   // Selected index management
   const selectedIndex = $derived(() => {
     if (props.selectedIndex !== undefined) {
-      return isStateRune(props.selectedIndex) 
-        ? props.selectedIndex.value 
-        : props.selectedIndex
+      return isStateRune(props.selectedIndex) ? props.selectedIndex() : props.selectedIndex
     }
-    return internalSelectedIndex.value
+    return internalSelectedIndex()
   })
-  
+
   const selectedIndices = $derived(() => {
     if (props.selectedIndices !== undefined) {
-      return isStateRune(props.selectedIndices)
-        ? props.selectedIndices.value
-        : props.selectedIndices
+      return isStateRune(props.selectedIndices) ? props.selectedIndices() : props.selectedIndices
     }
-    return internalSelectedIndices.value
+    return internalSelectedIndices()
   })
-  
+
   // Sort column management
   const sortColumn = $derived(() => {
     if (props.sortColumn !== undefined) {
-      return isStateRune(props.sortColumn)
-        ? props.sortColumn.value
-        : props.sortColumn
+      return isStateRune(props.sortColumn) ? props.sortColumn() : props.sortColumn
     }
-    return internalSortColumn.value
+    return internalSortColumn()
   })
-  
+
   const sortDirection = $derived(() => {
     if (props.sortDirection !== undefined) {
-      return isStateRune(props.sortDirection)
-        ? props.sortDirection.value
-        : props.sortDirection
+      return isStateRune(props.sortDirection) ? props.sortDirection() : props.sortDirection
     }
-    return internalSortDirection.value
+    return internalSortDirection()
   })
-  
+
   // Calculate column widths
   const columnWidths = $derived(() => {
     return props.columns.map(col => {
       if (col.width) return col.width
-      
+
       // Auto-calculate based on content
       const headerWidth = stringWidth(col.label) + 2
       const maxContentWidth = Math.max(
@@ -170,68 +162,65 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
           return stringWidth(formatted) + 2
         })
       )
-      
-      return Math.min(
-        Math.max(col.minWidth || 5, maxContentWidth),
-        col.maxWidth || 30
-      )
+
+      return Math.min(Math.max(col.minWidth || 5, maxContentWidth), col.maxWidth || 30)
     })
   })
-  
+
   // Filter data
   const filteredData = $derived(() => {
-    if (!props.filter && !filterValue.value) return props.data
-    
+    if (!props.filter && !filterValue()) return props.data
+
     const filterFn = props.filter
       ? typeof props.filter === 'function'
         ? props.filter
         : (row: T) => {
-            return Object.values(row).some(value => 
+            return Object.values(row).some(value =>
               String(value).toLowerCase().includes(props.filter.toLowerCase())
             )
           }
       : (row: T) => {
-          return Object.values(row).some(value => 
-            String(value).toLowerCase().includes(filterValue.value.toLowerCase())
+          return Object.values(row).some(value =>
+            String(value).toLowerCase().includes(filterValue().toLowerCase())
           )
         }
-    
+
     return props.data.filter(filterFn)
   })
-  
+
   // Sort data
   const sortedData = $derived(() => {
-    if (!sortColumn.value) return filteredData.value
-    
-    const column = props.columns.find(col => col.key === sortColumn.value)
-    if (!column || !column.sortable) return filteredData.value
-    
-    return [...filteredData.value].sort((a, b) => {
+    if (!sortColumn()) return filteredData()
+
+    const column = props.columns.find(col => col.key === sortColumn())
+    if (!column || !column.sortable) return filteredData()
+
+    return [...filteredData()].sort((a, b) => {
       const aVal = a[column.key as keyof T]
       const bVal = b[column.key as keyof T]
-      
+
       let result = 0
       if (aVal < bVal) result = -1
       else if (aVal > bVal) result = 1
-      
-      return sortDirection.value === 'asc' ? result : -result
+
+      return sortDirection() === 'asc' ? result : -result
     })
   })
-  
+
   // Visible rows (for virtualization)
   const visibleRows = $derived(() => {
     const height = props.height || props.maxHeight || 10
-    const start = scrollOffset.value
+    const start = scrollOffset()
     const end = start + height
-    return sortedData.value.slice(start, end)
+    return sortedData().slice(start, end)
   })
-  
+
   // Calculate if scrolling is needed
   const canScroll = $derived(() => {
     const height = props.height || props.maxHeight || 10
-    return sortedData.value.length > height
+    return sortedData().length > height
   })
-  
+
   // Update scroll offset to keep selected row visible
   // Only run effect in component context (not in tests)
   if (typeof $effect !== 'undefined') {
@@ -239,12 +228,12 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
       $effect(() => {
         if (selectionMode === 'single') {
           const height = props.height || props.maxHeight || 10
-          const index = selectedIndex.value
-          
-          if (index < scrollOffset.value) {
-            scrollOffset.value = index
-          } else if (index >= scrollOffset.value + height) {
-            scrollOffset.value = index - height + 1
+          const index = selectedIndex()
+
+          if (index < scrollOffset()) {
+            scrollOffset.$set(index)
+          } else if (index >= scrollOffset() + height) {
+            scrollOffset.$set(index - height + 1)
           }
         }
       })
@@ -252,11 +241,11 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
       // Ignore effect errors in test environment
     }
   }
-  
+
   // Keyboard navigation
   function handleKeyPress(key: string) {
-    if (!focused.value || !focusable) return
-    
+    if (!focused() || !focusable) return
+
     switch (key) {
       case 'ArrowUp':
       case 'k':
@@ -278,7 +267,7 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
         selectIndex(0)
         break
       case 'End':
-        selectIndex(sortedData.value.length - 1)
+        selectIndex(sortedData().length - 1)
         break
       case 'PageUp':
         moveSelection(-(props.height || 10))
@@ -289,88 +278,86 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
       case 'Enter':
       case ' ':
         if (selectionMode === 'multi') {
-          toggleMultiSelect(selectedIndex.value)
+          toggleMultiSelect(selectedIndex())
         } else if (selectionMode === 'single') {
-          const row = sortedData.value[selectedIndex.value]
-          props.onSelect?.(row, selectedIndex.value)
+          const row = sortedData()[selectedIndex()]
+          props.onSelect?.(row, selectedIndex())
         }
         break
     }
   }
-  
+
   function moveSelection(delta: number) {
-    const newIndex = selectedIndex.value + delta
-    const maxIndex = sortedData.value.length - 1
-    
+    const newIndex = selectedIndex() + delta
+    const maxIndex = sortedData().length - 1
+
     if (props.wrap) {
-      selectIndex((newIndex + sortedData.value.length) % sortedData.value.length)
+      selectIndex((newIndex + sortedData().length) % sortedData().length)
     } else {
       selectIndex(Math.max(0, Math.min(maxIndex, newIndex)))
     }
   }
-  
+
   function selectIndex(index: number) {
     if (selectionMode === 'single') {
       if (isStateRune(props.selectedIndex)) {
-        props.selectedIndex.value = index
+        props.selectedIndex.$set(index)
       } else {
-        internalSelectedIndex.value = index
+        internalSelectedIndex.$set(index)
       }
     }
   }
-  
+
   function toggleMultiSelect(index: number) {
-    const indices = [...selectedIndices.value]
+    const indices = [...selectedIndices()]
     const idx = indices.indexOf(index)
-    
+
     if (idx >= 0) {
       indices.splice(idx, 1)
     } else {
       indices.push(index)
       indices.sort((a, b) => a - b)
     }
-    
+
     if (isStateRune(props.selectedIndices)) {
-      props.selectedIndices.value = indices
+      props.selectedIndices.$set(indices)
     } else {
-      internalSelectedIndices.value = indices
+      internalSelectedIndices.$set(indices)
     }
-    
-    const rows = indices.map(i => sortedData.value[i])
+
+    const rows = indices.map(i => sortedData()[i])
     props.onMultiSelect?.(rows, indices)
   }
-  
+
   // Sort handling
   function handleSort(column: Column<T>) {
     if (!column.sortable) return
-    
-    const newDirection = sortColumn.value === column.key && sortDirection.value === 'asc' 
-      ? 'desc' 
-      : 'asc'
-    
+
+    const newDirection = sortColumn() === column.key && sortDirection() === 'asc' ? 'desc' : 'asc'
+
     if (isStateRune(props.sortColumn)) {
-      props.sortColumn.value = column.key
+      props.sortColumn.$set(column.key)
     } else {
-      internalSortColumn.value = column.key
+      internalSortColumn.$set(column.key)
     }
-    
+
     if (isStateRune(props.sortDirection)) {
-      props.sortDirection.value = newDirection
+      props.sortDirection.$set(newDirection)
     } else {
-      internalSortDirection.value = newDirection
+      internalSortDirection.$set(newDirection)
     }
-    
+
     props.onSort?.(column.key, newDirection)
   }
-  
+
   // Render helpers
   function renderHeader(): JSX.Element | null {
     if (!showHeader) return null
-    
+
     const headerCells = props.columns.map((col, index) => {
-      const width = columnWidths.value[index]
-      const isSorting = sortColumn.value === col.key
-      
+      const width = columnWidths()[index]
+      const isSorting = sortColumn() === col.key
+
       return jsx('interactive', {
         onClick: () => handleSort(col),
         children: jsx('text', {
@@ -378,39 +365,40 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
             .width(width)
             .foreground(col.sortable ? Colors.cyan : Colors.white)
             .bold(isSorting)
-            .textAlign(col.align || 'left'),
-          children: col.label + (isSorting ? (sortDirection.value === 'asc' ? ' ▲' : ' ▼') : '')
-        })
+            .align(col.align || 'left'),
+          children: col.label + (isSorting ? (sortDirection() === 'asc' ? ' ▲' : ' ▼') : ''),
+        }),
       })
     })
-    
+
     if (showRowNumbers) {
       headerCells.unshift(
         jsx('text', {
           style: style().width(5).foreground(Colors.gray),
-          children: '#'
+          children: '#',
         })
       )
     }
-    
+
     return jsx('hstack', {
       gap: 1,
       style: props.headerStyle || style().borderBottom('single').marginBottom(1),
-      children: headerCells
+      children: headerCells,
     })
   }
-  
+
   function renderRow(row: T, index: number): JSX.Element {
-    const actualIndex = scrollOffset.value + index
-    const isSelected = selectionMode === 'single' 
-      ? actualIndex === selectedIndex.value
-      : selectedIndices.value.includes(actualIndex)
-    const isFocused = focused.value && actualIndex === selectedIndex.value
-    
+    const actualIndex = scrollOffset() + index
+    const isSelected =
+      selectionMode === 'single'
+        ? actualIndex === selectedIndex()
+        : selectedIndices().includes(actualIndex)
+    const isFocused = focused() && actualIndex === selectedIndex()
+
     const cells = props.columns.map((col, colIndex) => {
       const value = row[col.key as keyof T]
-      const width = columnWidths.value[colIndex]
-      
+      const width = columnWidths()[colIndex]
+
       let content: JSX.Element | string
       if (col.render) {
         content = col.render(value, row, actualIndex)
@@ -419,39 +407,37 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
       } else {
         content = String(value)
       }
-      
-      const cellStyle = typeof props.cellStyle === 'function'
-        ? props.cellStyle(value, row, col)
-        : props.cellStyle
-      
-      const colStyle = typeof col.style === 'function'
-        ? col.style(value, row)
-        : col.style
-      
+
+      const cellStyle =
+        typeof props.cellStyle === 'function' ? props.cellStyle(value, row, col) : props.cellStyle
+
+      const colStyle = typeof col.style === 'function' ? col.style(value, row) : col.style
+
       return jsx('text', {
         style: style({
           ...cellStyle,
           ...colStyle,
           width,
-          textAlign: col.align || 'left'
+          align: col.align || 'left',
         }),
-        children: content
+        children: content,
       })
     })
-    
+
     if (showRowNumbers) {
       cells.unshift(
         jsx('text', {
           style: style().width(5).foreground(Colors.gray),
-          children: (actualIndex + 1).toString()
+          children: (actualIndex + 1).toString(),
         })
       )
     }
-    
-    const rowStyle = typeof props.rowStyle === 'function'
-      ? props.rowStyle(row, actualIndex, isSelected)
-      : props.rowStyle
-    
+
+    const rowStyle =
+      typeof props.rowStyle === 'function'
+        ? props.rowStyle(row, actualIndex, isSelected)
+        : props.rowStyle
+
     return jsx('interactive', {
       onClick: () => {
         selectIndex(actualIndex)
@@ -472,29 +458,32 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
           ...rowStyle,
           background: isSelected ? Colors.blue : 'transparent',
           foreground: isSelected ? Colors.white : Colors.white,
-          bold: isFocused
+          bold: isFocused,
         }),
-        children: cells
-      })
+        children: cells,
+      }),
     })
   }
-  
+
   function renderEmptyState(): JSX.Element {
     if (typeof props.emptyMessage === 'string') {
       return jsx('text', {
         style: style().foreground(Colors.gray).italic(),
-        children: props.emptyMessage || 'No data to display'
+        children: props.emptyMessage || 'No data to display',
       })
     }
-    return props.emptyMessage || jsx('text', {
-      style: style().foreground(Colors.gray).italic(),
-      children: 'No data to display'
-    })
+    return (
+      props.emptyMessage ||
+      jsx('text', {
+        style: style().foreground(Colors.gray).italic(),
+        children: 'No data to display',
+      })
+    )
   }
-  
+
   function renderFilter(): JSX.Element | null {
     if (!props.showFilter) return null
-    
+
     return jsx('hstack', {
       gap: 1,
       style: style().marginBottom(1),
@@ -503,33 +492,33 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
         jsx('text-input', {
           value: filterValue,
           placeholder: props.filterPlaceholder || 'Filter...',
-          onSubmit: (value) => {
-            filterValue.value = value
+          onSubmit: value => {
+            filterValue.$set(value)
             props.onFilter?.(value)
-          }
-        })
-      ]
+          },
+        }),
+      ],
     })
   }
-  
+
   function renderScrollbar(): JSX.Element | null {
-    if (!props.showScrollbar || !canScroll.value) return null
-    
+    if (!props.showScrollbar || !canScroll()) return null
+
     const height = props.height || props.maxHeight || 10
-    const scrollPercent = scrollOffset.value / (sortedData.value.length - height)
+    const scrollPercent = scrollOffset() / (sortedData().length - height)
     const thumbPosition = Math.floor(scrollPercent * (height - 1))
-    
+
     return jsx('vstack', {
       style: style().position('absolute').right(0).top(0),
-      children: Array.from({ length: height }, (_, i) => 
+      children: Array.from({ length: height }, (_, i) =>
         jsx('text', {
           children: i === thumbPosition ? '█' : '│',
-          style: style().foreground(i === thumbPosition ? Colors.white : Colors.gray)
+          style: style().foreground(i === thumbPosition ? Colors.white : Colors.gray),
         })
-      )
+      ),
     })
   }
-  
+
   // Main render
   const tableStyle = $derived(() => {
     const baseStyle = props.style || {}
@@ -540,38 +529,44 @@ export function Table<T = any>(props: TableProps<T>): JSX.Element {
       maxHeight: props.maxHeight,
       overflow: 'hidden',
       border: showBorder ? 'single' : 'none',
-      padding: showBorder ? 1 : 0
+      padding: showBorder ? 1 : 0,
     })
   })
-  
+
   return jsx('interactive', {
     onKeyPress: handleKeyPress,
-    onFocus: () => { focused.value = true },
-    onBlur: () => { focused.value = false },
-    onMouseEnter: () => { hovering.value = true },
-    onMouseLeave: () => { hovering.value = false },
+    onFocus: () => {
+      focused.$set(true)
+    },
+    onBlur: () => {
+      focused.$set(false)
+    },
+    onMouseEnter: () => {
+      hovering.$set(true)
+    },
+    onMouseLeave: () => {
+      hovering.$set(false)
+    },
     focusable,
     className: props.className,
     children: jsx('vstack', {
-      style: tableStyle.value,
+      style: tableStyle(),
       children: [
         renderFilter(),
         renderHeader(),
-        sortedData.value.length === 0
+        sortedData().length === 0
           ? renderEmptyState()
           : jsx('box', {
-              style: style().position('relative'),
+              style: style(),
               children: [
                 jsx('vstack', {
-                  children: visibleRows.value.map((row, index) => 
-                    renderRow(row, index)
-                  )
+                  children: visibleRows().map((row, index) => renderRow(row, index)),
                 }),
-                renderScrollbar()
-              ]
-            })
-      ]
-    })
+                renderScrollbar(),
+              ],
+            }),
+      ],
+    }),
   })
 }
 
@@ -582,7 +577,7 @@ export function DataTable<T = any>(props: TableProps<T>): JSX.Element {
     showHeader: true,
     showScrollbar: true,
     highlightOnFocus: true,
-    ...props
+    ...props,
   })
 }
 
@@ -593,8 +588,9 @@ export function CompactTable<T = any>(props: TableProps<T>): JSX.Element {
     showScrollbar: false,
     ...props,
     headerStyle: style().foreground(Colors.gray).marginBottom(0),
-    rowStyle: (_, __, selected) => style()
-      .background(selected ? Colors.blue : 'transparent')
-      .foreground(selected ? Colors.white : Colors.white)
+    rowStyle: (_, __, selected) =>
+      style()
+        .background(selected ? Colors.blue : 'transparent')
+        .foreground(selected ? Colors.white : Colors.white),
   })
 }

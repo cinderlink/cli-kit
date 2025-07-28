@@ -13,7 +13,16 @@ export interface RenderTreeNode {
 export interface DebugEvent {
   id: string
   timestamp: Date
-  category: 'scope' | 'jsx' | 'render' | 'lifecycle' | 'match' | 'performance' | 'error' | 'system' | 'logger'
+  category:
+    | 'scope'
+    | 'jsx'
+    | 'render'
+    | 'lifecycle'
+    | 'match'
+    | 'performance'
+    | 'error'
+    | 'system'
+    | 'logger'
   level: 'debug' | 'info' | 'warn' | 'error'
   message: string
   data?: unknown
@@ -56,6 +65,8 @@ export interface DebugConfig {
   capturePerformance: boolean
   autoWrap: boolean
 }
+
+export type DebugTab = 'scopes' | 'events' | 'performance' | 'state'
 
 export interface DebugHooks {
   useDebugState: () => DebugState

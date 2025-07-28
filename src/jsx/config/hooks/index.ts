@@ -7,5 +7,5 @@ export {
   useConfigValue,
   useConfigValues,
   useConfigObject,
-  createTypedConfig
-} from "./useConfig"
+  createTypedConfig,
+} from './useConfig'

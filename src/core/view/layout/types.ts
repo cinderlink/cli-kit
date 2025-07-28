@@ -1,11 +1,11 @@
 /**
  * Layout Types - Common types and interfaces for the layout system
- * 
+ *
  * This module defines the fundamental types for building flexible
  * layouts in TUI applications, inspired by CSS flexbox and grid.
  */
 
-import type { View } from "@core/types"
+import type { View } from '@core/types'
 
 // =============================================================================
 // Flexbox Types
@@ -16,10 +16,10 @@ import type { View } from "@core/types"
  * Determines whether items are laid out in rows or columns.
  */
 export enum FlexDirection {
-  Row = "row",
-  Column = "column",
-  RowReverse = "row-reverse",
-  ColumnReverse = "column-reverse"
+  Row = 'row',
+  Column = 'column',
+  RowReverse = 'row-reverse',
+  ColumnReverse = 'column-reverse',
 }
 
 /**
@@ -27,12 +27,12 @@ export enum FlexDirection {
  * Controls how space is distributed between and around items.
  */
 export enum JustifyContent {
-  Start = "start",
-  End = "end",
-  Center = "center",
-  SpaceBetween = "space-between",
-  SpaceAround = "space-around",
-  SpaceEvenly = "space-evenly"
+  Start = 'start',
+  End = 'end',
+  Center = 'center',
+  SpaceBetween = 'space-between',
+  SpaceAround = 'space-around',
+  SpaceEvenly = 'space-evenly',
 }
 
 /**
@@ -40,11 +40,11 @@ export enum JustifyContent {
  * Determines how items are aligned perpendicular to the main axis.
  */
 export enum AlignItems {
-  Start = "start",
-  End = "end",
-  Center = "center",
-  Stretch = "stretch",
-  Baseline = "baseline"
+  Start = 'start',
+  End = 'end',
+  Center = 'center',
+  Stretch = 'stretch',
+  Baseline = 'baseline',
 }
 
 /**
@@ -52,9 +52,9 @@ export enum AlignItems {
  * Determines if items should wrap when they overflow the container.
  */
 export enum FlexWrap {
-  NoWrap = "nowrap",
-  Wrap = "wrap",
-  WrapReverse = "wrap-reverse"
+  NoWrap = 'nowrap',
+  Wrap = 'wrap',
+  WrapReverse = 'wrap-reverse',
 }
 
 /**
@@ -66,7 +66,7 @@ export interface FlexItem {
   readonly flex?: number
   readonly grow?: number
   readonly shrink?: number
-  readonly basis?: number | "auto"
+  readonly basis?: number | 'auto'
   readonly alignSelf?: AlignItems
   readonly order?: number
 }
@@ -109,11 +109,11 @@ export interface GridTemplate {
  * Supports fixed sizes, fractions, and content-based sizing.
  */
 export type GridTrack =
-  | { type: "fixed"; size: number }
-  | { type: "fraction"; fraction: number }
-  | { type: "auto" }
-  | { type: "min-content" }
-  | { type: "max-content" }
+  | { type: 'fixed'; size: number }
+  | { type: 'fraction'; fraction: number }
+  | { type: 'auto' }
+  | { type: 'min-content' }
+  | { type: 'max-content' }
 
 /**
  * Grid item placement controls where an item appears in the grid.
@@ -153,7 +153,7 @@ export interface GridProps {
   readonly alignItems?: AlignItems
   readonly autoColumns?: GridTrack
   readonly autoRows?: GridTrack
-  readonly autoFlow?: "row" | "column" | "row-dense" | "column-dense"
+  readonly autoFlow?: 'row' | 'column' | 'row-dense' | 'column-dense'
   readonly padding?: {
     top?: number
     right?: number
@@ -218,8 +218,8 @@ export interface SpacerProps {
  * Controls the direction of the visual separator line.
  */
 export enum DividerOrientation {
-  Horizontal = "horizontal",
-  Vertical = "vertical"
+  Horizontal = 'horizontal',
+  Vertical = 'vertical',
 }
 
 /**

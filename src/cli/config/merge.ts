@@ -2,18 +2,18 @@
  * Configuration Merging Utilities
  */
 
-import type { CLIConfig, CommandConfig, CLIContext } from "@cli/types"
+import type { CLIConfig, CommandConfig, CLIContext } from '@cli/types'
 
 /**
  * Deep merge multiple CLI configurations
- * 
+ *
  * This function combines multiple CLI configurations, with later configurations
  * taking precedence. It handles:
  * - Deep merging of nested command structures
  * - Hook composition (all hooks are called in order)
  * - Option and argument merging
  * - Plugin configuration combination
- * 
+ *
  * @param base - The base configuration
  * @param configs - Additional configurations to merge
  * @returns Merged configuration
@@ -125,27 +125,30 @@ function composePostCommandHooks(
  */
 export function expandAliases(config: CLIConfig): CLIConfig
 export function expandAliases(commandName: string, aliases: Record<string, string>): string
-export function expandAliases(configOrCommand: CLIConfig | string, aliases?: Record<string, string>): CLIConfig | string {
+export function expandAliases(
+  configOrCommand: CLIConfig | string,
+  aliases?: Record<string, string>
+): CLIConfig | string {
   // Single command alias expansion
   if (typeof configOrCommand === 'string' && aliases) {
     let command = configOrCommand
-    
+
     function expandAlias(cmd: string): string {
       if (aliases && aliases[cmd]) {
         // Prevent infinite recursion
         const visited = new Set([cmd])
         let expanded = aliases[cmd]
-        
+
         while (aliases && aliases[expanded] && !visited.has(expanded)) {
           visited.add(expanded)
           expanded = aliases[expanded] || expanded
         }
-        
+
         return expanded
       }
       return cmd
     }
-    
+
     return expandAlias(command)
   }
 
@@ -155,33 +158,35 @@ export function expandAliases(configOrCommand: CLIConfig | string, aliases?: Rec
     return config
   }
 
-  function expandCommandAliases(commands: Record<string, CommandConfig>): Record<string, CommandConfig> {
+  function expandCommandAliases(
+    commands: Record<string, CommandConfig>
+  ): Record<string, CommandConfig> {
     const expanded: Record<string, CommandConfig> = {}
-    
+
     for (const [name, command] of Object.entries(commands)) {
       expanded[name] = command
-      
+
       // Recursively expand sub-commands
       if (command.commands) {
         expanded[name] = {
           ...command,
-          commands: expandCommandAliases(command.commands)
+          commands: expandCommandAliases(command.commands),
         }
       }
     }
-    
+
     // Add aliased commands
     for (const [alias, target] of Object.entries(config.aliases ?? {})) {
       if (expanded[target] && !expanded[alias]) {
         expanded[alias] = { ...expanded[target], hidden: true }
       }
     }
-    
+
     return expanded
   }
 
   return {
     ...config,
-    commands: config.commands ? expandCommandAliases(config.commands) : {}
+    commands: config.commands ? expandCommandAliases(config.commands) : {},
   }
 }

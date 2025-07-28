@@ -1,12 +1,12 @@
 /**
  * TEA-based Debug Application
- * 
+ *
  * Proper MVU architecture for the debug interface following TUIX patterns
  */
 
 import { Effect } from 'effect'
 import { scopeManager } from '@core/model/scope/manager'
-import { EventBus } from '@core/model/events/eventBus'
+import { EventBus } from '@core/model/events/event-bus'
 import type { Component } from '@core/types'
 import type { View } from '@core/types'
 import type { JSXElement } from '@jsx/types'
@@ -80,7 +80,7 @@ export interface PerformanceMetrics {
 }
 
 // Debug Messages - all possible actions in our debug application
-export type DebugMsg = 
+export type DebugMsg =
   | { _tag: 'SwitchTab'; tab: DebugModel['activeTab'] }
   | { _tag: 'AddLog'; log: DebugLog }
   | { _tag: 'UpdateModelState'; state: unknown }
@@ -113,32 +113,32 @@ export const initDebugModel = (appComponent?: (() => JSXElement) | JSXElement): 
     updateCount: 0,
     lastRender: new Date(),
     memoryUsage: 0,
-    cpuUsage: 0
+    cpuUsage: 0,
   },
   appComponent: appComponent || null,
   commandOutput: '',
   commandError: null,
-  commandExecuting: false
+  commandExecuting: false,
 })
 
 // Update function - pure state transitions
 export const updateDebugModel = (
-  msg: DebugMsg, 
+  msg: DebugMsg,
   model: DebugModel
 ): Effect.Effect<[DebugModel, DebugCommand[]]> => {
   return Effect.gen(function* () {
     const startTime = Date.now()
-    
+
     let newModel: DebugModel
     let commands: DebugCommand[] = []
-    
+
     switch (msg._tag) {
       case 'SwitchTab':
         newModel = {
           ...model,
-          activeTab: msg.tab
+          activeTab: msg.tab,
         }
-        
+
         // Load data for the new tab if needed
         if (msg.tab === 'cli') {
           commands.push(Effect.succeed({ _tag: 'RefreshScopes' }))
@@ -146,14 +146,14 @@ export const updateDebugModel = (
           commands.push(Effect.succeed({ _tag: 'RefreshComponents' }))
         }
         break
-        
+
       case 'AddLog':
         newModel = {
           ...model,
-          logs: [...model.logs.slice(-1000), msg.log] // Keep last 1000 logs
+          logs: [...model.logs.slice(-1000), msg.log], // Keep last 1000 logs
         }
         break
-        
+
       case 'UpdateModelState':
         newModel = {
           ...model,
@@ -166,26 +166,26 @@ export const updateDebugModel = (
               type: 'ModelUpdate',
               previousState: model.modelState,
               newState: msg.state,
-              duration: Date.now() - startTime
-            }
-          ]
+              duration: Date.now() - startTime,
+            },
+          ],
         }
         break
-        
+
       case 'UpdateViewTree':
         newModel = {
           ...model,
-          viewTree: msg.tree
+          viewTree: msg.tree,
         }
         break
-        
+
       case 'AddUpdateEvent':
         newModel = {
           ...model,
-          updateHistory: [...model.updateHistory.slice(-100), msg.event]
+          updateHistory: [...model.updateHistory.slice(-100), msg.event],
         }
         break
-        
+
       case 'RefreshScopes':
         const scopes = scopeManager.getAllScopes()
         newModel = {
@@ -195,11 +195,11 @@ export const updateDebugModel = (
             path: scope.path || '/',
             commands: scope.commands?.map(cmd => cmd.id) || [],
             active: scope.active || false,
-            parent: scope.parent
-          }))
+            parent: scope.parent,
+          })),
         }
         break
-        
+
       case 'RefreshComponents':
         // In a real implementation, this would introspect the JSX component tree
         newModel = {
@@ -211,67 +211,67 @@ export const updateDebugModel = (
               name: 'App',
               props: {},
               state: {},
-              renderTime: model.performance.renderTime
-            }
-          ]
+              renderTime: model.performance.renderTime,
+            },
+          ],
         }
         break
-        
+
       case 'UpdatePerformance':
         newModel = {
           ...model,
           performance: {
             ...model.performance,
             ...msg.metrics,
-            updateCount: model.performance.updateCount + 1
-          }
+            updateCount: model.performance.updateCount + 1,
+          },
         }
         break
-        
+
       case 'ExecuteCommand':
         newModel = {
           ...model,
           commandExecuting: true,
           commandOutput: '',
-          commandError: null
+          commandError: null,
         }
-        
+
         // Would trigger actual command execution
         commands.push(
           Effect.succeed({ _tag: 'CommandComplete', output: 'Command executed successfully' })
         )
         break
-        
+
       case 'CommandComplete':
         newModel = {
           ...model,
           commandExecuting: false,
-          commandOutput: msg.output
+          commandOutput: msg.output,
         }
         break
-        
+
       case 'CommandError':
         newModel = {
           ...model,
           commandExecuting: false,
-          commandError: msg.error
+          commandError: msg.error,
         }
         break
-        
+
       case 'ClearLogs':
         newModel = {
           ...model,
-          logs: []
+          logs: [],
         }
         break
-        
+
       case 'ClearHistory':
         newModel = {
           ...model,
-          updateHistory: []
+          updateHistory: [],
         }
         break
-        
+
       case 'Refresh':
         commands.push(
           Effect.succeed({ _tag: 'RefreshScopes' }),
@@ -279,16 +279,16 @@ export const updateDebugModel = (
         )
         newModel = model
         break
-        
+
       default:
         newModel = model
     }
-    
+
     // Update performance metrics
     const renderTime = Date.now() - startTime
     newModel.performance.renderTime = renderTime
     newModel.performance.lastRender = new Date()
-    
+
     return [newModel, commands] as const
   })
 }
@@ -296,9 +296,11 @@ export const updateDebugModel = (
 // View function - render the debug interface
 export const viewDebugModel = (model: DebugModel): View => {
   return RichDebugInterface({
-    children: model.appComponent ? 
-      (typeof model.appComponent === 'function' ? model.appComponent() : model.appComponent) :
-      undefined,
+    children: model.appComponent
+      ? typeof model.appComponent === 'function'
+        ? model.appComponent()
+        : model.appComponent
+      : undefined,
     initialState: {
       activeTab: model.activeTab,
       logs: model.logs.map(log => `[${log.level.toUpperCase()}] ${log.message}`),
@@ -307,32 +309,32 @@ export const viewDebugModel = (model: DebugModel): View => {
       updateHistory: model.updateHistory,
       cliScopes: model.cliScopes,
       jsxComponents: model.jsxComponents,
-      performance: model.performance
-    }
+      performance: model.performance,
+    },
   })
 }
 
 // Subscriptions - ongoing effects and event listeners
 export const debugSubscriptions = (model: DebugModel): Effect.Effect<DebugMsg>[] => {
   const subscriptions: Effect.Effect<DebugMsg>[] = []
-  
+
   // Real-time performance monitoring
   subscriptions.push(
     Effect.gen(function* () {
       yield* Effect.sleep(1000) // Update every second
       const memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024
       const cpuUsage = process.cpuUsage().system / 1000000 // Convert to seconds
-      
+
       return {
         _tag: 'UpdatePerformance',
         metrics: {
           memoryUsage,
-          cpuUsage
-        }
+          cpuUsage,
+        },
       } as DebugMsg
     }).pipe(Effect.forever)
   )
-  
+
   // Scope change monitoring
   subscriptions.push(
     Effect.gen(function* () {
@@ -340,7 +342,7 @@ export const debugSubscriptions = (model: DebugModel): Effect.Effect<DebugMsg>[]
       return { _tag: 'RefreshScopes' } as DebugMsg
     }).pipe(Effect.forever)
   )
-  
+
   return subscriptions
 }
 
@@ -351,5 +353,5 @@ export const createDebugComponent = (
   init: Effect.succeed([initDebugModel(appComponent), []]),
   update: updateDebugModel,
   view: viewDebugModel,
-  subscription: (model) => Effect.succeed(debugSubscriptions(model))
+  subscription: model => Effect.succeed(debugSubscriptions(model)),
 })

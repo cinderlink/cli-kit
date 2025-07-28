@@ -1,6 +1,6 @@
 /**
  * Example Component
- * 
+ *
  * Shows usage examples for commands
  */
 
@@ -17,14 +17,14 @@ export function Example(props: ExampleProps): JSX.Element {
     {
       flexDirection: 'column',
       gap: 1,
-      marginY: 1
+      marginY: 1,
     },
     props.description ? text(props.description) : null,
     box(
       {
         paddingX: 2,
         borderStyle: 'single',
-        borderColor: 'gray'
+        borderColor: 'gray',
       },
       text(props.code)
     )

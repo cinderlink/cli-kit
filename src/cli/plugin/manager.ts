@@ -1,14 +1,14 @@
 /**
  * Plugin Manager
- * 
+ *
  * Manages plugin lifecycle and registration
  */
 
-import type { Plugin, PluginContext } from "./types"
-import { validatePlugin } from "./validation"
-import { resolvePluginDependencies } from "./dependencies"
-import { mergePluginConfigs } from "./utils"
-import type { CLIConfig } from "@cli/types"
+import type { Plugin, PluginContext } from './types'
+import { validatePlugin } from './validation'
+import { resolvePluginDependencies } from './dependencies'
+import { mergePluginConfigs } from './utils'
+import type { CLIConfig } from '@cli/types'
 
 /**
  * Plugin manager for handling plugin lifecycle
@@ -32,7 +32,7 @@ export class PluginManager {
     }
 
     const name = plugin.metadata.name
-    
+
     if (this.plugins.has(name)) {
       throw new Error(`Plugin '${name}' is already registered`)
     }
@@ -141,7 +141,7 @@ export class PluginManager {
     const configs = this.getActivatedPlugins()
       .filter(p => p.cliConfig)
       .map(p => p.cliConfig as CLIConfig)
-    
+
     return mergePluginConfigs(this.context.config, ...configs)
   }
 
@@ -150,7 +150,7 @@ export class PluginManager {
    */
   async loadPlugins(plugins: Plugin[]): Promise<void> {
     const ordered = resolvePluginDependencies(plugins)
-    
+
     for (const plugin of ordered) {
       await this.register(plugin)
       await this.activate(plugin.metadata.name)

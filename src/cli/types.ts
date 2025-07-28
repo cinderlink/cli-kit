@@ -1,46 +1,46 @@
 /**
  * CLI Framework Types - Core type definitions for command-line interface system
- * 
+ *
  * This module defines the complete type system for the TUIX CLI framework,
  * providing a flexible, extensible architecture for building sophisticated
  * command-line applications with plugin support, validation, and hooks.
- * 
+ *
  * ## Key Features:
- * 
+ *
  * ### Configuration System
  * - Hierarchical command structure with subcommands
  * - Flexible option and argument validation using Zod schemas
  * - Plugin architecture for extensibility
  * - Hook system for lifecycle management
- * 
+ *
  * ### Command Handling
  * - Lazy loading for performance optimization
  * - Handler functions returning Components or void
  * - Support for aliases and hidden commands
  * - Nested command structures
- * 
+ *
  * ### Plugin Architecture
  * - Middleware system for cross-cutting concerns
  * - Command extensions and modifications
  * - Handler wrapping for enhanced functionality
  * - Dynamic plugin loading and configuration
- * 
+ *
  * ### Type Safety
  * - Zod schema validation for runtime type checking
  * - Strongly typed handler functions
  * - Comprehensive interface definitions
  * - Integration with TUIX Component system
- * 
+ *
  * @example
  * ```typescript
  * import { CLIConfig, CommandConfig, Handler } from './types'
- * 
+ *
  * // Define a command handler
  * const listHandler: Handler = async (args) => {
  *   const { filter } = args
  *   return myListComponent({ filter: filter as string })
  * }
- * 
+ *
  * // Define command configuration
  * const listCommand: CommandConfig = {
  *   description: 'List items with optional filtering',
@@ -49,7 +49,7 @@
  *   },
  *   handler: listHandler
  * }
- * 
+ *
  * // Complete CLI configuration
  * const cliConfig: CLIConfig = {
  *   name: 'myapp',
@@ -60,21 +60,21 @@
  *   }
  * }
  * ```
- * 
+ *
  * @module cli/types
  */
 
-import { z } from "zod"
-import type { Component } from "@core/types"
-import type { Plugin } from "./plugin"
-import type { TuixConfig } from "tuix/config"
+import { z } from 'zod'
+import type { Component } from '@core/types'
+import type { Plugin } from './plugin'
+import type { TuixConfig } from 'tuix/config'
 
 // Re-export Plugin for external use
-export type { Plugin } from "./plugin"
+export type { Plugin } from './plugin'
 
 /**
  * Complete CLI application configuration
- * 
+ *
  * Defines the structure and behavior of a CLI application including
  * metadata, commands, plugins, hooks, and global settings.
  */
@@ -95,7 +95,7 @@ export interface CLIConfig {
 
 /**
  * Configuration for individual CLI commands
- * 
+ *
  * Defines command behavior including validation schemas, handlers,
  * subcommands, and metadata. Supports both synchronous and lazy loading.
  */
@@ -113,7 +113,7 @@ export interface CommandConfig {
 
 /**
  * Lazy-loaded command handler for performance optimization
- * 
+ *
  * Allows commands to be loaded on-demand rather than at startup,
  * improving CLI application boot time for large command sets.
  */
@@ -127,16 +127,17 @@ export interface LazyHandler {
 
 /**
  * Command handler function type
- * 
+ *
  * Handles command execution with validated arguments. Can return
  * a Component for interactive UI or void for simple operations.
  */
-export type Handler = (args: Record<string, unknown>) => Promise<Component<unknown, unknown> | void> | Component<unknown, unknown> | void
-
+export type Handler = (
+  args: Record<string, unknown>
+) => Promise<Component<unknown, unknown> | void> | Component<unknown, unknown> | void
 
 /**
  * Reference to a plugin (by name or direct instance)
- * 
+ *
  * Allows plugins to be specified as module names for lazy loading
  * or as direct Plugin instances for immediate registration.
  */
@@ -146,20 +147,19 @@ export type PluginReference = string | Plugin
 
 /**
  * Extension capabilities for modifying existing commands
- * 
+ *
  * Allows plugins to add options, arguments, or wrap handlers
  * of existing commands without replacing them entirely.
  */
 export interface CommandExtension {
   options?: Record<string, z.ZodSchema>
   args?: Record<string, z.ZodSchema>
-  wrapper?: import("./plugin").HandlerWrapper
+  wrapper?: import('./plugin').HandlerWrapper
 }
-
 
 /**
  * Result of command-line argument parsing
- * 
+ *
  * Contains the parsed command path, validated arguments and options,
  * plus the original raw arguments for debugging or special handling.
  */
@@ -172,7 +172,7 @@ export interface ParsedArgs {
 
 /**
  * Runtime context for CLI command execution
- * 
+ *
  * Provides access to configuration, parsed arguments, and loaded
  * plugins during command execution. Passed to handlers and hooks.
  */

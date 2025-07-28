@@ -1,14 +1,14 @@
 /**
  * ScrollableBox Component
- * 
+ *
  * A reusable scrollable container with optional filtering and search
  * Perfect for displaying logs, process lists, and other scrollable content
  */
 
-import { Effect } from "effect"
-import type { View } from "@core/types"
-import { View as ViewUtils } from "@core/view"
-import { style, Colors } from "@core/terminal/ansi/styles"
+import { Effect } from 'effect'
+import type { View } from '@core/types'
+import { View as ViewUtils } from '@core/view'
+import { style, Colors } from '@core/terminal/ansi/styles'
 
 const { vstack, hstack, text, styledText } = ViewUtils
 
@@ -37,44 +37,45 @@ export const ScrollableBox = (props: ScrollableBoxProps): View => {
     height = 20,
     showScrollbar = true,
     showFilter = false,
-    filterPlaceholder = "Filter...",
-    emptyMessage = "No items to display",
+    filterPlaceholder = 'Filter...',
+    emptyMessage = 'No items to display',
     border = 'rounded',
     showCount = true,
-    footer
+    footer,
   } = props
 
-  // For now, we'll render all items (in a real implementation, 
+  // For now, we'll render all items (in a real implementation,
   // we'd implement virtual scrolling based on viewport)
   const visibleItems = items.slice(0, height)
   const hasMore = items.length > height
 
   const content = vstack(
     // Header with count
-    showCount && hstack(
-      styledText(`Items: ${items.length}`, style().foreground(Colors.gray)),
-      hasMore && styledText(` (showing ${visibleItems.length})`, style().foreground(Colors.yellow))
-    ),
-    
+    showCount &&
+      hstack(
+        styledText(`Items: ${items.length}`, style().foreground(Colors.gray)),
+        hasMore &&
+          styledText(` (showing ${visibleItems.length})`, style().foreground(Colors.yellow))
+      ),
+
     // Filter input (placeholder for now)
-    showFilter && vstack(
-      text("🔍 " + filterPlaceholder)
-    ),
-    
+    showFilter && vstack(text('🔍 ' + filterPlaceholder)),
+
     // Items or empty message
-    items.length === 0 ? (
-      styledText(emptyMessage, style().foreground(Colors.yellow))
-    ) : (
-      vstack(
-        ...visibleItems.map((item, index) => renderItem(item, index)),
-        hasMore && styledText(`... and ${items.length - height} more`, style().foreground(Colors.gray).italic())
-      )
-    ),
-    
+    items.length === 0
+      ? styledText(emptyMessage, style().foreground(Colors.yellow))
+      : vstack(
+          ...visibleItems.map((item, index) => renderItem(item, index)),
+          hasMore &&
+            styledText(
+              `... and ${items.length - height} more`,
+              style().foreground(Colors.gray).italic()
+            )
+        ),
+
     // Footer
-    footer && (
-      typeof footer === 'string' ? styledText(footer, style().foreground(Colors.gray)) : footer
-    )
+    footer &&
+      (typeof footer === 'string' ? styledText(footer, style().foreground(Colors.gray)) : footer)
   )
 
   // For now, return the content directly
@@ -92,38 +93,41 @@ export interface LogEntry {
   message: string
 }
 
-export const ScrollableLogBox = (props: Omit<ScrollableBoxProps, 'renderItem' | 'items'> & {
-  logs: ReadonlyArray<LogEntry>
-  colorize?: boolean
-}) => {
+export const ScrollableLogBox = (
+  props: Omit<ScrollableBoxProps, 'renderItem' | 'items'> & {
+    logs: ReadonlyArray<LogEntry>
+    colorize?: boolean
+  }
+) => {
   const { logs, colorize = true, ...rest } = props
-  
+
   const levelColors = {
     debug: Colors.gray,
     info: Colors.blue,
     warn: Colors.yellow,
-    error: Colors.red
+    error: Colors.red,
   }
 
   const levelIcons = {
     debug: '🔍',
     info: 'ℹ️',
     warn: '⚠️',
-    error: '❌'
+    error: '❌',
   }
 
   return ScrollableBox({
     ...rest,
     items: logs,
-    renderItem: (log: LogEntry) => hstack(
-      styledText(log.timestamp.toLocaleTimeString(), style().foreground(Colors.gray)),
-      styledText(
-        `${levelIcons[log.level]} ${log.level.toUpperCase().padEnd(5)}`,
-        colorize ? style().foreground(levelColors[log.level]).bold() : style()
+    renderItem: (log: LogEntry) =>
+      hstack(
+        styledText(log.timestamp.toLocaleTimeString(), style().foreground(Colors.gray)),
+        styledText(
+          `${levelIcons[log.level]} ${log.level.toUpperCase().padEnd(5)}`,
+          colorize ? style().foreground(levelColors[log.level]).bold() : style()
+        ),
+        styledText(`[${log.source.padEnd(12)}]`, style().foreground(Colors.cyan)),
+        text(log.message)
       ),
-      styledText(`[${log.source.padEnd(12)}]`, style().foreground(Colors.cyan)),
-      text(log.message)
-    )
   })
 }
 
@@ -138,42 +142,47 @@ export interface ProcessInfo {
   restarts?: number
 }
 
-export const ScrollableProcessList = (props: Omit<ScrollableBoxProps, 'renderItem' | 'items'> & {
-  processes: ReadonlyArray<ProcessInfo>
-  detailed?: boolean
-}) => {
+export const ScrollableProcessList = (
+  props: Omit<ScrollableBoxProps, 'renderItem' | 'items'> & {
+    processes: ReadonlyArray<ProcessInfo>
+    detailed?: boolean
+  }
+) => {
   const { processes, detailed = false, ...rest } = props
 
   const statusColors = {
     running: Colors.green,
     stopped: Colors.gray,
     error: Colors.red,
-    starting: Colors.yellow
+    starting: Colors.yellow,
   }
 
   const statusIcons = {
     running: '🟢',
     stopped: '⚪',
     error: '🔴',
-    starting: '🟡'
+    starting: '🟡',
   }
 
   return ScrollableBox({
     ...rest,
     items: processes,
-    renderItem: (proc: ProcessInfo) => vstack(
-      hstack(
-        text(statusIcons[proc.status] || '⚫'),
-        styledText(proc.name.padEnd(20), style().foreground(Colors.cyan).bold()),
-        styledText(
-          `[${proc.status.toUpperCase().padEnd(8)}]`,
-          style().foreground(statusColors[proc.status])
+    renderItem: (proc: ProcessInfo) =>
+      vstack(
+        hstack(
+          text(statusIcons[proc.status] || '⚫'),
+          styledText(proc.name.padEnd(20), style().foreground(Colors.cyan).bold()),
+          styledText(
+            `[${proc.status.toUpperCase().padEnd(8)}]`,
+            style().foreground(statusColors[proc.status])
+          ),
+          proc.pid &&
+            styledText(`PID: ${proc.pid.toString().padEnd(8)}`, style().foreground(Colors.gray)),
+          proc.uptime && styledText(`⏱️  ${proc.uptime}s`, style().foreground(Colors.blue)),
+          proc.restarts !== undefined &&
+            styledText(`🔄 ${proc.restarts}`, style().foreground(Colors.yellow))
         ),
-        proc.pid && styledText(`PID: ${proc.pid.toString().padEnd(8)}`, style().foreground(Colors.gray)),
-        proc.uptime && styledText(`⏱️  ${proc.uptime}s`, style().foreground(Colors.blue)),
-        proc.restarts !== undefined && styledText(`🔄 ${proc.restarts}`, style().foreground(Colors.yellow))
+        detailed && styledText('└─ Additional details here...', style().foreground(Colors.gray))
       ),
-      detailed && styledText('└─ Additional details here...', style().foreground(Colors.gray))
-    )
   })
 }

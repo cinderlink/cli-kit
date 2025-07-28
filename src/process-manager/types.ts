@@ -1,13 +1,14 @@
 /**
  * Process Manager Types
- * 
+ *
  * Core types for the process management system with Effect integration
  */
 
-import { Context } from "effect"
-import type { Logger } from "@logger/types"
+import { Context } from 'effect'
+import type { Logger } from '@logger/types'
 
 export interface ProcessConfig {
+  id?: string // Process identifier (if not provided, uses name)
   name: string
   command: string
   args?: string[]
@@ -15,6 +16,7 @@ export interface ProcessConfig {
   env?: Record<string, string>
   autostart?: boolean
   autorestart?: boolean
+  autoRestart?: boolean // Alias for autorestart (for test compatibility)
   restartDelay?: number // ms
   maxRestarts?: number
   watch?: boolean
@@ -26,7 +28,7 @@ export interface ProcessConfig {
   maxMemory?: number // MB
   maxCpu?: number // percentage
   group?: string // For grouping related processes
-  interpreter?: "node" | "bun" | "deno" | "python" | "ruby" | "shell"
+  interpreter?: 'node' | 'bun' | 'deno' | 'python' | 'ruby' | 'shell'
   uid?: number
   gid?: number
   healthCheck?: HealthCheckConfig
@@ -48,19 +50,13 @@ export interface ProcessState {
   health?: HealthStatus
 }
 
-export type ProcessStatus = 
-  | "stopped"
-  | "starting"
-  | "running"
-  | "stopping"
-  | "error"
-  | "crashed"
+export type ProcessStatus = 'stopped' | 'starting' | 'running' | 'stopping' | 'error' | 'crashed'
 
 export interface ProcessLog {
   timestamp: Date
-  level: "debug" | "info" | "warn" | "error"
+  level: 'debug' | 'info' | 'warn' | 'error'
   message: string
-  source: "stdout" | "stderr" | "system"
+  source: 'stdout' | 'stderr' | 'system'
 }
 
 export interface ProcessStats {
@@ -74,12 +70,12 @@ export interface ProcessStats {
 }
 
 export interface HealthCheckConfig {
-  type: "output" | "http" | "tcp" | "script"
+  type: 'output' | 'http' | 'tcp' | 'script'
   // For output type: watch for patterns in stdout/stderr
   outputPattern?: string | RegExp
   // For http type
   url?: string
-  method?: "GET" | "POST" | "HEAD"
+  method?: 'GET' | 'POST' | 'HEAD'
   expectedStatus?: number[]
   // For tcp type
   host?: string
@@ -117,7 +113,7 @@ export interface ProcessManagerConfig {
 }
 
 export interface ProcessEvent {
-  type: "start" | "stop" | "restart" | "crash" | "error" | "log" | "stats" | "health"
+  type: 'start' | 'stop' | 'restart' | 'crash' | 'error' | 'log' | 'stats' | 'health'
   process: string
   timestamp: Date
   data?: any
@@ -148,8 +144,8 @@ export interface ProcessGroup {
   name: string
   processes: string[]
   autostart?: boolean
-  startOrder?: "parallel" | "sequential"
-  stopOrder?: "parallel" | "sequential"
+  startOrder?: 'parallel' | 'sequential'
+  stopOrder?: 'parallel' | 'sequential'
 }
 
 export interface ProcessDependency {
@@ -169,9 +165,9 @@ export interface DoctorReport {
 }
 
 export interface DoctorIssue {
-  severity: "critical" | "warning" | "info"
+  severity: 'critical' | 'warning' | 'info'
   process?: string
-  type: "orphaned" | "runaway" | "unhealthy" | "resource_limit" | "crash_loop"
+  type: 'orphaned' | 'runaway' | 'unhealthy' | 'resource_limit' | 'crash_loop'
   message: string
   details?: any
 }
@@ -186,7 +182,7 @@ export interface OrphanedProcess {
 export interface RunawayProcess {
   name: string
   pid: number
-  issue: "memory" | "cpu" | "restart_loop"
+  issue: 'memory' | 'cpu' | 'restart_loop'
   value: number
   threshold: number
 }
@@ -198,7 +194,7 @@ export interface DoctorFix {
   error?: string
 }
 
-export const ProcessManager = Context.GenericTag<ProcessManager>("tuix/ProcessManager")
+export const ProcessManager = Context.GenericTag<ProcessManager>('tuix/ProcessManager')
 
 export interface ProcessManager {
   // Process lifecycle
@@ -207,42 +203,42 @@ export interface ProcessManager {
   start(name: string): Promise<void>
   stop(name: string): Promise<void>
   restart(name: string): Promise<void>
-  
+
   // Bulk operations
   startAll(): Promise<{ success: boolean; failures: string[]; summary: string }>
   stopAll(): Promise<void>
   startGroup(groupName: string): Promise<void>
   stopGroup(groupName: string): Promise<void>
-  
+
   // Status and monitoring
   status(name?: string): ProcessState | ProcessState[]
   list(): ProcessState[]
   stats(name?: string): ProcessStats | ProcessManagerStats
-  
+
   // Logs
   getLogs(name: string, lines?: number): Promise<ProcessLog[]>
   clearLogs(name: string): void
   tailLogs(name: string, callback: (log: ProcessLog) => void): () => void
-  
+
   // Configuration
   save(): Promise<void>
   load(): Promise<void>
-  
+
   // Events
   on(event: string, listener: (...args: unknown[]) => void): this
   off(event: string, listener: (...args: unknown[]) => void): this
-  
+
   // Lifecycle
   shutdown(): Promise<void>
-  
+
   // Diagnostics
   doctor(options?: { autoFix?: boolean }): Promise<DoctorReport>
-  
+
   // Groups
   createGroup(group: ProcessGroup): void
   deleteGroup(name: string): void
   getGroups(): ProcessGroup[]
-  
+
   // Dependencies
   setDependencies(dependencies: ProcessDependency[]): void
   getDependencies(): ProcessDependency[]

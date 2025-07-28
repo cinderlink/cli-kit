@@ -1,6 +1,6 @@
 /**
  * CLI Store
- * 
+ *
  * Manages CLI application state using Svelte 5 runes
  */
 

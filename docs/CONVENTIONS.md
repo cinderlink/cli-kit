@@ -130,36 +130,28 @@ project-root/
 ├── CLAUDE.md       # AI assistant instructions
 └── README.md       # Project overview
 ```
-
 ## Module Organization
 
 ### Standard Module Structure
 ```
 module-name/
-├── index.ts              # Public exports only
-├── types.ts              # Type definitions
-├── errors.ts             # Error types and factories
-├── constants.ts          # Module constants
-├── impl/                 # Internal implementation
-│   ├── core.ts
-│   ├── helpers.ts
-│   └── utils.ts
-├── tests/                # Test files
-│   ├── unit/
-│   │   ├── core.test.ts
-│   │   └── helpers.test.ts
-│   └── integration/
-│       └── module.test.ts
-├── integrations/         # Cross-module integration
-│   ├── cli/             # CLI integration
-│   │   └── commands.ts
-│   └── jsx/             # JSX integration
-│       └── components.tsx
-└── docs/                 # Additional module documentation
-    ├── api.md
-    ├── examples.md
-    └── ...
+├── index.ts            # Public exports only
+├── types.ts            # Type definitions
+├── errors.ts           # Error types and factories
+├── constants.ts        # Module constants
+├── feature.ts          # Feature implementation (one per feature)
+├── feature.test.ts     # Tests for the feature, beside the code
+├── feature.md          # Documentation for the feature, beside the code
+├── README.md           # Module documentation
+├── PLANNING.md         # Module development planning
+├── ISSUES.md           # Module-specific issues tracking
 ```
+- **No impl/ or integrations/ folders.**
+- **No tests/ folder.**
+- **No one-off scripts or examples.**
+- **Integration tests live in `src/tests/integration/`.**
+- **Every feature must be in its own file with a matching `.test.ts` and `.md` file.**
+- **Code, tests, and docs must always be kept in alignment.**
 
 ### Integration Patterns
 When integrating with other modules:

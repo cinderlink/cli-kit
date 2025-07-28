@@ -1,12 +1,12 @@
 /**
  * Lifecycle Hooks
- * 
+ *
  * Hooks for CLI application lifecycle events
  */
 
-import { Effect } from "effect"
-import type { EventBus } from "@core/model/events/eventBus"
-import { generateId } from "@core/model/events/eventBus"
+import { Effect } from 'effect'
+import type { EventBus } from '@core/model/events/eventBus'
+import { generateId } from '@core/model/events/eventBus'
 import type {
   BeforeInitEvent,
   AfterInitEvent,
@@ -16,9 +16,9 @@ import type {
   AfterExecuteEvent,
   BeforeRenderEvent,
   AfterRenderEvent,
-  Hook
-} from "./types"
-import { createHook } from "./utils"
+  Hook,
+} from './types'
+import { createHook } from './utils'
 
 /**
  * Create lifecycle hooks
@@ -32,7 +32,7 @@ export function createLifecycleHooks(eventBus: EventBus, source: string) {
     beforeExecute: createHook<BeforeExecuteEvent>(eventBus, 'hook:beforeExecute'),
     afterExecute: createHook<AfterExecuteEvent>(eventBus, 'hook:afterExecute'),
     beforeRender: createHook<BeforeRenderEvent>(eventBus, 'hook:beforeRender'),
-    afterRender: createHook<AfterRenderEvent>(eventBus, 'hook:afterRender')
+    afterRender: createHook<AfterRenderEvent>(eventBus, 'hook:afterRender'),
   }
 }
 
@@ -46,7 +46,7 @@ export const LifecycleEvents = {
       type: 'hook:beforeInit' as const,
       source,
       timestamp: new Date(),
-      config
+      config,
     })
   },
 
@@ -56,7 +56,7 @@ export const LifecycleEvents = {
       type: 'hook:afterInit' as const,
       source,
       timestamp: new Date(),
-      config
+      config,
     })
   },
 
@@ -72,7 +72,7 @@ export const LifecycleEvents = {
       source,
       timestamp: new Date(),
       command,
-      args
+      args,
     })
   },
 
@@ -90,7 +90,7 @@ export const LifecycleEvents = {
       timestamp: new Date(),
       command,
       args,
-      result
+      result,
     })
   },
 
@@ -106,7 +106,7 @@ export const LifecycleEvents = {
       source,
       timestamp: new Date(),
       command,
-      args
+      args,
     })
   },
 
@@ -124,37 +124,28 @@ export const LifecycleEvents = {
       timestamp: new Date(),
       command,
       args,
-      result
+      result,
     })
   },
 
-  emitBeforeRender(
-    eventBus: EventBus,
-    component: unknown,
-    source: string
-  ) {
+  emitBeforeRender(eventBus: EventBus, component: unknown, source: string) {
     return eventBus.emit('hook:beforeRender', {
       id: generateId(),
       type: 'hook:beforeRender' as const,
       source,
       timestamp: new Date(),
-      component
+      component,
     })
   },
 
-  emitAfterRender(
-    eventBus: EventBus,
-    component: unknown,
-    output: string,
-    source: string
-  ) {
+  emitAfterRender(eventBus: EventBus, component: unknown, output: string, source: string) {
     return eventBus.emit('hook:afterRender', {
       id: generateId(),
       type: 'hook:afterRender' as const,
       source,
       timestamp: new Date(),
       component,
-      output
+      output,
     })
-  }
+  },
 }

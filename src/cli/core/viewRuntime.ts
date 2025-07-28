@@ -1,13 +1,13 @@
 /**
  * View Runtime Interface
- * 
+ *
  * Defines the contract for view runtimes that can render CLI output.
  * This allows the CLI module to be view-agnostic while supporting
  * different rendering backends (TEA, JSX, plain text, etc).
  */
 
-import type { HelpData } from "./helpData"
-import type { CLIContext } from "@cli/types"
+import type { HelpData } from './helpData'
+import type { CLIContext } from '@cli/types'
 
 /**
  * View runtime interface that rendering backends must implement
@@ -17,27 +17,27 @@ export interface ViewRuntime {
    * Runtime identifier
    */
   readonly name: string
-  
+
   /**
    * Render help data to the terminal
    */
   renderHelp(data: HelpData): void
-  
+
   /**
    * Render an error message
    */
   renderError(error: Error, context?: CLIContext): void
-  
+
   /**
    * Render command output
    */
   renderOutput(output: unknown, context?: CLIContext): void
-  
+
   /**
    * Start an interactive session if supported
    */
   startInteractive?(context: CLIContext): Promise<void>
-  
+
   /**
    * Check if runtime supports interactive mode
    */
@@ -50,10 +50,10 @@ export interface ViewRuntime {
 export class TextViewRuntime implements ViewRuntime {
   readonly name = 'text'
   readonly supportsInteractive = false
-  
+
   renderHelp(data: HelpData): void {
     const lines: string[] = []
-    
+
     for (const section of data.sections) {
       switch (section.type) {
         case 'header':
@@ -64,13 +64,13 @@ export class TextViewRuntime implements ViewRuntime {
             }
           }
           break
-          
+
         case 'description':
           if (section.content) {
             lines.push(section.content)
           }
           break
-          
+
         case 'usage':
           lines.push('')
           lines.push('USAGE:')
@@ -78,7 +78,7 @@ export class TextViewRuntime implements ViewRuntime {
             lines.push(`  ${section.content}`)
           }
           break
-          
+
         case 'commands':
         case 'options':
         case 'arguments':
@@ -95,7 +95,7 @@ export class TextViewRuntime implements ViewRuntime {
                 line += item.description
               }
               lines.push(line)
-              
+
               // Add aliases on separate line
               if (item.aliases && item.aliases.length > 0) {
                 lines.push(`      (aliases: ${item.aliases.join(', ')})`)
@@ -103,7 +103,7 @@ export class TextViewRuntime implements ViewRuntime {
             }
           }
           break
-          
+
         case 'examples':
           lines.push('')
           if (section.title) {
@@ -118,7 +118,7 @@ export class TextViewRuntime implements ViewRuntime {
             }
           }
           break
-          
+
         case 'footer':
           lines.push('')
           if (section.content) {
@@ -127,17 +127,17 @@ export class TextViewRuntime implements ViewRuntime {
           break
       }
     }
-    
+
     console.log(lines.join('\n'))
   }
-  
+
   renderError(error: Error, context?: CLIContext): void {
     console.error(`Error: ${error.message}`)
     if (context?.debug) {
       console.error(error.stack)
     }
   }
-  
+
   renderOutput(output: unknown): void {
     if (typeof output === 'string') {
       console.log(output)
@@ -154,21 +154,21 @@ export class TextViewRuntime implements ViewRuntime {
  */
 class ViewRuntimeRegistry {
   private runtime: ViewRuntime = new TextViewRuntime()
-  
+
   /**
    * Register a view runtime
    */
   register(runtime: ViewRuntime): void {
     this.runtime = runtime
   }
-  
+
   /**
    * Get the current view runtime
    */
   get(): ViewRuntime {
     return this.runtime
   }
-  
+
   /**
    * Reset to default runtime
    */

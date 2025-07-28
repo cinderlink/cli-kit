@@ -26,40 +26,32 @@ bun add tuix
 
 ```tsx
 #!/usr/bin/env bun
-import { jsx, Plugin, Command, Arg, Flag } from "tuix"
+import { jsx, JSXApp } from "tuix/jsx"
+import { CLI, Command, Arg, Option } from "tuix/cli"
 
-function MyCLI() {
-  return (
-    <vstack>
-      {/* Define commands declaratively */}
-      <Plugin name="myapp" description="My awesome CLI" version="1.0.0">
-        <Command 
-          name="hello" 
-          description="Say hello"
-          handler={() => <success>Hello, World! 🎉</success>}
-        />
-        
-        <Command name="greet" description="Greet someone">
-          <Arg name="name" description="Person to greet" required />
-          <Flag name="loud" description="Shout the greeting" alias="l" />
-          
-          <Command handler={(ctx) => (
-            <text color="blue">
-              {ctx.flags.loud ? `HELLO ${ctx.args.name.toUpperCase()}!` : `Hello ${ctx.args.name}`}
-            </text>
-          )} />
-        </Command>
-      </Plugin>
+// Create a JSX CLI app
+const app = new JSXApp()
+  .command(
+    <CLI command="myapp" description="My awesome CLI" version="1.0.0">
+      <Command 
+        name="hello" 
+        description="Say hello"
+        handler={() => jsx("text", { style: { color: "green" } }, "Hello, World! 🎉")}
+      />
       
-      {/* Main UI shown when no command is provided */}
-      <text color="cyan" bold>Welcome to My CLI!</text>
-      <text>Run 'hello' or 'greet <name>' to get started</text>
-    </vstack>
+      <Command name="greet" description="Greet someone">
+        <Arg name="name" description="Person to greet" required />
+        <Option name="loud" description="Shout the greeting" alias="l" type="boolean" />
+        
+        <Command handler={(ctx) => jsx("text", { style: { color: "blue" } },
+          ctx.flags.loud ? `HELLO ${ctx.args.name.toUpperCase()}!` : `Hello ${ctx.args.name}`
+        )} />
+      </Command>
+    </CLI>
   )
-}
 
 // Run the app
-jsx(MyCLI).catch(console.error)
+await app.run()
 ```
 
 Run your CLI:
@@ -75,83 +67,83 @@ Run your CLI:
 TUIX exports are organized for optimal tree-shaking and type safety:
 
 ```typescript
-// Main exports
-import { runApp, Component, Effect } from 'tuix'
+// Main exports - core framework
+import { Effect, Component, runApp, Runtime, View } from 'tuix'
 
-// Components (JSX elements)
-import { Text, Button, Box, List, Table } from 'tuix/components'
+// Core view primitives
+import { text, vstack, hstack, box, empty } from 'tuix'
 
-// Stream components
-import { Stream, Pipe, Transform, StreamBox } from 'tuix/components/streams'
-import { Spawn, ManagedSpawn, CommandPipeline } from 'tuix/components/streams/spawn'
-import { timer, poll, fromArray, random } from 'tuix/components/streams'
+// JSX runtime and components
+import { jsx, JSXApp, render } from 'tuix/jsx'
 
-// Styling system
-import { style, Colors, Borders } from 'tuix/styling'
-
-// Layout utilities
-import { flexbox, grid, spacer, center } from 'tuix/layout'
+// UI Components
+import { TextInput, Button, List, Table, Tabs } from 'tuix'
 
 // CLI framework
-import { createCLI, plugin, middleware } from 'tuix/cli'
-
-// Testing utilities
-import { testComponent, createTestHarness } from 'tuix/testing'
-
-// Logger
-import { logger, LogLevel } from 'tuix/logger'
+import { runCLI, defineConfig, CLIRunner } from 'tuix/cli'
+import { CLI, Command, Arg, Option } from 'tuix/cli' // JSX components
 
 // Process management
 import { ProcessManager } from 'tuix/process-manager'
 
-// Direct core imports for advanced usage
-import { View, text, vstack, hstack } from 'tuix/core/view'
-import type { AppServices, TerminalCapabilities } from 'tuix/core/types'
+// Logger
+import { logger, createLogger } from 'tuix/logger'
+
+// Configuration system
+import { loadConfig, configSchema } from 'tuix/config'
+
+// Plugin system  
+import { definePlugin, PluginManager } from 'tuix/plugins'
+
+// Testing utilities
+import { createTestHarness } from 'tuix/testing'
+
+// Reactivity (Svelte-inspired runes)
+import { $state, $derived, $bindable } from 'tuix'
 ```
 
 ### Create Your First CLI
 
 ```typescript
-import { createCLI, z } from 'tuix'
+import { runCLI, defineConfig } from 'tuix/cli'
+import { z } from 'zod'
 
-const cli = createCLI({
+const config = defineConfig({
   name: 'my-app',
   version: '1.0.0',
+  description: 'My awesome CLI application',
   commands: {
     hello: {
       description: 'Say hello to someone',
       args: {
         name: z.string().describe('Name to greet')
       },
-      handler: (args) => `Hello, ${args.name}!`
+      handler: async ({ args }) => {
+        console.log(`Hello, ${args.name}!`)
+      }
     }
   }
 })
 
-await cli.run(process.argv.slice(2))
+await runCLI(config)
 ```
 
 ### JSX Terminal UI with Runes
 
 ```tsx
-import { Text, Button, Box } from 'tuix/components'
+import { jsx, $state } from 'tuix'
 
 const MyComponent = ({ name }: { name: string }) => {
   let clickCount = $state(0)
   
-  return (
-    <Box border="rounded" padding={2}>
-      <Text color="cyan" bold>
-        Welcome to TUIX, {name}! 🎉
-      </Text>
-      <Text>Clicked {clickCount} times</Text>
-      <Button 
-        variant="primary" 
-        onClick={() => clickCount++}
-      >
-        Get Started
-      </Button>
-    </Box>
+  return jsx('box', { padding: 2 },
+    jsx('text', { style: { color: 'cyan', bold: true } }, 
+      `Welcome to TUIX, ${name}! 🎉`
+    ),
+    jsx('text', null, `Clicked ${clickCount()} times`),
+    jsx('text', { style: { color: 'gray' } }, 
+      'Press Enter to increment'
+    )
   )
 }
 ```
@@ -159,7 +151,7 @@ const MyComponent = ({ name }: { name: string }) => {
 ### Advanced TUI Application with MVU
 
 ```typescript
-import { Component, runApp, Effect, View, Sub, KeyUtils } from "tuix"
+import { Component, runApp, Effect, View, text, vstack } from "tuix"
 
 interface Model {
   readonly count: number
@@ -185,31 +177,23 @@ const counterApp: Component<Model, Msg> = {
     }
   },
   
-  view: (model: Model) => View.vstack(
-    View.bold(View.cyan(View.text('TUIX Counter 🎯'))),
-    View.text(`Count: ${model.count}`),
-    View.text(`Last action: ${model.lastAction}`),
-    View.empty,
-    View.gray(View.text('Controls:')),
-    View.gray(View.text('  [+] Increment  [-] Decrement  [r] Reset  [q] Quit'))
+  view: (model: Model) => vstack(
+    text('TUIX Counter 🎯'),
+    text(`Count: ${model.count}`),
+    text(`Last action: ${model.lastAction}`),
+    text(''),
+    text('Controls:'),
+    text('  [+] Increment  [-] Decrement  [r] Reset  [q] Quit')
   ),
   
-  subscriptions: () => Sub.fromKeys((key) => {
-    if (KeyUtils.isChar(key, '+')) return { type: 'increment' }
-    if (KeyUtils.isChar(key, '-')) return { type: 'decrement' }
-    if (KeyUtils.isChar(key, 'r')) return { type: 'reset' }
-    if (KeyUtils.isChar(key, 'q')) return Sub.quit()
-    return null
+  subscriptions: (model: Model) => Effect.succeed({
+    // Keyboard subscriptions would be handled through the terminal service
+    keys: ['increment', 'decrement', 'reset', 'quit']
   })
 }
 
-// Run with proper error handling and cleanup
-await Effect.runPromise(
-  runApp(counterApp, { 
-    fps: 60,
-    fullscreen: true 
-  })
-)
+// Run the application
+await Effect.runPromise(runApp(counterApp))
 ```
 
 ## 🏗️ Architecture
@@ -329,285 +313,185 @@ const todoApp: Component<Model, Msg> = {
 await Effect.runPromise(runApp(todoApp))
 ```
 
-## 🌊 Stream Components
+## 🧩 JSX Components
 
-Tuix provides powerful stream components that integrate seamlessly with Effect.ts for real-time data processing:
+TUIX provides JSX support for building declarative terminal UIs with reactive state management.
 
-### Basic Streaming
+### Basic JSX Elements
 
 ```tsx
-import { Stream } from "effect"
-import { timer, fromArray } from "tuix/streams"
+import { jsx } from 'tuix/jsx'
 
-function StreamingApp() {
-  // Create a timer that emits every second
-  const timerStream = timer(1000, 10)
+// Basic text elements
+jsx('text', { style: { color: 'blue', bold: true } }, 'Hello World')
+
+// Layout containers
+jsx('vstack', { gap: 1 },
+  jsx('text', null, 'First line'),
+  jsx('text', null, 'Second line')
+)
+
+jsx('hstack', null,
+  jsx('text', null, 'Left'),
+  jsx('text', null, 'Right')
+)
+
+// Styled containers
+jsx('box', { padding: 2, style: { border: '1px solid cyan' } },
+  jsx('text', null, 'Boxed content')
+)
+```
+
+### Process Management
+
+```tsx
+import { ProcessManager } from 'tuix/process-manager'
+
+// Spawn and manage processes
+const processManager = new ProcessManager()
+
+await processManager.spawn('npm', ['test'], {
+  stdio: 'inherit',
+  shell: true
+})
+```
+
+## 🎮 Interactive Applications
+
+TUIX supports building interactive terminal applications using the MVU (Model-View-Update) pattern.
+
+### Basic Interactive App
+
+```tsx
+import { Component, runApp, Effect } from 'tuix'
+
+interface AppModel {
+  message: string
+  counter: number
+}
+
+type AppMsg = 
+  | { type: 'increment' }
+  | { type: 'decrement' }
+
+const app: Component<AppModel, AppMsg> = {
+  init: Effect.succeed([{ message: 'Hello TUIX!', counter: 0 }, []]),
   
-  return (
-    <vstack>
-      {/* Stream component renders items as they arrive */}
-      <Stream 
-        stream={timerStream}
-        transform={(n) => <text color="green">Tick {n}</text>}
-        maxItems={5}
-      />
-      
-      {/* StreamBox provides a bordered container */}
-      <StreamBox
-        title="Live Data"
-        border="rounded"
-        stream={dataStream}
-        placeholder="Waiting for data..."
-      >
-        {(item) => <text>{JSON.stringify(item)}</text>}
-      </StreamBox>
-    </vstack>
+  update: (msg, model) => {
+    switch (msg.type) {
+      case 'increment':
+        return Effect.succeed([{ ...model, counter: model.counter + 1 }, []])
+      case 'decrement':
+        return Effect.succeed([{ ...model, counter: model.counter - 1 }, []])
+    }
+  },
+  
+  view: (model) => jsx('vstack', null,
+    jsx('text', null, model.message),
+    jsx('text', null, `Counter: ${model.counter}`),
+    jsx('text', { style: { color: 'gray' } }, 'Press +/- to change, q to quit')
   )
 }
+
+await Effect.runPromise(runApp(app))
 ```
 
-### Process Spawning & Output Streaming
+### CLI with Interactive Commands
 
 ```tsx
-// Spawn a process and stream its output
-<Spawn 
-  command="npm test" 
-  stdout="stream"
-  stderr="stream"
-  stdoutStyle={{ foreground: "green" }}
-  stderrStyle={{ foreground: "red" }}
-/>
+import { JSXApp } from 'tuix/jsx'
+import { CLI, Command } from 'tuix/cli'
 
-// Custom spawn rendering
-<Spawn command={["ls", "-la"]} >
-  {({ stdout, stderr, exitCode }) => (
-    <vstack>
-      <Stream stream={stdout} />
-      <Stream stream={stderr} transform={(line) => <error>{line}</error>} />
-    </vstack>
-  )}
-</Spawn>
-
-// Command pipeline - pipe multiple commands
-<CommandPipeline
-  commands={[
-    { command: "find . -name '*.ts'" },
-    { command: "grep -v node_modules" },
-    { command: "wc -l" }
-  ]}
-  showPipeline={true}
->
-  {(output) => <Stream stream={output} />}
-</CommandPipeline>
-```
-
-### Stream Transformations
-
-```tsx
-// Pipe component for single transformations
-<Pipe
-  from={numberStream}
-  through={(n) => n * n}
-  concurrency={5}
->
-  {(squaredStream) => <Stream stream={squaredStream} />}
-</Pipe>
-
-// Transform component for multiple transformations
-<Transform
-  stream={dataStream}
-  transforms={[
-    { name: "Parse", fn: (s) => Stream.map(s, JSON.parse) },
-    { name: "Filter", fn: (s) => Stream.filter(s, (d) => d.active) },
-    { name: "Format", fn: (s) => Stream.map(s, formatData) }
-  ]}
-  showPipeline={true}
->
-  {(finalStream) => <StreamBox stream={finalStream} />}
-</Transform>
-```
-
-## 🎮 Interactive Mode
-
-Tuix provides a powerful context-based interactive mode system that works universally across the framework. By default, all commands and applications are non-interactive (they render and exit), but you can enable interactive mode at any scope.
-
-### Non-Interactive by Default
-
-```tsx
-// Commands render and exit immediately by default
-<Command name="status" handler={() => (
-  <text color="green">✅ All systems operational</text>
-)} />
-```
-
-### Enabling Interactive Mode
-
-```tsx
-// Always interactive
-<Command name="monitor" interactive={true} handler={() => (
-  <vstack>
-    <text>Monitoring... Press Ctrl+C to exit</text>
-    <Stream stream={metricsStream} />
-  </vstack>
-)} />
-
-// Conditionally interactive based on context
-<Command 
-  name="logs"
-  interactive={(ctx) => ctx.flags.follow === true}
-  handler={(ctx) => (
-    <LogViewer follow={ctx.flags.follow} />
-  )}
-/>
-
-// Interactive with configuration
-<Command
-  name="watch"
-  interactive={{
-    enabled: true,
-    timeout: 60000,     // Exit after 1 minute
-    exitOn: {
-      idle: 10000,      // Exit after 10s of inactivity
-      complete: true,   // Exit when streams complete
-      error: true       // Exit on errors
-    }
-  }}
-  handler={() => <WatchUI />}
-/>
-```
-
-### Using the Interactive API
-
-```tsx
-import { Interactive } from "tuix"
-
-// Run part of your app in interactive mode
-const MyCommand = () => Effect.gen(function* () {
-  // Non-interactive work
-  yield* doSetup()
-  
-  // Enter interactive mode for a section
-  yield* Interactive.scope(
-    showInteractiveUI(),
-    { timeout: 30000 }
+const app = new JSXApp()
+  .command(
+    <CLI command="myapp" description="Interactive CLI app">
+      <Command 
+        name="monitor" 
+        description="Monitor system resources"
+        handler={() => {
+          // This would start an interactive monitoring session
+          return jsx('text', { style: { color: 'green' } }, 'Monitoring started...')
+        }}
+      />
+    </CLI>
   )
-  
-  // Back to non-interactive
-  yield* cleanup()
-})
-
-// Check if currently interactive
-const StatusBar = () => Effect.gen(function* () {
-  const isInteractive = yield* Interactive.isActive
-  
-  return (
-    <hstack>
-      <text>Mode: {isInteractive ? "Interactive" : "Batch"}</text>
-      {isInteractive && <text color="gray">Press 'q' to quit</text>}
-    </hstack>
-  )
-})
-```
-
-### Exit Control
-
-```tsx
-// Exit with the Exit component
-<Exit code={0} message="✅ Done!" />
-<Exit code={1} delay={3000}>💥 Self-destruct in 3s...</Exit>
-
-// Exit programmatically
-yield* Interactive.exit(0)
 ```
 
 ## 🧩 JSX Components
 
-### Core Elements
+### Available Components
 
 ```tsx
-// Text rendering with styling
-<Text color="blue" bold italic>Styled text</Text>
+import { TextInput, Button, List, Table, Tabs } from 'tuix'
+import { jsx } from 'tuix/jsx'
 
-// Layout containers
-<Box border="rounded" padding={2} width={40}>
-  <div>Content goes here</div>
-</Box>
+// Text Input Component
+const MyForm = () => {
+  let inputValue = $state('')
+  
+  return jsx('vstack', null,
+    jsx(TextInput, {
+      value: inputValue(),
+      onChange: (value) => inputValue.set(value),
+      placeholder: 'Enter text...'
+    }),
+    jsx('text', null, `You typed: ${inputValue()}`)
+  )
+}
 
-// Flexible layouts
-<div style={{ display: 'flex', flexDirection: 'column' }}>
-  <Text>Item 1</Text>
-  <Text>Item 2</Text>
-</div>
+// List Component
+const MyList = () => {
+  let selectedIndex = $state(0)
+  const items = ['Option 1', 'Option 2', 'Option 3']
+  
+  return jsx(List, {
+    items,
+    selectedIndex: selectedIndex(),
+    onSelect: (index) => selectedIndex.set(index)
+  })
+}
+
+// Table Component
+const MyTable = () => {
+  const data = [
+    { name: 'Alice', age: 30 },
+    { name: 'Bob', age: 25 }
+  ]
+  
+  return jsx(Table, {
+    data,
+    columns: [
+      { key: 'name', title: 'Name' },
+      { key: 'age', title: 'Age' }
+    ]
+  })
+}
+
+// Tabs Component
+const MyTabs = () => {
+  let activeTab = $state(0)
+  
+  return jsx(Tabs, {
+    activeTab: activeTab(),
+    onTabChange: (index) => activeTab.set(index),
+    tabs: [
+      { title: 'Tab 1', content: jsx('text', null, 'Content 1') },
+      { title: 'Tab 2', content: jsx('text', null, 'Content 2') }
+    ]
+  })
+}
 ```
 
-### Interactive Components
+### Component Status
 
-```tsx
-// Reactive state with Svelte-inspired runes
-let count = $state(0)
-let inputValue = $state('')
-let selectedIndex = $state(0)
-
-// Buttons with reactive callbacks
-<Button variant="primary" onClick={() => count++}>
-  Clicked {count} times
-</Button>
-
-// Text input with callback handlers
-<TextInput 
-  value={inputValue}
-  onChange={(value) => inputValue = value}
-  placeholder="Enter text..."
-  validate={(value) => value.length > 0}
-/>
-
-// Selectable lists with callback handlers
-<List 
-  items={['Option 1', 'Option 2', 'Option 3']}
-  selected={selectedIndex}
-  onSelect={(index) => selectedIndex = index}
-/>
-```
-
-### Data Display
-
-```tsx
-// Reactive data with Svelte-inspired runes
-let tableData = $state([...])
-let currentTab = $state(0)
-let progress = $state(75)
-
-// Tables with callback handlers
-<Table 
-  data={tableData}
-  columns={[
-    { key: 'name', title: 'Name', sortable: true },
-    { key: 'value', title: 'Value', sortable: true }
-  ]}
-  onSort={(column) => /* handle sorting */}
-  onFilter={(column) => /* handle filtering */}
-/>
-
-// Tab navigation with callback handlers
-<Tabs 
-  activeTab={currentTab}
-  onTabChange={(index) => currentTab = index}
->
-  <Tab title="Tab 1">Content 1</Tab>
-  <Tab title="Tab 2">Content 2</Tab>
-</Tabs>
-
-// Progress indicators
-<ProgressBar value={progress} max={100} />
-<Spinner variant="dots" />
-```
-
-### Advanced Components
-
-- **Modal**: Dialog boxes with backdrop (coming soon)
-- **FilePicker**: File and directory selection (coming soon)
-- **Help**: Keybinding help system (coming soon)
-- **Viewport**: Scrollable content areas (coming soon)
+- ✅ **TextInput**: Interactive text input with validation
+- ✅ **Button**: Clickable buttons with styling  
+- ✅ **List**: Selectable lists with keyboard navigation
+- ✅ **Table**: Data tables with column configuration
+- ✅ **Tabs**: Tab navigation interface
+- 🚧 **Modal**: Dialog boxes (in development)
+- 🚧 **FilePicker**: File selection (in development)
+- 🚧 **Viewport**: Scrollable areas (in development)
 
 ## 🎨 Styling System
 
@@ -616,96 +500,87 @@ TUIX provides a comprehensive styling system with multiple approaches:
 ### JSX Style Props
 
 ```tsx
-// Direct style props
-<Text 
-  color="blue" 
-  backgroundColor="white"
-  bold 
-  italic 
-  underline
->
-  Styled text
-</Text>
+import { jsx } from 'tuix/jsx'
 
-// CSS-like styling
-<div style={{
-  color: 'rgb(255, 100, 100)',
-  backgroundColor: '#1a1a1a',
-  border: '1px solid cyan',
-  padding: '2px 4px',
-  margin: '1px',
-  textAlign: 'center'
-}}>
-  CSS-styled content
-</div>
+// Direct styling through jsx
+jsx('text', { 
+  style: { 
+    color: 'blue', 
+    backgroundColor: 'white',
+    bold: true,
+    italic: true,
+    underline: true
+  } 
+}, 'Styled text')
+
+// Layout with styling
+jsx('box', {
+  padding: 2,
+  style: {
+    border: '1px solid cyan',
+    backgroundColor: '#1a1a1a'
+  }
+}, jsx('text', { style: { color: 'white' } }, 'Boxed content'))
 ```
 
-### Advanced Color System
+### Color System
 
 ```tsx
-// Standard colors
-<Text color="red">Red text</Text>
-<Text color="brightCyan">Bright cyan text</Text>
+import { jsx } from 'tuix/jsx'
+
+// Standard ANSI colors
+jsx('text', { style: { color: 'red' } }, 'Red text')
+jsx('text', { style: { color: 'brightCyan' } }, 'Bright cyan text')
 
 // RGB colors
-<Text color="rgb(255, 100, 50)">Custom RGB</Text>
+jsx('text', { style: { color: 'rgb(255, 100, 50)' } }, 'Custom RGB')
 
 // Hex colors  
-<Text color="#ff6432">Hex color</Text>
+jsx('text', { style: { color: '#ff6432' } }, 'Hex color')
 
-// Gradients
-<Text gradient="linear-gradient(90deg, red, blue)">
-  Gradient text
-</Text>
+// Background colors
+jsx('text', { 
+  style: { 
+    color: 'white', 
+    backgroundColor: 'blue' 
+  } 
+}, 'Blue background')
 ```
 
 ### Layout and Borders
 
 ```tsx
-// Border styles
-<Box border="single">Single border</Box>
-<Box border="double">Double border</Box>
-<Box border="rounded">Rounded border</Box>
-<Box border="thick">Thick border</Box>
+// Layout containers
+jsx('vstack', { gap: 1 },
+  jsx('text', null, 'First line'),
+  jsx('text', null, 'Second line')
+)
 
-// Padding and margins
-<Box padding={2} margin={1}>
-  Spaced content
-</Box>
+jsx('hstack', { gap: 2 },
+  jsx('text', null, 'Left'),
+  jsx('text', null, 'Right')
+)
 
-// Flexible layouts
-<div style={{ 
-  display: 'flex', 
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center' 
-}}>
-  <Text>Left</Text>
-  <Text>Right</Text>
-</div>
+// Box with padding
+jsx('box', { padding: 2 },
+  jsx('text', null, 'Padded content')
+)
 ```
 
-### Programmatic Styling
+### Core Styling
 
 ```typescript
-import { style, Colors, createGradient } from 'tuix/styling'
+import { text, vstack, hstack, box } from 'tuix'
 
-// Function-based styling
-const myStyle = style()
-  .color(Colors.blue)
-  .backgroundColor(Colors.white)
-  .bold()
-  .padding(2)
-
-// Gradient creation
-const gradient = createGradient({
-  type: 'linear',
-  angle: 90,
-  stops: [
-    { color: Colors.red, position: 0 },
-    { color: Colors.blue, position: 100 }
-  ]
-})
+// Using core view primitives directly
+const styledView = vstack(
+  text('Title'),
+  box(text('Boxed content')),
+  hstack(
+    text('Left'),
+    text('Right')
+  )
+)
 ```
 
 ### Available Colors
@@ -733,8 +608,8 @@ TUIX features a reactive state management system inspired by [Svelte 5's runes](
 
 ### Svelte-Inspired Runes
 
-```typescript
-import { $state, $derived, $bindable } from 'tuix/runes'
+```tsx
+import { $state, $derived, $bindable, jsx } from 'tuix'
 
 // Reactive state (like Svelte's $state)
 let count = $state(0)
@@ -745,21 +620,14 @@ let greeting = $derived(() => `Hello, ${name()}!`)
 let doubled = $derived(() => count() * 2)
 
 // Bindable values for two-way data binding (like Svelte's $bindable)
-let inputValue = $bindable('', {
-  validate: (value) => value.length > 0 || 'Value cannot be empty',
-  transform: (value) => value.trim()
-})
+let inputValue = $bindable('')
 
 // Use in components
 const MyComponent = () => {
-  return (
-    <div>
-      <Text>{greeting()}</Text>
-      <Text>Count: {count()}, Doubled: {doubled()}</Text>
-      <Button onClick={() => count(count() + 1)}>
-        Increment
-      </Button>
-    </div>
+  return jsx('vstack', null,
+    jsx('text', null, greeting()),
+    jsx('text', null, `Count: ${count()}, Doubled: ${doubled()}`),
+    jsx('text', { style: { color: 'gray' } }, 'Use + to increment')
   )
 }
 ```
@@ -913,10 +781,29 @@ cd tuix
 bun install
 ```
 
-### Running Tests
+### Development Scripts
 
 ```bash
+# Run tests
 bun test
+bun test:watch
+
+# Type checking
+bun run typecheck:tsc
+
+# Code formatting & linting (Biome + oxlint)
+bun run format        # Format code
+bun run lint          # Lint code
+bun run check         # Check formatting and types
+bun run check:fix     # Fix formatting and linting issues
+
+# Build
+bun run build
+
+# Run examples
+bun run examples                    # List all examples
+bun run example:jsx-demo           # Run JSX demo
+bun run example:git-dashboard      # Run git dashboard
 ```
 
 ### Project Structure
@@ -924,36 +811,92 @@ bun test
 ```
 src/
 ├── core/           # Core framework (runtime, types, view)
-├── components/     # Built-in UI components
-├── styling/        # Styling system and themes
-├── services/       # Input, rendering, and system services
+├── jsx/            # JSX runtime and components
+├── ui/             # UI components (forms, data, layout)
+├── cli/            # CLI framework
+├── logger/         # Logging system
+├── plugins/        # Plugin system
+├── config/         # Configuration management
+├── process-manager/# Process management
 └── testing/        # Test utilities
 
 examples/           # Example applications
 docs/              # Documentation
 ```
 
+### TypeScript Path Mapping
+
+The project uses TypeScript path mapping for clean internal imports:
+
+```typescript
+// Internal module imports (for contributors)
+import { Component } from '@core/types'
+import { jsx } from '@jsx/runtime'
+import { TextInput } from '@ui/components/forms/text-input'
+import { runCLI } from '@cli/runner'
+import { logger } from '@logger/index'
+
+// External imports (for users)
+import { Component, jsx, TextInput, runCLI, logger } from 'tuix'
+import { CLI, Command } from 'tuix/cli'
+import { createTestHarness } from 'tuix/testing'
+```
+
 ## 📚 API Reference
 
 ### Core Functions
 
-- `runApp(component, config)` - Start your application
-- `text(content, style?)` - Create styled text
-- `vstack(...views)` - Vertical layout
-- `hstack(...views)` - Horizontal layout
-- `box(content, options)` - Container with borders
+```typescript
+import { runApp, text, vstack, hstack, box, Component, Effect } from 'tuix'
+
+// Application runner
+runApp(component: Component<Model, Msg>, config?: RuntimeConfig): Effect<void>
+
+// View primitives
+text(content: string): View
+vstack(...views: View[]): View  
+hstack(...views: View[]): View
+box(content: View, options?: BoxOptions): View
+```
+
+### JSX Runtime
+
+```typescript
+import { jsx, JSXApp } from 'tuix/jsx'
+import { CLI, Command, Arg, Option } from 'tuix/cli'
+
+// JSX factory
+jsx(type: string | Function, props: Record<string, any> | null, ...children: any[]): View
+
+// JSX application
+const app = new JSXApp().command(<CLI>...</CLI>)
+```
 
 ### Component Interface
 
-Every component must implement:
-
 ```typescript
 interface Component<Model, Msg> {
-  init: Effect<[Model, Cmd<Msg>[]], never, AppServices>
-  update: (msg: Msg, model: Model) => Effect<[Model, Cmd<Msg>[]], never, AppServices>
+  init: Effect<[Model, Commands[]], never, AppServices>
+  update: (msg: Msg, model: Model) => Effect<[Model, Commands[]], never, AppServices>
   view: (model: Model) => View
-  subscriptions?: (model: Model) => Effect<Sub<Msg>, never, AppServices>
+  subscriptions?: (model: Model) => Effect<Subscriptions, never, AppServices>
 }
+```
+
+### CLI Configuration
+
+```typescript
+import { defineConfig, runCLI } from 'tuix/cli'
+
+const config = defineConfig({
+  name: string
+  version: string
+  description?: string
+  commands: Record<string, CommandConfig>
+  plugins?: PluginReference[]
+})
+
+runCLI(config: CLIConfig): Promise<void>
 ```
 
 ## 🚧 Current Status
@@ -961,20 +904,19 @@ interface Component<Model, Msg> {
 This is an active development project. Some features are still being implemented:
 
 ### ✅ Completed
-- ✅ **CLI Framework**: Complete command parsing, routing, and validation with Zod
-- ✅ **JSX Runtime**: Full JSX support with [Svelte](https://svelte.dev/)-inspired runes for reactive terminal UIs
-- ✅ **Plugin System**: Extensible architecture with hooks and middleware
-- ✅ **Performance Optimizations**: Lazy loading, caching, view caching, and efficient rendering
-- ✅ **Core Components**: Text, Button, Box, List, Table, Tabs, ProgressBar, Spinner, TextInput
-- ✅ **Advanced Styling**: Colors, gradients, borders, layouts, and CSS-like styling
-- ✅ **Type Safety**: Full TypeScript support with proper generics and Effect.ts integration
-- ✅ **Input & Mouse Handling**: Comprehensive keyboard and mouse event processing
-- ✅ **Testing Framework**: Comprehensive test utilities, E2E testing, and performance benchmarks
-- ✅ **Documentation**: Comprehensive guides and API reference in `/docs` directory
-- ✅ **Examples**: 20+ real-world application examples including git dashboard, process monitor, log viewer
-- ✅ **Runes Reactivity**: [Svelte](https://svelte.dev/)-inspired reactive state management with `$state`, `$derived`, `$bindable`
-- ✅ **TUIX Files**: Support for `.tuix` files with JSX compilation
-- ✅ **Hit Testing**: Component boundary detection and coordinate mapping
+- ✅ **CLI Framework**: Command parsing, routing, and validation with Zod schemas
+- ✅ **JSX Runtime**: JSX factory function with support for terminal elements
+- ✅ **Plugin System**: Plugin registration and lifecycle management
+- ✅ **Core Framework**: MVU architecture with Effect.ts integration
+- ✅ **Basic Components**: TextInput, Button, List, Table, Tabs, ProgressBar, Spinner
+- ✅ **View System**: text, vstack, hstack, box primitives for layout
+- ✅ **Type Safety**: Full TypeScript support with Effect.ts integration
+- ✅ **Process Manager**: Spawn and manage external processes
+- ✅ **Configuration**: Config loading and validation system
+- ✅ **Logger**: Structured logging with multiple levels
+- ✅ **Runes System**: Svelte-inspired reactive state with $state, $derived, $bindable
+- ✅ **Path Mapping**: TypeScript path mapping for clean imports
+- ✅ **Tooling**: Biome formatting and oxlint for code quality
 
 ### 🚧 In Progress  
 - 🔧 **Mouse Routing**: Fine-grained coordinate-to-component mouse event routing (basic hit testing works)

@@ -341,7 +341,8 @@ await Effect.runPromise(
 ### Complete Example CLI
 
 ```tsx
-import { jsx, Plugin, Command, Flag, Arg } from 'tuix'
+import { jsx } from 'tuix/jsx'
+import { Plugin, Command, Flag, Arg } from 'tuix/cli/jsx'
 import { ProcessManager, ProcessMonitor } from 'tuix/process-manager'
 
 const CLI = () => {

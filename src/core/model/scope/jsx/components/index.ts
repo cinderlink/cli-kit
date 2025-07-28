@@ -1,6 +1,6 @@
 /**
  * Scope JSX Components
- * 
+ *
  * Components for scope management and lifecycle
  */
 

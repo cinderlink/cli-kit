@@ -1,17 +1,17 @@
 /**
  * Flex Component - JSX version for flexible layouts
- * 
+ *
  * Provides flexbox-like layouts for terminal UIs:
  * - Row and column layouts
  * - Alignment and justification
  * - Gap spacing
  * - Wrapping support
  * - Flex grow/shrink
- * 
+ *
  * @example
  * ```tsx
  * import { Flex, Row, Column } from 'tuix/components/layout/flex'
- * 
+ *
  * function MyLayout() {
  *   return (
  *     <Column gap={2}>
@@ -19,7 +19,7 @@
  *         <text>Left</text>
  *         <text>Right</text>
  *       </Row>
- *       
+ *
  *       <Flex direction="row" wrap gap={1}>
  *         {items.map(item => <Box key={item}>{item}</Box>)}
  *       </Flex>
@@ -64,20 +64,22 @@ export function Flex(props: FlexProps): JSX.Element {
     children,
     ...boxProps
   } = props
-  
-  const finalDirection = reverse 
-    ? (direction === 'row' ? 'row-reverse' : 'column-reverse')
+
+  const finalDirection = reverse
+    ? direction === 'row'
+      ? 'row-reverse'
+      : 'column-reverse'
     : direction
-    
+
   const container = direction === 'row' ? 'hstack' : 'vstack'
-  
+
   return jsx(container, {
     ...boxProps,
     gap,
     wrap: wrap === true ? true : wrap === 'reverse' ? 'reverse' : false,
     align,
     justify,
-    children
+    children,
   })
 }
 
@@ -85,25 +87,22 @@ export function Flex(props: FlexProps): JSX.Element {
  * FlexItem Component - Child of Flex with grow/shrink properties
  */
 export function FlexItem(props: FlexItemProps): JSX.Element {
-  const {
-    grow,
-    shrink,
-    basis,
-    alignSelf,
-    children,
-    ...boxProps
-  } = props
-  
+  const { grow, shrink, basis, alignSelf, children, ...boxProps } = props
+
   const style: any = {
-    ...boxProps.style
+    ...boxProps.style,
   }
-  
+
   if (grow !== undefined) style.flexGrow = grow
   if (shrink !== undefined) style.flexShrink = shrink
   if (basis !== undefined) style.flexBasis = basis
   if (alignSelf) style.alignSelf = alignSelf
-  
-  return <Box {...boxProps} style={style}>{children}</Box>
+
+  return (
+    <Box {...boxProps} style={style}>
+      {children}
+    </Box>
+  )
 }
 
 // Convenience components
@@ -130,19 +129,21 @@ export function Stack(props: Omit<FlexProps, 'direction'> & { spacing?: number }
 }
 
 // Grid-like layout using flex
-export function Grid(props: {
-  columns?: number
-  gap?: number
-  children: JSX.Element[]
-} & BoxProps): JSX.Element {
+export function Grid(
+  props: {
+    columns?: number
+    gap?: number
+    children: JSX.Element[]
+  } & BoxProps
+): JSX.Element {
   const { columns = 2, gap = 1, children, ...boxProps } = props
-  
+
   // Group children into rows
   const rows: JSX.Element[][] = []
   for (let i = 0; i < children.length; i += columns) {
     rows.push(children.slice(i, i + columns))
   }
-  
+
   return (
     <Column gap={gap} {...boxProps}>
       {rows.map((row, i) => (
@@ -164,14 +165,16 @@ export function Spacer({ size = 1 }: { size?: number }): JSX.Element {
 }
 
 // Common layout patterns
-export function Sidebar(props: {
-  sidebar: JSX.Element
-  sidebarWidth?: number
-  content: JSX.Element
-  gap?: number
-} & BoxProps): JSX.Element {
+export function Sidebar(
+  props: {
+    sidebar: JSX.Element
+    sidebarWidth?: number
+    content: JSX.Element
+    gap?: number
+  } & BoxProps
+): JSX.Element {
   const { sidebar, sidebarWidth = 20, content, gap = 2, ...boxProps } = props
-  
+
   return (
     <Row gap={gap} {...boxProps}>
       <Box width={sidebarWidth}>{sidebar}</Box>
@@ -180,24 +183,26 @@ export function Sidebar(props: {
   )
 }
 
-export function Header(props: {
-  header: JSX.Element
-  content: JSX.Element
-  footer?: JSX.Element
-  headerHeight?: number
-  footerHeight?: number
-  gap?: number
-} & BoxProps): JSX.Element {
-  const { 
-    header, 
-    content, 
-    footer, 
+export function Header(
+  props: {
+    header: JSX.Element
+    content: JSX.Element
+    footer?: JSX.Element
+    headerHeight?: number
+    footerHeight?: number
+    gap?: number
+  } & BoxProps
+): JSX.Element {
+  const {
+    header,
+    content,
+    footer,
     headerHeight = 3,
     footerHeight = 3,
     gap = 0,
-    ...boxProps 
+    ...boxProps
   } = props
-  
+
   return (
     <Column gap={gap} height="100%" {...boxProps}>
       <Box height={headerHeight}>{header}</Box>

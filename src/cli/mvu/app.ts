@@ -1,16 +1,16 @@
 /**
  * CLI MVU App
- * 
+ *
  * Integrates the unified state management with the JSX app system
  */
 
-import { Effect } from "effect"
-import type { Component } from "@core/types"
-import { initAppModel, type AppModel, type AppMsg, type Cmd } from "./model"
-import { update } from "./update"
-import { CLIStoreAdapter, CommandStoreAdapter, PluginStoreAdapter } from "./storeAdapter"
-import { withComponentContext } from "@core/context"
-import { createConsoleLogger } from "@logger"
+import { Effect } from 'effect'
+import type { Component } from '@core/types'
+import { initAppModel, type AppModel, type AppMsg, type Cmd } from './model'
+import { update } from './update'
+import { CLIStoreAdapter, CommandStoreAdapter, PluginStoreAdapter } from './storeAdapter'
+import { withComponentContext } from '@core/context'
+import { createConsoleLogger } from '@logger'
 
 const logger = createConsoleLogger('warn')
 
@@ -27,7 +27,7 @@ const storeContext = {
     } else {
       Effect.runSync(logger.warn('Store dispatch called before MVU app initialization'))
     }
-  }
+  },
 }
 
 // Create singleton store adapters
@@ -37,7 +37,7 @@ export const pluginStore = new PluginStoreAdapter(storeContext)
 
 /**
  * Create a CLI MVU component
- * 
+ *
  * This wraps a view function with the unified state management
  */
 export function createCLIMVUComponent(
@@ -45,46 +45,43 @@ export function createCLIMVUComponent(
 ): Component<AppModel, AppMsg> {
   return {
     init: Effect.succeed([initAppModel(), []]),
-    
+
     update: (msg, model) => {
       const [newModel, cmds] = update(msg, model)
-      
+
       // Update global model reference
       currentModel = newModel
-      
+
       // Convert commands to Effects
-      const effects = cmds.map(cmd => 
+      const effects = cmds.map(cmd =>
         cmd.pipe(
           Effect.map(resultMsg => resultMsg),
           Effect.catchAll(() => Effect.succeed(null as AppMsg | null)),
           Effect.filterOrFail((msg): msg is AppMsg => msg !== null)
         )
       )
-      
+
       return Effect.succeed([newModel, effects as Cmd[]])
     },
-    
-    view: (model) => {
+
+    view: model => {
       // Update global model reference
       currentModel = model
-      
+
       // Create dispatch function
       const dispatch = (msg: AppMsg) => {
         if (currentDispatch) {
           currentDispatch(msg)
         }
       }
-      
+
       // Provide context and render view
-      const element = withComponentContext(
-        { model, dispatch },
-        () => view({ model, dispatch })
-      )
-      
+      const element = withComponentContext({ model, dispatch }, () => view({ model, dispatch }))
+
       return element as import('@core/types').View
     },
-    
-    subscriptions: undefined
+
+    subscriptions: undefined,
   }
 }
 
@@ -108,16 +105,16 @@ export function getCurrentModel(): AppModel {
  */
 
 // Re-export types that existing code might depend on
-export type { CLIAppOptions } from "@cli/jsx/app"
-export type { JSXCommandContext } from "@cli/jsx/types"
-export type { Plugin } from "@cli/plugin"
-export type { RegisteredPlugin } from "./model"
+export type { CLIAppOptions } from '@cli/jsx/app'
+export type { JSXCommandContext } from '@cli/jsx/types'
+export type { Plugin } from '@cli/plugin'
+export type { RegisteredPlugin } from './model'
 
 // Helper to check if a command has CLI commands
 export function hasCliCommands(): boolean {
   const cliScope = commandStore.getCLIScope()
   if (!cliScope) return false
-  
+
   const commands = commandStore.getSubcommands([])
   return commands.length > 0
 }

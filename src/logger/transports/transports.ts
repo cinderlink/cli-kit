@@ -1,14 +1,14 @@
 /**
  * Log Transports
- * 
+ *
  * Various transports for outputting logs
  */
 
-import { Effect, Queue, Stream, Schedule, Chunk, Fiber } from "effect"
-import * as fs from "fs"
-import * as path from "path"
-import * as zlib from "zlib"
-import { promisify } from "util"
+import { Effect, Queue, Stream, Schedule, Chunk, Fiber } from 'effect'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as zlib from 'zlib'
+import { promisify } from 'util'
 import type {
   LogTransport,
   LogEntry,
@@ -18,10 +18,10 @@ import type {
   StreamTransportOptions,
   HttpTransportOptions,
   LogLevel,
-  InteractiveLogEntry
-} from "../types"
-import { LogLevels } from "../types"
-import { PrettyFormatter, JSONFormatter, CLIFormatter } from "../formatters/formatters"
+  InteractiveLogEntry,
+} from '../types'
+import { LogLevels } from '../types'
+import { PrettyFormatter, JSONFormatter, CLIFormatter } from '../formatters/formatters'
 
 const gzip = promisify(zlib.gzip)
 const gunzip = promisify(zlib.gunzip)
@@ -31,13 +31,15 @@ export class ConsoleTransport implements LogTransport {
   private level: number
 
   constructor(private options: ConsoleTransportOptions = {}) {
-    this.formatter = options.format || new PrettyFormatter({
-      colorize: options.colorize !== false,
-      showTimestamp: options.timestamp !== false,
-      showLevel: options.showLevel !== false,
-      showMetadata: options.showMetadata !== false,
-      showEmoji: true
-    })
+    this.formatter =
+      options.format ||
+      new PrettyFormatter({
+        colorize: options.colorize !== false,
+        showTimestamp: options.timestamp !== false,
+        showLevel: options.showLevel !== false,
+        showMetadata: options.showMetadata !== false,
+        showEmoji: true,
+      })
     this.level = options.level ? LogLevels[options.level] : LogLevels.trace
   }
 
@@ -46,8 +48,8 @@ export class ConsoleTransport implements LogTransport {
       if (LogLevels[entry.level] < this.level) return
 
       const formatted = this.formatter.format(entry)
-      
-      if (entry.level === "error" || entry.level === "fatal") {
+
+      if (entry.level === 'error' || entry.level === 'fatal') {
         console.error(formatted)
       } else {
         console.log(formatted)
@@ -72,9 +74,9 @@ export class FileTransport implements LogTransport {
   private initStream() {
     const filename = this.getFilename()
     this.stream = fs.createWriteStream(filename, {
-      flags: this.options.options?.flags || "a",
-      encoding: this.options.options?.encoding || "utf8",
-      mode: this.options.options?.mode
+      flags: this.options.options?.flags || 'a',
+      encoding: this.options.options?.encoding || 'utf8',
+      mode: this.options.options?.mode,
     })
 
     // Get current file size
@@ -90,7 +92,7 @@ export class FileTransport implements LogTransport {
     if (this.fileIndex === 0) {
       return this.options.filename
     }
-    
+
     const parsed = path.parse(this.options.filename)
     return path.join(parsed.dir, `${parsed.name}.${this.fileIndex}${parsed.ext}`)
   }
@@ -99,7 +101,7 @@ export class FileTransport implements LogTransport {
     if (!this.stream) return
 
     this.stream.end()
-    
+
     // Compress old file if needed
     if (this.options.zippedArchive) {
       const oldFilename = this.getFilename()
@@ -110,7 +112,7 @@ export class FileTransport implements LogTransport {
 
     // Move to next file
     this.fileIndex++
-    
+
     // Clean up old files if maxFiles is set
     if (this.options.maxFiles && this.fileIndex > this.options.maxFiles) {
       const oldestFile = path.join(
@@ -128,20 +130,21 @@ export class FileTransport implements LogTransport {
   }
 
   write(entry: LogEntry): Effect.Effect<void, never, never> {
-    return Effect.async((callback) => {
+    return Effect.async(callback => {
       if (LogLevels[entry.level] < this.level) {
         callback(Effect.succeed(undefined))
         return
       }
 
-      const formatted = this.formatter.format(entry) + "\n"
+      const formatted = this.formatter.format(entry) + '\n'
       const size = Buffer.byteLength(formatted)
 
       // Check if rotation is needed
       if (this.options.maxSize) {
-        const maxSize = typeof this.options.maxSize === "string" 
-          ? this.parseSize(this.options.maxSize)
-          : this.options.maxSize
+        const maxSize =
+          typeof this.options.maxSize === 'string'
+            ? this.parseSize(this.options.maxSize)
+            : this.options.maxSize
 
         if (this.currentSize + size > maxSize) {
           this.rotateLog().then(() => {
@@ -161,11 +164,11 @@ export class FileTransport implements LogTransport {
     callback: (effect: Effect.Effect<void, never, never>) => void
   ) {
     if (!this.stream) {
-      callback(Effect.fail(new Error("Stream not initialized")))
+      callback(Effect.fail(new Error('Stream not initialized')))
       return
     }
 
-    this.stream.write(formatted, (err) => {
+    this.stream.write(formatted, err => {
       if (err) {
         callback(Effect.fail(err))
       } else {
@@ -183,15 +186,15 @@ export class FileTransport implements LogTransport {
       m: 1024 * 1024,
       mb: 1024 * 1024,
       g: 1024 * 1024 * 1024,
-      gb: 1024 * 1024 * 1024
+      gb: 1024 * 1024 * 1024,
     }
 
     const match = size.toLowerCase().match(/^(\d+)([a-z]+)?$/)
     if (!match) throw new Error(`Invalid size format: ${size}`)
 
     const value = parseInt(match[1]!)
-    const unit = match[2]! || "b"
-    
+    const unit = match[2]! || 'b'
+
     return value * (units[unit] || 1)
   }
 
@@ -215,15 +218,15 @@ export class StreamTransport implements LogTransport {
   }
 
   write(entry: LogEntry): Effect.Effect<void, never, never> {
-    return Effect.async((callback) => {
+    return Effect.async(callback => {
       if (LogLevels[entry.level] < this.level) {
         callback(Effect.succeed(undefined))
         return
       }
 
-      const formatted = this.formatter.format(entry) + "\n"
-      
-      this.options.stream.write(formatted, (err) => {
+      const formatted = this.formatter.format(entry) + '\n'
+
+      this.options.stream.write(formatted, err => {
         if (err) {
           callback(Effect.fail(err))
         } else {
@@ -261,7 +264,7 @@ export class HttpTransport implements LogTransport {
       self.batchProcessor = yield* _(
         Stream.fromQueue(queue).pipe(
           Stream.groupedWithin(batchSize, Schedule.fixed(batchInterval)),
-          Stream.tap((chunk) => self.sendBatch(Chunk.toArray(chunk))),
+          Stream.tap(chunk => self.sendBatch(Chunk.toArray(chunk))),
           Stream.runDrain,
           Effect.fork
         )
@@ -284,22 +287,22 @@ export class HttpTransport implements LogTransport {
   private send(entries: LogEntry[]): Effect.Effect<void, never, never> {
     return Effect.tryPromise({
       try: async () => {
-        const body = entries.map(e => this.formatter.format(e)).join("\n")
-        
+        const body = entries.map(e => this.formatter.format(e)).join('\n')
+
         const response = await fetch(this.options.url, {
-          method: this.options.method || "POST",
+          method: this.options.method || 'POST',
           headers: {
-            "Content-Type": "application/json",
-            ...this.options.headers
+            'Content-Type': 'application/json',
+            ...this.options.headers,
           },
-          body
+          body,
         })
 
         if (!response.ok) {
           throw new Error(`HTTP transport failed: ${response.status} ${response.statusText}`)
         }
       },
-      catch: (error) => new Error(`HTTP transport error: ${error}`)
+      catch: error => new Error(`HTTP transport error: ${error}`),
     }).pipe(Effect.asVoid)
   }
 
@@ -332,11 +335,11 @@ export class TUITransport implements LogTransport {
       const interactiveEntry: InteractiveLogEntry = {
         ...entry,
         id: `${Date.now()}-${Math.random()}`,
-        expanded: false
+        expanded: false,
       }
 
       this.entries.push(interactiveEntry)
-      
+
       // Keep only last 10000 entries
       if (this.entries.length > 10000) {
         this.entries = this.entries.slice(-10000)
@@ -359,4 +362,3 @@ export class TUITransport implements LogTransport {
     }
   }
 }
-

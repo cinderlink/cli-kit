@@ -1,6 +1,6 @@
 /**
  * CLI JSX Components
- * 
+ *
  * Main components for building CLI applications with JSX
  */
 

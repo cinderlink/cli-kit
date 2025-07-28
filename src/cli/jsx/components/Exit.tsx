@@ -1,6 +1,6 @@
 /**
  * Exit Component
- * 
+ *
  * Handles graceful CLI exit
  */
 
@@ -19,7 +19,7 @@ export function Exit(props: ExitProps): JSX.Element {
     // Exit the process after the component mounts
     process.exit(props.code ?? 0)
   })
-  
+
   // Display message if provided
   return props.message ? text(props.message) : null
 }

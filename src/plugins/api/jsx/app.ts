@@ -1,6 +1,6 @@
 /**
  * Plugin JSX Application Helpers
- * 
+ *
  * Utilities for creating and managing core plugins
  * For CLI integration, use '@plugins/integrations/cli/app'
  */

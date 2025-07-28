@@ -1,6 +1,6 @@
 /**
  * Navigation Components
- * 
+ *
  * Components for navigating and organizing content
  */
 

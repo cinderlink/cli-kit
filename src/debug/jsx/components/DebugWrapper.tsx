@@ -1,6 +1,6 @@
 /**
  * Debug Wrapper Component
- * 
+ *
  * Main debug UI wrapper that intercepts logs and output, routing them to tabs
  * Uses debugWrapperStore for state management
  */
@@ -19,16 +19,16 @@ interface DebugWrapperProps {
 
 export function DebugWrapper({ children }: DebugWrapperProps): View {
   // Use debug wrapper store for state management
-  
+
   // Subscribe to store updates
   $effect(() => {
-    const unsubscribe = debugStore.subscribe((state) => {
+    const unsubscribe = debugStore.subscribe(state => {
       // Track state changes silently
     })
-    
+
     return () => unsubscribe()
   })
-  
+
   // Intercept console.log and stdout
   $effect(() => {
     // Store original functions
@@ -38,57 +38,59 @@ export function DebugWrapper({ children }: DebugWrapperProps): View {
     const originalConsoleInfo = console.info
     const originalStdoutWrite = process.stdout.write.bind(process.stdout)
     const originalStderrWrite = process.stderr.write.bind(process.stderr)
-    
+
     // Intercept console methods
     console.log = (...args: unknown[]) => {
-      const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-      ).join(' ')
+      const message = args
+        .map(arg => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)))
+        .join(' ')
       debugWrapperStore.addLog(`[LOG] ${message}`)
       // Only write to original if not in app view
       if (debugWrapperStore.activeTab !== 'app') {
         originalConsoleLog(...args)
       }
     }
-    
+
     console.error = (...args: unknown[]) => {
-      const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-      ).join(' ')
+      const message = args
+        .map(arg => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)))
+        .join(' ')
       debugWrapperStore.addLog(`[ERROR] ${message}`)
       if (debugWrapperStore.activeTab !== 'app') {
         originalConsoleError(...args)
       }
     }
-    
+
     console.warn = (...args: unknown[]) => {
-      const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-      ).join(' ')
+      const message = args
+        .map(arg => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)))
+        .join(' ')
       debugWrapperStore.addLog(`[WARN] ${message}`)
       if (debugWrapperStore.activeTab !== 'app') {
         originalConsoleWarn(...args)
       }
     }
-    
+
     console.info = (...args: unknown[]) => {
-      const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-      ).join(' ')
+      const message = args
+        .map(arg => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)))
+        .join(' ')
       debugWrapperStore.addLog(`[INFO] ${message}`)
       if (debugWrapperStore.activeTab !== 'app') {
         originalConsoleInfo(...args)
       }
     }
-    
+
     // Intercept stdout/stderr
-    process.stdout.write = function(chunk: string | Uint8Array, ...args: unknown[]): boolean {
+    process.stdout.write = function (chunk: string | Uint8Array, ...args: unknown[]): boolean {
       const str = chunk?.toString() || ''
       // Filter out debug output to prevent recursion
-      if (!str.includes('[TUIX DEBUG]') && 
-          !str.includes('[DebugWrapper]') &&
-          !str.includes('DEBUG MODE') &&
-          !str.includes('Registered Scopes:')) {
+      if (
+        !str.includes('[TUIX DEBUG]') &&
+        !str.includes('[DebugWrapper]') &&
+        !str.includes('DEBUG MODE') &&
+        !str.includes('Registered Scopes:')
+      ) {
         debugWrapperStore.addOutput(str)
       }
       // Only write to original if not in app view
@@ -97,8 +99,8 @@ export function DebugWrapper({ children }: DebugWrapperProps): View {
       }
       return true
     }
-    
-    process.stderr.write = function(chunk: string | Uint8Array, ...args: unknown[]): boolean {
+
+    process.stderr.write = function (chunk: string | Uint8Array, ...args: unknown[]): boolean {
       const str = chunk?.toString() || ''
       debugWrapperStore.addOutput(`[STDERR] ${str}`)
       // Only write to original if not in app view
@@ -107,7 +109,7 @@ export function DebugWrapper({ children }: DebugWrapperProps): View {
       }
       return true
     }
-    
+
     // Cleanup on unmount
     return () => {
       console.log = originalConsoleLog
@@ -118,12 +120,12 @@ export function DebugWrapper({ children }: DebugWrapperProps): View {
       process.stderr.write = originalStderrWrite
     }
   })
-  
+
   // Keyboard handler
   $effect(() => {
     const handleKey = (key: Buffer) => {
       const keyStr = key.toString()
-      
+
       // Handle quit separately since it's not in the store
       if (keyStr === 'q' || keyStr === 'Q') {
         import('@core/runtime/interactive').then(({ Interactive }) => {
@@ -131,19 +133,19 @@ export function DebugWrapper({ children }: DebugWrapperProps): View {
         })
         return
       }
-      
+
       // Use store to handle other keys
       debugWrapperStore.handleKeypress(keyStr)
     }
-    
+
     process.stdin.on('data', handleKey)
     return () => process.stdin.off('data', handleKey)
   })
-  
+
   if (!debugWrapperStore.isVisible) {
     return children || empty
   }
-  
+
   // Create tab bar
   const tabBar = hstack(
     text(debugWrapperStore.getTabDisplay('app')),
@@ -154,10 +156,10 @@ export function DebugWrapper({ children }: DebugWrapperProps): View {
     text(debugWrapperStore.getTabDisplay('performance')),
     text(debugWrapperStore.getTabDisplay('state'))
   )
-  
+
   // Create tab content based on active tab
   let tabContent: View = empty
-  
+
   if (debugWrapperStore.activeTab === 'app') {
     tabContent = vstack(
       text('Application Output'),
@@ -188,24 +190,14 @@ export function DebugWrapper({ children }: DebugWrapperProps): View {
   } else if (debugWrapperStore.activeTab === 'state') {
     tabContent = text('State view not implemented yet')
   }
-  
+
   // Status bar
   const statusBar = hstack(
     text('D: toggle | 1-7: tabs | C: clear logs/output | Q: quit'),
     spacer(),
     text(`Debug Mode: ${debugWrapperStore.activeTab}`)
   )
-  
+
   // Return the debug panel
-  return vstack(
-    box(
-      vstack(
-        tabBar,
-        text(''),
-        box(tabContent),
-        text(''),
-        statusBar
-      )
-    )
-  )
+  return vstack(box(vstack(tabBar, text(''), box(tabContent), text(''), statusBar)))
 }

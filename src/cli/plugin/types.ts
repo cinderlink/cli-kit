@@ -1,12 +1,12 @@
 /**
  * Plugin System Type Definitions
- * 
+ *
  * Core types and interfaces for the CLI plugin system
  */
 
-import type { z } from "zod"
-import type { Command, CLIConfig } from "@cli/types"
-import type { Context } from "effect"
+import type { z } from 'zod'
+import type { Command, CLIConfig } from '@cli/types'
+import type { Context } from 'effect'
 
 /**
  * Plugin metadata containing identification and compatibility information

@@ -1,10 +1,10 @@
 /**
  * Text Component Export
- * 
+ *
  * Rich text display component with styling options
  */
 
-export { 
+export {
   Text,
   Heading,
   Code,
@@ -18,5 +18,5 @@ export {
   heading,
   code,
   link,
-  type TextProps
+  type TextProps,
 } from './Text'

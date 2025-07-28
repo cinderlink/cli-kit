@@ -2,7 +2,7 @@
  * Registry Types and Interfaces
  */
 
-import type { Plugin } from "@cli/plugin"
+import type { Plugin } from '@cli/plugin'
 
 /**
  * Registered plugin with metadata

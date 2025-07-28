@@ -1,6 +1,6 @@
 /**
  * Option Component
- * 
+ *
  * Defines a command option (similar to flag but with values)
  */
 
@@ -29,7 +29,7 @@ export function Option(props: OptionProps): JSX.Element {
         type: props.type,
         default: props.default,
         choices: props.choices,
-        required: props.required
+        required: props.required,
       }}
     >
       {props.children}

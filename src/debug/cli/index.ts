@@ -1,6 +1,6 @@
 /**
  * Debug CLI Integration
- * 
+ *
  * Provides debug mode support for CLI applications
  */
 
@@ -11,11 +11,11 @@ export async function patchCLICommands() {
     // Patch command execution to track timing
     const cliModule = await import('@cli/core/runner')
     const originalExecute = cliModule.execute
-    
-    cliModule.execute = async function(command: unknown, context: unknown) {
+
+    cliModule.execute = async function (command: unknown, context: unknown) {
       const commandName = command.name || 'unknown'
       debug.match(`Executing command: ${commandName}`, { command, context })
-      
+
       const start = performance.now()
       try {
         const result = await originalExecute.call(this, command, context)
@@ -28,7 +28,7 @@ export async function patchCLICommands() {
         throw error
       }
     }
-    
+
     debug.system('CLI commands patched for debug mode')
   } catch (error) {
     debug.error('Failed to patch CLI commands', error as Error)

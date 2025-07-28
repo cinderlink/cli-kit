@@ -1,6 +1,6 @@
 /**
  * Simple Plugin Store
- * 
+ *
  * Manages plugin state without using Svelte 5 runes
  */
 
@@ -43,9 +43,9 @@ class SimplePluginStore {
       description: plugin.description,
       enabled: false,
       config: {},
-      plugin
+      plugin,
     }
-    
+
     this.plugins.set(registration.id, registration)
   }
 

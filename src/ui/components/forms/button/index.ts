@@ -1,10 +1,10 @@
 /**
  * Button Component Export
- * 
+ *
  * Interactive button component with variants and states
  */
 
-export { 
+export {
   Button,
   button,
   primaryButton,
@@ -18,5 +18,5 @@ export {
   SubmitCancelButtons,
   type ButtonProps,
   type ButtonVariant,
-  type ButtonSize
+  type ButtonSize,
 } from './Button'

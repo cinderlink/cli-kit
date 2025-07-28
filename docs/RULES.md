@@ -1,50 +1,90 @@
-# Tuix Framework Rules
+# Cinderlink CLI-Kit Rules
 
 ⚠️ **CRITICAL**: These rules are NOT suggestions. They are requirements. Violations MUST be fixed immediately.
 
 ## 🚫 NEVER Rules
 
 ### Code Quality
-- **NEVER** use `any` types - use proper TypeScript with discriminated unions
-- **NEVER** create workarounds - fix the root cause
-- **NEVER** commit without running tests - all tests MUST pass
-- **NEVER** leave TypeScript errors - zero tolerance for type errors
-- **NEVER** create one-off scripts - use the test suite or CLI commands
-- **NEVER** ignore failing tests - fix immediately or rollback changes
-- **NEVER** add JSX pragmas - JSX is configured at build level
+- **NEVER** use `any` types—use strict TypeScript with discriminated unions and explicit types.
+- **NEVER** create workarounds or temporary fixes—fix the root cause.
+- **NEVER** commit without running all tests (`bun test`).
+- **NEVER** leave TypeScript errors—zero tolerance for type errors.
+- **NEVER** create one-off scripts or one-off examples.
+- **NEVER** ignore failing tests—fix immediately or rollback changes.
+- **NEVER** leave commented-out code—use git for history.
 
-### Implementation
-- **NEVER** create multiple versions of the same feature (no -v2, -enhanced, -simple suffixes)
-- **NEVER** create duplicate implementations across modules
-- **NEVER** use qualifier names (simple-logger, basic-button, enhanced-feature)
-- **NEVER** commit backup files (.bak, .old, .backup, .orig)
-- **NEVER** leave commented-out code - use git for history
-- **NEVER** create "temporary" fixes - all fixes must be permanent
-- **NEVER** create jsx-dev-runtime.ts or jsx-runtime.ts files - these are handled by package.json exports
+### Implementation & Structure
+- **NEVER** use `impl/` or `integrations/` folders. Each feature must live in its own file or directory.
+- **NEVER** create duplicate implementations or multiple versions (no -v2, -enhanced, -simple suffixes).
+- **NEVER** use qualifier names (simple-logger, basic-button, enhanced-feature).
+- **NEVER** commit backup files (.bak, .old, .backup, .orig).
+- **NEVER** mix concerns—maintain single responsibility per file/feature.
+- **NEVER** create circular dependencies.
+- **NEVER** create files unless absolutely necessary.
 
-### File Naming
-- **NEVER** use PascalCase for non-component files (exceptions: components use PascalCase, docs use UPPERCASE.md)
-- **NEVER** use UPPERCASE for non-documentation files
-- **NEVER** use kebab-case when path-based organization works (foo/bar not foo-bar)
-- **EXCEPTION**: Keep kebab-case for proper nouns (process-manager)
-- **NEVER** create test-*.ts or demo-*.ts files - use proper test suite
-- **NEVER** use inconsistent naming within a module
+### File & Test Naming
+- **NEVER** use PascalCase for non-component files (components use PascalCase, docs use UPPERCASE.md).
+- **NEVER** use UPPERCASE for non-documentation files.
+- **NEVER** use kebab-case when path-based organization works (foo/bar not foo-bar; exception: proper nouns).
+- **NEVER** create test-*.ts or demo-*.ts files—use `feature.test.ts` beside the feature.
+- **NEVER** place tests in a separate folder (except integration tests at `src/tests/integration/`).
+- **NEVER** have code, docs, and tests out of alignment.
 
-### Architecture
-- **NEVER** violate module boundaries - use only exported APIs
-- **NEVER** reach into internal module files
-- **NEVER** bypass the established patterns
-- **NEVER** mix concerns - maintain single responsibility
-- **NEVER** create circular dependencies
-- **NEVER** assume module implementation details
+### Documentation
+- **NEVER** skip documentation—every feature must have up-to-date docs beside its code and tests.
+- **NEVER** merge broken code—fix issues first.
+- **NEVER** ignore linting errors—address all warnings.
 
-### Development Process
-- **NEVER** skip documentation - all exports need JSDoc
-- **NEVER** merge broken code - fix issues first
-- **NEVER** work around framework limitations - report and fix them
-- **NEVER** ignore linting errors - address all warnings
-- **NEVER** create files unless absolutely necessary
-- **NEVER** create documentation proactively unless requested
+## ✅ ALWAYS Rules
+
+### Code Quality
+- **ALWAYS** use strict TypeScript types with full type safety.
+- **ALWAYS** colocate tests beside the code they test (`feature.ts` + `feature.test.ts`).
+- **ALWAYS** colocate documentation beside the code it documents (`feature.md` or similar).
+- **ALWAYS** run all tests before committing (`bun test`).
+- **ALWAYS** check types before committing (`bun run tsc --noEmit`).
+- **ALWAYS** maintain at least 80% test coverage (70% for branches).
+- **ALWAYS** document errors and edge cases.
+- **ALWAYS** validate inputs at module boundaries.
+
+### Implementation & Structure
+- **ALWAYS** organize code by feature, not by type.
+- **ALWAYS** place every feature in its own file or directory, with matching test and doc files.
+- **ALWAYS** keep code, tests, and docs in alignment. When changing a feature, update all three.
+- **ALWAYS** write docs first, then tests, then code for new features.
+- **ALWAYS** review and align code, tests, and docs when changing or fixing features.
+- **ALWAYS** update dependent features and integrations, including their code, tests, and docs, when making changes.
+
+### Integration Tests
+- **ALWAYS** place integration tests at `src/tests/integration/`.
+- **ALWAYS** keep integration tests up to date with feature changes.
+
+### Documentation
+- **ALWAYS** colocate documentation with features.
+- **ALWAYS** update docs when implementation changes.
+- **ALWAYS** document public APIs, errors, edge cases, and usage examples.
+
+## 📋 Verification Checklist
+
+Before any commit:
+- [ ] All tests pass (`bun test`)
+- [ ] No TypeScript errors (`bun run tsc --noEmit`)
+- [ ] Documentation updated and colocated
+- [ ] No duplicate implementations
+- [ ] No workarounds or temporary fixes
+- [ ] Files use appropriate naming (lowercase paths, PascalCase components, camelCase stores, UPPERCASE.md docs)
+- [ ] No use of impl/ or integrations/ folders
+- [ ] Tests are beside the code they test
+- [ ] Docs are beside the code they document
+- [ ] Follows all NEVER and ALWAYS rules
+
+## 🚨 Enforcement
+
+These rules are enforced through:
+1. Pre-commit checks
+2. CI/CD pipeline validation
+3. Code review requirements
+4. Automated linting
 
 ## ✅ ALWAYS Rules
 
@@ -96,6 +136,7 @@
 - **ALWAYS** check module-specific documentation
 - **ALWAYS** update docs when implementation changes
 - **ALWAYS** verify examples still work
+- **ALWAYS** consult and update dep docs in docs/dependencies/[dep]/ when needed.
 
 ## 📋 Framework-Wide Rules
 

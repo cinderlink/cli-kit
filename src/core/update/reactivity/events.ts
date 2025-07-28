@@ -1,6 +1,6 @@
 /**
  * Reactivity Domain Event System
- * 
+ *
  * Defines events for Svelte 5 runes and reactive state management.
  * These events track state changes, lifecycle hooks, and reactive dependencies.
  */
@@ -67,12 +67,7 @@ export interface DerivedEvent extends BaseReactivityEvent {
 /**
  * All reactivity event types
  */
-export type ReactivityEvent = 
-  | RuneEvent
-  | LifecycleEvent
-  | StateEvent
-  | EffectEvent
-  | DerivedEvent
+export type ReactivityEvent = RuneEvent | LifecycleEvent | StateEvent | EffectEvent | DerivedEvent
 
 /**
  * Reactivity event channel names
@@ -82,10 +77,11 @@ export const ReactivityEventChannels = {
   LIFECYCLE: 'reactivity-lifecycle',
   STATE: 'reactivity-state',
   EFFECT: 'reactivity-effect',
-  DERIVED: 'reactivity-derived'
+  DERIVED: 'reactivity-derived',
 } as const
 
-export type ReactivityEventChannel = typeof ReactivityEventChannels[keyof typeof ReactivityEventChannels]
+export type ReactivityEventChannel =
+  (typeof ReactivityEventChannels)[keyof typeof ReactivityEventChannels]
 
 /**
  * Rune handle interface for type-safe reactive values

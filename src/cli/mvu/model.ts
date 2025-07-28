@@ -1,14 +1,14 @@
 /**
  * Unified CLI State Model
- * 
+ *
  * Consolidates all CLI-related state into a single MVU model
  */
 
-import { Effect } from "effect"
-import type { Plugin } from "@cli/plugin"
-import type { ScopeDef } from "@core/model/scope/types"
-import type { CLIAppOptions } from "@cli/jsx/app"
-import type { JSXCommandContext } from "@cli/jsx/types"
+import { Effect } from 'effect'
+import type { Plugin } from '@cli/plugin'
+import type { ScopeDef } from '@core/model/scope/types'
+import type { CLIAppOptions } from '@cli/jsx/app'
+import type { JSXCommandContext } from '@cli/jsx/types'
 
 // CLI State
 export interface CLIState {
@@ -65,30 +65,30 @@ export interface AppModel {
 // App Messages
 export type AppMsg =
   // CLI Messages
-  | { type: "SetCLIConfig"; config: CLIAppOptions }
-  | { type: "StartCLI" }
-  | { type: "StopCLI"; exitCode: number }
-  | { type: "ResetCLI" }
-  
+  | { type: 'SetCLIConfig'; config: CLIAppOptions }
+  | { type: 'StartCLI' }
+  | { type: 'StopCLI'; exitCode: number }
+  | { type: 'ResetCLI' }
+
   // Command Messages
-  | { type: "SetCommandPath"; path: string[] }
-  | { type: "ExecuteCommand"; path: string[]; context: JSXCommandContext }
-  | { type: "ResetCommandContext" }
-  
+  | { type: 'SetCommandPath'; path: string[] }
+  | { type: 'ExecuteCommand'; path: string[]; context: JSXCommandContext }
+  | { type: 'ResetCommandContext' }
+
   // Plugin Messages
-  | { type: "RegisterPlugin"; plugin: Plugin; config?: Record<string, unknown> }
-  | { type: "EnablePlugin"; name: string }
-  | { type: "DisablePlugin"; name: string }
-  | { type: "ConfigurePlugin"; name: string; config: Record<string, unknown> }
-  | { type: "UnregisterPlugin"; name: string }
-  
+  | { type: 'RegisterPlugin'; plugin: Plugin; config?: Record<string, unknown> }
+  | { type: 'EnablePlugin'; name: string }
+  | { type: 'DisablePlugin'; name: string }
+  | { type: 'ConfigurePlugin'; name: string; config: Record<string, unknown> }
+  | { type: 'UnregisterPlugin'; name: string }
+
   // Debug Messages
-  | { type: "UpdateDebugTab"; tab: string }
-  | { type: "ToggleDebugVisibility" }
-  | { type: "AddDebugLog"; message: string }
-  | { type: "AddDebugOutput"; content: string }
-  | { type: "RecordDebugEvent"; event: string; data: any }
-  | { type: "UpdateDebugPerformance"; renderTime: number }
+  | { type: 'UpdateDebugTab'; tab: string }
+  | { type: 'ToggleDebugVisibility' }
+  | { type: 'AddDebugLog'; message: string }
+  | { type: 'AddDebugOutput'; content: string }
+  | { type: 'RecordDebugEvent'; event: string; data: any }
+  | { type: 'UpdateDebugPerformance'; renderTime: number }
 
 // Commands (Effects)
 export type Cmd = Effect.Effect<AppMsg, never, never>
@@ -98,19 +98,19 @@ export const initAppModel = (): AppModel => ({
   cli: {
     config: {},
     isRunning: false,
-    exitCode: null
+    exitCode: null,
   },
   commands: {
     activePath: [],
-    context: null
+    context: null,
   },
   plugins: {
     plugins: new Map(),
     autoEnable: true,
-    validateDependencies: true
+    validateDependencies: true,
   },
   debug: {
-    activeTab: "app",
+    activeTab: 'app',
     logs: [],
     output: [],
     events: [],
@@ -118,7 +118,7 @@ export const initAppModel = (): AppModel => ({
     performance: {
       renderCount: 0,
       lastRenderTime: 0,
-      avgRenderTime: 0
-    }
-  }
+      avgRenderTime: 0,
+    },
+  },
 })

@@ -1,6 +1,6 @@
 /**
  * Focus Service - Manages focus state and keyboard navigation
- * 
+ *
  * Provides:
  * - Focus tracking across components
  * - Tab order management
@@ -9,7 +9,7 @@
  * - Focus restoration
  */
 
-import { Context, Effect, Option, Ref, pipe } from "effect"
+import { Context, Effect, Option, Ref, pipe } from 'effect'
 
 // =============================================================================
 // Focus Service Interface
@@ -35,62 +35,62 @@ export interface FocusService {
    * Register a focusable component
    */
   readonly register: (component: FocusableComponent) => Effect.Effect<void, never, never>
-  
+
   /**
    * Unregister a component
    */
   readonly unregister: (id: string) => Effect.Effect<void, never, never>
-  
+
   /**
    * Get the currently focused component
    */
   readonly getCurrentFocus: () => Effect.Effect<Option.Option<string>, never, never>
-  
+
   /**
    * Set focus to a specific component
    */
   readonly setFocus: (id: string) => Effect.Effect<boolean, never, never>
-  
+
   /**
    * Clear focus from all components
    */
   readonly clearFocus: () => Effect.Effect<void, never, never>
-  
+
   /**
    * Move focus to the next component in tab order
    */
   readonly focusNext: () => Effect.Effect<Option.Option<string>, never, never>
-  
+
   /**
    * Move focus to the previous component in tab order
    */
   readonly focusPrevious: () => Effect.Effect<Option.Option<string>, never, never>
-  
+
   /**
    * Trap focus within a specific component (e.g., modal)
    */
   readonly trapFocus: (containerId: string) => Effect.Effect<void, never, never>
-  
+
   /**
    * Release focus trap
    */
   readonly releaseTrap: () => Effect.Effect<void, never, never>
-  
+
   /**
    * Save current focus state
    */
   readonly saveFocusState: () => Effect.Effect<void, never, never>
-  
+
   /**
    * Restore previously saved focus state
    */
   readonly restoreFocusState: () => Effect.Effect<void, never, never>
-  
+
   /**
    * Get all registered components in tab order
    */
   readonly getTabOrder: () => Effect.Effect<ReadonlyArray<FocusableComponent>, never, never>
-  
+
   /**
    * Check if a component has focus
    */
@@ -100,7 +100,7 @@ export interface FocusService {
 /**
  * Focus service tag
  */
-export const FocusService = Context.GenericTag<FocusService>("@app/FocusService")
+export const FocusService = Context.GenericTag<FocusService>('@app/FocusService')
 
 // =============================================================================
 // Focus State
@@ -117,7 +117,7 @@ const initialState: FocusState = {
   components: new Map(),
   currentFocus: Option.none(),
   focusTrap: Option.none(),
-  savedFocus: Option.none()
+  savedFocus: Option.none(),
 }
 
 // =============================================================================
@@ -146,38 +146,45 @@ const findComponentInDirection = (
   direction: 'next' | 'previous'
 ): Option.Option<FocusableComponent> => {
   if (components.length === 0) return Option.none()
-  
+
   if (Option.isNone(currentId)) {
     return Option.some(direction === 'next' ? components[0] : components[components.length - 1])
   }
-  
+
   const currentIndex = components.findIndex(c => c.id === currentId.value)
   if (currentIndex === -1) {
     return Option.some(direction === 'next' ? components[0] : components[components.length - 1])
   }
-  
-  const nextIndex = direction === 'next' 
-    ? (currentIndex + 1) % components.length
-    : currentIndex === 0 ? components.length - 1 : currentIndex - 1
-    
+
+  const nextIndex =
+    direction === 'next'
+      ? (currentIndex + 1) % components.length
+      : currentIndex === 0
+        ? components.length - 1
+        : currentIndex - 1
+
   return Option.some(components[nextIndex])
 }
 
 /**
  * Navigate focus in a direction
  */
-const navigateFocus = (direction: 'next' | 'previous', stateRef: Ref.Ref<FocusState>, setFocus: (id: string) => Effect.Effect<boolean, never, never>) =>
+const navigateFocus = (
+  direction: 'next' | 'previous',
+  stateRef: Ref.Ref<FocusState>,
+  setFocus: (id: string) => Effect.Effect<boolean, never, never>
+) =>
   Effect.gen(function* (_) {
     const state = yield* _(Ref.get(stateRef))
     const trapId = Option.getOrNull(state.focusTrap)
     const components = getSortedComponents(state.components, trapId)
     const target = findComponentInDirection(components, state.currentFocus, direction)
-    
+
     if (Option.isSome(target)) {
       yield* _(setFocus(target.value.id))
       return Option.some(target.value.id)
     }
-    
+
     return Option.none()
   })
 
@@ -191,14 +198,14 @@ const getSortedComponents = (
   let comps = Array.from(components.values())
     .filter(c => c.focusable)
     .sort((a, b) => a.tabIndex - b.tabIndex)
-  
+
   // If focus is trapped, only include components within the trap
   if (trapId) {
     // In a real implementation, we'd check component hierarchy
     // For now, we'll only focus the trap component
     comps = comps.filter(c => c.id === trapId || c.trapped)
   }
-  
+
   return comps
 }
 
@@ -213,13 +220,13 @@ const getSortedComponents = (
  */
 export const FocusServiceLive = Effect.gen(function* (_) {
   const stateRef = yield* _(Ref.make(initialState))
-  
+
   const register = (component: FocusableComponent) =>
     Ref.update(stateRef, state => ({
       ...state,
-      components: new Map(state.components).set(component.id, component)
+      components: new Map(state.components).set(component.id, component),
     }))
-  
+
   const unregister = (id: string) =>
     Ref.update(stateRef, state => {
       const components = new Map(state.components)
@@ -227,106 +234,111 @@ export const FocusServiceLive = Effect.gen(function* (_) {
       return {
         ...state,
         components,
-        currentFocus: Option.filter(state.currentFocus, focusId => focusId !== id)
+        currentFocus: Option.filter(state.currentFocus, focusId => focusId !== id),
       }
     })
-  
-  const getCurrentFocus = () =>
-    Ref.get(stateRef).pipe(
-      Effect.map(state => state.currentFocus)
-    )
-  
+
+  const getCurrentFocus = () => Ref.get(stateRef).pipe(Effect.map(state => state.currentFocus))
+
   const setFocus = (id: string) =>
     Effect.gen(function* (_) {
       const state = yield* _(Ref.get(stateRef))
       const component = state.components.get(id)
-      
+
       if (!component || !component.focusable) {
         return false
       }
-      
+
       // Blur current component
       yield* _(blurCurrentComponent(state))
-      
+
       // Update state
-      yield* _(Ref.update(stateRef, s => ({
-        ...s,
-        currentFocus: Option.some(id)
-      })))
-      
+      yield* _(
+        Ref.update(stateRef, s => ({
+          ...s,
+          currentFocus: Option.some(id),
+        }))
+      )
+
       // Focus new component
       if (component.onFocus) {
         yield* _(component.onFocus())
       }
-      
+
       return true
     })
-  
+
   const clearFocus = () =>
     Effect.gen(function* (_) {
       const state = yield* _(Ref.get(stateRef))
-      
+
       // Blur current component
       yield* _(blurCurrentComponent(state))
-      
-      yield* _(Ref.update(stateRef, s => ({
-        ...s,
-        currentFocus: Option.none()
-      })))
+
+      yield* _(
+        Ref.update(stateRef, s => ({
+          ...s,
+          currentFocus: Option.none(),
+        }))
+      )
     })
-  
+
   const focusNext = () => navigateFocus('next', stateRef, setFocus)
-  
+
   const focusPrevious = () => navigateFocus('previous', stateRef, setFocus)
-  
+
   const trapFocus = (containerId: string) =>
     Effect.gen(function* (_) {
       const state = yield* _(Ref.get(stateRef))
-      
+
       // Save current focus before trapping
-      yield* _(Ref.update(stateRef, s => ({
-        ...s,
-        focusTrap: Option.some(containerId),
-        savedFocus: s.currentFocus
-      })))
-      
+      yield* _(
+        Ref.update(stateRef, s => ({
+          ...s,
+          focusTrap: Option.some(containerId),
+          savedFocus: s.currentFocus,
+        }))
+      )
+
       // Focus the trap container or first focusable element within
       const component = state.components.get(containerId)
       if (component && component.focusable) {
         yield* _(setFocus(containerId))
       }
     })
-  
+
   const releaseTrap = () =>
     Effect.gen(function* (_) {
       const state = yield* _(Ref.get(stateRef))
-      
-      yield* _(Ref.update(stateRef, s => ({
-        ...s,
-        focusTrap: Option.none()
-      })))
-      
+
+      yield* _(
+        Ref.update(stateRef, s => ({
+          ...s,
+          focusTrap: Option.none(),
+        }))
+      )
+
       // Restore saved focus if any
       if (Option.isSome(state.savedFocus)) {
         yield* _(setFocus(state.savedFocus.value))
       }
     })
-  
+
   const saveFocusState = () =>
     Ref.update(stateRef, state => ({
       ...state,
-      savedFocus: state.currentFocus
+      savedFocus: state.currentFocus,
     }))
-  
+
   const restoreFocusState = () =>
     Effect.gen(function* (_) {
       const state = yield* _(Ref.get(stateRef))
-      
+
       if (Option.isSome(state.savedFocus)) {
         yield* _(setFocus(state.savedFocus.value))
       }
     })
-  
+
   const getTabOrder = () =>
     Ref.get(stateRef).pipe(
       Effect.map(state => {
@@ -334,14 +346,12 @@ export const FocusServiceLive = Effect.gen(function* (_) {
         return getSortedComponents(state.components, trapId)
       })
     )
-  
+
   const hasFocus = (id: string) =>
     Ref.get(stateRef).pipe(
-      Effect.map(state => 
-        Option.isSome(state.currentFocus) && state.currentFocus.value === id
-      )
+      Effect.map(state => Option.isSome(state.currentFocus) && state.currentFocus.value === id)
     )
-  
+
   return FocusService.of({
     register,
     unregister,
@@ -355,7 +365,7 @@ export const FocusServiceLive = Effect.gen(function* (_) {
     saveFocusState,
     restoreFocusState,
     getTabOrder,
-    hasFocus
+    hasFocus,
   })
 })
 
@@ -381,7 +391,7 @@ export const focusable = (
   focusable: options.focusable ?? true,
   trapped: options.trapped,
   onFocus: options.onFocus,
-  onBlur: options.onBlur
+  onBlur: options.onBlur,
 })
 
 /**
@@ -393,7 +403,5 @@ export const withFocus = (component: FocusableComponent) =>
       Effect.flatMap(service => service.register(component)),
       Effect.as(component)
     ),
-    () => FocusService.pipe(
-      Effect.flatMap(service => service.unregister(component.id))
-    )
+    () => FocusService.pipe(Effect.flatMap(service => service.unregister(component.id)))
   )

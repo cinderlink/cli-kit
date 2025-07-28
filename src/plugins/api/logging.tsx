@@ -1,19 +1,19 @@
 /**
  * Logging Plugin for JSX CLI Applications
- * 
+ *
  * Wraps the existing tuix logging functionality in a JSX plugin interface
  * with beautiful terminal styling and user-friendly commands
  */
 
-import { defineJSXCommand, type JSXCommandContext } from "@plugins/api/jsx/app"
-import { Plugin, Command } from "@plugins/api/jsx/index"
-import { LogExplorer, createConsoleLogger, createDevelopmentLogger } from "@logger/index"
-import { TUITransport } from "@logger/transports/transports"
-import { runApp } from "@core/runtime"
-import { LiveServices } from "@core/services/impl"
-import { Effect } from "effect"
-import * as fs from "fs/promises"
-import * as path from "path"
+import { defineJSXCommand, type JSXCommandContext } from '@plugins/api/jsx/app'
+import { Plugin, Command } from '@plugins/api/jsx/index'
+import { LogExplorer, createConsoleLogger, createDevelopmentLogger } from '@logger/index'
+import { TUITransport } from '@logger/transports/transports'
+import { runApp } from '@core/runtime'
+import { LiveServices } from '@core/services/impl'
+import { Effect } from 'effect'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 
 // Import the tuix binary logging functions (these are already well-tested)
 // We'll adapt them to work with JSX styling
@@ -23,67 +23,67 @@ let loggingState = {
   loggers: new Map<string, any>(),
   currentLogFile: null as string | null,
   logLevel: 'info' as 'debug' | 'info' | 'warn' | 'error',
-  logDir: './logs' // Default, will be overridden by props/config
+  logDir: './logs', // Default, will be overridden by props/config
 }
 
 /**
  * Show logs command - similar to tuix logs
  */
 const ShowLogsCommand = defineJSXCommand({
-  name: "show",
-  description: "Show logs from a file or logger",
-  aliases: ["view", "cat"],
+  name: 'show',
+  description: 'Show logs from a file or logger',
+  aliases: ['view', 'cat'],
   args: {
     source: {
-      description: "Log file or logger name",
-      required: true
-    }
+      description: 'Log file or logger name',
+      required: true,
+    },
   },
   flags: {
     lines: {
-      description: "Number of lines to show",
-      alias: "n",
-      type: "number",
-      default: 50
+      description: 'Number of lines to show',
+      alias: 'n',
+      type: 'number',
+      default: 50,
     },
     follow: {
-      description: "Follow log output (tail -f)",
-      alias: "f",
-      type: "boolean"
+      description: 'Follow log output (tail -f)',
+      alias: 'f',
+      type: 'boolean',
     },
     filter: {
-      description: "Filter logs by pattern/regex",
-      type: "string"
+      description: 'Filter logs by pattern/regex',
+      type: 'string',
     },
     level: {
-      description: "Minimum log level to show",
-      type: "string",
-      choices: ["debug", "info", "warn", "error"]
+      description: 'Minimum log level to show',
+      type: 'string',
+      choices: ['debug', 'info', 'warn', 'error'],
     },
     interactive: {
-      description: "Use interactive log explorer",
-      alias: "i",
-      type: "boolean"
+      description: 'Use interactive log explorer',
+      alias: 'i',
+      type: 'boolean',
     },
     timeout: {
-      description: "Auto-stop watchers after specified seconds",
-      type: "number"
+      description: 'Auto-stop watchers after specified seconds',
+      type: 'number',
     },
     dir: {
-      description: "Override log directory",
-      alias: "d",
-      type: "string"
-    }
+      description: 'Override log directory',
+      alias: 'd',
+      type: 'string',
+    },
   },
   examples: [
-    "logs show app.log --lines 100",
+    'logs show app.log --lines 100',
     "logs show app.log --follow --filter 'error'",
-    "logs show app.log --interactive",
-    "logs show system --level warn"
+    'logs show app.log --interactive',
+    'logs show system --level warn',
   ],
   // Interactive when --follow or --interactive flags are used
-  interactive: (ctx) => ctx.flags.follow === true || ctx.flags.interactive === true,
-  handler: async (ctx) => {
+  interactive: ctx => ctx.flags.follow === true || ctx.flags.interactive === true,
+  handler: async ctx => {
     const { source } = ctx.args
     const { lines, follow, filter, level, interactive, timeout } = ctx.flags
 
@@ -111,7 +111,7 @@ const ShowLogsCommand = defineJSXCommand({
         const logPath = path.isAbsolute(source) ? source : path.join(logDir, source)
         const content = await fs.readFile(logPath, 'utf-8')
         const lines = content.split('\n').filter(line => line.trim())
-        
+
         logEntries = lines.map((line, i) => {
           try {
             const parsed = JSON.parse(line)
@@ -119,14 +119,14 @@ const ShowLogsCommand = defineJSXCommand({
               timestamp: new Date(parsed.timestamp || parsed.time || Date.now()),
               level: parsed.level || 'info',
               message: parsed.message || parsed.msg || line,
-              source: path.basename(logPath)
+              source: path.basename(logPath),
             }
           } catch {
             return {
               timestamp: new Date(),
               level: 'info',
               message: line,
-              source: path.basename(logPath)
+              source: path.basename(logPath),
             }
           }
         })
@@ -141,7 +141,7 @@ const ShowLogsCommand = defineJSXCommand({
             </vstack>
           )
         }
-        
+
         // This would need to be implemented based on your logger interface
         logEntries = [] // logger.getRecentLogs?.(lines) || []
       }
@@ -150,8 +150,8 @@ const ShowLogsCommand = defineJSXCommand({
       if (level) {
         const levelPriority = { debug: 0, info: 1, warn: 2, error: 3 }
         const minPriority = levelPriority[level as keyof typeof levelPriority]
-        logEntries = logEntries.filter(entry => 
-          levelPriority[entry.level as keyof typeof levelPriority] >= minPriority
+        logEntries = logEntries.filter(
+          entry => levelPriority[entry.level as keyof typeof levelPriority] >= minPriority
         )
       }
 
@@ -175,13 +175,17 @@ const ShowLogsCommand = defineJSXCommand({
                 {level && <text color="yellow">Level ≥ {level}</text>}
               </hstack>
               <text>{'─'.repeat(80)}</text>
-              
+
               {logEntries.length === 0 ? (
                 <panel border="single" style={{ padding: '1' }}>
-                  <text color="yellow">⚠️  No log entries found</text>
+                  <text color="yellow">⚠️ No log entries found</text>
                 </panel>
               ) : (
-                <panel border="rounded" title="Log Entries" style={{ padding: '1', maxHeight: '30' }}>
+                <panel
+                  border="rounded"
+                  title="Log Entries"
+                  style={{ padding: '1', maxHeight: '30' }}
+                >
                   <vstack>
                     {logEntries.map((entry, i) => (
                       <LogEntryView key={i} entry={entry} />
@@ -210,29 +214,29 @@ const ShowLogsCommand = defineJSXCommand({
         </vstack>
       )
     }
-  }
+  },
 })
 
 /**
  * List available logs
  */
 const ListLogsCommand = defineJSXCommand({
-  name: "list",
-  description: "List available log files and loggers",
-  aliases: ["ls"],
+  name: 'list',
+  description: 'List available log files and loggers',
+  aliases: ['ls'],
   flags: {
     verbose: {
-      description: "Show detailed information",
-      alias: "v",
-      type: "boolean"
+      description: 'Show detailed information',
+      alias: 'v',
+      type: 'boolean',
     },
     dir: {
-      description: "Override log directory",
-      alias: "d",
-      type: "string"
-    }
+      description: 'Override log directory',
+      alias: 'd',
+      type: 'string',
+    },
   },
-  handler: async (ctx) => {
+  handler: async ctx => {
     const logFiles: string[] = []
     const loggers = Array.from(loggingState.loggers.keys())
 
@@ -261,7 +265,9 @@ const ListLogsCommand = defineJSXCommand({
             <panel title="📁 Log Files" border="rounded" style={{ padding: '1' }}>
               <vstack>
                 {logFiles.length === 0 ? (
-                  <text color="gray">No log files found in {ctx.flags.dir || loggingState.logDir}</text>
+                  <text color="gray">
+                    No log files found in {ctx.flags.dir || loggingState.logDir}
+                  </text>
                 ) : (
                   <vstack>
                     <text color="gray">Directory: {ctx.flags.dir || loggingState.logDir}</text>
@@ -271,7 +277,10 @@ const ListLogsCommand = defineJSXCommand({
                         <text color="green">📄</text>
                         <text color="cyan">{file}</text>
                         {ctx.flags.verbose && (
-                          <text color="gray">  ({path.join(ctx.flags.dir || loggingState.logDir, file)})</text>
+                          <text color="gray">
+                            {' '}
+                            ({path.join(ctx.flags.dir || loggingState.logDir, file)})
+                          </text>
                         )}
                       </hstack>
                     ))}
@@ -305,31 +314,31 @@ const ListLogsCommand = defineJSXCommand({
         </panel>
       </vstack>
     )
-  }
+  },
 })
 
 /**
  * Configure logging
  */
 const ConfigCommand = defineJSXCommand({
-  name: "config",
-  description: "Configure logging settings",
+  name: 'config',
+  description: 'Configure logging settings',
   subcommands: {
     set: defineJSXCommand({
-      name: "set",
-      description: "Set logging configuration",
+      name: 'set',
+      description: 'Set logging configuration',
       args: {
         key: {
-          description: "Configuration key",
+          description: 'Configuration key',
           required: true,
-          choices: ["level", "dir", "format"]
+          choices: ['level', 'dir', 'format'],
         },
         value: {
-          description: "Configuration value",
-          required: true
-        }
+          description: 'Configuration value',
+          required: true,
+        },
       },
-      handler: (ctx) => {
+      handler: ctx => {
         const { key, value } = ctx.args
 
         switch (key) {
@@ -339,11 +348,11 @@ const ConfigCommand = defineJSXCommand({
             }
             loggingState.logLevel = value
             break
-          
+
           case 'dir':
             loggingState.logDir = value
             break
-            
+
           default:
             return <error>Unknown configuration key: {key}</error>
         }
@@ -354,26 +363,28 @@ const ConfigCommand = defineJSXCommand({
             <text>{`${key}: ${value}`}</text>
           </vstack>
         )
-      }
+      },
     }),
 
     get: defineJSXCommand({
-      name: "get",
-      description: "Get logging configuration",
+      name: 'get',
+      description: 'Get logging configuration',
       args: {
         key: {
-          description: "Configuration key",
-          required: false
-        }
+          description: 'Configuration key',
+          required: false,
+        },
       },
-      handler: (ctx) => {
+      handler: ctx => {
         if (!ctx.args.key) {
           return (
             <panel border="double" title="⚙️  Logging Configuration" style={{ padding: '1' }}>
               <vstack>
                 <hstack>
                   <text color="gray">Log Level:</text>
-                  <text color="cyan" bold>{loggingState.logLevel}</text>
+                  <text color="cyan" bold>
+                    {loggingState.logLevel}
+                  </text>
                 </hstack>
                 <hstack>
                   <text color="gray">Directory:</text>
@@ -391,7 +402,7 @@ const ConfigCommand = defineJSXCommand({
         const config: Record<string, any> = {
           level: loggingState.logLevel,
           dir: loggingState.logDir,
-          loggers: loggingState.loggers.size
+          loggers: loggingState.loggers.size,
         }
 
         const value = config[ctx.args.key as keyof typeof config]
@@ -400,23 +411,30 @@ const ConfigCommand = defineJSXCommand({
         }
 
         return <text>{`${ctx.args.key}: ${value}`}</text>
-      }
-    })
+      },
+    }),
   },
   handler: () => (
     <vstack>
-      <text color="blue" bold>Logging Configuration</text>
+      <text color="blue" bold>
+        Logging Configuration
+      </text>
       <text>Use subcommands:</text>
       <text color="green">• config get [key]</text>
       <text color="green">• config set &lt;key&gt; &lt;value&gt;</text>
     </vstack>
-  )
+  ),
 })
 
 /**
  * Interactive log viewer component
  */
-const InteractiveLogsView = ({ source, filter, level, timeout }: {
+const InteractiveLogsView = ({
+  source,
+  filter,
+  level,
+  timeout,
+}: {
   source: string
   filter?: string
   level?: string
@@ -430,7 +448,9 @@ const InteractiveLogsView = ({ source, filter, level, timeout }: {
             <vstack>
               <hstack>
                 <text color="gray">Source:</text>
-                <text color="cyan" bold>{source}</text>
+                <text color="cyan" bold>
+                  {source}
+                </text>
               </hstack>
               {filter && (
                 <hstack>
@@ -452,18 +472,18 @@ const InteractiveLogsView = ({ source, filter, level, timeout }: {
               )}
             </vstack>
           </panel>
-          
+
           <text></text>
-          
+
           <panel border="single" style={{ padding: '1' }}>
             <vstack>
               <text color="yellow">🔄 Interactive log viewer loading...</text>
               <text></text>
               <text color="gray">Controls:</text>
-              <text color="green">  • Press 'q' to quit</text>
-              <text color="green">  • Use arrow keys to navigate</text>
-              <text color="green">  • Press 'f' to filter</text>
-              <text color="green">  • Press '/' to search</text>
+              <text color="green"> • Press 'q' to quit</text>
+              <text color="green"> • Use arrow keys to navigate</text>
+              <text color="green"> • Press 'f' to filter</text>
+              <text color="green"> • Press '/' to search</text>
             </vstack>
           </panel>
         </vstack>
@@ -480,21 +500,22 @@ const LogEntryView = ({ entry }: { entry: any }) => {
     debug: 'gray',
     info: 'blue',
     warn: 'yellow',
-    error: 'red'
+    error: 'red',
   }
 
   const levelIcons = {
     debug: '🔍',
     info: 'ℹ️',
     warn: '⚠️',
-    error: '❌'
+    error: '❌',
   }
 
   return (
     <hstack>
       <text color="gray">{entry.timestamp.toLocaleTimeString()}</text>
       <text color={levelColors[entry.level as keyof typeof levelColors] || 'white'} bold>
-        {levelIcons[entry.level as keyof typeof levelIcons] || '•'} {entry.level.toUpperCase().padEnd(5)}
+        {levelIcons[entry.level as keyof typeof levelIcons] || '•'}{' '}
+        {entry.level.toUpperCase().padEnd(5)}
       </text>
       <text color="cyan">[{entry.source.padEnd(12)}]</text>
       <text>{entry.message}</text>
@@ -505,76 +526,76 @@ const LogEntryView = ({ entry }: { entry: any }) => {
 /**
  * Main logging plugin as JSX component
  */
-export const LoggingPlugin = ({ 
-  name = "logs", 
-  description = "Comprehensive logging functionality", 
-  version = "1.0.0",
+export const LoggingPlugin = ({
+  name = 'logs',
+  description = 'Comprehensive logging functionality',
+  version = '1.0.0',
   dir,
-  as
-}: { 
+  as,
+}: {
   name?: string
-  description?: string 
+  description?: string
   version?: string
   dir?: string
   as?: string
 } = {}) => {
   // Use the 'as' prop to rename the plugin if provided
   const pluginName = as || name
-  
+
   // Initialize log directory from props or config
   // This happens synchronously on first render
   if (dir && loggingState.logDir !== dir) {
     loggingState.logDir = dir
   }
-  
+
   return (
-  <Plugin name={pluginName} description={description} version={version}>
-    <Command {...ShowLogsCommand} />
-    <Command {...ListLogsCommand} />
-    <Command {...ConfigCommand} />
-    
-    {/* Aliases */}
-    <Command {...ShowLogsCommand} name="view" />
-    <Command {...ShowLogsCommand} name="cat" />
-    <Command {...ListLogsCommand} name="ls" />
-    
-    {/* Tail command */}
-    <Command
-      name="tail"
-      description="Follow log output (alias for show --follow)"
-      args={{
-        source: {
-          description: "Log file or logger name",
-          required: true
-        }
-      }}
-      flags={{
-        lines: {
-          description: "Number of lines to show initially",
-          alias: "n",
-          type: "number",
-          default: 10
-        },
-        dir: {
-          description: "Override log directory",
-          alias: "d",
-          type: "string"
-        }
-      }}
-      interactive={true}
-      handler={(ctx) => {
-        // Update log dir if provided
-        if (ctx.flags.dir) {
-          loggingState.logDir = ctx.flags.dir
-        }
-        // Delegate to show command with follow flag
-        return ShowLogsCommand.handler({
-          ...ctx,
-          flags: { ...ctx.flags, follow: true }
-        })
-      }}
-    />
-  </Plugin>
+    <Plugin name={pluginName} description={description} version={version}>
+      <Command {...ShowLogsCommand} />
+      <Command {...ListLogsCommand} />
+      <Command {...ConfigCommand} />
+
+      {/* Aliases */}
+      <Command {...ShowLogsCommand} name="view" />
+      <Command {...ShowLogsCommand} name="cat" />
+      <Command {...ListLogsCommand} name="ls" />
+
+      {/* Tail command */}
+      <Command
+        name="tail"
+        description="Follow log output (alias for show --follow)"
+        args={{
+          source: {
+            description: 'Log file or logger name',
+            required: true,
+          },
+        }}
+        flags={{
+          lines: {
+            description: 'Number of lines to show initially',
+            alias: 'n',
+            type: 'number',
+            default: 10,
+          },
+          dir: {
+            description: 'Override log directory',
+            alias: 'd',
+            type: 'string',
+          },
+        }}
+        interactive={true}
+        handler={ctx => {
+          // Update log dir if provided
+          if (ctx.flags.dir) {
+            loggingState.logDir = ctx.flags.dir
+          }
+          // Delegate to show command with follow flag
+          return ShowLogsCommand.handler({
+            ...ctx,
+            flags: { ...ctx.flags, follow: true },
+          })
+        }}
+      />
+    </Plugin>
   )
 }
 
@@ -592,29 +613,29 @@ export function getLogger(name: string) {
 // Initialize loggers when plugin is loaded
 export const LoggingPluginHooks = {
   onInit: async (config?: any) => {
-    console.log("📝 Logging plugin initialized")
-    
+    console.log('📝 Logging plugin initialized')
+
     // Set log directory from config
     if (config?.logsDirectory) {
       loggingState.logDir = config.logsDirectory
     } else if (config?.tuixDir) {
       loggingState.logDir = path.join(config.tuixDir, 'logs')
     }
-    
+
     // Create default console logger
-    const defaultLogger = createConsoleLogger("info", { 
+    const defaultLogger = createConsoleLogger('info', {
       colorize: true,
       prettyPrint: true,
-      showEmoji: true 
+      showEmoji: true,
     })
-    
-    loggingState.loggers.set("console", defaultLogger)
-    loggingState.loggers.set("default", defaultLogger)
+
+    loggingState.loggers.set('console', defaultLogger)
+    loggingState.loggers.set('default', defaultLogger)
   },
-  
+
   onExit: async () => {
-    console.log("📝 Logging plugin shutting down")
-  }
+    console.log('📝 Logging plugin shutting down')
+  },
 }
 
 export default LoggingPlugin

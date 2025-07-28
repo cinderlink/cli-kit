@@ -2,11 +2,11 @@
  * Option Parsing Utilities
  */
 
-import { parseValue, addOptionValue } from "./value"
+import { parseValue, addOptionValue } from './value'
 
 /**
  * Parse long option (--name or --name=value)
- * 
+ *
  * @param arg - Long option string
  * @returns Tuple of [name, value]
  */
@@ -20,7 +20,7 @@ export function parseLongOption(arg: string): [string, string | undefined] {
 
 /**
  * Parse short options (-abc becomes a=true, b=true, c=true)
- * 
+ *
  * @param flags - Short option flags
  * @param options - Options object to modify
  * @param argv - Full argument array
@@ -28,16 +28,16 @@ export function parseLongOption(arg: string): [string, string | undefined] {
  * @returns Number of additional arguments consumed
  */
 export function parseShortOptions(
-  flags: string, 
+  flags: string,
   options: Record<string, unknown>,
   argv: string[],
   currentIndex: number
 ): number {
   let consumed = 0
-  
+
   for (let j = 0; j < flags.length; j++) {
     const flag = flags[j]
-    
+
     // Check if this is the last flag and there's a value
     if (j === flags.length - 1) {
       const nextArg = argv[currentIndex + 1 + consumed]
@@ -51,6 +51,6 @@ export function parseShortOptions(
       addOptionValue(options, flag, true)
     }
   }
-  
+
   return consumed
 }

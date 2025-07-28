@@ -1,6 +1,6 @@
 /**
  * Plugin Component - Core API
- * 
+ *
  * Defines a basic plugin scope that can contain commands
  * For CLI integration, use Plugin from '@plugins/integrations/cli/Plugin'
  */
@@ -22,7 +22,7 @@ export function Plugin(props: PluginProps): JSX.Element {
       name={props.name}
       description={props.description}
       metadata={{
-        version: props.version
+        version: props.version,
       }}
     >
       {props.children}

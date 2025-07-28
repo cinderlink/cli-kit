@@ -1,6 +1,6 @@
 /**
  * CommandLineScope Component
- * 
+ *
  * CLI-aware scope that handles command execution and help rendering.
  * Automatically shows help when no command matches or help is requested.
  */
@@ -20,7 +20,7 @@ export function CommandLineScope(props: CommandLineScopeProps): JSX.Element {
   return (
     <Scope {...props} executable={true}>
       {props.children}
-      
+
       {/* Always add help as a child command */}
       <Scope
         id={`${props.id || `scope_${props.type}_${props.name}`}_help`}

@@ -1,143 +1,147 @@
-import { test, expect, describe } from "bun:test"
-import { resolvePluginDependencies, checkDependencies, getPluginDependents } from "./dependencies"
-import type { Plugin } from "./types"
+import { test, expect, describe } from 'bun:test'
+import { resolvePluginDependencies, checkDependencies, getPluginDependents } from './dependencies'
+import type { Plugin } from './types'
 
-describe("Plugin Dependencies", () => {
-  describe("resolvePluginDependencies", () => {
-    test("sorts plugins by dependency order", () => {
+describe('Plugin Dependencies', () => {
+  describe('resolvePluginDependencies', () => {
+    test('sorts plugins by dependency order', () => {
       const pluginA: Plugin = {
         metadata: {
-          name: "plugin-a",
-          version: "1.0.0",
+          name: 'plugin-a',
+          version: '1.0.0',
           dependencies: {
-            "plugin-b": "1.0.0"
-          }
-        }
+            'plugin-b': '1.0.0',
+          },
+        },
       }
 
       const pluginB: Plugin = {
         metadata: {
-          name: "plugin-b",
-          version: "1.0.0"
-        }
+          name: 'plugin-b',
+          version: '1.0.0',
+        },
       }
 
       const result = resolvePluginDependencies([pluginA, pluginB])
       expect(result).toHaveLength(2)
-      expect(result[0].metadata.name).toBe("plugin-b")
-      expect(result[1].metadata.name).toBe("plugin-a")
+      expect(result[0].metadata.name).toBe('plugin-b')
+      expect(result[1].metadata.name).toBe('plugin-a')
     })
 
-    test("handles multiple dependency levels", () => {
+    test('handles multiple dependency levels', () => {
       const pluginA: Plugin = {
         metadata: {
-          name: "plugin-a",
-          version: "1.0.0",
+          name: 'plugin-a',
+          version: '1.0.0',
           dependencies: {
-            "plugin-b": "1.0.0"
-          }
-        }
+            'plugin-b': '1.0.0',
+          },
+        },
       }
 
       const pluginB: Plugin = {
         metadata: {
-          name: "plugin-b",
-          version: "1.0.0",
+          name: 'plugin-b',
+          version: '1.0.0',
           dependencies: {
-            "plugin-c": "1.0.0"
-          }
-        }
+            'plugin-c': '1.0.0',
+          },
+        },
       }
 
       const pluginC: Plugin = {
         metadata: {
-          name: "plugin-c",
-          version: "1.0.0"
-        }
+          name: 'plugin-c',
+          version: '1.0.0',
+        },
       }
 
       const result = resolvePluginDependencies([pluginA, pluginB, pluginC])
       expect(result).toHaveLength(3)
-      expect(result[0].metadata.name).toBe("plugin-c")
-      expect(result[1].metadata.name).toBe("plugin-b")
-      expect(result[2].metadata.name).toBe("plugin-a")
+      expect(result[0].metadata.name).toBe('plugin-c')
+      expect(result[1].metadata.name).toBe('plugin-b')
+      expect(result[2].metadata.name).toBe('plugin-a')
     })
 
-    test("detects circular dependencies", () => {
+    test('detects circular dependencies', () => {
       const pluginA: Plugin = {
         metadata: {
-          name: "plugin-a",
-          version: "1.0.0",
+          name: 'plugin-a',
+          version: '1.0.0',
           dependencies: {
-            "plugin-b": "1.0.0"
-          }
-        }
+            'plugin-b': '1.0.0',
+          },
+        },
       }
 
       const pluginB: Plugin = {
         metadata: {
-          name: "plugin-b",
-          version: "1.0.0",
+          name: 'plugin-b',
+          version: '1.0.0',
           dependencies: {
-            "plugin-a": "1.0.0"
-          }
-        }
+            'plugin-a': '1.0.0',
+          },
+        },
       }
 
-      expect(() => resolvePluginDependencies([pluginA, pluginB])).toThrow(/Circular dependency detected/)
+      expect(() => resolvePluginDependencies([pluginA, pluginB])).toThrow(
+        /Circular dependency detected/
+      )
     })
 
-    test("throws on missing dependencies", () => {
+    test('throws on missing dependencies', () => {
       const plugin: Plugin = {
         metadata: {
-          name: "plugin-a",
-          version: "1.0.0",
+          name: 'plugin-a',
+          version: '1.0.0',
           dependencies: {
-            "missing-plugin": "1.0.0"
-          }
-        }
+            'missing-plugin': '1.0.0',
+          },
+        },
       }
 
-      expect(() => resolvePluginDependencies([plugin])).toThrow("Plugin dependency 'missing-plugin' not found")
+      expect(() => resolvePluginDependencies([plugin])).toThrow(
+        "Plugin dependency 'missing-plugin' not found"
+      )
     })
 
-    test("handles plugins with no dependencies", () => {
+    test('handles plugins with no dependencies', () => {
       const plugins: Plugin[] = [
         {
           metadata: {
-            name: "plugin-a",
-            version: "1.0.0"
-          }
+            name: 'plugin-a',
+            version: '1.0.0',
+          },
         },
         {
           metadata: {
-            name: "plugin-b",
-            version: "1.0.0"
-          }
-        }
+            name: 'plugin-b',
+            version: '1.0.0',
+          },
+        },
       ]
 
       const result = resolvePluginDependencies(plugins)
       expect(result).toHaveLength(2)
       // Order doesn't matter when there are no dependencies
-      expect(result.map(p => p.metadata.name).sort()).toEqual(["plugin-a", "plugin-b"])
+      expect(result.map(p => p.metadata.name).sort()).toEqual(['plugin-a', 'plugin-b'])
     })
   })
 
-  describe("checkDependencies", () => {
-    test("reports satisfied dependencies", () => {
+  describe('checkDependencies', () => {
+    test('reports satisfied dependencies', () => {
       const plugin: Plugin = {
         metadata: {
-          name: "plugin-a",
-          version: "1.0.0",
+          name: 'plugin-a',
+          version: '1.0.0',
           dependencies: {
-            "plugin-b": "1.0.0"
-          }
-        }
+            'plugin-b': '1.0.0',
+          },
+        },
       }
 
       const available = new Map([
-        ["plugin-b", { metadata: { name: "plugin-b", version: "1.0.0" } } as Plugin]
+        ['plugin-b', { metadata: { name: 'plugin-b', version: '1.0.0' } } as Plugin],
       ])
 
       const result = checkDependencies(plugin, available)
@@ -145,33 +149,33 @@ describe("Plugin Dependencies", () => {
       expect(result.missing).toHaveLength(0)
     })
 
-    test("reports missing dependencies", () => {
+    test('reports missing dependencies', () => {
       const plugin: Plugin = {
         metadata: {
-          name: "plugin-a",
-          version: "1.0.0",
+          name: 'plugin-a',
+          version: '1.0.0',
           dependencies: {
-            "plugin-b": "1.0.0",
-            "plugin-c": "1.0.0"
-          }
-        }
+            'plugin-b': '1.0.0',
+            'plugin-c': '1.0.0',
+          },
+        },
       }
 
       const available = new Map([
-        ["plugin-b", { metadata: { name: "plugin-b", version: "1.0.0" } } as Plugin]
+        ['plugin-b', { metadata: { name: 'plugin-b', version: '1.0.0' } } as Plugin],
       ])
 
       const result = checkDependencies(plugin, available)
       expect(result.satisfied).toBe(false)
-      expect(result.missing).toEqual(["plugin-c"])
+      expect(result.missing).toEqual(['plugin-c'])
     })
 
-    test("handles plugins with no dependencies", () => {
+    test('handles plugins with no dependencies', () => {
       const plugin: Plugin = {
         metadata: {
-          name: "plugin-a",
-          version: "1.0.0"
-        }
+          name: 'plugin-a',
+          version: '1.0.0',
+        },
       }
 
       const result = checkDependencies(plugin, new Map())
@@ -180,57 +184,57 @@ describe("Plugin Dependencies", () => {
     })
   })
 
-  describe("getPluginDependents", () => {
-    test("finds direct dependents", () => {
+  describe('getPluginDependents', () => {
+    test('finds direct dependents', () => {
       const plugins: Plugin[] = [
         {
           metadata: {
-            name: "plugin-a",
-            version: "1.0.0",
+            name: 'plugin-a',
+            version: '1.0.0',
             dependencies: {
-              "plugin-c": "1.0.0"
-            }
-          }
+              'plugin-c': '1.0.0',
+            },
+          },
         },
         {
           metadata: {
-            name: "plugin-b",
-            version: "1.0.0",
+            name: 'plugin-b',
+            version: '1.0.0',
             dependencies: {
-              "plugin-c": "1.0.0"
-            }
-          }
+              'plugin-c': '1.0.0',
+            },
+          },
         },
         {
           metadata: {
-            name: "plugin-c",
-            version: "1.0.0"
-          }
-        }
+            name: 'plugin-c',
+            version: '1.0.0',
+          },
+        },
       ]
 
-      const dependents = getPluginDependents("plugin-c", plugins)
+      const dependents = getPluginDependents('plugin-c', plugins)
       expect(dependents).toHaveLength(2)
-      expect(dependents.map(p => p.metadata.name).sort()).toEqual(["plugin-a", "plugin-b"])
+      expect(dependents.map(p => p.metadata.name).sort()).toEqual(['plugin-a', 'plugin-b'])
     })
 
-    test("returns empty array when no dependents", () => {
+    test('returns empty array when no dependents', () => {
       const plugins: Plugin[] = [
         {
           metadata: {
-            name: "plugin-a",
-            version: "1.0.0"
-          }
+            name: 'plugin-a',
+            version: '1.0.0',
+          },
         },
         {
           metadata: {
-            name: "plugin-b",
-            version: "1.0.0"
-          }
-        }
+            name: 'plugin-b',
+            version: '1.0.0',
+          },
+        },
       ]
 
-      const dependents = getPluginDependents("plugin-a", plugins)
+      const dependents = getPluginDependents('plugin-a', plugins)
       expect(dependents).toHaveLength(0)
     })
   })

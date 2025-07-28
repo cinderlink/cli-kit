@@ -1,8 +1,8 @@
 /**
  * Styling Types - Common types and interfaces for the styling system
- * 
+ *
  * This module defines the core type system for TUIX styling, providing:
- * 
+ *
  * - **Position Types**: Normalized positioning with branded types for type safety
  * - **Spacing Types**: Padding and margin interfaces with CSS-style normalization
  * - **Text Alignment**: Horizontal and vertical alignment enums
@@ -11,14 +11,14 @@
  * - **Text Transformation**: Content transformation utilities
  * - **Style Properties**: Complete interface for all styling capabilities
  * - **Style Inheritance**: Property cascading system
- * 
+ *
  * The type system is designed to be comprehensive yet practical for terminal UI applications,
  * providing familiar CSS-like concepts adapted for character-based displays.
  */
 
-import { Brand } from "effect"
-import type { Color } from "./color"
-import type { Border, BorderSide } from "./borders"
+import { Brand } from 'effect'
+import type { Color } from './color'
+import type { Border, BorderSide } from './borders'
 
 // =============================================================================
 // Position Types
@@ -26,15 +26,15 @@ import type { Border, BorderSide } from "./borders"
 
 /**
  * Position as a normalized value between 0.0 and 1.0
- * 
+ *
  * Used for alignment and relative positioning within containers.
  * Provides type-safe positioning with validation and common presets.
- * 
+ *
  * Values:
  * - 0.0: Start/Left/Top position
- * - 0.5: Center/Middle position  
+ * - 0.5: Center/Middle position
  * - 1.0: End/Right/Bottom position
- * 
+ *
  * @example
  * ```typescript
  * const centerPos = Position.Center // 0.5
@@ -42,27 +42,26 @@ import type { Border, BorderSide } from "./borders"
  * const invalid = Position.of(1.5) // null (out of range)
  * ```
  */
-export type Position = number & Brand.Brand<"Position">
+export type Position = number & Brand.Brand<'Position'>
 
 /**
  * Position factory and constants
- * 
+ *
  * Provides validated Position creation and common position presets.
  */
 export const Position = {
   /**
    * Create a Position from a number with validation
    */
-  of: (n: number): Position | null =>
-    n >= 0 && n <= 1 ? (n as Position) : null,
-  
+  of: (n: number): Position | null => (n >= 0 && n <= 1 ? (n as Position) : null),
+
   /**
    * Predefined positions
    */
   Start: 0.0 as Position,
   Center: 0.5 as Position,
   End: 1.0 as Position,
-  
+
   // Aliases
   Left: 0.0 as Position,
   Top: 0.0 as Position,
@@ -77,10 +76,10 @@ export const Position = {
 
 /**
  * Padding configuration for all four sides
- * 
+ *
  * Defines inner spacing within an element, measured in character units.
  * Each side can be configured independently for flexible layout control.
- * 
+ *
  * @example
  * ```typescript
  * const padding: Padding = {
@@ -100,10 +99,10 @@ export interface Padding {
 
 /**
  * Margin configuration for all four sides
- * 
+ *
  * Defines outer spacing around an element, measured in character units.
  * Creates space between adjacent elements in the layout.
- * 
+ *
  * @example
  * ```typescript
  * const margin: Margin = {
@@ -123,19 +122,19 @@ export interface Margin {
 
 /**
  * Helper to normalize spacing values (CSS-style)
- * 
+ *
  * Converts shorthand spacing notation to explicit four-value format:
  * - 1 value: all sides equal
  * - 2 values: vertical, horizontal
  * - 3 values: top, horizontal, bottom
  * - 4 values: top, right, bottom, left
- * 
+ *
  * @param top - Top spacing or all sides if only value provided
  * @param right - Right spacing or horizontal if only 2 values
  * @param bottom - Bottom spacing
  * @param left - Left spacing
  * @returns Tuple of [top, right, bottom, left] values
- * 
+ *
  * @example
  * ```typescript
  * normalizeSpacing(2) // [2, 2, 2, 2]
@@ -171,27 +170,27 @@ export const normalizeSpacing = (
 
 /**
  * Horizontal text alignment options
- * 
+ *
  * Controls how text is aligned within its container horizontally.
  * Similar to CSS text-align property for terminal applications.
  */
 export enum HorizontalAlign {
-  Left = "left",
-  Center = "center",
-  Right = "right",
-  Justify = "justify"
+  Left = 'left',
+  Center = 'center',
+  Right = 'right',
+  Justify = 'justify',
 }
 
 /**
  * Vertical text alignment options
- * 
+ *
  * Controls how text is aligned within its container vertically.
  * Useful for centering content in fixed-height containers.
  */
 export enum VerticalAlign {
-  Top = "top",
-  Middle = "middle",
-  Bottom = "bottom"
+  Top = 'top',
+  Middle = 'middle',
+  Bottom = 'bottom',
 }
 
 // =============================================================================
@@ -200,10 +199,10 @@ export enum VerticalAlign {
 
 /**
  * Text decoration and formatting options
- * 
+ *
  * Controls various text styling effects available in terminal applications.
  * These correspond to ANSI escape sequence capabilities.
- * 
+ *
  * @example
  * ```typescript
  * const decoration: TextDecoration = {
@@ -229,10 +228,10 @@ export interface TextDecoration {
 
 /**
  * Dimension constraints for layout elements
- * 
+ *
  * Defines size constraints for views, measured in character units.
  * Supports both exact sizing and flexible min/max constraints.
- * 
+ *
  * @example
  * ```typescript
  * const dimensions: Dimensions = {
@@ -257,25 +256,25 @@ export interface Dimensions {
 
 /**
  * Text transformation options
- * 
+ *
  * Defines how text content should be transformed before display.
  * Supports common transformations and custom transformation functions.
- * 
+ *
  * @example
  * ```typescript
  * const upper: TextTransform = { _tag: "uppercase" }
- * const custom: TextTransform = { 
- *   _tag: "custom", 
+ * const custom: TextTransform = {
+ *   _tag: "custom",
  *   fn: (text) => text.replace(/\w+/g, word => word.charAt(0).toUpperCase() + word.slice(1))
  * }
  * ```
  */
-export type TextTransform = 
-  | { _tag: "none" }
-  | { _tag: "uppercase" }
-  | { _tag: "lowercase" }
-  | { _tag: "capitalize" }
-  | { _tag: "custom"; fn: (text: string) => string }
+export type TextTransform =
+  | { _tag: 'none' }
+  | { _tag: 'uppercase' }
+  | { _tag: 'lowercase' }
+  | { _tag: 'capitalize' }
+  | { _tag: 'custom'; fn: (text: string) => string }
 
 // =============================================================================
 // Complete Style Properties
@@ -283,10 +282,10 @@ export type TextTransform =
 
 /**
  * Complete style properties interface
- * 
+ *
  * Defines all possible styling properties that can be applied to text and layout elements.
  * This is the comprehensive interface used throughout the styling system.
- * 
+ *
  * Properties are organized into logical groups:
  * - Colors: foreground, background
  * - Borders: border styling and colors
@@ -297,7 +296,7 @@ export type TextTransform =
  * - Transform: text transformation functions
  * - Overflow: text overflow handling
  * - Performance: caching hints
- * 
+ *
  * @example
  * ```typescript
  * const style: StyleProps = {
@@ -315,17 +314,17 @@ export interface StyleProps {
   // Colors
   readonly foreground?: Color
   readonly background?: Color
-  
+
   // Borders
   readonly border?: Border
   readonly borderSides?: BorderSide
   readonly borderForeground?: Color
   readonly borderBackground?: Color
-  
+
   // Spacing
   readonly padding?: Padding
   readonly margin?: Margin
-  
+
   // Text decoration
   readonly bold?: boolean
   readonly italic?: boolean
@@ -334,8 +333,8 @@ export interface StyleProps {
   readonly inverse?: boolean
   readonly blink?: boolean
   readonly faint?: boolean
-  readonly inline?: boolean  // Prevents style bleeding to subsequent text
-  
+  readonly inline?: boolean // Prevents style bleeding to subsequent text
+
   // Dimensions
   readonly width?: number
   readonly height?: number
@@ -343,18 +342,18 @@ export interface StyleProps {
   readonly minHeight?: number
   readonly maxWidth?: number
   readonly maxHeight?: number
-  
+
   // Alignment
   readonly horizontalAlign?: HorizontalAlign
   readonly verticalAlign?: VerticalAlign
-  
+
   // Transform
   readonly transform?: TextTransform
-  
+
   // Overflow
-  readonly overflow?: "visible" | "hidden" | "wrap" | "ellipsis"
-  readonly wordBreak?: "normal" | "break-all" | "keep-all"
-  
+  readonly overflow?: 'visible' | 'hidden' | 'wrap' | 'ellipsis'
+  readonly wordBreak?: 'normal' | 'break-all' | 'keep-all'
+
   // Performance hints
   readonly cached?: boolean
 }
@@ -365,36 +364,36 @@ export interface StyleProps {
 
 /**
  * Properties that can be inherited from parent styles
- * 
+ *
  * Defines which style properties cascade from parent to child elements.
  * Similar to CSS inheritance, but adapted for terminal UI constraints.
- * 
+ *
  * Inheritable properties typically affect text appearance and behavior,
  * while layout properties (padding, margins, dimensions) are not inherited.
  */
 export const INHERITABLE_PROPS = new Set([
-  "foreground",
-  "background",
-  "bold",
-  "italic",
-  "underline",
-  "strikethrough",
-  "inverse",
-  "blink",
-  "faint",
-  "transform",
-  "wordBreak"
+  'foreground',
+  'background',
+  'bold',
+  'italic',
+  'underline',
+  'strikethrough',
+  'inverse',
+  'blink',
+  'faint',
+  'transform',
+  'wordBreak',
 ])
 
 /**
  * Check if a property is inheritable
- * 
+ *
  * Determines whether a given style property should be inherited
  * from parent to child elements in the styling hierarchy.
- * 
+ *
  * @param prop - The style property name to check
  * @returns True if the property is inheritable, false otherwise
- * 
+ *
  * @example
  * ```typescript
  * isInheritable('foreground') // true
@@ -402,5 +401,6 @@ export const INHERITABLE_PROPS = new Set([
  * isInheritable('bold') // true
  * ```
  */
-export const isInheritable = (prop: keyof StyleProps): boolean =>
-  INHERITABLE_PROPS.has(prop)
+export const isInheritable = (prop: keyof StyleProps): boolean => INHERITABLE_PROPS.has(prop)
+
+export type AnsiStyle = StyleProps

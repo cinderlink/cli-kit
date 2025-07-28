@@ -1,10 +1,10 @@
 /**
  * Screenshot Module Stub
- * 
+ *
  * TODO: Implement screenshot functionality
  */
 
-import { Effect } from "effect"
+import { Effect } from 'effect'
 
 export interface ScreenshotInfo {
   name: string
@@ -37,33 +37,34 @@ export interface ScreenshotResult {
 
 export const Screenshot = {
   list: () => Effect.succeed([] as ScreenshotInfo[]),
-  
-  take: (command: string, options?: any) => 
+
+  take: (command: string, options?: any) =>
     Effect.succeed({
       screenshot: {
         metadata: { dimensions: { width: 80, height: 24 } },
-        visual: { lines: ["Screenshot functionality not implemented yet"] },
-        raw: { ansiCodes: "" }
+        visual: { lines: ['Screenshot functionality not implemented yet'] },
+        raw: { ansiCodes: '' },
       },
-      path: "/dev/null"
+      path: '/dev/null',
     } as ScreenshotResult),
-  
+
   capturePty: (cmd: string, args: string[], options?: any) =>
     Effect.succeed({
       metadata: { dimensions: { width: 80, height: 24 } },
-      visual: { lines: ["Screenshot functionality not implemented yet"] },
-      raw: { ansiCodes: "" }
+      visual: { lines: ['Screenshot functionality not implemented yet'] },
+      raw: { ansiCodes: '' },
     } as ScreenshotData),
-  
-  save: (screenshot: ScreenshotData) => Effect.succeed("/dev/null"),
-  
-  load: (name: string) => Effect.succeed({
-    metadata: { dimensions: { width: 80, height: 24 } },
-    visual: { lines: ["Screenshot functionality not implemented yet"] },
-    raw: { ansiCodes: "" }
-  } as ScreenshotData),
-  
-  delete: (name: string) => Effect.succeed(undefined)
+
+  save: (screenshot: ScreenshotData) => Effect.succeed('/dev/null'),
+
+  load: (name: string) =>
+    Effect.succeed({
+      metadata: { dimensions: { width: 80, height: 24 } },
+      visual: { lines: ['Screenshot functionality not implemented yet'] },
+      raw: { ansiCodes: '' },
+    } as ScreenshotData),
+
+  delete: (name: string) => Effect.succeed(undefined),
 }
 
 export function formatScreenshot(screenshot: ScreenshotData, options?: any): string {

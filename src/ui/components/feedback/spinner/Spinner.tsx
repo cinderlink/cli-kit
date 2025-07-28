@@ -1,16 +1,16 @@
 /**
  * Spinner Component - JSX version for loading indicators
- * 
+ *
  * Animated loading indicators with multiple styles:
  * - Various spinner types (dots, line, circle, etc.)
  * - Customizable colors and sizes
  * - Optional loading text
  * - Smooth animations
- * 
+ *
  * @example
  * ```tsx
  * import { Spinner } from 'tuix/components/feedback/spinner'
- * 
+ *
  * function LoadingScreen() {
  *   return (
  *     <Center>
@@ -47,7 +47,7 @@ const SPINNER_FRAMES = {
   circle: ['◐', '◓', '◑', '◒'],
   bounce: ['⠁', '⠂', '⠄', '⠂'],
   pulse: ['·', '•', '●', '•'],
-  wave: ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '▇', '▆', '▅', '▄', '▃', '▂']
+  wave: ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '▇', '▆', '▅', '▄', '▃', '▂'],
 }
 
 /**
@@ -59,33 +59,33 @@ export function Spinner(props: SpinnerProps): JSX.Element {
   const color = props.color || Colors.blue
   const size = props.size || 'medium'
   const speed = props.speed || 80
-  
+
   // State
   const frameIndex = $state(0)
   const frames = SPINNER_FRAMES[type]
-  
+
   // Animation effect
   $effect(() => {
     const interval = setInterval(() => {
       frameIndex.value = (frameIndex.value + 1) % frames.length
     }, speed)
-    
+
     return () => clearInterval(interval)
   })
-  
+
   // Size styles
   const sizeStyles = {
     small: { fontSize: 12 },
     medium: { fontSize: 16 },
-    large: { fontSize: 24 }
+    large: { fontSize: 24 },
   }
-  
+
   // Render
   const spinnerStyle = style({
     color,
-    ...sizeStyles[size]
+    ...sizeStyles[size],
   })
-  
+
   if (props.text) {
     return jsx('hstack', {
       gap: 1,
@@ -93,19 +93,19 @@ export function Spinner(props: SpinnerProps): JSX.Element {
       children: [
         jsx('text', {
           style: spinnerStyle,
-          children: frames[frameIndex.value]
+          children: frames[frameIndex.value],
         }),
         jsx('text', {
-          children: props.text
-        })
-      ]
+          children: props.text,
+        }),
+      ],
     })
   }
-  
+
   return jsx('text', {
     style: spinnerStyle,
     className: props.className,
-    children: frames[frameIndex.value]
+    children: frames[frameIndex.value],
   })
 }
 
@@ -125,12 +125,14 @@ export const processingSpinner = (props: Omit<SpinnerProps, 'text'>) => (
 )
 
 // Spinner with custom message
-export function SpinnerWithMessage(props: SpinnerProps & { 
-  message: string 
-  messageColor?: string 
-}): JSX.Element {
+export function SpinnerWithMessage(
+  props: SpinnerProps & {
+    message: string
+    messageColor?: string
+  }
+): JSX.Element {
   const { message, messageColor = Colors.gray, ...spinnerProps } = props
-  
+
   return jsx('vstack', {
     align: 'center',
     gap: 1,
@@ -138,9 +140,9 @@ export function SpinnerWithMessage(props: SpinnerProps & {
       <Spinner {...spinnerProps} />,
       jsx('text', {
         style: style({ color: messageColor }),
-        children: message
-      })
-    ]
+        children: message,
+      }),
+    ],
   })
 }
 
@@ -154,7 +156,7 @@ export function LoadingOverlay(props: {
   if (!props.loading) {
     return props.children || jsx('text', { children: '' })
   }
-  
+
   return jsx('box', {
     style: style({
       position: 'absolute',
@@ -165,18 +167,19 @@ export function LoadingOverlay(props: {
       background: 'rgba(0, 0, 0, 0.7)',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     }),
     children: jsx('vstack', {
       align: 'center',
       gap: 2,
       children: [
         <Spinner size="large" {...props.spinnerProps} />,
-        props.message && jsx('text', {
-          style: style({ color: Colors.white }),
-          children: props.message
-        })
-      ].filter(Boolean)
-    })
+        props.message &&
+          jsx('text', {
+            style: style({ color: Colors.white }),
+            children: props.message,
+          }),
+      ].filter(Boolean),
+    }),
   })
 }

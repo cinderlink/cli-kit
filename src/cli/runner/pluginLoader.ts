@@ -1,26 +1,26 @@
 /**
  * Plugin Loader Module
- * 
+ *
  * Handles loading and initializing plugins from configuration
  */
 
-import type { Plugin, PluginContext } from "@cli/plugin"
-import type { CLIConfig } from "@cli/types"
-import { Context } from "effect"
+import type { Plugin, PluginContext } from '@cli/plugin'
+import type { CLIConfig } from '@cli/types'
+import { Context } from 'effect'
 
 export class PluginLoader {
   constructor(private config: CLIConfig) {}
-  
+
   /**
    * Load plugins from configuration
    */
   async loadPlugins(): Promise<Plugin[]> {
     const plugins: Plugin[] = []
-    
+
     if (!this.config.plugins || this.config.plugins.length === 0) {
       return plugins
     }
-    
+
     for (const pluginConfig of this.config.plugins) {
       try {
         // Handle string plugin references (module names)
@@ -33,20 +33,24 @@ export class PluginLoader {
           }
         }
         // Handle inline plugin objects
-        else if (typeof pluginConfig === 'object' && pluginConfig !== null && 'metadata' in pluginConfig) {
+        else if (
+          typeof pluginConfig === 'object' &&
+          pluginConfig !== null &&
+          'metadata' in pluginConfig
+        ) {
           plugins.push(pluginConfig as Plugin)
         }
       } catch (error) {
         console.warn(`Failed to load plugin:`, error)
       }
     }
-    
+
     // Initialize plugins
     await this.initializePlugins(plugins)
-    
+
     return plugins
   }
-  
+
   /**
    * Initialize loaded plugins
    */
@@ -62,7 +66,7 @@ export class PluginLoader {
       }
     }
   }
-  
+
   /**
    * Create plugin context for initialization
    */
@@ -74,10 +78,10 @@ export class PluginLoader {
       events: new EventTarget(),
       services: Context.empty(),
       env: process.env as Record<string, string | undefined>,
-      plugins: new Map([[plugin.metadata.name, plugin.metadata]])
+      plugins: new Map([[plugin.metadata.name, plugin.metadata]]),
     }
   }
-  
+
   /**
    * Validate plugin compatibility
    */

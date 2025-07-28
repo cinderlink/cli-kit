@@ -10,7 +10,7 @@ import type { View } from '@core/types'
 export function DebugRender(): View {
   const state = debugStore.getState()
   const renderEvents = state.events.filter(e => e.category === 'render' || e.category === 'jsx')
-  
+
   return vstack([
     text('🎨 Render Trace', { color: Colors.cyan, bold: true }),
     text(`${renderEvents.length} render events`),
@@ -19,8 +19,8 @@ export function DebugRender(): View {
       const time = event.timestamp.toLocaleTimeString()
       const component = event.context?.componentName || 'Unknown'
       const phase = event.context?.phase || ''
-      
+
       return text(`${time} ${component} ${phase}`)
-    })
+    }),
   ])
 }

@@ -1,6 +1,6 @@
 /**
  * Help Component
- * 
+ *
  * Provides help text and documentation for commands
  */
 

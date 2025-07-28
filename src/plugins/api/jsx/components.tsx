@@ -1,6 +1,6 @@
 /**
  * Plugin JSX Components
- * 
+ *
  * Components for plugin management within the JSX runtime
  */
 
@@ -18,14 +18,14 @@ export function RegisterPlugin(props: RegisterPluginProps): JSX.Element {
     name: props.name,
     description: props.description,
     version: props.version,
-    commands: []
+    commands: [],
   })
-  
+
   // Configure if config provided
   if (props.config) {
     pluginStore.configure(props.name, props.config)
   }
-  
+
   return (
     <Scope
       type="component"
@@ -35,7 +35,7 @@ export function RegisterPlugin(props: RegisterPluginProps): JSX.Element {
         action: 'register',
         pluginName: props.name,
         pluginPath: props.path,
-        config: props.config
+        config: props.config,
       }}
     />
   )
@@ -46,14 +46,14 @@ export function RegisterPlugin(props: RegisterPluginProps): JSX.Element {
  */
 export function EnablePlugin(props: EnablePluginProps): JSX.Element {
   const enabled = props.enabled ?? true
-  
+
   // Update plugin state in store
   if (enabled) {
     pluginStore.enable(props.name)
   } else {
     pluginStore.disable(props.name)
   }
-  
+
   return (
     <Scope
       type="component"
@@ -62,7 +62,7 @@ export function EnablePlugin(props: EnablePluginProps): JSX.Element {
       metadata={{
         action: 'enable',
         pluginName: props.name,
-        enabled
+        enabled,
       }}
     />
   )
@@ -74,7 +74,7 @@ export function EnablePlugin(props: EnablePluginProps): JSX.Element {
 export function ConfigurePlugin(props: ConfigurePluginProps): JSX.Element {
   // Update plugin configuration in store
   pluginStore.configure(props.name, props.config)
-  
+
   return (
     <Scope
       type="component"
@@ -83,7 +83,7 @@ export function ConfigurePlugin(props: ConfigurePluginProps): JSX.Element {
       metadata={{
         action: 'configure',
         pluginName: props.name,
-        config: props.config
+        config: props.config,
       }}
     />
   )

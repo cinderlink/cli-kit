@@ -1,15 +1,15 @@
 /**
  * Hook Manager
- * 
+ *
  * Central manager for all CLI hooks
  */
 
-import { Effect } from "effect"
-import type { EventBus } from "@core/model/events/eventBus"
-import { getGlobalEventBus } from "@core/model/events/eventBus"
-import { createLifecycleHooks } from "./lifecycle"
-import { createPluginHooks } from "./pluginHooks"
-import type { HookEvent } from "./types"
+import { Effect } from 'effect'
+import type { EventBus } from '@core/model/events/eventBus'
+import { getGlobalEventBus } from '@core/model/events/eventBus'
+import { createLifecycleHooks } from './lifecycle'
+import { createPluginHooks } from './pluginHooks'
+import type { HookEvent } from './types'
 
 /**
  * Hook manager interface
@@ -24,7 +24,7 @@ export interface Hooks {
   afterExecute: ReturnType<typeof createLifecycleHooks>['afterExecute']
   beforeRender: ReturnType<typeof createLifecycleHooks>['beforeRender']
   afterRender: ReturnType<typeof createLifecycleHooks>['afterRender']
-  
+
   // Plugin hooks
   onPluginLoad: ReturnType<typeof createPluginHooks>['onPluginLoad']
   onPluginUnload: ReturnType<typeof createPluginHooks>['onPluginUnload']
@@ -33,10 +33,14 @@ export interface Hooks {
   beforeValidate: ReturnType<typeof createPluginHooks>['beforeValidate']
   afterValidate: ReturnType<typeof createPluginHooks>['afterValidate']
   onError: ReturnType<typeof createPluginHooks>['onError']
-  
+
   // Event emitters
-  emit: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }) => Effect.Effect<void, never>
-  emitSync: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }) => void
+  emit: <T extends HookEvent>(
+    event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }
+  ) => Effect.Effect<void, never>
+  emitSync: <T extends HookEvent>(
+    event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }
+  ) => void
 }
 
 /**
@@ -49,30 +53,34 @@ export function createHooks(eventBus: EventBus, source = 'cli'): Hooks {
   return {
     // Spread lifecycle hooks
     ...lifecycleHooks,
-    
+
     // Spread plugin hooks
     ...pluginHooks,
-    
+
     // Event emitters
-    emit: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }) => {
+    emit: <T extends HookEvent>(
+      event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }
+    ) => {
       const fullEvent = {
         ...event,
         id: Date.now().toString(),
         source,
-        timestamp: new Date()
+        timestamp: new Date(),
       } as T
       return eventBus.emit(event.type, fullEvent)
     },
-    
-    emitSync: <T extends HookEvent>(event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }) => {
+
+    emitSync: <T extends HookEvent>(
+      event: Omit<T, 'id' | 'source' | 'timestamp'> & { type: T['type'] }
+    ) => {
       const fullEvent = {
         ...event,
         id: Date.now().toString(),
         source,
-        timestamp: new Date()
+        timestamp: new Date(),
       } as T
       Effect.runSync(eventBus.emit(event.type, fullEvent))
-    }
+    },
   }
 }
 

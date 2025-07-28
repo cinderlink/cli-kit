@@ -3,34 +3,34 @@
 
 /**
  * Process Manager Plugin for JSX CLI Applications
- * 
+ *
  * Provides process management commands integrated with the CLI framework
  */
 
-import type { JSXCommandContext } from "../cli/jsx/types"
-import { ProcessManager as ProcessManagerClass } from "./manager"
-import { ProcessMonitor } from "./index"
-import { createConsoleLogger } from "../logger"
-import { PrettyLogEntry } from "../logger/components/LogComponents"
-import { runApp } from "../core/runtime"
-import { LiveServices } from "../core/services/impl"
-import { Effect } from "effect"
-import type { ProcessConfig } from "./types"
-import { ProcessStatusView } from "./components/ProcessStatusView"
-import * as fs from "fs/promises"
-import * as path from "path"
+import type { JSXCommandContext } from '../cli/jsx/types'
+import { ProcessManager as ProcessManagerClass } from './manager'
+import { ProcessMonitor } from './index'
+import { createConsoleLogger } from '../logger'
+import { PrettyLogEntry } from '../logger/components/LogComponents'
+import { runApp } from '../core/runtime'
+import { LiveServices } from '../core/services/impl'
+import { Effect } from 'effect'
+import type { ProcessConfig } from './types'
+import { ProcessStatusView } from './components/ProcessStatusView'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 
 // Single instance of process manager
 let processManager: ProcessManagerClass | null = null
 
 export function getProcessManager(config?: any): ProcessManagerClass {
   if (!processManager) {
-    const logger = createConsoleLogger("debug", {
+    const logger = createConsoleLogger('debug', {
       colorize: true,
       prettyPrint: true,
-      showEmoji: true
+      showEmoji: true,
     })
-    
+
     processManager = new ProcessManagerClass(logger, config || {})
   }
   return processManager
@@ -47,28 +47,27 @@ export interface ProcessManagerPluginConfig {
 /**
  * Main Process Manager Plugin Component
  */
-export const ProcessManagerPlugin = ({ 
-  name = "pm", 
-  description = "Process management and monitoring"
+export const ProcessManagerPlugin = ({
+  name = 'pm',
+  description = 'Process management and monitoring',
 }: ProcessManagerPluginConfig) => {
-  
   // Return JSX elements instead of config object to integrate with scope system
   return (
-    <plugin name={name} description={description} aliases={["process", "proc"]}>
-      <command 
+    <plugin name={name} description={description} aliases={['process', 'proc']}>
+      <command
         name="start"
         description="Start a new process or saved process"
-        handler={async (ctx) => {
+        handler={async ctx => {
           const pm = getProcessManager()
-          
+
           try {
             // Implementation would go here - get name from args
-            const processName = ctx.args.name || "default"
+            const processName = ctx.args.name || 'default'
             await pm.start(processName, {
               watch: ctx.flags.watch,
-              group: ctx.flags.group
+              group: ctx.flags.group,
             })
-            
+
             return (
               <vstack>
                 <text color="green">✅ Process started: {processName}</text>
@@ -87,26 +86,28 @@ export const ProcessManagerPlugin = ({
         <flag name="watch" description="Watch for file changes and restart" />
         <flag name="group" description="Process group" />
       </command>
-      
-      <command 
+
+      <command
         name="status"
         description="Show status of all processes"
-        handler={async (ctx) => {
+        handler={async ctx => {
           const pm = getProcessManager()
           const states = pm.list()
-          
+
           if (states.length === 0) {
             return <text color="gray">No processes running</text>
           }
-          
+
           return (
             <vstack gap={1}>
-              <text color="cyan" bold>📊 Process Status</text>
+              <text color="cyan" bold>
+                📊 Process Status
+              </text>
               {states.map(process => (
-                <ProcessStatusView 
-                  key={process.name} 
-                  process={process} 
-                  detailed={ctx.flags.detailed} 
+                <ProcessStatusView
+                  key={process.name}
+                  process={process}
+                  detailed={ctx.flags.detailed}
                 />
               ))}
             </vstack>
@@ -115,19 +116,21 @@ export const ProcessManagerPlugin = ({
       >
         <flag name="detailed" description="Show detailed process information" />
       </command>
-      
-      <command 
+
+      <command
         name="logs"
         description="Show process logs"
-        handler={async (ctx) => {
+        handler={async ctx => {
           const pm = getProcessManager()
           const processName = ctx.args.name || ctx.flags.name
           const lines = ctx.flags.lines || 20
           const logs = pm.getLogs(processName, lines)
-          
+
           return (
             <vstack gap={0.5}>
-              <text color="cyan" bold>📋 Process Logs</text>
+              <text color="cyan" bold>
+                📋 Process Logs
+              </text>
               {logs.map((log, i) => (
                 <PrettyLogEntry
                   key={i}
@@ -146,26 +149,21 @@ export const ProcessManagerPlugin = ({
         <arg name="name" description="Process name to show logs for" />
         <flag name="lines" description="Number of lines to show" type="number" default={20} />
       </command>
-      
-      <command 
+
+      <command
         name="monitor"
         description="Monitor processes interactively"
-        handler={async (ctx) => {
+        handler={async ctx => {
           const pm = getProcessManager()
-          
+
           const component = {
             init: Effect.succeed([{}, []] as const),
             update: () => Effect.succeed([{}, []] as const),
             view: () => ProcessMonitor({ manager: pm }),
-            subscription: () => Effect.succeed([])
+            subscription: () => Effect.succeed([]),
           }
-          
-          return await Effect.runPromise(
-            runApp(
-              component,
-              LiveServices
-            )
-          )
+
+          return await Effect.runPromise(runApp(component, LiveServices))
         }}
       />
     </plugin>

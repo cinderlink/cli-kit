@@ -12,7 +12,41 @@ alwaysApply: true
 - `bun test` - Run tests (NEVER jest/vitest)
 - `bun install` - Install dependencies (NEVER npm/pnpm/yarn)
 - `bun run <script>` - Run package.json scripts
-- `bun build` - Build projects (NEVER webpack/vite)
+- `bun run build.config.ts` - Build projects (NEVER webpack/vite)
+
+## Code Quality Tooling
+
+### Biome for Formatting (NEVER prettier/dprint)
+- `bun run format` - Format code with Biome
+- `bun run format:check` - Check formatting without writing
+- `bun run format:imports` - Organize imports with Biome
+- **ALWAYS** use Biome for all formatting (configured in biome.json)
+
+### oxlint for Linting (NEVER ESLint for performance-critical linting)
+- `bun run lint` - Run oxlint on src/
+- `bun run lint:fix` - Auto-fix linting issues
+- `bun run lint:all` - Lint entire project
+- **ALWAYS** use oxlint as primary linter for fast feedback
+
+### Combined Quality Checks
+- `bun run check` - Run format check + lint + typecheck
+- `bun run check:fix` - Auto-fix formatting, imports, and linting
+- **ALWAYS** run `bun run check` before committing
+
+## TypeScript Configuration
+
+### Strict Mode Setup
+- **Source files**: Use tsconfig.src.json with strict mode enabled
+- **Environment variables**: Typed in types/process-env.d.ts
+- **Build configuration**: Defined in build.config.ts
+- **NEVER** disable strict TypeScript checks
+- **ALWAYS** use explicit return types for public functions
+
+### Pre-commit Hooks
+- **Husky**: Automatically runs `bun run check` before commits
+- **Quality gates**: Format, lint, and typecheck must pass
+- **NEVER** bypass pre-commit hooks with --no-verify
+- **ALWAYS** fix issues instead of skipping checks
 
 ## Bun Native APIs (NEVER Node.js equivalents)
 
@@ -20,7 +54,7 @@ alwaysApply: true
 - `bun:sqlite` not `better-sqlite3`
 - `Bun.$\`command\`` not `execa`
 - Built-in `WebSocket` not `ws`
-- Built-in `.env` loading
+- Built-in `.env` loading (typed via types/process-env.d.ts)
 
 ## Required Reading Before Coding
 
@@ -58,10 +92,12 @@ alwaysApply: true
 
 ### Development Process
 - **ALWAYS** read module docs before modifying modules
+- **ALWAYS** run `bun run check` before committing (includes format + lint + typecheck)
 - **ALWAYS** run `bun test` before committing
-- **ALWAYS** check `bun run tsc --noEmit` for type errors
+- **ALWAYS** use strict TypeScript mode (enabled in tsconfig.src.json)
 - **NEVER** use `any` types - use proper TypeScript
 - **ALWAYS** maintain 80% test coverage
+- **ALWAYS** use `bun run check:fix` to auto-fix formatting and linting issues
 
 ### Architecture
 - **NEVER** violate module boundaries

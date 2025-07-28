@@ -1,18 +1,18 @@
 /**
  * Style Builder - Fluent API for style creation
- * 
+ *
  * Provides chainable methods for building styles
  */
 
-import { Data } from "effect"
-import type { Color } from "@core/terminal/ansi/styles/color"
-import type { Border } from "@core/terminal/ansi/styles/borders"
-import { BorderSide } from "@core/terminal/ansi/styles/borders"
-import type { StyleProps, HorizontalAlign, VerticalAlign, StyleTransform } from "./types"
+import { Data } from 'effect'
+import type { Color } from '@core/terminal/ansi/styles/color'
+import type { Border } from '@core/terminal/ansi/styles/borders'
+import { BorderSide } from '@core/terminal/ansi/styles/borders'
+import type { StyleProps, HorizontalAlign, VerticalAlign, StyleTransform } from './types'
 
 /**
  * The main Style class with immutable, chainable API
- * 
+ *
  * @example
  * ```typescript
  * const myStyle = new Style({})
@@ -27,207 +27,199 @@ export class Style extends Data.Class<{
   // ===========================================================================
   // Color Methods
   // ===========================================================================
-  
+
   /**
    * Set the foreground (text) color
    */
   foreground(color: Color): Style {
     return new Style({
       ...this,
-      props: { ...this.props, foreground: color }
+      props: { ...this.props, foreground: color },
     })
   }
-  
+
   /**
    * Set the background color
    */
   background(color: Color): Style {
     return new Style({
       ...this,
-      props: { ...this.props, background: color }
+      props: { ...this.props, background: color },
     })
   }
-  
+
   // ===========================================================================
   // Border Methods
   // ===========================================================================
-  
+
   /**
    * Set the border style
    */
   border(border: Border, sides: BorderSide = BorderSide.All): Style {
     return new Style({
       ...this,
-      props: { 
-        ...this.props, 
+      props: {
+        ...this.props,
         border,
-        borderSides: sides
-      }
+        borderSides: sides,
+      },
     })
   }
-  
+
   /**
    * Set which border sides to render
    */
   borderSides(sides: BorderSide): Style {
     return new Style({
       ...this,
-      props: { ...this.props, borderSides: sides }
+      props: { ...this.props, borderSides: sides },
     })
   }
-  
+
   /**
    * Enable/disable top border
    */
   borderTop(enable = true): Style {
     const current = this.props.borderSides || BorderSide.All
-    const newSides = enable 
-      ? current | BorderSide.Top
-      : current & ~BorderSide.Top
+    const newSides = enable ? current | BorderSide.Top : current & ~BorderSide.Top
     return this.borderSides(newSides)
   }
-  
+
   /**
    * Enable/disable right border
    */
   borderRight(enable = true): Style {
     const current = this.props.borderSides || BorderSide.All
-    const newSides = enable 
-      ? current | BorderSide.Right
-      : current & ~BorderSide.Right
+    const newSides = enable ? current | BorderSide.Right : current & ~BorderSide.Right
     return this.borderSides(newSides)
   }
-  
+
   /**
    * Enable/disable bottom border
    */
   borderBottom(enable = true): Style {
     const current = this.props.borderSides || BorderSide.All
-    const newSides = enable 
-      ? current | BorderSide.Bottom
-      : current & ~BorderSide.Bottom
+    const newSides = enable ? current | BorderSide.Bottom : current & ~BorderSide.Bottom
     return this.borderSides(newSides)
   }
-  
+
   /**
    * Enable/disable left border
    */
   borderLeft(enable = true): Style {
     const current = this.props.borderSides || BorderSide.All
-    const newSides = enable 
-      ? current | BorderSide.Left
-      : current & ~BorderSide.Left
+    const newSides = enable ? current | BorderSide.Left : current & ~BorderSide.Left
     return this.borderSides(newSides)
   }
-  
+
   /**
    * Set the border foreground color
    */
   borderForeground(color: Color): Style {
     return new Style({
       ...this,
-      props: { ...this.props, borderForeground: color }
+      props: { ...this.props, borderForeground: color },
     })
   }
-  
+
   /**
    * Set the border background color
    */
   borderBackground(color: Color): Style {
     return new Style({
       ...this,
-      props: { ...this.props, borderBackground: color }
+      props: { ...this.props, borderBackground: color },
     })
   }
-  
+
   // ===========================================================================
   // Typography Methods
   // ===========================================================================
-  
+
   /**
    * Make text bold
    */
   bold(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, bold: enable }
+      props: { ...this.props, bold: enable },
     })
   }
-  
+
   /**
    * Make text italic
    */
   italic(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, italic: enable }
+      props: { ...this.props, italic: enable },
     })
   }
-  
+
   /**
    * Underline text
    */
   underline(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, underline: enable }
+      props: { ...this.props, underline: enable },
     })
   }
-  
+
   /**
    * Strike through text
    */
   strikethrough(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, strikethrough: enable }
+      props: { ...this.props, strikethrough: enable },
     })
   }
-  
+
   /**
    * Make text faint/dim
    */
   faint(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, faint: enable }
+      props: { ...this.props, faint: enable },
     })
   }
-  
+
   /**
    * Make text blink
    */
   blink(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, blink: enable }
+      props: { ...this.props, blink: enable },
     })
   }
-  
+
   /**
    * Reverse colors (swap foreground/background)
    */
   reverse(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, reverse: enable }
+      props: { ...this.props, reverse: enable },
     })
   }
-  
+
   /**
    * Make text invisible (but still take up space)
    */
   invisible(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, invisible: enable }
+      props: { ...this.props, invisible: enable },
     })
   }
-  
+
   // ===========================================================================
   // Layout Methods
   // ===========================================================================
-  
+
   /**
    * Set padding on all sides
    */
@@ -244,8 +236,8 @@ export class Style extends Data.Class<{
           paddingTop: value,
           paddingRight: value,
           paddingBottom: value,
-          paddingLeft: value
-        }
+          paddingLeft: value,
+        },
       })
     } else if (args.length === 2) {
       const [vertical, horizontal] = args
@@ -256,8 +248,8 @@ export class Style extends Data.Class<{
           paddingTop: vertical,
           paddingRight: horizontal,
           paddingBottom: vertical,
-          paddingLeft: horizontal
-        }
+          paddingLeft: horizontal,
+        },
       })
     } else {
       const [top, right, bottom, left] = args
@@ -268,43 +260,43 @@ export class Style extends Data.Class<{
           paddingTop: top,
           paddingRight: right,
           paddingBottom: bottom,
-          paddingLeft: left
-        }
+          paddingLeft: left,
+        },
       })
     }
   }
-  
+
   /**
    * Set padding for specific sides
    */
   paddingTop(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, paddingTop: value }
+      props: { ...this.props, paddingTop: value },
     })
   }
-  
+
   paddingRight(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, paddingRight: value }
+      props: { ...this.props, paddingRight: value },
     })
   }
-  
+
   paddingBottom(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, paddingBottom: value }
+      props: { ...this.props, paddingBottom: value },
     })
   }
-  
+
   paddingLeft(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, paddingLeft: value }
+      props: { ...this.props, paddingLeft: value },
     })
   }
-  
+
   /**
    * Set margin on all sides
    */
@@ -321,8 +313,8 @@ export class Style extends Data.Class<{
           marginTop: value,
           marginRight: value,
           marginBottom: value,
-          marginLeft: value
-        }
+          marginLeft: value,
+        },
       })
     } else if (args.length === 2) {
       const [vertical, horizontal] = args
@@ -333,8 +325,8 @@ export class Style extends Data.Class<{
           marginTop: vertical,
           marginRight: horizontal,
           marginBottom: vertical,
-          marginLeft: horizontal
-        }
+          marginLeft: horizontal,
+        },
       })
     } else {
       const [top, right, bottom, left] = args
@@ -345,185 +337,185 @@ export class Style extends Data.Class<{
           marginTop: top,
           marginRight: right,
           marginBottom: bottom,
-          marginLeft: left
-        }
+          marginLeft: left,
+        },
       })
     }
   }
-  
+
   /**
    * Set margin for specific sides
    */
   marginTop(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, marginTop: value }
+      props: { ...this.props, marginTop: value },
     })
   }
-  
+
   marginRight(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, marginRight: value }
+      props: { ...this.props, marginRight: value },
     })
   }
-  
+
   marginBottom(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, marginBottom: value }
+      props: { ...this.props, marginBottom: value },
     })
   }
-  
+
   marginLeft(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, marginLeft: value }
+      props: { ...this.props, marginLeft: value },
     })
   }
-  
+
   // ===========================================================================
   // Dimension Methods
   // ===========================================================================
-  
+
   /**
    * Set fixed width
    */
   width(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, width: value }
+      props: { ...this.props, width: value },
     })
   }
-  
+
   /**
    * Set fixed height
    */
   height(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, height: value }
+      props: { ...this.props, height: value },
     })
   }
-  
+
   /**
    * Set maximum width
    */
   maxWidth(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, maxWidth: value }
+      props: { ...this.props, maxWidth: value },
     })
   }
-  
+
   /**
    * Set maximum height
    */
   maxHeight(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, maxHeight: value }
+      props: { ...this.props, maxHeight: value },
     })
   }
-  
+
   /**
    * Set minimum width
    */
   minWidth(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, minWidth: value }
+      props: { ...this.props, minWidth: value },
     })
   }
-  
+
   /**
    * Set minimum height
    */
   minHeight(value: number): Style {
     return new Style({
       ...this,
-      props: { ...this.props, minHeight: value }
+      props: { ...this.props, minHeight: value },
     })
   }
-  
+
   // ===========================================================================
   // Alignment Methods
   // ===========================================================================
-  
+
   /**
    * Set horizontal alignment
    */
   align(value: HorizontalAlign): Style {
     return new Style({
       ...this,
-      props: { ...this.props, align: value }
+      props: { ...this.props, align: value },
     })
   }
-  
+
   /**
    * Set vertical alignment
    */
   valign(value: VerticalAlign): Style {
     return new Style({
       ...this,
-      props: { ...this.props, valign: value }
+      props: { ...this.props, valign: value },
     })
   }
-  
+
   // ===========================================================================
   // Transform Methods
   // ===========================================================================
-  
+
   /**
    * Set a text transform function
    */
   transform(fn: StyleTransform): Style {
     return new Style({
       ...this,
-      props: { ...this.props, transform: fn }
+      props: { ...this.props, transform: fn },
     })
   }
-  
+
   // ===========================================================================
   // Utility Methods
   // ===========================================================================
-  
+
   /**
    * Set whether this is an inline style (doesn't break lines)
    */
   inline(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, inline: enable }
+      props: { ...this.props, inline: enable },
     })
   }
-  
+
   /**
    * Set whether this style inherits from parent
    */
   inherit(enable = true): Style {
     return new Style({
       ...this,
-      props: { ...this.props, inherit: enable }
+      props: { ...this.props, inherit: enable },
     })
   }
-  
+
   /**
    * Merge another style into this one
    * Properties from the other style override this one
    */
   merge(other: Style): Style {
     return new Style({
-      props: { ...this.props, ...other.props }
+      props: { ...this.props, ...other.props },
     })
   }
-  
+
   /**
    * Create a copy of this style with specific props
    */
   copy(props: Partial<StyleProps>): Style {
     return new Style({
-      props: { ...this.props, ...props }
+      props: { ...this.props, ...props },
     })
   }
 }

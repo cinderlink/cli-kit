@@ -6,7 +6,7 @@ export const DEBUG_DEFAULTS = {
   MAX_EVENTS: parseInt(process.env.TUIX_DEBUG_MAX_EVENTS || '1000', 10),
   AUTO_WRAP: process.env.TUIX_DEBUG_AUTO_WRAP !== 'false',
   CAPTURE_LOGGER: process.env.TUIX_DEBUG_CAPTURE_LOGGER !== 'false',
-  CAPTURE_PERFORMANCE: process.env.TUIX_DEBUG_CAPTURE_PERFORMANCE !== 'false'
+  CAPTURE_PERFORMANCE: process.env.TUIX_DEBUG_CAPTURE_PERFORMANCE !== 'false',
 } as const
 
 export const DEBUG_CATEGORIES = {
@@ -18,14 +18,14 @@ export const DEBUG_CATEGORIES = {
   PERFORMANCE: 'performance',
   ERROR: 'error',
   SYSTEM: 'system',
-  LOGGER: 'logger'
+  LOGGER: 'logger',
 } as const
 
 export const DEBUG_LEVELS = {
   DEBUG: 'debug',
   INFO: 'info',
   WARN: 'warn',
-  ERROR: 'error'
+  ERROR: 'error',
 } as const
 
 export const CATEGORY_ICONS = {
@@ -37,12 +37,12 @@ export const CATEGORY_ICONS = {
   performance: '⚡',
   error: '❌',
   system: '⚙️',
-  logger: '📝'
+  logger: '📝',
 } as const
 
 export const LEVEL_COLORS = {
   debug: 'gray',
   info: 'blue',
   warn: 'yellow',
-  error: 'red'
+  error: 'red',
 } as const

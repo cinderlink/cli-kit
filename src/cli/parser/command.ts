@@ -2,20 +2,17 @@
  * Command Parsing Utilities
  */
 
-import type { CLIConfig, CommandConfig } from "@cli/types"
-import type { ZodTypeAny } from "zod"
+import type { CLIConfig, CommandConfig } from '@cli/types'
+import type { ZodTypeAny } from 'zod'
 
 /**
  * Find a command configuration by path
- * 
+ *
  * @param config - CLI configuration
  * @param commandPath - Command path to find
  * @returns Command configuration if found
  */
-export function findCommand(
-  config: CLIConfig,
-  commandPath: string[]
-): CommandConfig | undefined {
+export function findCommand(config: CLIConfig, commandPath: string[]): CommandConfig | undefined {
   let current = config.commands
   let command: CommandConfig | undefined
 
@@ -32,7 +29,7 @@ export function findCommand(
 
 /**
  * Get option schemas for a command path
- * 
+ *
  * @param config - CLI configuration
  * @param commandPath - Command path
  * @returns Combined option schemas
@@ -47,12 +44,12 @@ export function getCommandOptionSchemas(
   // Collect schemas from each level
   for (const part of commandPath) {
     if (!current || !current[part]) break
-    
+
     const command = current[part]
     if (command.options) {
       schemas = { ...schemas, ...command.options }
     }
-    
+
     current = command.commands
   }
 
@@ -61,7 +58,7 @@ export function getCommandOptionSchemas(
 
 /**
  * Get argument schemas for a command path
- * 
+ *
  * @param config - CLI configuration
  * @param commandPath - Command path
  * @returns Argument schemas

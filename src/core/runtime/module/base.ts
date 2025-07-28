@@ -1,172 +1,170 @@
 /**
- * Base Module Class - Foundation for domain modules
- * 
- * Provides common functionality for all domain modules including
+ * @fileoverview This file defines the base class for all modules in the application.
+ * It provides a common interface for module initialization, shutdown, and event handling,
+ * ensuring a consistent lifecycle and interaction pattern across different parts of the system.
+ * The `ModuleBase` class encapsulates common functionalities such as state management,
  * event emission, subscription management, and lifecycle hooks.
  */
 
-import { Effect } from 'effect'
-import type { EventBus, BaseEvent, EventHandler } from "../../model/events/eventBus"
+import { Effect, Ref } from 'effect'
+import type { BaseEvent, EventHandler } from '@core/model/events/event-bus'
+import type { EventBus } from '@core/model/events/event-bus'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
- * Module lifecycle state
+ * Defines the possible states of a module.
+ * - `uninitialized`: The initial state before the module has been started.
+ * - `initializing`: The state while the module's `initialize` method is executing.
+ * - `ready`: The state when the module is fully initialized and operational.
+ * - `shutting-down`: The state while the module's `shutdown` method is executing.
+ * - `shutdown`: The final state after the module has been successfully shut down.
  */
 export type ModuleState = 'uninitialized' | 'initializing' | 'ready' | 'shutting-down' | 'shutdown'
 
 /**
- * Module error type
- */
-export class ModuleError {
-  readonly _tag = 'ModuleError'
-  constructor(
-    readonly module: string,
-    readonly message: string,
-    readonly cause?: unknown
-  ) {}
-}
-
-/**
- * Base class for all domain modules
+ * Abstract base class for all modules.
  */
 export abstract class ModuleBase {
   protected state: ModuleState = 'uninitialized'
-  protected subscriptions: Array<() => Effect<void, never>> = []
-  
+  protected subscriptions: Array<() => void> = []
+  protected readonly ready: Ref.Ref<boolean>
+
   constructor(
     protected readonly eventBus: EventBus,
     public readonly name: string
-  ) {}
-  
+  ) {
+    this.ready = Ref.unsafeMake(false)
+  }
+
   /**
    * Initialize the module
    */
-  abstract initialize(): Effect<void, ModuleError>
-  
+  public abstract initialize(): Effect.Effect<void, ModuleError>
+
   /**
    * Shutdown the module
    */
-  shutdown(): Effect<void, never> {
-    return Effect.gen(function* () {
-      this.state = 'shutting-down'
-      
-      // Unsubscribe from all events
-      yield* Effect.all(this.subscriptions.map(unsub => unsub()))
-      this.subscriptions = []
-      
-      // Run any custom shutdown logic
-      yield* this.onShutdown()
-      
-      this.state = 'shutdown'
-    }.bind(this))
+  public shutdown(): Effect.Effect<void, ModuleError> {
+    return Effect.gen(
+      function* (this: ModuleBase) {
+        this.state = 'shutting-down'
+        yield* this.onShutdown()
+        yield* this.unsubscribeAll()
+        this.state = 'shutdown'
+      }.bind(this)
+    ).pipe(
+      Effect.mapError(err => new ModuleError(this.name, 'Shutdown failed', err))
+    ) as Effect.Effect<void, ModuleError>
   }
-  
+
   /**
    * Optional shutdown hook for subclasses
    */
-  protected onShutdown(): Effect<void, never> {
+  protected onShutdown(): Effect.Effect<void, never> {
     return Effect.void
   }
-  
+
+  /**
+   * Unsubscribe from all events
+   */
+  protected unsubscribeAll(): Effect.Effect<void, never> {
+    return Effect.sync(() => {
+      this.subscriptions.forEach(unsub => unsub())
+      this.subscriptions = []
+    })
+  }
+
   /**
    * Emit an event to a specific channel
    */
   protected emitEvent<T extends BaseEvent>(
     channel: string,
-    event: Omit<T, 'timestamp' | 'source'>
-  ): Effect<void, never> {
+    event: Omit<T, 'id' | 'timestamp' | 'source'>
+  ): Effect.Effect<void, never> {
     const fullEvent = {
       ...event,
+      id: this.generateId(),
       timestamp: new Date(),
-      source: this.name
+      source: this.name,
     } as T
-    
+
     return this.eventBus.publish(channel, fullEvent)
   }
-  
+
   /**
-   * Subscribe to events on a channel
+   * Subscribe to a specific channel
    */
   protected subscribe<T extends BaseEvent>(
     channel: string,
     handler: EventHandler<T>
-  ): Effect<void, never> {
-    return Effect.gen(function* () {
-      const unsubscribe = yield* this.eventBus.subscribe(channel, handler)
+  ): Effect.Effect<void, never> {
+    return Effect.sync(() => {
+      const unsubscribe = this.eventBus.subscribe(channel, handler)
       this.subscriptions.push(unsubscribe)
-    }.bind(this))
+    })
   }
-  
-  /**
-   * Subscribe to multiple channels
-   */
-  protected subscribeMany(
-    subscriptions: Array<{
-      channel: string
-      handler: EventHandler<BaseEvent>
-    }>
-  ): Effect<void, never> {
-    return Effect.all(
-      subscriptions.map(({ channel, handler }) => 
-        this.subscribe(channel, handler)
-      )
-    ).pipe(Effect.asVoid)
-  }
-  
-  /**
-   * Get the current module state
-   */
-  getState(): ModuleState {
-    return this.state
-  }
-  
+
   /**
    * Check if module is ready
    */
-  isReady(): boolean {
-    return this.state === 'ready'
+  public isReady(): Effect.Effect<boolean> {
+    return Ref.get(this.ready)
   }
-  
+
+  /**
+   * Set the module as ready
+   */
+  public setReady(): Effect.Effect<void, never> {
+    return Effect.gen(
+      function* (this: ModuleBase) {
+        yield* Ref.set(this.ready, true)
+        yield* this.emitEvent<BaseEvent>('module-lifecycle', {
+          type: 'module-ready',
+        })
+      }.bind(this)
+    ) as Effect.Effect<void, never>
+  }
+
   /**
    * Wait for module to be ready
    */
-  waitForReady(maxAttempts: number = 50): Effect<void, ModuleError> {
-    return Effect.gen(function* () {
-      let attempts = 0
-      
-      while (this.state !== 'ready' && attempts < maxAttempts) {
-        if (this.state === 'shutdown' || this.state === 'shutting-down') {
-          yield* Effect.fail(new ModuleError(
-            this.name,
-            'Module is shutting down or already shutdown'
-          ))
+  public waitForReady(maxAttempts: number = 50): Effect.Effect<void, ModuleError> {
+    return Effect.gen(
+      function* (this: ModuleBase) {
+        let attempts = 0
+        while (attempts < maxAttempts) {
+          const isReady = yield* Ref.get(this.ready)
+          if (isReady) {
+            return
+          }
+          yield* Effect.sleep('100 millis')
+          attempts++
         }
-        
-        yield* Effect.sleep(100) // 100ms delay
-        attempts++
-      }
-      
-      if (this.state !== 'ready') {
-        yield* Effect.fail(new ModuleError(
-          this.name,
-          `Module did not become ready within ${maxAttempts * 100}ms`
-        ))
-      }
-    }.bind(this))
+        return yield* Effect.fail(
+          new ModuleError(this.name, `Module ${this.name} did not become ready in time`)
+        )
+      }.bind(this)
+    )
   }
-  
+
   /**
-   * Mark module as ready
-   */
-  protected setReady(): Effect<void, never> {
-    return Effect.sync(() => {
-      this.state = 'ready'
-    })
-  }
-  
-  /**
-   * Generate a unique ID for this module
+   * Generate a unique ID
    */
   protected generateId(): string {
-    return `${this.name}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return uuidv4()
+  }
+}
+
+/**
+ * Custom error class for module-related errors.
+ */
+export class ModuleError extends Error {
+  constructor(
+    public readonly moduleName: string,
+    public override readonly message: string,
+    public override readonly cause?: unknown
+  ) {
+    super(`[${moduleName}] ${message}`)
+    this.name = 'ModuleError'
   }
 }

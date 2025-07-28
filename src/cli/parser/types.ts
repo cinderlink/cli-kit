@@ -2,7 +2,7 @@
  * Parser Types
  */
 
-import type { CLIConfig } from "@cli/types"
+import type { CLIConfig } from '@cli/types'
 
 /**
  * Parsed command line arguments

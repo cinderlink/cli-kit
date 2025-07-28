@@ -1,6 +1,6 @@
 /**
  * Tabs Component - Multi-view interface with tab navigation
- * 
+ *
  * Features:
  * - Multiple tab views with content switching
  * - Keyboard navigation between tabs
@@ -9,14 +9,14 @@
  * - Tab state management
  * - Icons and badges support
  * - Closeable tabs
- * 
+ *
  * @example
  * ```tsx
  * import { Tabs, Tab } from 'tuix/components/navigation/tabs'
- * 
+ *
  * function MyApp() {
  *   const activeTab = $state(0)
- *   
+ *
  *   return (
  *     <Tabs activeIndex={activeTab}>
  *       <Tab label="General" icon="⚙️">
@@ -89,71 +89,70 @@ export function Tabs(props: TabsProps): JSX.Element {
       .filter(child => child && child.type === 'tab')
       .map(child => child.props as TabProps)
   })
-  
+
   // Internal state
   const focused = $state(props.autoFocus || false)
   const hovering = $state(false)
   const internalActiveIndex = $state(0)
   const focusedTabIndex = $state(0)
-  
+
   // Active index management
   const activeIndex = $derived(() => {
     if (props.activeIndex !== undefined) {
-      return isStateRune(props.activeIndex)
-        ? props.activeIndex.value
-        : props.activeIndex
+      return isStateRune(props.activeIndex) ? props.activeIndex() : props.activeIndex
     }
-    return internalActiveIndex.value
+    return internalActiveIndex()
   })
-  
+
   // Ensure active index is valid
   // Only run effect in component context (not in tests)
   if (typeof $effect !== 'undefined') {
     try {
       $effect(() => {
-        const maxIndex = tabs.value.length - 1
-        if (activeIndex.value > maxIndex) {
+        const maxIndex = tabs().length - 1
+        if (activeIndex() > maxIndex) {
           setActiveIndex(maxIndex)
-        } else if (activeIndex.value < 0 && tabs.value.length > 0) {
+        } else if (activeIndex() < 0 && tabs().length > 0) {
           setActiveIndex(0)
         }
       })
     } catch (e) {
       // Ignore effect errors in test environment
+      console.error(e)
     }
   }
-  
+
   // Configuration
   const orientation = props.orientation || 'horizontal'
   const tabPosition = props.tabPosition || (orientation === 'horizontal' ? 'top' : 'left')
   const tabAlign = props.tabAlign || 'start'
   const showBorder = props.showBorder !== false
   const focusable = props.focusable !== false
-  
+
   // Helper functions
   function setActiveIndex(index: number) {
-    if (tabs.value[index]?.disabled) return
-    
+    if (tabs()[index]?.disabled) return
+
     if (isStateRune(props.activeIndex)) {
-      props.activeIndex.value = index
+      props.activeIndex.$set(index)
     } else {
-      internalActiveIndex.value = index
+      internalActiveIndex.$set(index)
     }
     props.onTabChange?.(index)
   }
-  
+
   function closeTab(index: number) {
     props.onTabClose?.(index)
   }
-  
+
   // Keyboard navigation
   function handleKeyPress(key: string) {
-    if (!focused.value || !focusable) return
-    
+    if (!focused() || !focusable) return
+
     const isHorizontal = orientation === 'horizontal'
     const nextKey = isHorizontal ? 'ArrowRight' : 'ArrowDown'
     const prevKey = isHorizontal ? 'ArrowLeft' : 'ArrowUp'
-    
+
     switch (key) {
       case nextKey:
       case 'l':
@@ -166,89 +165,87 @@ export function Tabs(props: TabsProps): JSX.Element {
         moveTabFocus(-1)
         break
       case 'Home':
-        focusedTabIndex.value = 0
+        focusedTabIndex.$set(0)
         break
       case 'End':
-        focusedTabIndex.value = tabs.value.length - 1
+        focusedTabIndex.$set(tabs().length - 1)
         break
       case 'Enter':
       case ' ':
-        setActiveIndex(focusedTabIndex.value)
+        setActiveIndex(focusedTabIndex())
         break
       case 'Delete':
       case 'Backspace':
-        if (tabs.value[focusedTabIndex.value]?.closeable) {
-          closeTab(focusedTabIndex.value)
+        if (tabs()[focusedTabIndex()]?.closeable) {
+          closeTab(focusedTabIndex())
         }
         break
     }
   }
-  
+
   function moveTabFocus(delta: number) {
-    const newIndex = focusedTabIndex.value + delta
-    const maxIndex = tabs.value.length - 1
-    
+    const newIndex = focusedTabIndex() + delta
+    const maxIndex = tabs().length - 1
+
     if (props.wrap) {
-      focusedTabIndex.value = (newIndex + tabs.value.length) % tabs.value.length
+      focusedTabIndex.$set((newIndex + tabs().length) % tabs().length)
     } else {
-      focusedTabIndex.value = Math.max(0, Math.min(maxIndex, newIndex))
+      focusedTabIndex.$set(Math.max(0, Math.min(maxIndex, newIndex)))
     }
-    
+
     // Skip disabled tabs
-    if (tabs.value[focusedTabIndex.value]?.disabled) {
+    if (tabs()[focusedTabIndex()]?.disabled) {
       moveTabFocus(delta > 0 ? 1 : -1)
     }
   }
-  
+
   // Render helpers
   function renderTab(tab: TabProps, index: number): JSX.Element {
-    const isActive = index === activeIndex.value
-    const isFocused = focused.value && index === focusedTabIndex.value
+    const isActive = index === activeIndex()
+    const isFocused = focused() && index === focusedTabIndex()
     const isDisabled = tab.disabled || false
-    
-    const tabStyle = typeof props.tabStyle === 'function'
-      ? props.tabStyle(index, isActive, isFocused)
-      : props.tabStyle
-    
+
+    const tabStyle =
+      typeof props.tabStyle === 'function'
+        ? props.tabStyle(index, isActive, isFocused)
+        : props.tabStyle
+
     const baseStyle = style({
       padding: { horizontal: 2, vertical: 0 },
       cursor: isDisabled ? 'not-allowed' : 'pointer',
       opacity: isDisabled ? 0.5 : 1,
-      ...tabStyle
+      ...tabStyle,
     })
-    
+
     const activeStyle = isActive
       ? style({
           background: Colors.blue,
           foreground: Colors.white,
-          bold: true
+          bold: true,
         })
       : style({
           background: 'transparent',
-          foreground: Colors.gray
+          foreground: Colors.gray,
         })
-    
-    const focusStyle = isFocused && !isActive
-      ? style({
-          background: Colors.gray,
-          foreground: Colors.white
-        })
-      : {}
-    
+
+    const focusStyle =
+      isFocused && !isActive
+        ? style({
+            background: Colors.gray,
+            foreground: Colors.white,
+          })
+        : {}
+
     const content: JSX.Element[] = []
-    
+
     // Icon
     if (tab.icon) {
-      content.push(
-        typeof tab.icon === 'string'
-          ? jsx('text', { children: tab.icon })
-          : tab.icon
-      )
+      content.push(typeof tab.icon === 'string' ? jsx('text', { children: tab.icon }) : tab.icon)
     }
-    
+
     // Label
     content.push(jsx('text', { children: tab.label }))
-    
+
     // Badge
     if (tab.badge !== undefined) {
       content.push(
@@ -258,11 +255,11 @@ export function Tabs(props: TabsProps): JSX.Element {
             .foreground(isActive ? Colors.blue : Colors.white)
             .padding({ horizontal: 1 })
             .borderRadius(2),
-          children: String(tab.badge)
+          children: String(tab.badge),
         })
       )
     }
-    
+
     // Close button
     if (tab.closeable) {
       content.push(
@@ -273,99 +270,105 @@ export function Tabs(props: TabsProps): JSX.Element {
           },
           children: jsx('text', {
             style: style().foreground(Colors.red).marginLeft(1),
-            children: '×'
-          })
+            children: '×',
+          }),
         })
       )
     }
-    
+
     return jsx('interactive', {
       onClick: () => !isDisabled && setActiveIndex(index),
       onMouseEnter: () => {
         if (!isDisabled) {
-          focusedTabIndex.value = index
+          focusedTabIndex.$set(index)
         }
       },
       children: jsx('box', {
         style: style({
           ...baseStyle,
           ...activeStyle,
-          ...focusStyle
+          ...focusStyle,
         }),
         children: jsx('hstack', {
           gap: 1,
           align: 'middle',
-          children: content
-        })
-      })
+          children: content,
+        }),
+      }),
     })
   }
-  
+
   function renderTabBar(): JSX.Element {
-    const tabElements = tabs.value.map((tab, index) => renderTab(tab, index))
-    
+    const tabElements = tabs().map((tab, index) => renderTab(tab, index))
+
     const barStyle = style({
       ...props.tabBarStyle,
       justifyContent: tabAlign === 'stretch' ? 'space-between' : tabAlign,
       borderBottom: showBorder && tabPosition === 'top' ? 'single' : 'none',
       borderTop: showBorder && tabPosition === 'bottom' ? 'single' : 'none',
       borderRight: showBorder && tabPosition === 'left' ? 'single' : 'none',
-      borderLeft: showBorder && tabPosition === 'right' ? 'single' : 'none'
+      borderLeft: showBorder && tabPosition === 'right' ? 'single' : 'none',
     })
-    
+
     return jsx(orientation === 'horizontal' ? 'hstack' : 'vstack', {
       style: barStyle,
       gap: 0,
-      children: tabElements
+      children: tabElements,
     })
   }
-  
+
   function renderContent(): JSX.Element | null {
-    const activeTab = tabs.value[activeIndex.value]
+    const activeTab = tabs()[activeIndex()]
     if (!activeTab) return null
-    
+
     return jsx('box', {
       style: props.contentStyle || style().padding(1),
-      children: activeTab.children
+      children: activeTab.children,
     })
   }
-  
+
   // Main render
   const containerStyle = $derived(() => {
     const baseStyle = props.style || {}
     return style({
       ...baseStyle,
-      border: showBorder ? 'single' : 'none'
+      border: showBorder ? 'single' : 'none',
     })
   })
-  
+
   const layout = () => {
     const tabBar = renderTabBar()
     const content = renderContent()
-    
+
     if (orientation === 'horizontal') {
-      return tabPosition === 'top'
-        ? [tabBar, content]
-        : [content, tabBar]
+      return tabPosition === 'top' ? [tabBar, content] : [content, tabBar]
     } else {
       return tabPosition === 'left'
         ? jsx('hstack', { children: [tabBar, content] })
         : jsx('hstack', { children: [content, tabBar] })
     }
   }
-  
+
   return jsx('interactive', {
     onKeyPress: handleKeyPress,
-    onFocus: () => { focused.value = true },
-    onBlur: () => { focused.value = false },
-    onMouseEnter: () => { hovering.value = true },
-    onMouseLeave: () => { hovering.value = false },
+    onFocus: () => {
+      focused.$set(true)
+    },
+    onBlur: () => {
+      focused.$set(false)
+    },
+    onMouseEnter: () => {
+      hovering.$set(true)
+    },
+    onMouseLeave: () => {
+      hovering.$set(false)
+    },
     focusable,
     className: props.className,
     children: jsx('vstack', {
-      style: containerStyle.value,
-      children: layout()
-    })
+      style: containerStyle(),
+      children: layout(),
+    }),
   })
 }
 
@@ -373,24 +376,25 @@ export function Tabs(props: TabsProps): JSX.Element {
 export function SimpleTabs(props: Omit<TabsProps, 'style'>): JSX.Element {
   return Tabs({
     showBorder: false,
-    tabStyle: (_, active) => style()
-      .padding({ horizontal: 2, vertical: 0 })
-      .foreground(active ? Colors.white : Colors.gray)
-      .underline(active),
-    ...props
+    tabStyle: (_, active) =>
+      style()
+        .padding({ horizontal: 2, vertical: 0 })
+        .foreground(active ? Colors.white : Colors.gray)
+        .underline(active),
+    ...props,
   })
 }
 
 export function PillTabs(props: TabsProps): JSX.Element {
   return Tabs({
     showBorder: false,
-    tabStyle: (_, active, focused) => style()
-      .padding({ horizontal: 3, vertical: 1 })
-      .borderRadius(999)
-      .background(active ? Colors.blue : focused ? Colors.gray : 'transparent')
-      .foreground(active || focused ? Colors.white : Colors.gray),
-    tabBarStyle: style().gap(1).padding(1),
-    ...props
+    tabStyle: (_, active, focused) =>
+      style()
+        .padding({ horizontal: 3, vertical: 1 })
+        .background(active ? Colors.blue : focused ? Colors.gray : 'transparent')
+        .foreground(active || focused ? Colors.white : Colors.gray),
+    tabBarStyle: style().padding(1),
+    ...props,
   })
 }
 
@@ -398,6 +402,6 @@ export function VerticalTabs(props: Omit<TabsProps, 'orientation'>): JSX.Element
   return Tabs({
     orientation: 'vertical',
     tabPosition: 'left',
-    ...props
+    ...props,
   })
 }

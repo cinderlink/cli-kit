@@ -1,18 +1,18 @@
 /**
  * Renderer Service - High-performance terminal rendering
- * 
+ *
  * This service manages the rendering pipeline, including double buffering,
  * dirty region tracking, and efficient screen updates.
  */
 
-import { Effect, Context } from "effect"
-import type { RenderError, View, Viewport } from "../core/types"
+import { Effect, Context } from 'effect'
+import type { RenderError, View, Viewport } from '../core/types'
 
 /**
  * The RendererService interface defines the rendering pipeline.
  * It handles efficient screen updates with minimal terminal I/O.
  */
-export class RendererService extends Context.Tag("RendererService")<
+export class RendererService extends Context.Tag('RendererService')<
   RendererService,
   {
     // =============================================================================
@@ -110,13 +110,17 @@ export class RendererService extends Context.Tag("RendererService")<
     /**
      * Get rendering performance statistics.
      */
-    readonly getStats: Effect.Effect<{
-      readonly framesRendered: number
-      readonly averageFrameTime: number
-      readonly lastFrameTime: number
-      readonly dirtyRegionCount: number
-      readonly bufferSwitches: number
-    }, never, never>
+    readonly getStats: Effect.Effect<
+      {
+        readonly framesRendered: number
+        readonly averageFrameTime: number
+        readonly lastFrameTime: number
+        readonly dirtyRegionCount: number
+        readonly bufferSwitches: number
+      },
+      never,
+      never
+    >
 
     /**
      * Reset performance statistics.
@@ -135,11 +139,7 @@ export class RendererService extends Context.Tag("RendererService")<
     /**
      * Render a view to a specific position without affecting the viewport.
      */
-    readonly renderAt: (
-      view: View,
-      x: number,
-      y: number
-    ) => Effect.Effect<void, RenderError, never>
+    readonly renderAt: (view: View, x: number, y: number) => Effect.Effect<void, RenderError, never>
 
     /**
      * Render multiple views in a single operation.
@@ -152,12 +152,14 @@ export class RendererService extends Context.Tag("RendererService")<
     /**
      * Create a clipping region that restricts rendering.
      */
-    readonly setClipRegion: (region: {
-      x: number
-      y: number
-      width: number
-      height: number
-    } | null) => Effect.Effect<void, RenderError, never>
+    readonly setClipRegion: (
+      region: {
+        x: number
+        y: number
+        width: number
+        height: number
+      } | null
+    ) => Effect.Effect<void, RenderError, never>
 
     /**
      * Save the current rendering state (viewport, clip region, etc.).
@@ -177,11 +179,15 @@ export class RendererService extends Context.Tag("RendererService")<
      * Measure the display width of text, accounting for ANSI escape sequences
      * and unicode characters.
      */
-    readonly measureText: (text: string) => Effect.Effect<{
-      readonly width: number
-      readonly height: number
-      readonly lineCount: number
-    }, RenderError, never>
+    readonly measureText: (text: string) => Effect.Effect<
+      {
+        readonly width: number
+        readonly height: number
+        readonly lineCount: number
+      },
+      RenderError,
+      never
+    >
 
     /**
      * Wrap text to fit within a specified width.
@@ -212,10 +218,7 @@ export class RendererService extends Context.Tag("RendererService")<
      * Create a new rendering layer.
      * Layers allow for compositing multiple views with different z-orders.
      */
-    readonly createLayer: (
-      name: string,
-      zIndex: number
-    ) => Effect.Effect<void, RenderError, never>
+    readonly createLayer: (name: string, zIndex: number) => Effect.Effect<void, RenderError, never>
 
     /**
      * Remove a rendering layer.
@@ -286,42 +289,44 @@ export const RenderUtils = {
   emptyView: (width: number, height: number): View => ({
     render: () => Effect.succeed(' '.repeat(width * height)),
     width,
-    height
+    height,
   }),
 
   /**
    * Create a view from a simple string.
    */
   textView: (text: string): View => ({
-    render: () => Effect.succeed(text)
+    render: () => Effect.succeed(text),
   }),
 
   /**
    * Combine multiple views horizontally.
    */
   joinHorizontal: (views: ReadonlyArray<View>): View => ({
-    render: () => Effect.gen(function* (_) {
-      const lines = yield* _(renderAndSplitViews(views))
-      const maxLines = Math.max(...lines.map(l => l.length), 0)
-      
-      const result: string[] = []
-      for (let i = 0; i < maxLines; i++) {
-        const line = lines.map(l => l[i] || '').join('')
-        result.push(line)
-      }
-      
-      return result.join('\n')
-    })
+    render: () =>
+      Effect.gen(function* (_) {
+        const lines = yield* _(renderAndSplitViews(views))
+        const maxLines = Math.max(...lines.map(l => l.length), 0)
+
+        const result: string[] = []
+        for (let i = 0; i < maxLines; i++) {
+          const line = lines.map(l => l[i] || '').join('')
+          result.push(line)
+        }
+
+        return result.join('\n')
+      }),
   }),
 
   /**
    * Combine multiple views vertically.
    */
   joinVertical: (views: ReadonlyArray<View>): View => ({
-    render: () => Effect.gen(function* (_) {
-      const rendered = yield* _(Effect.all(views.map(view => view.render())))
-      return rendered.join('\n')
-    })
+    render: () =>
+      Effect.gen(function* (_) {
+        const rendered = yield* _(Effect.all(views.map(view => view.render())))
+        return rendered.join('\n')
+      }),
   }),
 
   /**
@@ -331,37 +336,37 @@ export const RenderUtils = {
     view: View,
     padding: { top: number; right: number; bottom: number; left: number }
   ): View => ({
-    render: () => Effect.gen(function* (_) {
-      const content = yield* _(view.render())
-      const lines = content.split('\n')
-      
-      // Add horizontal padding
-      const paddedLines = addHorizontalPadding(lines, padding.left, padding.right)
-      
-      // Add vertical padding
-      const lineWidth = (lines[0]?.length || 0) + padding.left + padding.right
-      const topPadding = createPaddingLines(padding.top, lineWidth)
-      const bottomPadding = createPaddingLines(padding.bottom, lineWidth)
-      
-      return [...topPadding, ...paddedLines, ...bottomPadding].join('\n')
-    }),
+    render: () =>
+      Effect.gen(function* (_) {
+        const content = yield* _(view.render())
+        const lines = content.split('\n')
+
+        // Add horizontal padding
+        const paddedLines = addHorizontalPadding(lines, padding.left, padding.right)
+
+        // Add vertical padding
+        const lineWidth = (lines[0]?.length || 0) + padding.left + padding.right
+        const topPadding = createPaddingLines(padding.top, lineWidth)
+        const bottomPadding = createPaddingLines(padding.bottom, lineWidth)
+
+        return [...topPadding, ...paddedLines, ...bottomPadding].join('\n')
+      }),
     width: view.width ? view.width + padding.left + padding.right : undefined,
-    height: view.height ? view.height + padding.top + padding.bottom : undefined
+    height: view.height ? view.height + padding.top + padding.bottom : undefined,
   }),
 
   /**
    * Clip a view to specified dimensions.
    */
   clipView: (view: View, width: number, height: number): View => ({
-    render: () => Effect.gen(function* (_) {
-      const content = yield* _(view.render())
-      const lines = content.split('\n').slice(0, height)
-      
-      return lines
-        .map(line => line.slice(0, width))
-        .join('\n')
-    }),
+    render: () =>
+      Effect.gen(function* (_) {
+        const content = yield* _(view.render())
+        const lines = content.split('\n').slice(0, height)
+
+        return lines.map(line => line.slice(0, width)).join('\n')
+      }),
     width,
-    height
-  })
+    height,
+  }),
 } as const

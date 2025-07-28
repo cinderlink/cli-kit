@@ -1,11 +1,11 @@
 /**
  * Config Manager Module
- * 
+ *
  * Handles loading and creating Tuix configuration
  */
 
-import { loadConfig } from "tuix/config"
-import { createConfig, type TuixConfig } from "tuix/config"
+import { loadConfig } from 'tuix/config'
+import { createConfig, type TuixConfig } from 'tuix/config'
 
 export class ConfigManager {
   /**
@@ -22,7 +22,7 @@ export class ConfigManager {
       return undefined
     }
   }
-  
+
   /**
    * Create default config if none exists
    */
@@ -33,18 +33,18 @@ export class ConfigManager {
       // Config doesn't exist, create one
       const configName = appName || 'tuix'
       const defaultConfig = createConfig()
-      
+
       // Save the config
       const configPath = `${configName}.config.ts`
       const configContent = this.generateConfigContent()
-      
+
       await Bun.write(configPath, configContent)
       console.log(`✅ Created default config at ${configPath}`)
-      
+
       return defaultConfig
     }
   }
-  
+
   /**
    * Generate default config file content
    */
