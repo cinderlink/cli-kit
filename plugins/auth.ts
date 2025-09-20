@@ -13,7 +13,7 @@ import { InfoPanel, SuccessPanel, ErrorPanel, text, vstack } from "../src/compon
 
 // Auth configuration schema
 const authConfigSchema = z.object({
-  tokenFile: z.string().default("~/.cli-kit/auth.json"),
+  tokenFile: z.string().default("~/.tuix/auth.json"),
   apiUrl: z.string().optional(),
   timeout: z.number().default(30000),
   allowOffline: z.boolean().default(false)
@@ -228,7 +228,7 @@ export const authPlugin = definePlugin({
     name: "auth",
     version: "1.0.0",
     description: "Authentication plugin for CLI applications",
-    author: "CLI-KIT",
+    author: "TUIX",
     keywords: ["auth", "authentication", "login", "security"]
   },
   
@@ -247,7 +247,7 @@ export const authPlugin = definePlugin({
   
   config: authConfigSchema,
   defaultConfig: {
-    tokenFile: "~/.cli-kit/auth.json",
+    tokenFile: "~/.tuix/auth.json",
     timeout: 30000,
     allowOffline: false
   },

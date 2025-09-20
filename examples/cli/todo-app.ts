@@ -40,7 +40,7 @@ const todoSchema = z.object({
 type Todo = z.infer<typeof todoSchema>
 
 // Storage utilities
-const todoFile = path.join(homedir(), ".cli-kit", "todos.json")
+const todoFile = path.join(homedir(), ".tuix", "todos.json")
 
 async function loadTodos(): Promise<Todo[]> {
   try {

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The CLI-KIT framework provides a powerful, type-safe way to build command-line interfaces with rich terminal UI components. It combines the robustness of Effect.ts with an intuitive API inspired by modern web frameworks.
+The TUIX framework provides a powerful, type-safe way to build command-line interfaces with rich terminal UI components. It combines the robustness of Effect.ts with an intuitive API inspired by modern web frameworks.
 
 ## Key Features
 
@@ -17,7 +17,7 @@ The CLI-KIT framework provides a powerful, type-safe way to build command-line i
 ## Quick Start
 
 ```typescript
-import { defineConfig, runCLI } from "cli-kit/cli"
+import { defineConfig, runCLI } from "tuix/cli"
 import { z } from "zod"
 
 const config = defineConfig({
@@ -138,8 +138,8 @@ commands: {
 Create rich terminal UIs with the component system:
 
 ```typescript
-import { Panel, SuccessPanel, ErrorPanel } from "cli-kit/components"
-import { text, vstack, hstack } from "cli-kit/components"
+import { Panel, SuccessPanel, ErrorPanel } from "tuix/components"
+import { text, vstack, hstack } from "tuix/components"
 
 handler: (args) => {
   if (success) {
@@ -164,7 +164,7 @@ handler: (args) => {
 Extend your CLI with plugins:
 
 ```typescript
-import { definePlugin } from "cli-kit/cli"
+import { definePlugin } from "tuix/cli"
 
 const authPlugin = definePlugin({
   metadata: {
@@ -189,7 +189,7 @@ const authPlugin = definePlugin({
 
 ## Architecture
 
-The CLI framework is built on top of the existing CLI-KIT TUI framework:
+The CLI framework is built on top of the existing TUIX TUI framework:
 
 ```
 ┌─ CLI Framework ────────────────────────────┐
@@ -266,7 +266,7 @@ handler: async (args) => {
 Improve startup time by lazy loading command handlers:
 
 ```typescript
-import { lazyLoad } from "cli-kit/cli"
+import { lazyLoad } from "tuix/cli"
 
 commands: {
   analytics: {
@@ -312,7 +312,7 @@ program
     // ...
   })
 
-// CLI-KIT
+// TUIX
 commands: {
   serve: {
     description: "Start server",
@@ -347,7 +347,7 @@ yargs.command(
   }
 )
 
-// CLI-KIT
+// TUIX
 commands: {
   fetch: {
     description: "Fetch a URL",
@@ -383,7 +383,7 @@ args: {
 Build interactive CLIs with reactive state:
 
 ```typescript
-import { createComponent, $state } from "cli-kit/components"
+import { createComponent, $state } from "tuix/components"
 
 const InteractivePrompt = createComponent(() => {
   const selected = $state(0)
@@ -421,7 +421,7 @@ const InteractivePrompt = createComponent(() => {
 Test your CLI commands with the testing utilities:
 
 ```typescript
-import { testPluginCommand, executeWithPlugins } from "cli-kit/cli/testing"
+import { testPluginCommand, executeWithPlugins } from "tuix/cli/testing"
 
 test("greet command", async () => {
   const result = await executeWithPlugins(

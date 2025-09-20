@@ -68,7 +68,7 @@ export interface LargeTextOptions {
 }
 
 export interface LargeGradientTextOptions extends LargeTextOptions {
-  readonly gradient: GradientConfig
+  readonly gradient: LargeTextGradientConfig
 }
 
 export interface LargeAnimatedGradientTextOptions extends LargeGradientTextOptions {
@@ -76,7 +76,7 @@ export interface LargeAnimatedGradientTextOptions extends LargeGradientTextOptio
   readonly time: number // Current animation time
 }
 
-export interface GradientConfig {
+export interface LargeTextGradientConfig {
   readonly colors: Color[]
   readonly direction?: 'horizontal' | 'vertical' | 'diagonal'
 }
@@ -285,7 +285,7 @@ function createFilledBlocks(lines: string[][], char: string = '█'): string[][]
 /**
  * Resolve color palette by name or return custom gradient
  */
-function resolveGradient(paletteNameOrGradient: string | GradientConfig): GradientConfig {
+function resolveGradient(paletteNameOrGradient: string | LargeTextGradientConfig): LargeTextGradientConfig {
   if (typeof paletteNameOrGradient === 'string') {
     const palette = colorPalettes[paletteNameOrGradient]
     if (palette) {
@@ -308,7 +308,7 @@ function resolveGradient(paletteNameOrGradient: string | GradientConfig): Gradie
  */
 function applyGradient(
   lines: string[][], 
-  gradient: GradientConfig,
+  gradient: LargeTextGradientConfig,
   time: number = 0
 ): View {
   const colors = gradient.colors
@@ -445,7 +445,7 @@ export function largeTextWithPalette(
   options?: Partial<LargeTextOptions>
 ): View {
   const palette = colorPalettes[paletteName]
-  const gradient: GradientConfig = {
+  const gradient: LargeTextGradientConfig = {
     colors: palette.colors,
     direction: 'horizontal'
   }
@@ -469,7 +469,7 @@ export function largeAnimatedTextWithPalette(
   options?: Partial<LargeAnimatedGradientTextOptions>
 ): View {
   const palette = colorPalettes[paletteName]
-  const gradient: GradientConfig = {
+  const gradient: LargeTextGradientConfig = {
     colors: palette.colors,
     direction: 'horizontal'
   }

@@ -1,4 +1,4 @@
-# CLI-KIT API Improvement Proposals
+# TUIX API Improvement Proposals
 
 Based on the framework showcase and example development process, here are proposed API improvements to simplify common use cases and enhance the developer experience.
 
@@ -106,7 +106,7 @@ const customGradient = gradient()
   .animate({ speed: 0.1 })
 
 // Text with gradient
-const title = largeText("CLI-KIT")
+const title = largeText("TUIX")
   .gradient(customGradient)
   .size("large")
   .spacing(2)

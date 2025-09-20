@@ -18,7 +18,7 @@ import { z } from "zod"
 // Test 1: Static component using builder functions
 const StaticComponent = () => Panel(
   vstack(
-    text("🚀 CLI-KIT Simplified API"),
+    text("🚀 TUIX Simplified API"),
     text(""),
     text("✓ Component builders work"),
     text("✓ Panel and Button builders work"),

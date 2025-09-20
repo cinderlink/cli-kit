@@ -20,6 +20,7 @@ export class TerminalError extends Data.TaggedError("TerminalError")<{
   readonly cause?: unknown
   readonly component?: string
   readonly context?: Record<string, unknown>
+  readonly fatal: boolean
   readonly timestamp: Date
 }> {
   constructor(props: {
@@ -27,11 +28,16 @@ export class TerminalError extends Data.TaggedError("TerminalError")<{
     readonly cause?: unknown
     readonly component?: string
     readonly context?: Record<string, unknown>
+    readonly fatal?: boolean
+    readonly message?: string
   }) {
+    const { fatal, message, ...rest } = props
+    const formattedOperation = rest.operation.charAt(0).toUpperCase() + rest.operation.slice(1)
     super({
-      message: `Terminal operation failed: ${props.operation}`,
+      message: message ?? `Terminal ${formattedOperation} failed`,
+      fatal: fatal ?? false,
       timestamp: new Date(),
-      ...props
+      ...rest
     })
   }
 }

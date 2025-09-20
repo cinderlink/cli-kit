@@ -11,7 +11,7 @@ import { z } from "zod"
 const config = defineConfig({
   name: "simple-cli",
   version: "1.0.0",
-  description: "A simple CLI built with CLI-KIT",
+  description: "A simple CLI built with TUIX",
   
   // Global options
   options: {

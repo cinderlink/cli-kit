@@ -1,6 +1,6 @@
 # Performance Guide
 
-CLI-KIT includes several performance optimizations to ensure fast startup times and smooth rendering. This guide covers best practices, optimization techniques, and performance monitoring.
+TUIX includes several performance optimizations to ensure fast startup times and smooth rendering. This guide covers best practices, optimization techniques, and performance monitoring.
 
 ## Performance Overview
 
@@ -24,7 +24,7 @@ Recent benchmark results show significant performance improvements:
 Commands and modules are loaded on-demand with intelligent caching:
 
 ```typescript
-import { createLazyHandler, preloadHandlers } from "cli-kit/cli/lazy-cache"
+import { createLazyHandler, preloadHandlers } from "tuix/cli/lazy-cache"
 
 // Create lazy-loaded command
 const lazyCLI = defineConfig({
@@ -55,7 +55,7 @@ preloadHandlers([lazyCLI.commands.build, lazyCLI.commands.dev])
 Rendered views are cached to avoid re-computation:
 
 ```typescript
-import { globalViewCache, memoizeRender } from "cli-kit/core/view-cache"
+import { globalViewCache, memoizeRender } from "tuix/core/view-cache"
 
 // Automatic caching for expensive views
 const expensiveView = vstack(
@@ -79,7 +79,7 @@ const rendered = await Effect.runPromise(expensiveView.render())
 Fast Unicode-aware string width calculation:
 
 ```typescript
-import { stringWidthOptimized } from "cli-kit/utils/string-width-optimized"
+import { stringWidthOptimized } from "tuix/utils/string-width-optimized"
 
 // 83% faster for Unicode strings
 const width = stringWidthOptimized("Hello 世界 🌟")
@@ -99,7 +99,7 @@ const repeatedWidth = stringWidthOptimized("Same string")
 ANSI code generation is cached and optimized:
 
 ```typescript
-import { styledTextOptimized } from "cli-kit/styling/render-optimized"
+import { styledTextOptimized } from "tuix/styling/render-optimized"
 
 // 90% faster style rendering
 const styled = styledTextOptimized("Text", {
@@ -292,9 +292,9 @@ bun test __tests__/performance/optimization.bench.test.ts
 Monitor cache performance:
 
 ```typescript
-import { globalViewCache } from "cli-kit/core/view-cache"
-import { getStyleCacheStats } from "cli-kit/styling/render-optimized"
-import { getWidthCacheStats } from "cli-kit/utils/string-width-optimized"
+import { globalViewCache } from "tuix/core/view-cache"
+import { getStyleCacheStats } from "tuix/styling/render-optimized"
+import { getWidthCacheStats } from "tuix/utils/string-width-optimized"
 
 // Get cache statistics
 console.log('View cache:', globalViewCache.getStats())
@@ -342,8 +342,8 @@ const viewCache = new ViewCache({
 Clear caches when needed:
 
 ```typescript
-import { clearStyleCache } from "cli-kit/styling/render-optimized"
-import { clearWidthCache } from "cli-kit/utils/string-width-optimized"
+import { clearStyleCache } from "tuix/styling/render-optimized"
+import { clearWidthCache } from "tuix/utils/string-width-optimized"
 
 // Clear caches manually
 globalViewCache.clear()
@@ -399,10 +399,10 @@ const config = defineConfig({
 
 ```typescript
 // Before
-import { stringWidth } from "cli-kit/utils/string-width"
+import { stringWidth } from "tuix/utils/string-width"
 
 // After  
-import { stringWidthOptimized } from "cli-kit/utils/string-width-optimized"
+import { stringWidthOptimized } from "tuix/utils/string-width-optimized"
 
 // Update calls
 const width = stringWidthOptimized(text) // Drop-in replacement
@@ -415,7 +415,7 @@ const width = stringWidthOptimized(text) // Drop-in replacement
 const styled = Effect.runSync(renderStyled(text, style))
 
 // After
-import { styledTextOptimized } from "cli-kit/styling/render-optimized"
+import { styledTextOptimized } from "tuix/styling/render-optimized"
 const styled = styledTextOptimized(text, {
   foreground: 'blue',
   bold: true
@@ -429,7 +429,7 @@ const styled = styledTextOptimized(text, {
 const rendered = await Effect.runPromise(view.render())
 
 // After
-import { globalViewCache } from "cli-kit/core/view-cache"
+import { globalViewCache } from "tuix/core/view-cache"
 const key = globalViewCache.generateKey(view)
 const rendered = await globalViewCache.renderCached(key, view)
 ```

@@ -93,7 +93,7 @@ const Dashboard = createComponent((context) => {
           text(""),
           styledText("System Monitoring & Control", style().foreground(Colors.gray))
         ),
-        "CLI-KIT Dashboard"
+        "TUIX Dashboard"
       ),
       
       text(""),
@@ -215,7 +215,7 @@ const config = defineConfig({
       handler: () => {
         const ComponentDemo = createComponent((context) => {
           const counter = context.$state(0)
-          const message = context.$state("Hello from CLI-KIT!")
+          const message = context.$state("Hello from TUIX!")
           
           const doubledCounter = context.$derived(() => counter() * 2)
           
@@ -223,7 +223,7 @@ const config = defineConfig({
             view: () => vstack(
               HeaderPanel(
                 text("Component Showcase"),
-                "CLI-KIT Demo"
+                "TUIX Demo"
               ),
               
               text(""),

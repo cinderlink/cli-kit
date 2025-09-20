@@ -6,7 +6,7 @@
     "module": "Preserve",
     "moduleDetection": "force",
     "jsx": "react-jsx",
-    "jsxImportSource": "@cinderlink/cli-kit",
+    "jsxImportSource": "tuix",
     "allowJs": true,
 
     // Bundler mode
@@ -42,11 +42,13 @@
     "src/**/*",
     "examples/**/*",
     "**/*.test.ts",
-    "**/*.tuix"
+    "**/*.tuix",
+    "types/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "research"
+    "research",
+    "tests" 
   ]
 }

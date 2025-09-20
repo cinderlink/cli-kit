@@ -52,9 +52,15 @@ Use the test setup utilities in `tests/e2e/setup.ts` for testing components with
 import { createTestContext } from "./setup.ts"
 
 test("Component with Services", async () => {
-  const ctx = await Effect.runPromise(createTestContext(component))
-  // Test with mocked services
-  await ctx.cleanup()
+  await Effect.runPromise(
+    Effect.scoped(
+      Effect.gen(function* (_) {
+        const ctx = yield* _(createTestContext(component))
+        // Test with mocked services
+        yield* _(ctx.cleanup())
+      })
+    )
+  )
 })
 ```
 

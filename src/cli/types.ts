@@ -1,83 +1,91 @@
-/**
- * Core types for the CLI framework
- */
-
 import { z } from "zod"
-import type { Component } from "../core/types"
 
-export interface CLIConfig {
-  name: string
-  version: string
-  description?: string
-  options?: Record<string, z.ZodSchema>
-  commands?: Record<string, CommandConfig>
-  plugins?: PluginReference[]
-  hooks?: CLIHooks
-  settings?: Record<string, any>
+export type CommandOptionsSchema = Record<string, z.ZodTypeAny>
+export type CommandArgumentsSchema = z.ZodTuple<[z.ZodTypeAny, ...z.ZodTypeAny[]]> | z.ZodObject<any> | undefined
+
+export interface CommandExecutionContext {
+  readonly commandPath: readonly string[]
+  readonly options: Record<string, unknown>
+  readonly args: unknown
+  readonly raw: {
+    readonly argv: readonly string[]
+  }
+  readonly config: CLIConfig
+  readonly cli: CLIInstance
 }
+
+export type CommandResult = void | string | Promise<void | string>
+
+export type CommandHandler = (context: CommandExecutionContext) => CommandResult
 
 export interface CommandConfig {
-  description: string
-  options?: Record<string, z.ZodSchema>
-  args?: Record<string, z.ZodSchema>
-  arguments?: z.ZodSchema[] // Alternative to args
-  commands?: Record<string, CommandConfig> // Subcommands
-  handler?: LazyHandler | Handler
-  aliases?: string[]
-  hidden?: boolean
-  lazy?: boolean
+  readonly description?: string
+  readonly summary?: string
+  readonly options?: CommandOptionsSchema
+  readonly args?: CommandArgumentsSchema
+  readonly examples?: readonly string[]
+  readonly handler: CommandHandler
+  readonly hidden?: boolean
 }
 
-export interface LazyHandler {
-  (): Promise<Handler>
-  _lazy: true
-  _loader?: () => Promise<{ default: Handler }>
+export interface CommandMap {
+  readonly [name: string]: CommandConfig | NestedCommandGroup
 }
 
-export type Handler = (args: any) => Promise<Component<any, any> | void> | Component<any, any> | void
+export interface NestedCommandGroup {
+  readonly description?: string
+  readonly commands: CommandMap
+}
 
 export interface CLIHooks {
-  beforeCommand?: (command: string[], args: any) => Promise<void> | void
-  afterCommand?: (command: string[], args: any, result: any) => Promise<void> | void
-  onError?: (error: Error, command: string[], args: any) => Promise<void> | void
+  readonly beforeCommand?: (info: CommandExecutionContext) => Promise<void> | void
+  readonly afterCommand?: (info: CommandExecutionContext, result: string | void) => Promise<void> | void
+  readonly onError?: (error: unknown, info: CommandExecutionContext) => Promise<void> | void
 }
 
-export type PluginReference = string | Plugin
-
-export interface Plugin {
-  name: string
-  version: string
-  description?: string
-  commands?: Record<string, CommandConfig>
-  extends?: Record<string, CommandExtension>
-  middleware?: PluginMiddleware
-  install?: () => Promise<void> | void
-  uninstall?: () => Promise<void> | void
+export interface CLIPlugin {
+  readonly name: string
+  readonly version?: string
+  readonly commands?: CommandMap
+  readonly hooks?: CLIHooks
 }
 
-export interface CommandExtension {
-  options?: Record<string, z.ZodSchema>
-  args?: Record<string, z.ZodSchema>
-  wrapper?: HandlerWrapper
+export interface CLISettings {
+  readonly colors?: boolean
+  readonly interactive?: boolean
+  readonly output?: "text" | "json"
 }
 
-export type HandlerWrapper = (originalHandler: Handler) => Handler
-
-export interface PluginMiddleware {
-  beforeCommand?: (command: string[], args: any) => Promise<void> | void
-  afterCommand?: (command: string[], args: any, result: any) => Promise<void> | void
-  onError?: (error: Error, command: string[], args: any) => Promise<void> | void
+export interface CLIConfig {
+  readonly name: string
+  readonly version: string
+  readonly description?: string
+  readonly commands: CommandMap
+  readonly options?: CommandOptionsSchema
+  readonly hooks?: CLIHooks
+  readonly plugins?: readonly CLIPlugin[]
+  readonly settings?: CLISettings
 }
 
-export interface ParsedArgs {
-  command: string[]
-  args: Record<string, any>
-  options: Record<string, any>
-  rawArgs: string[]
+export interface NormalizedCLIConfig extends CLIConfig {
+  readonly options: CommandOptionsSchema
+  readonly hooks: CLIHooks
+  readonly plugins: readonly CLIPlugin[]
+  readonly settings: CLISettings
 }
 
-export interface CLIContext {
-  config: CLIConfig
-  parsedArgs: ParsedArgs
-  plugins: Plugin[]
+export interface CLIInstance {
+  readonly config: NormalizedCLIConfig
+  run(argv?: readonly string[]): Promise<void>
+}
+
+export interface ParsedArgv {
+  readonly argv: readonly string[]
+  readonly positionals: readonly string[]
+  readonly options: Record<string, unknown>
+}
+
+export interface CommandResolution {
+  readonly path: readonly string[]
+  readonly command: CommandConfig
 }

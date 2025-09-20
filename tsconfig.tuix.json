@@ -3,7 +3,7 @@
     // TUI Extensions (.tuix) configuration
     // Extends the base TypeScript config for .tuix files
     "jsx": "react-jsx",
-    "jsxImportSource": "@cinderlink/cli-kit",
+    "jsxImportSource": "tuix",
     "allowImportingTsExtensions": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -19,12 +19,12 @@
     // Path mapping for clean imports in .tuix files
     "baseUrl": ".",
     "paths": {
-      "@/*": ["node_modules/@cinderlink/cli-kit/src/*", "src/*"],
-      "@/core/*": ["node_modules/@cinderlink/cli-kit/src/core/*", "src/core/*"],
-      "@/services/*": ["node_modules/@cinderlink/cli-kit/src/services/*", "src/services/*"],
-      "@/components/*": ["node_modules/@cinderlink/cli-kit/src/components/*", "src/components/*"],
-      "@/styling/*": ["node_modules/@cinderlink/cli-kit/src/styling/*", "src/styling/*"],
-      "@/testing/*": ["node_modules/@cinderlink/cli-kit/src/testing/*", "src/testing/*"]
+      "@/*": ["src/*"],
+      "@/core/*": ["src/core/*"],
+      "@/services/*": ["src/services/*"],
+      "@/components/*": ["src/components/*"],
+      "@/styling/*": ["src/styling/*"],
+      "@/testing/*": ["src/testing/*"]
     }
   },
   "include": [

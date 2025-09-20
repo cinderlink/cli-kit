@@ -18,7 +18,7 @@ const Greeting = ({ name, emoji = "👋" }: { name: string; emoji?: string }) =>
       <text>{emoji} </text>
       <bold>Hello, {name}!</bold>
     </hstack>
-    <faint>Welcome to CLI-KIT with JSX</faint>
+    <faint>Welcome to TUIX with JSX</faint>
   </vstack>
 )
 
@@ -186,7 +186,7 @@ const config = defineConfig({
       handler: (args) => (
         <panel title="JSX Showcase">
           <vstack>
-            <bold>CLI-KIT JSX Support</bold>
+            <bold>TUIX JSX Support</bold>
             <text></text>
             
             <underline>Features:</underline>

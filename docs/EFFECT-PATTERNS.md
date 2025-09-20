@@ -177,7 +177,7 @@ const withTempFile = <A>(operation: (path: string) => Effect.Effect<A>) =>
   Effect.acquireRelease(
     // Acquire
     Effect.sync(() => {
-      const tempPath = `/tmp/cli-kit-${Date.now()}`
+      const tempPath = `/tmp/tuix-${Date.now()}`
       fs.writeFileSync(tempPath, '')
       return tempPath
     }),

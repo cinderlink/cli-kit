@@ -2,7 +2,7 @@
  * Runes - Svelte-inspired Reactive State Management
  * 
  * This is the new runes system with $bindable support.
- * Import from '@cli-kit/runes' to use these instead of the legacy reactivity system.
+ * Import from 'tuix/runes' to use these instead of the legacy reactivity system.
  */
 
 export {

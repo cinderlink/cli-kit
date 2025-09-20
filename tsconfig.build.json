@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "src/**/*",
+    "cli.ts",
+    "jsx-runtime.ts",
+    "jsx-dev-runtime.ts",
+    "bin/**/*.ts",
+    "types/**/*"
+  ],
+  "exclude": [
+    "__tests__",
+    "tests",
+    "examples",
+    "docs",
+    "dist",
+    "node_modules",
+    "src/testing"
+  ]
+}
+

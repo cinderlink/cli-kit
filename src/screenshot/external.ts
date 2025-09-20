@@ -1,13 +1,13 @@
 /**
  * External Command Screenshot Capture
  * 
- * Captures output from non-CLI-KIT terminal commands
+ * Captures output from non-TUIX terminal commands
  */
 
 import { Effect } from "effect"
 import { exec } from "child_process"
 import { promisify } from "util"
-import type { CliKitScreenshot, ScreenshotOptions } from "./types.ts"
+import type { TuixScreenshot, ScreenshotOptions } from "./types.ts"
 import stripAnsi from "strip-ansi"
 
 const execAsync = promisify(exec)
@@ -18,7 +18,7 @@ const execAsync = promisify(exec)
 export function captureExternalCommand(
   command: string,
   options: ScreenshotOptions
-): Effect.Effect<CliKitScreenshot, Error> {
+): Effect.Effect<TuixScreenshot, Error> {
   return Effect.tryPromise({
     try: async () => {
       // Execute the command and capture output
@@ -40,7 +40,7 @@ export function captureExternalCommand(
       // Extract ANSI styles (simplified for now)
       const styles = extractAnsiStyles(lines)
       
-      const screenshot: CliKitScreenshot = {
+      const screenshot: TuixScreenshot = {
         metadata: {
           version: "1.0.0",
           timestamp: new Date().toISOString(),
@@ -80,12 +80,12 @@ export function capturePtyCommand(
   command: string,
   args: string[],
   options: ScreenshotOptions & { duration?: number }
-): Effect.Effect<CliKitScreenshot, Error> {
+): Effect.Effect<TuixScreenshot, Error> {
   return Effect.tryPromise({
     try: async () => {
       const pty = await import('node-pty')
       
-      return new Promise<CliKitScreenshot>((resolve, reject) => {
+      return new Promise<TuixScreenshot>((resolve, reject) => {
         const term = pty.spawn(command, args, {
           name: 'xterm-color',
           cols: 80,
@@ -113,7 +113,7 @@ export function capturePtyCommand(
           const cleanLines = lines.map(line => stripAnsi(line))
           const styles = extractAnsiStyles(lines)
           
-          const screenshot: CliKitScreenshot = {
+          const screenshot: TuixScreenshot = {
             metadata: {
               version: "1.0.0",
               timestamp: new Date().toISOString(),

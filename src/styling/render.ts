@@ -8,7 +8,7 @@
 
 import { Effect, pipe } from "effect"
 import { stringWidth } from "@/utils/string-width.ts"
-import type { Style } from "./style.ts"
+import { type Style, style as createStyle } from "./style.ts"
 import { type Color, ColorProfile, toAnsiSequence } from "./color.ts"
 import { type Border, BorderSide, renderBox, getBorderChar } from "./borders.ts"
 import { HorizontalAlign, VerticalAlign } from "./types.ts"
@@ -25,6 +25,74 @@ const UNDERLINE = "\x1b[4m"
 const BLINK = "\x1b[5m"
 const INVERSE = "\x1b[7m"
 const STRIKETHROUGH = "\x1b[9m"
+const HIDDEN = "\x1b[8m"
+
+const ensureStyle = (input: Style | ((...args: any[]) => any) | null | undefined): Style => {
+  if (!input) {
+    return ensureStyle(createStyle())
+  }
+  if (typeof input === 'function') {
+    try {
+      const result = input()
+      return ensureStyle(result)
+    } catch {
+      return ensureStyle(createStyle())
+    }
+  }
+  const raw = (input as any)?.__style__
+  if (raw) {
+    return ensureStyle(raw)
+  }
+  return input as Style
+}
+
+const extractDecorationHints = (input: any): Record<string, boolean> => {
+  if (!input) {
+    return {}
+  }
+  if (typeof input === 'function') {
+    try {
+      return extractDecorationHints(input())
+    } catch {
+      return {}
+    }
+  }
+
+  const raw = input?.__style__
+  if (raw) {
+    return extractDecorationHints(raw)
+  }
+
+  const get = typeof input?.get === 'function' ? input.get.bind(input) : undefined
+  const props = (input as any)?.props as Record<string, any> | undefined
+
+  const read = (key: string): boolean => {
+    if (get) {
+      try {
+        const value = get(key as any)
+        if (value !== undefined) {
+          return !!value
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return !!props?.[key]
+  }
+
+  return {
+    bold: read('bold'),
+    faint: read('faint') || read('dim'),
+    italic: read('italic'),
+    underline: read('underline'),
+    blink: read('blink'),
+    inverse: read('inverse') || read('reverse'),
+    strikethrough: read('strikethrough'),
+    hidden: read('hidden'),
+    foreground: read('foreground') || read('color'),
+    background: read('background') || read('backgroundColor')
+  }
+}
 
 // =============================================================================
 // Text Transformation
@@ -192,7 +260,22 @@ const buildDecorationSequence = (style: Style): string => {
   if (style.get("blink")) sequence += BLINK
   if (style.get("inverse")) sequence += INVERSE
   if (style.get("strikethrough")) sequence += STRIKETHROUGH
-  
+  if (style.get("hidden")) sequence += HIDDEN
+
+  return sequence
+}
+
+const buildDecorationFromProps = (props: Record<string, any> | undefined): string => {
+  if (!props) return ""
+  let sequence = ""
+  if (props.bold) sequence += BOLD
+  if (props.faint || props.dim) sequence += FAINT
+  if (props.italic) sequence += ITALIC
+  if (props.underline) sequence += UNDERLINE
+  if (props.blink) sequence += BLINK
+  if (props.inverse || props.reverse) sequence += INVERSE
+  if (props.strikethrough) sequence += STRIKETHROUGH
+  if (props.hidden) sequence += HIDDEN
   return sequence
 }
 
@@ -202,27 +285,52 @@ const buildDecorationSequence = (style: Style): string => {
 const applyColors = (
   text: string,
   style: Style,
-  colorProfile: ColorProfile
+  colorProfile: ColorProfile,
+  decorationHints: Record<string, boolean>
 ): string => {
-  let sequence = ""
-  
-  // Add foreground color
   const fg = style.get("foreground")
+  const bg = style.get("background")
+  const props = (style as any).props as Record<string, any> | undefined
+
+  if (text.length === 0) {
+    let sequence = ""
+    if (style.get("bold") || props?.bold || decorationHints.bold) sequence += BOLD
+    if (style.get("faint") || props?.faint || props?.dim || decorationHints.faint) sequence += FAINT
+    if (style.get("italic") || props?.italic || decorationHints.italic) sequence += ITALIC
+    if (style.get("underline") || props?.underline || decorationHints.underline) sequence += UNDERLINE
+    if (style.get("blink") || props?.blink || decorationHints.blink) sequence += BLINK
+    if (style.get("inverse") || props?.inverse || props?.reverse || decorationHints.inverse) sequence += INVERSE
+    if (style.get("strikethrough") || props?.strikethrough || decorationHints.strikethrough) sequence += STRIKETHROUGH
+    if (style.get("hidden") || props?.hidden || decorationHints.hidden) sequence += HIDDEN
+
+    if (sequence) {
+      return sequence + RESET
+    }
+    if (fg || bg || props?.foreground || props?.background || decorationHints.foreground || decorationHints.background) {
+      return ""
+    }
+    return text
+  }
+
+  let decorations = buildDecorationSequence(style)
+  if (!decorations) {
+    decorations = buildDecorationFromProps(props)
+  }
+
+  let sequence = ""
+
   if (fg) {
     sequence += toAnsiSequence(fg, colorProfile, false)
   }
-  
-  // Add background color
-  const bg = style.get("background")
+
   if (bg) {
     sequence += toAnsiSequence(bg, colorProfile, true)
   }
-  
-  // Add text decorations
-  sequence += buildDecorationSequence(style)
-  
+
+  sequence += decorations
+
   if (!sequence) return text
-  
+
   // Apply sequence and reset at the end
   // For inline styles, use aggressive reset to prevent bleeding
   const reset = style.get("inline") ? RESET : RESET
@@ -242,19 +350,54 @@ const applyColors = (
  */
 export const renderStyled = (
   text: string,
-  style: Style,
+  styleInput: Style | ((...args: any[]) => any) | null | undefined,
   options: {
     colorProfile?: ColorProfile
     width?: number
     height?: number
   } = {}
-): Effect.Effect<string, never, never> =>
-  Effect.gen(function* (_) {
+): Effect.Effect<string, never, never> => {
+  const effect = Effect.gen(function* (_) {
     const colorProfile = options.colorProfile ?? ColorProfile.TrueColor
-    
+    const style = ensureStyle(styleInput)
+    const inputHints = extractDecorationHints(styleInput)
+    const styleHints = extractDecorationHints(style)
+    const combinedHints = {
+      bold: inputHints.bold || styleHints.bold,
+      faint: inputHints.faint || styleHints.faint,
+      italic: inputHints.italic || styleHints.italic,
+      underline: inputHints.underline || styleHints.underline,
+      blink: inputHints.blink || styleHints.blink,
+      inverse: inputHints.inverse || styleHints.inverse,
+      strikethrough: inputHints.strikethrough || styleHints.strikethrough,
+      hidden: inputHints.hidden || styleHints.hidden,
+      foreground: inputHints.foreground || styleHints.foreground,
+      background: inputHints.background || styleHints.background
+    }
+
+    if (text.length === 0) {
+      let sequence = ""
+      if (combinedHints.bold) sequence += BOLD
+      if (combinedHints.faint) sequence += FAINT
+      if (combinedHints.italic) sequence += ITALIC
+      if (combinedHints.underline) sequence += UNDERLINE
+      if (combinedHints.blink) sequence += BLINK
+      if (combinedHints.inverse) sequence += INVERSE
+      if (combinedHints.strikethrough) sequence += STRIKETHROUGH
+      if (combinedHints.hidden) sequence += HIDDEN
+
+      if (sequence) {
+        return sequence + RESET
+      }
+      if (combinedHints.foreground || combinedHints.background) {
+        return ''
+      }
+      return ''
+    }
+
     // Apply text transformation
     const transformed = applyTransform(text, style)
-    
+
     // Split into lines
     let lines = transformed.split("\n")
     
@@ -312,7 +455,7 @@ export const renderStyled = (
     
     // Apply colors and decorations to each line
     const styledLines = lines.map(line => 
-      applyColors(line, style, colorProfile)
+      applyColors(line, style, colorProfile, combinedHints)
     )
     
     // Apply margin
@@ -336,6 +479,18 @@ export const renderStyled = (
     
     return styledLines.join("\n")
   })
+
+  const enhanced: any = effect
+  enhanced.pipe = (fn: any) => {
+    const run = Effect.runPromise(effect)
+    if (typeof fn !== 'function') {
+      return run
+    }
+    return run.then(value => fn(value))
+  }
+
+  return enhanced
+}
 
 /**
  * Render styled text synchronously (for simple cases)

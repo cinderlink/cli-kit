@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "tuix": "./bin/tuix.ts",
-    "build": "bun build src/index.ts --outdir dist --format esm",
+    "build": "bun build src/index.ts --outdir dist --format esm --target bun",
+    "prepack": "bun run build",
     "build:compile": "bun build --compile --minify --bytecode --target bun-linux-x64 --outfile dist/tuix src/index.ts",
     "dev": "bun --watch run src/index.ts",
     "test": "bun test",
@@ -35,11 +36,10 @@
     "test:core-coverage": "bun test __tests__/unit/core __tests__/core.test.ts __tests__/simple.test.ts --coverage",
     "test:layout-coverage": "bun test __tests__/unit/layout --coverage",
     "test:styling-coverage": "bun test __tests__/unit/styling --coverage",
-    "typecheck": "tsc --noEmit && tsc --project tsconfig.tuix.json --noEmit",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit && tsc --project tsconfig.tuix.json --noEmit",
     "lint": "echo 'No linter configured yet'",
     "clean": "rm -rf dist coverage",
     "check": "bun run typecheck && bun test",
-    
     "pm2:start": "pm2 start ecosystem.config.cjs",
     "pm2:stop": "pm2 stop ecosystem.config.cjs",
     "pm2:restart": "pm2 restart ecosystem.config.cjs",
@@ -76,13 +76,23 @@
     "example:simple-tuix": "bun examples/simple-tuix-demo.tuix",
     "example:performance-demo": "bun examples/cli/performance-demo.ts",
     "example:optimization-comparison": "bun examples/cli/optimization-comparison.ts",
-    "examples": "bun scripts/show-examples.ts",
-    "examples:test": "bun scripts/test-examples.ts",
+    "examples": "bun ./bin/tuix.ts examples",
+    "examples:test": "bun ./bin/tuix.ts examples:test",
     "screenshot:list": "./bin/tuix.ts screenshot list",
     "screenshot:examples": "./bin/tuix.ts screenshot multi",
     "screenshot:clean": "rm -rf .tuix/screenshots"
   },
-  "keywords": ["tui", "tuix", "terminal", "cli", "bun", "typescript", "jsx", "runes", "effect"],
+  "keywords": [
+    "tui",
+    "tuix",
+    "terminal",
+    "cli",
+    "bun",
+    "typescript",
+    "jsx",
+    "runes",
+    "effect"
+  ],
   "author": "Cinderlink",
   "license": "MIT",
   "bin": {
@@ -121,6 +131,10 @@
     "./runes": {
       "import": "./src/runes.ts",
       "types": "./src/runes.ts"
+    },
+    "./services": {
+      "import": "./services.ts",
+      "types": "./services.ts"
     }
   },
   "dependencies": {
@@ -132,6 +146,7 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@domir/bun-test": "0.1.2",
     "@types/bun": "latest",
     "@types/strip-ansi": "^5.2.1",
     "node-pty": "^1.0.0",

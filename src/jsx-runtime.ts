@@ -1,5 +1,5 @@
 /**
- * JSX Runtime for CLI-KIT
+ * JSX Runtime for TUIX
  * 
  * Enables JSX/TSX syntax for building terminal UIs
  * Compatible with React JSX transform with Svelte-inspired binding support
@@ -305,7 +305,7 @@ export function jsx(
     
     default:
       // Unknown element type - return a text element as fallback
-      console.warn(`Unknown JSX element type: ${type}, falling back to text`)
+      // Silent fallback to text for unknown elements
       
       let content = ''
       if (Array.isArray(children)) {

@@ -85,7 +85,7 @@ export {
   matchKeyBinding,
   generateComponentId,
   createDefaultStyles
-} from "./base.ts"
+} from "./base"
 
 // Box component
 export {
@@ -132,7 +132,7 @@ export {
   dangerButton,
   warningButton,
   ghostButton
-} from "./button.ts"
+} from "./Button"
 
 // List component
 export {
@@ -145,7 +145,7 @@ export {
   list,
   singleSelectList,
   multiSelectList
-} from "./list.ts"
+} from "./List"
 
 // Spinner component
 export {
@@ -254,7 +254,7 @@ export {
   type LargeTextOptions,
   type LargeGradientTextOptions,
   type LargeAnimatedGradientTextOptions,
-  type GradientConfig,
+  type LargeTextGradientConfig,
   largeText,
   largeGradientText,
   largeAnimatedGradientText,

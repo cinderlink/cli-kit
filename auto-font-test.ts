@@ -92,7 +92,7 @@ const testComponent: Component<TestModel, TestMsg> = {
     const currentFontName = fontNames[model.currentFontIndex];
     
     const logo = largeGradientText({
-      text: "cli-kit",
+      text: "tuix",
       gradient: gradientPresets.rainbow,  // Use rainbow for better visibility
       font: currentFont,
       scale: model.currentScale

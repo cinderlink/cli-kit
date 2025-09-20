@@ -5,7 +5,7 @@
 import { Effect, Layer, Ref } from "effect"
 import { TerminalService } from "../terminal.ts"
 import { TerminalError } from "@/core/errors.ts"
-import type { WindowSize, TerminalCapabilities } from "@/core/types.ts"
+import type { TerminalCapabilities } from "@/core/types.ts"
 
 // ANSI Escape Sequences
 const ESC = '\x1b'
@@ -70,161 +70,195 @@ const ANSI = {
 export const TerminalServiceLive = Layer.effect(
   TerminalService,
   Effect.gen(function* (_) {
-    const stdout = process.stdout
-    const stdin = process.stdin
     const isRawMode = yield* _(Ref.make(false))
     const isAlternateScreen = yield* _(Ref.make(false))
-    
-    // Helper to write to stdout
-    const write = (data: string) =>
+    const capitalize = (operation: string) =>
+      operation.charAt(0).toUpperCase() + operation.slice(1)
+
+    const ensureStdout = (operation: string): NodeJS.WriteStream => {
+      const current = process.stdout as NodeJS.WriteStream | undefined
+      if (!current) {
+        throw new TerminalError({
+          operation,
+          fatal: true,
+          message: `${capitalize(operation)} failed: STDOUT is not available`
+        })
+      }
+      if (current.isTTY === false) {
+        throw new TerminalError({
+          operation,
+          fatal: true,
+          message: `${capitalize(operation)} failed: Not a TTY terminal`
+        })
+      }
+      return current
+    }
+
+    const writeSequence = (operation: string, data: string) =>
       Effect.try({
         try: () => {
-          stdout.write(data)
+          const stream = ensureStdout(operation)
+          stream.write(data)
         },
-        catch: (error) => new TerminalError({ 
-          operation: "write",
-          cause: error 
-        })
+        catch: (error) =>
+          error instanceof TerminalError
+            ? error
+            : new TerminalError({
+                operation,
+                cause: error,
+                message: `${capitalize(operation)} failed: ${error instanceof Error ? error.message : String(error)}`
+              })
       })
-    
-    // Helper to detect terminal capabilities
+
     const detectCapabilities = (): TerminalCapabilities => {
       const env = process.env
-      const colorSupport = (() => {
-        if (env.COLORTERM === 'truecolor') return 'truecolor'
-        if (env.TERM?.includes('256color')) return '256'
-        if (env.TERM && !env.NO_COLOR) return 'basic'
-        return 'none'
-      })()
-      
+      const term = env.TERM?.toLowerCase() ?? ""
+      const colorterm = env.COLORTERM?.toLowerCase() ?? ""
+      const colors: TerminalCapabilities["colors"] = colorterm.includes("truecolor") ||
+        colorterm.includes("24bit") ||
+        term.includes("truecolor") ||
+        term.includes("24bit")
+        ? "truecolor"
+        : term.includes("256color")
+          ? "256"
+          : "16"
+
+      const locale = env.LC_ALL ?? env.LC_CTYPE ?? env.LANG ?? ""
+      const unicode = /utf-?8/i.test(locale)
+      const mouse = !!process.stdout && process.stdout.isTTY !== false
+
       return {
-        colors: colorSupport,
-        unicode: process.platform !== 'win32', // Simplified check
-        mouse: true, // Most modern terminals support mouse
-        clipboard: false, // Requires additional setup
-        sixel: false, // Image protocol support
-        kitty: env.TERM === 'xterm-kitty',
-        iterm2: env.TERM_PROGRAM === 'iTerm.app',
-        windowTitle: true,
-        columns: stdout.columns || 80,
-        rows: stdout.rows || 24,
+        colors,
+        unicode,
+        mouse,
+        alternateScreen: true,
+        cursorShapes: true
       }
     }
-    
+
+    const currentSize = () => {
+      const current = process.stdout as NodeJS.WriteStream | undefined
+      return {
+        width: current?.columns ?? 80,
+        height: current?.rows ?? 24
+      }
+    }
+
     return {
       // Basic Terminal Operations
-      clear: write(ANSI.clear),
-      
-      write: (text: string) => write(text),
-      
-      writeLine: (text: string) => write(text + '\n'),
-      
-      moveCursor: (x: number, y: number) => write(ANSI.cursorTo(x, y)),
-      
+      clear: writeSequence("clear", ANSI.clear),
+
+      write: (text: string) => writeSequence("write", text),
+
+      writeLine: (text: string) => writeSequence("write", `${text}\n`),
+
+      moveCursor: (x: number, y: number) => writeSequence("moveCursor", ANSI.cursorTo(x, y)),
+
       moveCursorRelative: (dx: number, dy: number) =>
         Effect.gen(function* (_) {
-          if (dx > 0) yield* _(write(ANSI.cursorForward(dx)))
-          else if (dx < 0) yield* _(write(ANSI.cursorBack(-dx)))
-          
-          if (dy > 0) yield* _(write(ANSI.cursorDown(dy)))
-          else if (dy < 0) yield* _(write(ANSI.cursorUp(-dy)))
+          if (dx > 0) yield* _(writeSequence("moveCursor", ANSI.cursorForward(dx)))
+          else if (dx < 0) yield* _(writeSequence("moveCursor", ANSI.cursorBack(-dx)))
+
+          if (dy > 0) yield* _(writeSequence("moveCursor", ANSI.cursorDown(dy)))
+          else if (dy < 0) yield* _(writeSequence("moveCursor", ANSI.cursorUp(-dy)))
         }),
-      
-      hideCursor: write(ANSI.cursorHide),
-      
-      showCursor: write(ANSI.cursorShow),
-      
+
+      hideCursor: writeSequence("hideCursor", ANSI.cursorHide),
+
+      showCursor: writeSequence("showCursor", ANSI.cursorShow),
+
       // Terminal State Management
-      getSize: Effect.sync(() => ({
-        width: stdout.columns || 80,
-        height: stdout.rows || 24,
-      })),
-      
+      getSize: Effect.sync(currentSize),
+
       setRawMode: (enabled: boolean) =>
         Effect.gen(function* (_) {
           const currentRawMode = yield* _(Ref.get(isRawMode))
           if (currentRawMode === enabled) return
-          
+
+          const currentStdin = process.stdin as NodeJS.ReadStream | undefined
+          if (!currentStdin || typeof currentStdin.setRawMode !== "function" || currentStdin.isTTY === false) {
+            yield* _(Ref.set(isRawMode, false))
+            return
+          }
+
           yield* _(Effect.try({
             try: () => {
-              if (stdin.isTTY) {
-                stdin.setRawMode(enabled)
-              }
+              currentStdin.setRawMode(enabled)
             },
             catch: (error) => new TerminalError({
               operation: "setRawMode",
-              cause: error
+              cause: error,
+              message: `SetRawMode failed: ${error instanceof Error ? error.message : String(error)}`
             })
           }))
-          
+
           yield* _(Ref.set(isRawMode, enabled))
         }),
-      
+
       setAlternateScreen: (enabled: boolean) =>
         Effect.gen(function* (_) {
           const current = yield* _(Ref.get(isAlternateScreen))
           if (current === enabled) return
-          
-          yield* _(write(enabled ? ANSI.alternateScreenEnable : ANSI.alternateScreenDisable))
+
+          yield* _(writeSequence("alternateScreen", enabled ? ANSI.alternateScreenEnable : ANSI.alternateScreenDisable))
           yield* _(Ref.set(isAlternateScreen, enabled))
         }),
-      
-      saveCursor: write(ANSI.cursorSave),
-      
-      restoreCursor: write(ANSI.cursorRestore),
-      
+
+      saveCursor: writeSequence("saveCursor", ANSI.cursorSave),
+
+      restoreCursor: writeSequence("restoreCursor", ANSI.cursorRestore),
+
       // Terminal Capabilities
       getCapabilities: Effect.sync(detectCapabilities),
-      
-      supportsTrueColor: Effect.sync(() => 
-        detectCapabilities().colors === 'truecolor'
-      ),
-      
+
+      supportsTrueColor: Effect.sync(() => detectCapabilities().colors === "truecolor"),
+
       supports256Colors: Effect.sync(() => {
         const colors = detectCapabilities().colors
-        return colors === '256' || colors === 'truecolor'
+        return colors === "256" || colors === "truecolor"
       }),
-      
-      supportsUnicode: Effect.sync(() => 
-        detectCapabilities().unicode
-      ),
-      
+
+      supportsUnicode: Effect.sync(() => detectCapabilities().unicode),
+
       // Screen Management
-      clearToEndOfLine: write(ANSI.clearToEOL),
-      
-      clearToStartOfLine: write(ANSI.clearToSOL),
-      
-      clearLine: write(ANSI.clearLine),
-      
-      clearToEndOfScreen: write(ANSI.clearToEOS),
-      
-      clearToStartOfScreen: write(ANSI.clearToSOS),
-      
-      scrollUp: (lines: number) => write(ANSI.scrollUp(lines)),
-      
-      scrollDown: (lines: number) => write(ANSI.scrollDown(lines)),
-      
+      clearToEndOfLine: writeSequence("clearLine", ANSI.clearToEOL),
+
+      clearToStartOfLine: writeSequence("clearLine", ANSI.clearToSOL),
+
+      clearLine: writeSequence("clearLine", ANSI.clearLine),
+
+      clearToEndOfScreen: writeSequence("clearScreen", ANSI.clearToEOS),
+
+      clearToStartOfScreen: writeSequence("clearScreen", ANSI.clearToSOS),
+
+      scrollUp: (lines: number) => writeSequence("scroll", ANSI.scrollUp(lines)),
+
+      scrollDown: (lines: number) => writeSequence("scroll", ANSI.scrollDown(lines)),
+
       // Advanced Features
-      setTitle: (title: string) => write(ANSI.setTitle(title)),
-      
-      bell: write(ANSI.bell),
-      
+      setTitle: (title: string) => writeSequence("setTitle", ANSI.setTitle(title)),
+
+      bell: writeSequence("bell", ANSI.bell),
+
       getCursorPosition: Effect.gen(function* (_) {
-        // This is complex as it requires reading from stdin
-        // For now, return a placeholder
+        yield* _(writeSequence("cursorPosition", ANSI.requestCursorPosition))
         yield* _(Effect.logWarning("getCursorPosition not fully implemented"))
-        return { x: 1, y: 1 }
+        yield* _(Effect.fail(new TerminalError({
+          operation: "cursorPosition",
+          message: "Cursor position query not supported in this environment"
+        })))
       }),
       
       setCursorShape: (shape: 'block' | 'underline' | 'bar') =>
-        write(
+        writeSequence(
+          "cursorShape",
           shape === 'block' ? ANSI.cursorBlock :
           shape === 'underline' ? ANSI.cursorUnderline :
           ANSI.cursorBar
         ),
-      
+
       setCursorBlink: (enabled: boolean) =>
-        write(enabled ? ANSI.cursorBlinkingBlock : ANSI.cursorBlock),
+        writeSequence("cursorBlink", enabled ? ANSI.cursorBlinkingBlock : ANSI.cursorBlock),
     }
   })
 )
@@ -251,13 +285,8 @@ export const TerminalServiceTest = Layer.succeed(
       colors: 'truecolor',
       unicode: true,
       mouse: true,
-      clipboard: false,
-      sixel: false,
-      kitty: false,
-      iterm2: false,
-      windowTitle: true,
-      columns: 80,
-      rows: 24,
+      alternateScreen: true,
+      cursorShapes: true,
     }),
     supportsTrueColor: Effect.succeed(true),
     supports256Colors: Effect.succeed(true),

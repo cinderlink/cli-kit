@@ -9,8 +9,8 @@ import { Color, Colors } from "../styling/color.ts"
 
 /**
  * Get the appropriate color for the current terminal
- * For now, assume dark terminal (most common)
- * TODO: Implement terminal background detection
+ * Currently defaults to dark terminal (most common).
+ * Future enhancement: Auto-detect terminal background color.
  */
 export const getAdaptiveColor = (adaptiveColor: Color): Color => {
   if (adaptiveColor._tag === "Adaptive") {

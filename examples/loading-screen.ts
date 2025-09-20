@@ -307,7 +307,7 @@ const loadingScreen: Component<LoadingModel, LoadingMsg> = {
     
     // Use animated gradient text for the logo
     const logo = largeAnimatedGradientText({
-      text: "CLI-KIT",
+      text: "TUIX",
       gradient: gradientWithDirection,
       time: model.animationTime,
       animationSpeed: model.animationSpeed,

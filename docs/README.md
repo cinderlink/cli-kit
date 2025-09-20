@@ -1,11 +1,11 @@
-# CLI Kit Documentation
+# TUIX Documentation
 
-Welcome to the CLI Kit documentation! This framework provides a comprehensive toolkit for building modern command-line applications with TypeScript, Effect.ts, and JSX support with Svelte-inspired runes.
+Welcome to the TUIX documentation! This framework provides a comprehensive toolkit for building modern command-line applications with TypeScript, Effect.ts, and JSX support with Svelte-inspired runes.
 
 ## Quick Start
 
 ```typescript
-import { createCLI, z } from '@cli-kit/core'
+import { createCLI, z } from 'tuix'
 
 const cli = createCLI({
   name: 'my-app',
@@ -69,12 +69,12 @@ CLI Kit is built around several core principles:
 
 1. **Installation**
    ```bash
-   bun add @cli-kit/core
+   bun add tuix
    ```
 
 2. **Create Your First CLI**
    ```typescript
-   import { createCLI } from '@cli-kit/core'
+   import { createCLI } from 'tuix'
    
    const cli = createCLI({
      name: 'my-cli',
@@ -91,7 +91,7 @@ CLI Kit is built around several core principles:
 
 3. **Add Components with Runes**
    ```typescript
-   import { Button, Text } from '@cli-kit/components'
+   import { Button, Text } from 'tuix/components'
    
    const MyApp = () => {
      let count = $state(0)

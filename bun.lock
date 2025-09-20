@@ -12,6 +12,7 @@
         "zod": "^3.22.0",
       },
       "devDependencies": {
+        "@domir/bun-test": "0.1.2",
         "@types/bun": "latest",
         "@types/strip-ansi": "^5.2.1",
         "node-pty": "^1.0.0",
@@ -24,6 +25,8 @@
     },
   },
   "packages": {
+    "@domir/bun-test": ["@domir/bun-test@0.1.2", "", { "peerDependencies": { "@types/bun": "^1.2.12", "effect": "^3.15.2" } }, "sha512-s12b7SVaaj4hKzScPycnLVhVFkLgFOFy2HK8fKPc2sXN96XRubBQknRw0GETv9osL5RzIQrIkGK9xRIydLblrA=="],
+
     "@oven/bun-darwin-aarch64": ["@oven/bun-darwin-aarch64@1.2.17", "", { "os": "darwin", "cpu": "arm64" }, "sha512-66Xjz3NZXUUWKZJPvWKuwEkaqMZpir1Gm4SbhbB2iiRSSTW8jqwdkSb9RhgTCDt5OnSPd3+Cq0WsP/T5ExJbhA=="],
 
     "@oven/bun-darwin-x64": ["@oven/bun-darwin-x64@1.2.17", "", { "os": "darwin", "cpu": "x64" }, "sha512-OMJMHpcpBlWcVnWfSQ6x+8fF7HpkQLqBfoIvzxgUjIZZvj2d8K46XX4N/h62RglDEinRC9VDGxt24vwvlk5tTw=="],

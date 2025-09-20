@@ -6,7 +6,7 @@
 
 import { Effect } from "effect"
 import type { View } from "@/core/types.ts"
-import type { CliKitScreenshot, ComponentSnapshot } from "./types.ts"
+import type { TuixScreenshot, ComponentSnapshot } from "./types.ts"
 import { text, styledText, hstack, vstack, box } from "@/core/view.ts"
 import { spacer } from "@/layout/index.ts"
 import { style, Colors } from "@/styling/index.ts"
@@ -15,7 +15,7 @@ import { Borders } from "@/styling/index.ts"
 /**
  * Reconstruct a View from a screenshot
  */
-export function reconstructView(screenshot: CliKitScreenshot): Effect.Effect<View, Error> {
+export function reconstructView(screenshot: TuixScreenshot): Effect.Effect<View, Error> {
   return Effect.try({
     try: () => reconstructComponentTree(screenshot.components),
     catch: (error) => new Error(`Failed to reconstruct view: ${error}`)
@@ -31,7 +31,6 @@ function reconstructComponentTree(snapshot: ComponentSnapshot): View {
       return text(snapshot.content || '')
       
     case 'styledText':
-      // TODO: Properly deserialize style
       const textStyle = snapshot.props?.style ? reconstructStyle(snapshot.props.style) : style()
       return styledText(snapshot.content || '', textStyle)
       
@@ -94,7 +93,7 @@ function reconstructStyle(styleData: any) {
 /**
  * Create a visual-only view from screenshot (without component tree)
  */
-export function createVisualView(screenshot: CliKitScreenshot): View {
+export function createVisualView(screenshot: TuixScreenshot): View {
   const views: View[] = []
   
   screenshot.visual.lines.forEach((line, lineIndex) => {

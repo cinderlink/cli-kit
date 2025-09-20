@@ -5,7 +5,7 @@
 import { Effect } from "effect"
 import { stringWidth } from "@/utils/string-width.ts"
 import type { View, RenderError } from "@/core/types.ts"
-import { RendererService } from "@/services/index.ts"
+import { RendererService } from "@/services/index"
 import { style as createStyle, renderStyledSync, type Style } from "@/styling/index.ts"
 
 /**

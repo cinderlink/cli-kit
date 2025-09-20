@@ -4,7 +4,7 @@
  * Tests for the core types, error system, and basic functionality.
  */
 
-import { test, expect, describe } from "bun:test"
+import { describe, it, expect } from "@domir/bun-test"
 import { Effect } from "effect"
 import type { Component, ComponentMsg, View } from "@/core/types.ts"
 import {
@@ -16,6 +16,7 @@ import {
   RecoveryStrategies
 } from "@/core/errors.ts"
 import { testComponent, TUIAssert, createTestLayer } from "@/testing/test-utils.ts"
+import { guardAsync } from "../tests/test-guard.ts"
 
 // =============================================================================
 // Test Components
@@ -56,57 +57,60 @@ const CounterComponent: Component<CounterModel, ComponentMsg<CounterMsg>> = {
 // =============================================================================
 
 describe("Core Types", () => {
-  test("Component interface should be properly typed", async () => {
-    const tester = testComponent(CounterComponent)
-    
-    // Test initialization
-    const [initialModel, initialCmds] = await tester.testInit()
-    expect(initialModel.count).toBe(0)
-    expect(initialCmds).toEqual([])
-  })
+  it("Component interface should be properly typed", () =>
+    guardAsync(async () => {
+      const tester = testComponent(CounterComponent)
 
-  test("Component update should handle messages correctly", async () => {
-    const tester = testComponent(CounterComponent)
-    const initialModel = { count: 0 }
-    
-    // Test increment
-    const [newModel1] = await tester.testUpdate({ _tag: 'Increment' }, initialModel)
-    expect(newModel1.count).toBe(1)
-    
-    // Test decrement
-    const [newModel2] = await tester.testUpdate({ _tag: 'Decrement' }, newModel1)
-    expect(newModel2.count).toBe(0)
-    
-    // Test reset
-    const modelWithCount = { count: 42 }
-    const [newModel3] = await tester.testUpdate({ _tag: 'Reset' }, modelWithCount)
-    expect(newModel3.count).toBe(0)
-  })
+      const [initialModel, initialCmds] = await tester.testInit()
+      expect(initialModel.count).toBe(0)
+      expect(initialCmds).toEqual([])
+    }, { label: "Core: component init" })
+  )
 
-  test("Component view should render correctly", async () => {
-    const tester = testComponent(CounterComponent)
-    const model = { count: 42 }
-    
-    const rendered = await tester.testView(model)
-    TUIAssert.outputContains(rendered, "Count: 42")
-  })
+  it("Component update should handle messages correctly", () =>
+    guardAsync(async () => {
+      const tester = testComponent(CounterComponent)
+      const initialModel = { count: 0 }
 
-  test("Component should handle system messages", async () => {
-    const tester = testComponent(CounterComponent)
-    const initialModel = { count: 0 }
-    
-    // System messages should not change the model
-    const [newModel] = await tester.testUpdate({ _tag: 'KeyPress', key: {
-      type: 'enter' as any,
-      key: 'enter',
-      ctrl: false,
-      alt: false,
-      shift: false,
-      meta: false
-    }}, initialModel)
-    
-    expect(newModel.count).toBe(0)
-  })
+      const [newModel1] = await tester.testUpdate({ _tag: 'Increment' }, initialModel)
+      expect(newModel1.count).toBe(1)
+
+      const [newModel2] = await tester.testUpdate({ _tag: 'Decrement' }, newModel1)
+      expect(newModel2.count).toBe(0)
+
+      const modelWithCount = { count: 42 }
+      const [newModel3] = await tester.testUpdate({ _tag: 'Reset' }, modelWithCount)
+      expect(newModel3.count).toBe(0)
+    }, { label: "Core: component update" })
+  )
+
+  it("Component view should render correctly", () =>
+    guardAsync(async () => {
+      const tester = testComponent(CounterComponent)
+      const model = { count: 42 }
+
+      const rendered = await tester.testView(model)
+      TUIAssert.outputContains(rendered, "Count: 42")
+    }, { label: "Core: component view" })
+  )
+
+  it("Component should handle system messages", () =>
+    guardAsync(async () => {
+      const tester = testComponent(CounterComponent)
+      const initialModel = { count: 0 }
+
+      const [newModel] = await tester.testUpdate({ _tag: 'KeyPress', key: {
+        type: 'enter' as any,
+        key: 'enter',
+        ctrl: false,
+        alt: false,
+        shift: false,
+        meta: false
+      }}, initialModel)
+
+      expect(newModel.count).toBe(0)
+    }, { label: "Core: system messages" })
+  )
 })
 
 // =============================================================================
@@ -114,7 +118,7 @@ describe("Core Types", () => {
 // =============================================================================
 
 describe("Error System", () => {
-  test("TerminalError should be properly structured", () => {
+  it("TerminalError should be properly structured", () => {
     const error = new TerminalError({
       operation: "clear",
       cause: new Error("Terminal not available"),
@@ -123,13 +127,13 @@ describe("Error System", () => {
     })
 
     expect(error._tag).toBe("TerminalError")
-    expect(error.message).toContain("clear")
+    expect(error.message).toMatch(/clear/i)
     expect(error.component).toBe("TestComponent")
     expect(error.context?.attempt).toBe(1)
     expect(error.timestamp).toBeInstanceOf(Date)
   })
 
-  test("InputError should be properly structured", () => {
+  it("InputError should be properly structured", () => {
     const error = new InputError({
       device: "keyboard",
       operation: "read",
@@ -141,7 +145,7 @@ describe("Error System", () => {
     expect(error.message).toContain("read")
   })
 
-  test("RenderError should be properly structured", () => {
+  it("RenderError should be properly structured", () => {
     const error = new RenderError({
       phase: "render",
       operation: "paint",
@@ -154,7 +158,7 @@ describe("Error System", () => {
     expect(error.component).toBe("Button")
   })
 
-  test("ErrorUtils.isCritical should classify errors correctly", () => {
+  it("ErrorUtils.isCritical should classify errors correctly", () => {
     const terminalError = new TerminalError({ operation: "init" })
     const inputError = new InputError({ device: "keyboard" })
     
@@ -163,7 +167,7 @@ describe("Error System", () => {
     expect(ErrorUtils.isRecoverable(inputError)).toBe(true)
   })
 
-  test("ErrorUtils.fromUnknown should handle various error types", () => {
+  it("ErrorUtils.fromUnknown should handle various error types", () => {
     // Test with Error instance
     const jsError = new Error("Something went wrong")
     const appError1 = ErrorUtils.fromUnknown(jsError, { 
@@ -183,7 +187,7 @@ describe("Error System", () => {
     expect(appError3).toBe(terminalError)
   })
 
-  test("ErrorUtils.getUserMessage should provide user-friendly messages", () => {
+  it("ErrorUtils.getUserMessage should provide user-friendly messages", () => {
     const terminalError = new TerminalError({ operation: "clear" })
     const inputError = new InputError({ device: "mouse" })
     

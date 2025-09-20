@@ -46,9 +46,16 @@ To migrate existing runtime integration tests to component logic tests:
 ```typescript
 // OLD: Runtime integration test (slow, unreliable)
 test("Feature Toggle", async () => {
-  const ctx = await Effect.runPromise(createTestContext(component))
-  await ctx.sendKey(key('/'))
-  await ctx.waitForOutput(output => output.includes("Feature ON"), 1000)
+  await Effect.runPromise(
+    Effect.scoped(
+      Effect.gen(function* (_) {
+        const ctx = yield* _(createTestContext(component))
+        yield* _(ctx.sendKey(key('/')))
+        yield* _(ctx.waitForOutput(output => output.includes("Feature ON"), 1000))
+        yield* _(ctx.cleanup())
+      })
+    )
+  )
 })
 
 // NEW: Component logic test (fast, reliable)

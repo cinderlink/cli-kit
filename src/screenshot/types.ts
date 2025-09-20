@@ -1,5 +1,5 @@
 /**
- * CLI-KIT Screenshot System Types
+ * TUIX Screenshot System Types
  * 
  * Defines the screenshot format (.cks) that captures both visual output
  * and component structure for perfect reproduction
@@ -9,13 +9,13 @@ import type { View } from "@/core/types.ts"
 import type { Style } from "@/styling/types.ts"
 
 /**
- * CLI-KIT Screenshot format (.cks)
+ * TUIX Screenshot format (.cks)
  * Human-readable format that can be re-inflated into pixel-perfect views
  */
-export interface CliKitScreenshot {
+export interface TuixScreenshot {
   // Metadata
   readonly metadata: {
-    readonly version: string           // CLI-KIT version
+    readonly version: string           // TUIX version
     readonly timestamp: string         // ISO timestamp
     readonly name: string             // Screenshot name
     readonly description?: string     // Optional description

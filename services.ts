@@ -3,7 +3,7 @@
  * 
  * Use this to import the live service implementations:
  * ```typescript
- * import { LiveServices } from "@cinderlink/cli-kit/services"
+ * import { LiveServices } from "tuix/services"
  * ```
  */
 

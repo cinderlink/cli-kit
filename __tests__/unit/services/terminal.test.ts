@@ -2,12 +2,14 @@
  * Tests for Terminal Service
  */
 
-import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test"
+import { describe, it, expect, beforeEach, afterEach } from "@domir/bun-test"
+import { mock } from "bun:test"
 import { Effect, Context, Layer } from "effect"
 import { TerminalService } from "@/services/terminal"
 import { TerminalServiceLive } from "@/services/impl/terminal-impl"
 import { TerminalError } from "@/core/errors"
 import type { WindowSize, TerminalCapabilities } from "@/core/types"
+import { guardAsync } from "../../../tests/test-guard.ts"
 
 describe("Terminal Service", () => {
   let originalStdout: any
@@ -15,6 +17,12 @@ describe("Terminal Service", () => {
   let mockWrite: any
   let mockColumns: number
   let mockRows: number
+
+  const runTerminal = <A, E>(label: string, effect: Effect.Effect<A, E, any>) =>
+    guardAsync(
+      () => Effect.runPromise(effect.pipe(Effect.provide(TerminalServiceLive))),
+      { label }
+    )
 
   beforeEach(() => {
     // Mock process.stdout and process.stderr
@@ -44,13 +52,12 @@ describe("Terminal Service", () => {
 
   describe("basic operations", () => {
     it("clears the screen", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: clear",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.clear
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       // Should write ANSI clear sequence
@@ -58,39 +65,36 @@ describe("Terminal Service", () => {
     })
 
     it("writes text without newline", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: write",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.write("Hello, World!")
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("Hello, World!")
     })
 
     it("writes text with newline", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: writeLine",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.writeLine("Hello, World!")
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("Hello, World!\n")
     })
 
     it("moves cursor to absolute position", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: moveCursor",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.moveCursor(10, 5)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       // ANSI sequence for cursor position (1-indexed)
@@ -98,7 +102,8 @@ describe("Terminal Service", () => {
     })
 
     it("moves cursor relatively", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: moveCursorRelative",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           
@@ -107,9 +112,7 @@ describe("Terminal Service", () => {
           yield* terminal.moveCursorRelative(-2, 0)  // Left
           yield* terminal.moveCursorRelative(0, 4)   // Down
           yield* terminal.moveCursorRelative(0, -1)  // Up
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b[3C")  // Right
@@ -119,14 +122,13 @@ describe("Terminal Service", () => {
     })
 
     it("handles cursor visibility", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: cursor visibility",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.hideCursor
           yield* terminal.showCursor
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b[?25l") // Hide
@@ -136,13 +138,12 @@ describe("Terminal Service", () => {
 
   describe("state management", () => {
     it("gets terminal size", async () => {
-      const size = await Effect.runPromise(
+      const size = await runTerminal(
+        "Terminal: getSize",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.getSize
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(size).toEqual({ width: 80, height: 24 })
@@ -152,13 +153,12 @@ describe("Terminal Service", () => {
       process.stdout.columns = undefined
       process.stdout.rows = undefined
 
-      const size = await Effect.runPromise(
+      const size = await runTerminal(
+        "Terminal: getSize fallback",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.getSize
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       // Should return default size
@@ -172,14 +172,13 @@ describe("Terminal Service", () => {
         isTTY: true
       } as any
 
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: setRawMode",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.setRawMode(true)
           yield* terminal.setRawMode(false)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(setRawModeMock).toHaveBeenCalledWith(true)
@@ -189,14 +188,13 @@ describe("Terminal Service", () => {
     it("handles non-TTY for raw mode", async () => {
       process.stdin = { isTTY: false } as any
 
-      const result = await Effect.runPromise(
+      const result = await runTerminal(
+        "Terminal: setRawMode non-tty",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.setRawMode(true)
           return "success"
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       // Should succeed silently on non-TTY
@@ -204,14 +202,13 @@ describe("Terminal Service", () => {
     })
 
     it("manages alternate screen buffer", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: alternate screen",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.setAlternateScreen(true)
           yield* terminal.setAlternateScreen(false)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b[?1049h") // Enable
@@ -219,14 +216,13 @@ describe("Terminal Service", () => {
     })
 
     it("saves and restores cursor position", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: save/restore cursor",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.saveCursor
           yield* terminal.restoreCursor
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b7")  // Save
@@ -241,13 +237,12 @@ describe("Terminal Service", () => {
       process.env.TERM = "xterm-256color"
       process.env.LANG = "en_US.UTF-8"
 
-      const capabilities = await Effect.runPromise(
+      const capabilities = await runTerminal(
+        "Terminal: capabilities env",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.getCapabilities
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(capabilities.colors).toBe("truecolor")
@@ -259,13 +254,12 @@ describe("Terminal Service", () => {
       delete process.env.COLORTERM
       process.env.TERM = "xterm-256color"
 
-      const capabilities = await Effect.runPromise(
+      const capabilities = await runTerminal(
+        "Terminal: capabilities 256",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.getCapabilities
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(capabilities.colors).toBe("256")
@@ -275,13 +269,12 @@ describe("Terminal Service", () => {
       delete process.env.COLORTERM
       process.env.TERM = "xterm"
 
-      const capabilities = await Effect.runPromise(
+      const capabilities = await runTerminal(
+        "Terminal: capabilities 16",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.getCapabilities
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(capabilities.colors).toBe("16")
@@ -291,16 +284,15 @@ describe("Terminal Service", () => {
       process.env.COLORTERM = "truecolor"
       process.env.TERM = "xterm-256color"
 
-      const [trueColor, colors256] = await Effect.runPromise(
+      const [trueColor, colors256] = await runTerminal(
+        "Terminal: supports colors",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* Effect.all([
             terminal.supportsTrueColor,
             terminal.supports256Colors
           ])
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(trueColor).toBe(true)
@@ -310,13 +302,12 @@ describe("Terminal Service", () => {
     it("checks unicode support", async () => {
       process.env.LANG = "en_US.UTF-8"
 
-      const unicode = await Effect.runPromise(
+      const unicode = await runTerminal(
+        "Terminal: supports unicode",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.supportsUnicode
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(unicode).toBe(true)
@@ -325,13 +316,12 @@ describe("Terminal Service", () => {
     it("handles non-unicode locale", async () => {
       process.env.LANG = "C"
 
-      const unicode = await Effect.runPromise(
+      const unicode = await runTerminal(
+        "Terminal: supports unicode fallback",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.supportsUnicode
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(unicode).toBe(false)
@@ -340,15 +330,14 @@ describe("Terminal Service", () => {
 
   describe("screen management", () => {
     it("clears line regions", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: clear line regions",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.clearToEndOfLine
           yield* terminal.clearToStartOfLine
           yield* terminal.clearLine
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b[0K") // To EOL
@@ -357,14 +346,13 @@ describe("Terminal Service", () => {
     })
 
     it("clears screen regions", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: clear screen regions",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.clearToEndOfScreen
           yield* terminal.clearToStartOfScreen
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b[0J") // To EOS
@@ -372,14 +360,13 @@ describe("Terminal Service", () => {
     })
 
     it("scrolls the terminal", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: scroll",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.scrollUp(5)
           yield* terminal.scrollDown(3)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b[5S") // Scroll up
@@ -389,26 +376,24 @@ describe("Terminal Service", () => {
 
   describe("advanced features", () => {
     it("sets terminal title", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: setTitle",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.setTitle("My TUI App")
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b]0;My TUI App\x07")
     })
 
     it("rings terminal bell", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: bell",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.bell
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x07")
@@ -417,19 +402,13 @@ describe("Terminal Service", () => {
     it("gets cursor position", async () => {
       // This is tricky to test as it requires terminal response
       // For now, we'll test that it makes the request
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: getCursorPosition",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
-          // The implementation might timeout or fail in tests
-          const result = yield* terminal.getCursorPosition.pipe(
-            Effect.either
-          )
-          
-          // We expect it to fail in test environment
+          const result = yield* terminal.getCursorPosition.pipe(Effect.either)
           expect(result._tag).toBe("Left")
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       // Should have sent the cursor position request
@@ -437,15 +416,14 @@ describe("Terminal Service", () => {
     })
 
     it("sets cursor shape", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: setCursorShape",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.setCursorShape('block')
           yield* terminal.setCursorShape('underline')
           yield* terminal.setCursorShape('bar')
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(mockWrite).toHaveBeenCalledWith("\x1b[1 q") // Block
@@ -454,14 +432,13 @@ describe("Terminal Service", () => {
     })
 
     it("sets cursor blink", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: setCursorBlink",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           yield* terminal.setCursorBlink(true)
           yield* terminal.setCursorBlink(false)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       // Blink is controlled via cursor shape codes
@@ -475,13 +452,12 @@ describe("Terminal Service", () => {
         throw new Error("Write failed")
       })
 
-      const result = await Effect.runPromise(
+      const result = await runTerminal(
+        "Terminal: write error",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.write("test").pipe(Effect.either)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(result._tag).toBe("Left")
@@ -494,13 +470,12 @@ describe("Terminal Service", () => {
     it("handles non-TTY terminals", async () => {
       process.stdout.isTTY = false
 
-      const result = await Effect.runPromise(
+      const result = await runTerminal(
+        "Terminal: clear non-tty",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.clear.pipe(Effect.either)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       // Should fail for non-TTY
@@ -513,13 +488,12 @@ describe("Terminal Service", () => {
     it("handles missing stdout", async () => {
       process.stdout = undefined as any
 
-      const result = await Effect.runPromise(
+      const result = await runTerminal(
+        "Terminal: write missing stdout",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
           return yield* terminal.write("test").pipe(Effect.either)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(result._tag).toBe("Left")
@@ -531,26 +505,22 @@ describe("Terminal Service", () => {
 
   describe("integration scenarios", () => {
     it("performs full screen setup and teardown", async () => {
-      await Effect.runPromise(
+      await runTerminal(
+        "Terminal: full screen workflow",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
-          
-          // Setup
+
           yield* terminal.setAlternateScreen(true)
           yield* terminal.hideCursor
           yield* terminal.clear
-          
-          // Do some work
+
           yield* terminal.moveCursor(10, 5)
           yield* terminal.write("Hello, TUI!")
-          
-          // Teardown
+
           yield* terminal.clear
           yield* terminal.showCursor
           yield* terminal.setAlternateScreen(false)
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       // Verify sequence
@@ -564,22 +534,20 @@ describe("Terminal Service", () => {
     })
 
     it("handles terminal resize gracefully", async () => {
-      const sizes = await Effect.runPromise(
+      const sizes = await runTerminal(
+        "Terminal: resize",
         Effect.gen(function* () {
           const terminal = yield* TerminalService
-          
+
           const size1 = yield* terminal.getSize
-          
-          // Simulate resize
+
           process.stdout.columns = 120
           process.stdout.rows = 40
-          
+
           const size2 = yield* terminal.getSize
-          
+
           return [size1, size2]
-        }).pipe(
-          Effect.provide(TerminalServiceLive)
-        )
+        })
       )
 
       expect(sizes[0]).toEqual({ width: 80, height: 24 })

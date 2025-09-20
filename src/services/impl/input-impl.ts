@@ -101,9 +101,36 @@ const parseMouseEvent = (sequence: string): MouseEvent | null => {
 const parseBuffer = (
   buffer: string, 
   keyPubSub: PubSub.PubSub<KeyEvent>,
-  mousePubSub: PubSub.PubSub<MouseEvent>
+  mousePubSub: PubSub.PubSub<MouseEvent>,
+  pastePubSub: PubSub.PubSub<string>,
+  focusPubSub: PubSub.PubSub<boolean>
 ): string => {
   while (buffer.length > 0) {
+    // Bracketed paste: ESC [ 200 ~ ... ESC [ 201 ~
+    if (buffer.startsWith('\x1b[200~')) {
+      const endIdx = buffer.indexOf('\x1b[201~')
+      if (endIdx === -1) {
+        // Wait for rest of paste
+        break
+      }
+      const startLen = '\x1b[200~'.length
+      const pasted = buffer.slice(startLen, endIdx)
+      Effect.runSync(PubSub.publish(pastePubSub, pasted))
+      buffer = buffer.slice(endIdx + '\x1b[201~'.length)
+      continue
+    }
+
+    // Focus in/out: ESC [ I (focus in), ESC [ O (focus out)
+    if (buffer.startsWith('\x1b[I')) {
+      Effect.runSync(PubSub.publish(focusPubSub, true))
+      buffer = buffer.slice('\x1b[I'.length)
+      continue
+    }
+    if (buffer.startsWith('\x1b[O')) {
+      Effect.runSync(PubSub.publish(focusPubSub, false))
+      buffer = buffer.slice('\x1b[O'.length)
+      continue
+    }
     // Check for SGR mouse events first: ESC [ < btn ; x ; y ; M/m
     const sgrMatch = buffer.match(/^\x1b\[<(\d+);(\d+);(\d+)[Mm]/)
     if (sgrMatch) {
@@ -188,7 +215,7 @@ const parseBuffer = (
     }
     
     // Unknown sequence - skip the escape character and continue
-    console.debug('Unknown ANSI sequence:', buffer.slice(0, Math.min(10, buffer.length)))
+    // Silent handling of unknown sequences - could be tracked for debugging if needed
     buffer = buffer.slice(1)
   }
   
@@ -205,6 +232,8 @@ export const InputServiceLive = Layer.scoped(
     // Use PubSub to broadcast events to all consumers
     const keyPubSub = yield* _(PubSub.unbounded<KeyEvent>())
     const mousePubSub = yield* _(PubSub.unbounded<MouseEvent>())
+    const pastePubSub = yield* _(PubSub.unbounded<string>())
+    const focusPubSub = yield* _(PubSub.unbounded<boolean>())
     
     // Start reading from stdin
     yield* _(Effect.acquireRelease(
@@ -221,13 +250,17 @@ export const InputServiceLive = Layer.scoped(
         let buffer = ''
         stdin.on('data', (chunk: string) => {
           buffer += chunk
-          buffer = parseBuffer(buffer, keyPubSub, mousePubSub)
+          buffer = parseBuffer(buffer, keyPubSub, mousePubSub, pastePubSub, focusPubSub)
         })
       }),
       () => Effect.sync(() => {
         stdin.removeAllListeners('data')
         if (stdin.isTTY && 'setRawMode' in stdin) {
           stdin.setRawMode(false)
+        }
+        // Pause stdin if available
+        if (typeof (stdin as any).pause === 'function') {
+          ;(stdin as any).pause()
         }
       })
     ))
@@ -236,6 +269,8 @@ export const InputServiceLive = Layer.scoped(
       keyEvents: Stream.fromPubSub(keyPubSub),
       
       mouseEvents: Stream.fromPubSub(mousePubSub),
+      
+      focusEvents: Stream.fromPubSub(focusPubSub),
       
       allEvents: Stream.merge(
         Stream.fromPubSub(keyPubSub).pipe(
@@ -317,10 +352,12 @@ export const InputServiceLive = Layer.scoped(
       // Mouse Control
       enableMouse: Effect.try({
         try: () => {
-          process.stdout.write('\x1b[?1000h') // Enable X10 mouse tracking
-          process.stdout.write('\x1b[?1002h') // Enable button event tracking
-          process.stdout.write('\x1b[?1015h') // Enable urxvt extended mode
-          process.stdout.write('\x1b[?1006h') // Enable SGR extended mode
+          if (typeof (process.stdout as any)?.write === 'function') {
+            process.stdout.write('\x1b[?1000h')
+            process.stdout.write('\x1b[?1002h')
+            process.stdout.write('\x1b[?1015h')
+            process.stdout.write('\x1b[?1006h')
+          }
         },
         catch: (error) => new InputError({
           device: 'mouse',
@@ -330,10 +367,12 @@ export const InputServiceLive = Layer.scoped(
       
       disableMouse: Effect.try({
         try: () => {
-          process.stdout.write('\x1b[?1000l') // Disable X10 mouse tracking
-          process.stdout.write('\x1b[?1002l') // Disable button event tracking
-          process.stdout.write('\x1b[?1015l') // Disable urxvt extended mode
-          process.stdout.write('\x1b[?1006l') // Disable SGR extended mode
+          if (typeof (process.stdout as any)?.write === 'function') {
+            process.stdout.write('\x1b[?1000l')
+            process.stdout.write('\x1b[?1002l')
+            process.stdout.write('\x1b[?1015l')
+            process.stdout.write('\x1b[?1006l')
+          }
         },
         catch: (error) => new InputError({
           device: 'mouse',
@@ -343,7 +382,9 @@ export const InputServiceLive = Layer.scoped(
       
       enableMouseMotion: Effect.try({
         try: () => {
-          process.stdout.write('\x1b[?1003h') // Enable all mouse motion tracking
+          if (typeof (process.stdout as any)?.write === 'function') {
+            process.stdout.write('\x1b[?1003h')
+          }
         },
         catch: (error) => new InputError({
           device: 'mouse',
@@ -353,7 +394,9 @@ export const InputServiceLive = Layer.scoped(
       
       disableMouseMotion: Effect.try({
         try: () => {
-          process.stdout.write('\x1b[?1003l') // Disable all mouse motion tracking
+          if (typeof (process.stdout as any)?.write === 'function') {
+            process.stdout.write('\x1b[?1003l')
+          }
         },
         catch: (error) => new InputError({
           device: 'mouse',
@@ -374,8 +417,42 @@ export const InputServiceLive = Layer.scoped(
           process.stdout.removeListener('resize', handleResize)
         })
       }),
-      
-      pasteEvents: Stream.empty // Not implemented yet
+      // Bracketed paste enable/disable
+      enableBracketedPaste: Effect.try({
+        try: () => {
+          if (typeof (process.stdout as any)?.write === 'function') {
+            process.stdout.write('\x1b[?2004h')
+          }
+        },
+        catch: (error) => new InputError({ device: 'keyboard', cause: error })
+      }),
+      disableBracketedPaste: Effect.try({
+        try: () => {
+          if (typeof (process.stdout as any)?.write === 'function') {
+            process.stdout.write('\x1b[?2004l')
+          }
+        },
+        catch: (error) => new InputError({ device: 'keyboard', cause: error })
+      }),
+      pasteEvents: Stream.fromPubSub(pastePubSub),
+
+      // Focus tracking
+      enableFocusTracking: Effect.try({
+        try: () => {
+          if (typeof (process.stdout as any)?.write === 'function') {
+            process.stdout.write('\x1b[?1004h')
+          }
+        },
+        catch: (error) => new InputError({ device: 'keyboard', cause: error })
+      }),
+      disableFocusTracking: Effect.try({
+        try: () => {
+          if (typeof (process.stdout as any)?.write === 'function') {
+            process.stdout.write('\x1b[?1004l')
+          }
+        },
+        catch: (error) => new InputError({ device: 'keyboard', cause: error })
+      })
     }
   })
 )

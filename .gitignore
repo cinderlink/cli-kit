@@ -9,11 +9,22 @@ dist
 # code coverage
 coverage
 *.lcov
+coverage.json
+
+# test results and logs
+.test-results.xml
+test-output*.log
+test-output*.txt
+tests-results*
 
 # logs
 logs
 _.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# screenshots
+.cli-kit/screenshots/
+.tuix/screenshots/
 
 # dotenv environment variable files
 .env
@@ -38,4 +49,3 @@ research/
 
 # Test screenshots
 __tests__/screenshots-*/
-

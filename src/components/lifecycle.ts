@@ -6,16 +6,32 @@
 
 import { Effect, Ref } from "effect"
 
-export interface LifecycleHook {
-  (): void | Promise<void> | (() => void)
+export interface LifecycleHook { (): void | Promise<void> | (() => void) }
+export interface AsyncLifecycleHook { (): Promise<void> | Promise<() => void> }
+
+// Minimal context shape used by simple unit tests
+export interface LifecycleContext {
+  mounted: LifecycleHook[]
+  beforeUpdate: LifecycleHook[]
+  afterUpdate: LifecycleHook[]
+  destroy: LifecycleHook[]
+  errorHandlers: Array<(error: Error) => void>
+  isActive: boolean
 }
 
-export interface AsyncLifecycleHook {
-  (): Promise<void> | Promise<() => void>
+export function createLifecycleContext(): LifecycleContext {
+  return {
+    mounted: [],
+    beforeUpdate: [],
+    afterUpdate: [],
+    destroy: [],
+    errorHandlers: [],
+    isActive: true
+  }
 }
 
-// Global lifecycle context
-interface LifecycleContext {
+// Internal global context for hook-based helpers used elsewhere
+interface GlobalLifecycleContext {
   currentComponent: string | null
   hooks: Map<string, ComponentHooks>
 }
@@ -25,10 +41,10 @@ interface ComponentHooks {
   destroy: LifecycleHook[]
   beforeUpdate: LifecycleHook[]
   afterUpdate: LifecycleHook[]
-  cleanups: Array<() => void>
+  cleanups: Array<() => void | Promise<void>>
 }
 
-const lifecycleContext: LifecycleContext = {
+const lifecycleContext: GlobalLifecycleContext = {
   currentComponent: null,
   hooks: new Map()
 }
@@ -77,6 +93,11 @@ export function clearCurrentComponent() {
 export function onMount(fn: LifecycleHook) {
   const hooks = getCurrentHooks()
   hooks.mount.push(fn)
+  // Return a cleanup that removes this hook
+  return (): Promise<void> => {
+    const idx = hooks.mount.indexOf(fn)
+    if (idx >= 0) hooks.mount.splice(idx, 1)
+  }
 }
 
 /**
@@ -85,6 +106,10 @@ export function onMount(fn: LifecycleHook) {
 export function onDestroy(fn: LifecycleHook) {
   const hooks = getCurrentHooks()
   hooks.destroy.push(fn)
+  return () => {
+    const idx = hooks.destroy.indexOf(fn)
+    if (idx >= 0) hooks.destroy.splice(idx, 1)
+  }
 }
 
 /**
@@ -93,6 +118,10 @@ export function onDestroy(fn: LifecycleHook) {
 export function beforeUpdate(fn: LifecycleHook) {
   const hooks = getCurrentHooks()
   hooks.beforeUpdate.push(fn)
+  return () => {
+    const idx = hooks.beforeUpdate.indexOf(fn)
+    if (idx >= 0) hooks.beforeUpdate.splice(idx, 1)
+  }
 }
 
 /**
@@ -101,6 +130,10 @@ export function beforeUpdate(fn: LifecycleHook) {
 export function afterUpdate(fn: LifecycleHook) {
   const hooks = getCurrentHooks()
   hooks.afterUpdate.push(fn)
+  return () => {
+    const idx = hooks.afterUpdate.indexOf(fn)
+    if (idx >= 0) hooks.afterUpdate.splice(idx, 1)
+  }
 }
 
 /**
@@ -139,7 +172,10 @@ export async function executeDestroyHooks(componentId: string) {
   // Run cleanup functions first
   for (const cleanup of hooks.cleanups) {
     try {
-      cleanup()
+      const result = cleanup()
+      if (result instanceof Promise) {
+        await result
+      }
     } catch (error) {
       console.error(`Error in cleanup function:`, error)
     }
@@ -251,51 +287,95 @@ export function createHook<T extends any[], R>(
 /**
  * Use interval - runs a function at regular intervals
  */
-export const useInterval = createHook((callback: () => void, delay: number) => {
-  onMount(() => {
-    const interval = setInterval(callback, delay)
-    return () => clearInterval(interval)
-  })
-})
+export const useInterval = (callback: () => void, delay: number) => {
+  const id = setInterval(callback, delay)
+  return () => clearInterval(id)
+}
 
 /**
  * Use timeout - runs a function after a delay
  */
-export const useTimeout = createHook((callback: () => void, delay: number) => {
-  onMount(() => {
-    const timeout = setTimeout(callback, delay)
-    return () => clearTimeout(timeout)
-  })
-})
+export const useTimeout = (callback: () => void, delay: number) => {
+  const id = setTimeout(callback, delay)
+  return () => clearTimeout(id)
+}
 
 /**
  * Use async effect - for handling async side effects
  */
-export const useAsyncEffect = createHook((
+export const useAsyncEffect = (
   effect: () => Promise<void | (() => void)>,
-  dependencies?: any[]
+  _dependencies?: any[]
 ) => {
-  onMount(async () => {
+  let active = true
+  let cleanup: (() => void | Promise<void>) | undefined
+  let cleanupRequested = false
+  let cleanupCompleted = false
+
+  const executeCleanup = async (fn?: (() => void | Promise<void>) | void) => {
+    if (!fn) {
+      return
+    }
     try {
-      const cleanup = await effect()
-      if (typeof cleanup === 'function') {
-        return cleanup
+      await fn()
+    } catch (error) {
+      console.error("Error in async effect cleanup:", error)
+    }
+  }
+
+  const runCleanupSafely = (fn?: (() => void | Promise<void>) | void): Promise<void> => {
+    if (cleanupCompleted) {
+      return Promise.resolve()
+    }
+    cleanupCompleted = true
+    return executeCleanup(fn)
+  }
+
+  const effectPromise = (async () => {
+    try {
+      if (!active) {
+        return undefined
       }
+      const maybeCleanup = await effect()
+      if (!active || cleanupRequested || cleanupCompleted) {
+        await runCleanupSafely(maybeCleanup)
+        return maybeCleanup ?? undefined
+      }
+      cleanup = maybeCleanup ?? undefined
+      return cleanup
     } catch (error) {
       console.error("Error in async effect:", error)
+      return undefined
     }
-  })
-})
+  })()
+  return () => {
+    if (cleanupCompleted) {
+      return Promise.resolve()
+    }
+    active = false
+    cleanupRequested = true
+    if (cleanup) {
+      const fn = cleanup
+      cleanup = undefined
+      return runCleanupSafely(fn)
+    }
+    return effectPromise
+      .then(runCleanupSafely)
+      .catch(() => Promise.resolve())
+  }
+}
 
 /**
  * Use previous value - keeps track of the previous value of a variable
  */
-export const usePrevious = createHook(<T>(value: T): T | undefined => {
-  const ref = Ref.make<T | undefined>(undefined)
-  
-  afterUpdate(() => {
-    Effect.runSync(Ref.set(ref, value))
-  })
-  
-  return Effect.runSync(Ref.get(ref))
-})
+export function usePrevious<T>(initial?: T) {
+  let prev = initial as T | undefined
+  return (next?: T): T | undefined => {
+    const out = prev
+    prev = next as T | undefined
+    return out
+  }
+}
+
+// Re-export component helpers expected by tests from this module
+export { createComponent, wrapComponent, functional, reactive } from "./component"

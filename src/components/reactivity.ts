@@ -4,7 +4,7 @@
  * Svelte 5-inspired reactive state management
  */
 
-import { Effect, Ref, Queue } from "effect"
+import { Effect } from "effect"
 
 export interface Signal<T> {
   (): T
@@ -31,11 +31,48 @@ const reactivityContext: ReactivityContext = {
   dependencies: new Set()
 }
 
+// Simple batching implementation
+let batchDepth = 0
+const pendingNotifications = new Map<Signal<any>, any>()
+
+function enqueueNotification<T>(signal: Signal<T>, value: T) {
+  if (batchDepth > 0) {
+    pendingNotifications.set(signal, value)
+  } else {
+    // flush immediately when not batching
+    notifySubscribers(signal, value)
+  }
+}
+
+function flushNotifications() {
+  // Drain the queue, allowing cascading updates produced during notify
+  while (pendingNotifications.size > 0) {
+    const entries = Array.from(pendingNotifications.entries())
+    pendingNotifications.clear()
+    for (const [sig, val] of entries) {
+      notifySubscribers(sig as any, val)
+    }
+  }
+}
+
+function notifySubscribers<T>(signal: Signal<T>, value: T) {
+  // We rely on a hidden property where we stored subscribers on signal creation
+  const subs: Set<(v: T) => void> | undefined = (signal as any).__subs
+  if (!subs) return
+  subs.forEach((callback) => {
+    try {
+      callback(value)
+    } catch (error) {
+      console.error("Error in signal subscription:", error)
+    }
+  })
+}
+
 /**
  * Create a reactive signal
  */
 export function $state<T>(initial: T): Signal<T> {
-  const ref = Ref.make(initial)
+  let current = initial
   const subscribers = new Set<(value: T) => void>()
   
   const signal = (() => {
@@ -43,35 +80,27 @@ export function $state<T>(initial: T): Signal<T> {
     if (reactivityContext.tracking) {
       reactivityContext.dependencies.add(signal)
     }
-    return Effect.runSync(Ref.get(ref))
+    return current
   }) as Signal<T>
+  // Expose subscribers for batching notify
+  ;(signal as any).__subs = subscribers
   
   signal.set = (value: T) => {
-    const oldValue = Effect.runSync(Ref.get(ref))
+    const oldValue = current
     if (oldValue !== value) {
-      Effect.runSync(Ref.set(ref, value))
-      // Notify all subscribers
-      subscribers.forEach(callback => {
-        try {
-          callback(value)
-        } catch (error) {
-          console.error("Error in signal subscription:", error)
-        }
-      })
+      current = value
+      enqueueNotification(signal, value)
     }
   }
   
   signal.update = (updater: (current: T) => T) => {
-    const current = Effect.runSync(Ref.get(ref))
-    signal.set(updater(current))
+    const next = updater(current)
+    signal.set(next)
   }
   
   signal.subscribe = (callback: (value: T) => void) => {
     subscribers.add(callback)
-    // Call immediately with current value
-    callback(Effect.runSync(Ref.get(ref)))
-    
-    // Return unsubscribe function
+    // Do not call immediately to avoid re-entrancy issues
     return () => {
       subscribers.delete(callback)
     }
@@ -84,10 +113,10 @@ export function $state<T>(initial: T): Signal<T> {
  * Create a derived signal that automatically updates when dependencies change
  */
 export function $derived<T>(computation: () => T): ReadonlySignal<T> {
-  const signal = $state(computation())
-  const dependencies = new Set<Signal<any>>()
+  const signal = $state<T>(undefined as unknown as T)
+  let dependencies = new Set<Signal<any>>()
   
-  // Track dependencies during initial computation
+  // Track dependencies during computation and capture the resulting set
   const trackDependencies = () => {
     const prevTracking = reactivityContext.tracking
     const prevDependencies = new Set(reactivityContext.dependencies)
@@ -97,12 +126,9 @@ export function $derived<T>(computation: () => T): ReadonlySignal<T> {
     
     try {
       const value = computation()
-      
-      // Update dependencies
-      dependencies.clear()
-      reactivityContext.dependencies.forEach(dep => dependencies.add(dep))
-      
-      return value
+      const nextDependencies = new Set<Signal<any>>()
+      reactivityContext.dependencies.forEach(dep => nextDependencies.add(dep))
+      return { value, nextDependencies }
     } finally {
       reactivityContext.tracking = prevTracking
       reactivityContext.dependencies = prevDependencies
@@ -111,27 +137,38 @@ export function $derived<T>(computation: () => T): ReadonlySignal<T> {
   
   // Subscribe to all dependencies
   const subscriptions: Array<() => void> = []
-  const updateDerived = () => {
-    // Clean up old subscriptions
+
+  function refreshSubscriptions(newDependencies: Set<Signal<any>>) {
     subscriptions.forEach(unsub => unsub())
     subscriptions.length = 0
-    
-    // Recompute and track new dependencies
-    const newValue = trackDependencies()
-    signal.set(newValue)
-    
-    // Subscribe to new dependencies
+
+    dependencies = newDependencies
+
     dependencies.forEach(dep => {
       const unsubscribe = dep.subscribe(() => {
-        const updatedValue = trackDependencies()
-        signal.set(updatedValue)
+        updateDerived()
       })
       subscriptions.push(unsubscribe)
     })
   }
-  
+
+  function updateDerived() {
+    const { value, nextDependencies } = trackDependencies()
+    const needsRefresh =
+      nextDependencies.size !== dependencies.size ||
+      Array.from(nextDependencies).some(dep => !dependencies.has(dep))
+
+    signal.set(value)
+
+    if (needsRefresh) {
+      refreshSubscriptions(nextDependencies)
+    }
+  }
+
   // Initial setup
-  updateDerived()
+  const initial = trackDependencies()
+  signal.set(initial.value)
+  refreshSubscriptions(initial.nextDependencies)
   
   const derivedSignal = (() => signal()) as ReadonlySignal<T>
   derivedSignal.subscribe = signal.subscribe
@@ -142,8 +179,9 @@ export function $derived<T>(computation: () => T): ReadonlySignal<T> {
 /**
  * Create a reactive effect that runs when dependencies change
  */
-export function $effect(fn: () => void | (() => void)): () => void {
-  const dependencies = new Set<Signal<any>>()
+export function $effect(fn: () => void | (() => void)):
+  Effect.Effect<() => void> {
+  let dependencies = new Set<Signal<any>>()
   let cleanup: (() => void) | void
   let subscriptions: Array<() => void> = []
   
@@ -154,10 +192,6 @@ export function $effect(fn: () => void | (() => void)): () => void {
       cleanup = undefined
     }
     
-    // Clean up old subscriptions
-    subscriptions.forEach(unsub => unsub())
-    subscriptions.length = 0
-    
     // Track dependencies
     const prevTracking = reactivityContext.tracking
     const prevDependencies = new Set(reactivityContext.dependencies)
@@ -167,35 +201,39 @@ export function $effect(fn: () => void | (() => void)): () => void {
     
     try {
       cleanup = fn()
-      
-      // Update dependencies
-      dependencies.clear()
-      reactivityContext.dependencies.forEach(dep => dependencies.add(dep))
-      
-      // Subscribe to dependencies
-      dependencies.forEach(dep => {
-        const unsubscribe = dep.subscribe(() => {
-          runEffect()
+      const nextDependencies = new Set<Signal<any>>()
+      reactivityContext.dependencies.forEach(dep => nextDependencies.add(dep))
+      const needsRefresh =
+        nextDependencies.size !== dependencies.size ||
+        Array.from(nextDependencies).some(dep => !dependencies.has(dep))
+
+      if (needsRefresh) {
+        subscriptions.forEach(unsub => unsub())
+        subscriptions = []
+        dependencies = nextDependencies
+        dependencies.forEach(dep => {
+          const unsubscribe = dep.subscribe(() => {
+            runEffect()
+          })
+          subscriptions.push(unsubscribe)
         })
-        subscriptions.push(unsubscribe)
-      })
-      
+      } else {
+        dependencies = nextDependencies
+      }
     } finally {
       reactivityContext.tracking = prevTracking
       reactivityContext.dependencies = prevDependencies
     }
   }
   
-  // Run effect initially
-  runEffect()
-  
-  // Return cleanup function
-  return () => {
-    if (cleanup) {
-      cleanup()
+  // Return an Effect that runs the effect immediately and yields a cleanup
+  return Effect.sync(() => {
+    runEffect()
+    return () => {
+      if (cleanup) cleanup()
+      subscriptions.forEach((unsub) => unsub())
     }
-    subscriptions.forEach(unsub => unsub())
-  }
+  })
 }
 
 /**
@@ -259,9 +297,18 @@ export function $memo<T>(computation: () => T, dependencies?: ReadonlySignal<any
 /**
  * Batch multiple signal updates to avoid unnecessary recalculations
  */
-export function batch(fn: () => void) {
-  // Simple implementation - in a real system this would defer updates
-  fn()
+export function batch<T>(fn: () => T): T {
+  batchDepth++
+  let result!: T
+  try {
+    result = fn()
+  } finally {
+    batchDepth--
+    if (batchDepth === 0) {
+      flushNotifications()
+    }
+  }
+  return result
 }
 
 /**
@@ -269,7 +316,7 @@ export function batch(fn: () => void) {
  */
 export function $debounced<T>(signal: Signal<T>, delay: number): ReadonlySignal<T> {
   const debouncedSignal = $state(signal())
-  let timeoutId: NodeJS.Timeout | null = null
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
   
   signal.subscribe(value => {
     if (timeoutId) {

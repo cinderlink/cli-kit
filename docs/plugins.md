@@ -2,14 +2,14 @@
 
 ## Overview
 
-The CLI-KIT plugin system allows you to extend your CLI applications with reusable functionality. Plugins can add commands, modify existing behavior, provide services, and hook into the CLI lifecycle.
+The TUIX plugin system allows you to extend your CLI applications with reusable functionality. Plugins can add commands, modify existing behavior, provide services, and hook into the CLI lifecycle.
 
 ## Creating a Plugin
 
 ### Basic Plugin Structure
 
 ```typescript
-import { definePlugin } from "cli-kit/cli"
+import { definePlugin } from "tuix/cli"
 import { z } from "zod"
 
 export default definePlugin({
@@ -43,7 +43,7 @@ export default definePlugin({
 For more complex plugins, use the builder API:
 
 ```typescript
-import { createPlugin } from "cli-kit/cli"
+import { createPlugin } from "tuix/cli"
 
 export default createPlugin("my-plugin", "1.0.0", (api) => {
   // Add commands dynamically
@@ -234,7 +234,7 @@ Plugins have lifecycle methods for setup and teardown:
 ### Authentication Plugin
 
 ```typescript
-import { createPlugin } from "cli-kit/cli"
+import { createPlugin } from "tuix/cli"
 import { z } from "zod"
 import * as fs from "fs/promises"
 import * as path from "path"
@@ -320,7 +320,7 @@ export default createPlugin("auth", "1.0.0", (api) => {
 ### Configuration Plugin
 
 ```typescript
-import { definePlugin } from "cli-kit/cli"
+import { definePlugin } from "tuix/cli"
 import { z } from "zod"
 import * as fs from "fs/promises"
 import * as path from "path"
@@ -397,7 +397,7 @@ export default definePlugin({
 ### Telemetry Plugin
 
 ```typescript
-import { definePlugin } from "cli-kit/cli"
+import { definePlugin } from "tuix/cli"
 
 interface CommandMetrics {
   command: string[]
@@ -492,7 +492,7 @@ import {
   testPluginCommand, 
   testPluginHook,
   testServiceRegistration 
-} from "cli-kit/cli/testing"
+} from "tuix/cli/testing"
 
 describe("Auth Plugin", () => {
   test("login command", async () => {
@@ -649,7 +649,7 @@ Create an NPM package for your plugin:
   "types": "dist/index.d.ts",
   "keywords": ["mycli-plugin"],
   "peerDependencies": {
-    "cli-kit": "^1.0.0"
+    "tuix": "^1.0.0"
   }
 }
 ```
@@ -668,7 +668,7 @@ Include a manifest for plugin metadata:
   "repository": "https://github.com/you/mycli-plugin-awesome",
   "keywords": ["cli", "plugin", "awesome"],
   "engines": {
-    "cli-kit": "^1.0.0"
+    "tuix": "^1.0.0"
   },
   "config": {
     "apiUrl": "https://api.awesome.com"

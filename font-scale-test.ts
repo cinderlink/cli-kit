@@ -109,7 +109,7 @@ const testComponent: Component<TestModel, TestMsg> = {
     const currentFontName = fontNames[model.currentFontIndex];
     
     const logo = largeGradientText({
-      text: "cli-kit",
+      text: "tuix",
       gradient: gradientPresets.neon,
       font: currentFont,
       scale: model.currentScale
@@ -170,7 +170,7 @@ const config: AppOptions = {
 };
 
 console.log("=== Font Scale Test ===");
-console.log("This will test all fonts at all scales with 'cli-kit' text");
+console.log("This will test all fonts at all scales with 'tuix' text");
 console.log("Screenshots will be saved as: font-{name}-scale-{size}x.png");
 console.log("Total screenshots to generate:", fonts.length * scales.length);
 console.log("Starting test...\n");

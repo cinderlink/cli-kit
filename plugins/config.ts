@@ -16,8 +16,8 @@ type ConfigFormat = 'json' | 'yaml' | 'toml'
 
 // Plugin configuration
 const configPluginSchema = z.object({
-  configPath: z.string().default("./.cli-kit.config.json"),
-  globalConfigPath: z.string().default("~/.cli-kit/config.json"),
+  configPath: z.string().default("./.tuix.config.json"),
+  globalConfigPath: z.string().default("~/.tuix/config.json"),
   format: z.enum(['json', 'yaml', 'toml']).default('json'),
   mergeStrategy: z.enum(['shallow', 'deep', 'replace']).default('deep')
 })

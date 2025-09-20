@@ -7,9 +7,9 @@
 import { Effect } from "effect"
 import * as fs from "fs/promises"
 import * as path from "path"
-import type { CliKitScreenshot } from "./types.ts"
+import type { TuixScreenshot } from "./types.ts"
 
-const SCREENSHOT_DIR = ".cli-kit/screenshots"
+const SCREENSHOT_DIR = ".tuix/screenshots"
 const SCREENSHOT_EXT = ".cks"
 
 /**
@@ -30,7 +30,7 @@ export function ensureScreenshotDir(baseDir: string = process.cwd()): Effect.Eff
  * Save a screenshot to disk
  */
 export function saveScreenshot(
-  screenshot: CliKitScreenshot,
+  screenshot: TuixScreenshot,
   baseDir?: string
 ): Effect.Effect<string, Error> {
   return Effect.gen(function* (_) {
@@ -57,7 +57,7 @@ export function saveScreenshot(
 export function loadScreenshot(
   name: string,
   baseDir?: string
-): Effect.Effect<CliKitScreenshot, Error> {
+): Effect.Effect<TuixScreenshot, Error> {
   return Effect.tryPromise({
     try: async () => {
       const dir = path.join(baseDir || process.cwd(), SCREENSHOT_DIR)
@@ -65,7 +65,7 @@ export function loadScreenshot(
       const filepath = path.join(dir, filename)
       
       const content = await fs.readFile(filepath, 'utf-8')
-      return JSON.parse(content) as CliKitScreenshot
+      return JSON.parse(content) as TuixScreenshot
     },
     catch: (error) => new Error(`Failed to load screenshot: ${error}`)
   })
@@ -93,7 +93,7 @@ export function listScreenshots(
             // Try to read metadata
             try {
               const content = await fs.readFile(filepath, 'utf-8')
-              const screenshot = JSON.parse(content) as CliKitScreenshot
+              const screenshot = JSON.parse(content) as TuixScreenshot
               
               screenshots.push({
                 name: screenshot.metadata.name,
@@ -155,7 +155,7 @@ export function deleteScreenshot(
  * Export screenshot to different formats
  */
 export function exportScreenshot(
-  screenshot: CliKitScreenshot,
+  screenshot: TuixScreenshot,
   format: 'json' | 'text' | 'ansi',
   outputPath?: string
 ): Effect.Effect<string, Error> {

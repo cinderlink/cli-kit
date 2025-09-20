@@ -12,7 +12,7 @@ import {
   InputService,
   RendererService,
   StorageService
-} from "@/services/index.ts"
+} from "@/services/index"
 import type {
   Component,
   KeyEvent,
@@ -22,7 +22,7 @@ import type {
   Viewport,
   TerminalCapabilities,
   Cmd
-} from "@/services/index.ts"
+} from "@/services/index"
 import {
   TerminalError,
   InputError,

@@ -20,7 +20,7 @@ import {
   RendererService, 
   StorageService,
   MouseRouterService 
-} from "@/services/index.ts"
+} from "@/services/index"
 import { ApplicationError } from "@/core/errors.ts"
 
 /**

@@ -1,7 +1,7 @@
 /**
  * JSX Runtime - Root export for package
  * 
- * Enables importing as "cli-kit/jsx-runtime"
+ * Enables importing as "tuix/jsx-runtime"
  */
 
 export * from "./src/jsx-runtime"

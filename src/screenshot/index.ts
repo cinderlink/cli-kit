@@ -1,5 +1,5 @@
 /**
- * CLI-KIT Screenshot System
+ * TUIX Screenshot System
  * 
  * Main entry point for screenshot functionality
  */
@@ -13,19 +13,19 @@ export * from "./protocol.ts"
 
 import { Effect } from "effect"
 import type { View } from "@/core/types.ts"
-import type { ScreenshotOptions, CliKitScreenshot } from "./types.ts"
+import type { ScreenshotOptions, TuixScreenshot } from "./types.ts"
 import { captureScreenshot } from "./capture.ts"
 import { captureExternalCommand, capturePtyCommand } from "./external.ts"
 import { saveScreenshot, loadScreenshot, listScreenshots, deleteScreenshot } from "./storage.ts"
 import { reconstructView, createVisualView } from "./reconstruct.ts"
-import { CLI_KIT_SCREENSHOT_ENV, CLI_KIT_SCREENSHOT_FORMAT, CLI_KIT_SCREENSHOT_PIPE } from "./protocol.ts"
+import { TUIX_SCREENSHOT_ENV, TUIX_SCREENSHOT_FORMAT, TUIX_SCREENSHOT_PIPE } from "./protocol.ts"
 
 /**
  * High-level screenshot API
  */
 export const Screenshot = {
   /**
-   * Capture a CLI-KIT view
+   * Capture a TUIX view
    */
   capture: captureScreenshot,
   
@@ -33,20 +33,20 @@ export const Screenshot = {
    * Capture an external command
    */
   captureCommand: (command: string, options: ScreenshotOptions) => {
-    // Try to detect if it's a CLI-KIT app
-    if (command.includes('cli-kit') || command.includes('.ts')) {
+    // Try to detect if it's a TUIX app
+    if (command.includes('tuix') || command.includes('.ts')) {
       // Run with enhanced protocol
       const enhancedCommand = {
         command,
         env: {
-          [CLI_KIT_SCREENSHOT_ENV]: "true",
-          [CLI_KIT_SCREENSHOT_FORMAT]: "enhanced",
-          [CLI_KIT_SCREENSHOT_PIPE]: `/tmp/cli-kit-screenshot-${Date.now()}.pipe`
+          [TUIX_SCREENSHOT_ENV]: "true",
+          [TUIX_SCREENSHOT_FORMAT]: "enhanced",
+          [TUIX_SCREENSHOT_PIPE]: `/tmp/tuix-screenshot-${Date.now()}.pipe`
         }
       }
       return captureExternalCommand(enhancedCommand.command, {
         ...options,
-        description: options.description || `Enhanced CLI-KIT screenshot of: ${command}`
+        description: options.description || `Enhanced TUIX screenshot of: ${command}`
       })
     } else {
       // Regular external command
@@ -94,7 +94,7 @@ export const Screenshot = {
    */
   take: (source: View | string, options: ScreenshotOptions) =>
     Effect.gen(function* (_) {
-      let screenshot: CliKitScreenshot
+      let screenshot: TuixScreenshot
       
       if (typeof source === 'string') {
         // It's a command
@@ -114,7 +114,7 @@ export const Screenshot = {
 /**
  * Create a formatted display of a screenshot
  */
-export function formatScreenshot(screenshot: CliKitScreenshot, options?: {
+export function formatScreenshot(screenshot: TuixScreenshot, options?: {
   showMetadata?: boolean
   showComponentTree?: boolean
   colorize?: boolean

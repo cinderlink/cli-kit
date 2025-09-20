@@ -67,9 +67,9 @@ export class StorageService extends Context.Tag("StorageService")<
      */
     readonly loadConfig: <T>(
       appName: string,
-      schema: Schema<T>,
-      defaults: T
-    ) => Effect.Effect<T, StorageError, never>
+      schema?: Schema<T>,
+      defaults?: T | null
+    ) => Effect.Effect<T | null, StorageError, never>
 
     /**
      * Save configuration to user config directory.
@@ -77,13 +77,23 @@ export class StorageService extends Context.Tag("StorageService")<
     readonly saveConfig: <T>(
       appName: string,
       config: T,
-      schema: Schema<T>
+      schema?: Schema<T>
     ) => Effect.Effect<void, StorageError, never>
 
     /**
      * Get the path to the user config file.
      */
     readonly getConfigPath: (appName: string) => Effect.Effect<string, StorageError, never>
+
+    /**
+     * Delete configuration for the provided application.
+     */
+    readonly deleteConfig: (appName: string) => Effect.Effect<void, StorageError, never>
+
+    /**
+     * List the names of all stored configuration entries.
+     */
+    readonly listConfigs: () => Effect.Effect<ReadonlyArray<string>, StorageError, never>
 
     /**
      * Watch configuration file for changes.
@@ -163,6 +173,11 @@ export class StorageService extends Context.Tag("StorageService")<
     ) => Effect.Effect<void, StorageError, never>
 
     /**
+     * Delete a file.
+     */
+    readonly deleteFile: (path: string) => Effect.Effect<void, StorageError, never>
+
+    /**
      * Read a file as JSON with schema validation.
      */
     readonly readJsonFile: <T>(
@@ -239,6 +254,27 @@ export class StorageService extends Context.Tag("StorageService")<
       keepCount: number
     ) => Effect.Effect<void, StorageError, never>
 
+    /**
+     * Resolve data paths for an application.
+     */
+    readonly getDataPaths: (
+      appName: string
+    ) => Effect.Effect<ReadonlyArray<string>, StorageError, never>
+
+    /**
+     * Resolve cache paths for an application.
+     */
+    readonly getCachePaths: (
+      appName: string
+    ) => Effect.Effect<ReadonlyArray<string>, StorageError, never>
+
+    /**
+     * Resolve config paths for an application.
+     */
+    readonly getConfigPaths: (
+      appName: string
+    ) => Effect.Effect<ReadonlyArray<string>, StorageError, never>
+
     // =============================================================================
     // Transaction Support
     // =============================================================================
@@ -271,6 +307,17 @@ export class StorageService extends Context.Tag("StorageService")<
     readonly rollbackTransaction: (
       transactionId: string
     ) => Effect.Effect<void, StorageError, never>
+
+    /**
+     * Execute a transaction with automatic commit / rollback semantics.
+     */
+    readonly transaction: <A>(
+      transactionId: string,
+      body: (tx: {
+        readonly write: (path: string, content: string) => Effect.Effect<void, StorageError, never>
+        readonly delete: (path: string) => Effect.Effect<void, StorageError, never>
+      }) => Effect.Effect<A, StorageError, never>
+    ) => Effect.Effect<A, StorageError, never>
   }
 >() {}
 

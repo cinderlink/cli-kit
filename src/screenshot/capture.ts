@@ -1,14 +1,67 @@
 /**
  * Screenshot Capture Implementation
  * 
- * Captures CLI-KIT views into the .cks format
+ * Captures TUIX views into the .cks format
  */
 
 import { Effect } from "effect"
 import type { View } from "@/core/types.ts"
-import type { CliKitScreenshot, ComponentSnapshot, ScreenshotOptions, StyleMap } from "./types.ts"
+import type { TuixScreenshot, ComponentSnapshot, ScreenshotOptions, StyleMap } from "./types.ts"
 import { renderStyledSync } from "@/styling/render.ts"
+import { version } from "../../package.json" with { type: "json" }
 import type { RendererService } from "@/services/renderer.ts"
+import type { StyleProps } from "@/styling/types.ts"
+
+/**
+ * Serialize style properties for screenshot storage
+ */
+function serializeStyle(style?: StyleProps): Record<string, any> | undefined {
+  if (!style) return undefined
+  
+  const serialized: Record<string, any> = {}
+  
+  // Colors
+  if (style.foreground) serialized.foreground = style.foreground
+  if (style.background) serialized.background = style.background
+  
+  // Text decoration
+  if (style.bold) serialized.bold = style.bold
+  if (style.italic) serialized.italic = style.italic
+  if (style.underline) serialized.underline = style.underline
+  if (style.strikethrough) serialized.strikethrough = style.strikethrough
+  if (style.inverse) serialized.inverse = style.inverse
+  if (style.blink) serialized.blink = style.blink
+  if (style.faint) serialized.faint = style.faint
+  
+  // Borders
+  if (style.border) serialized.border = style.border
+  if (style.borderTop) serialized.borderTop = style.borderTop
+  if (style.borderRight) serialized.borderRight = style.borderRight
+  if (style.borderBottom) serialized.borderBottom = style.borderBottom
+  if (style.borderLeft) serialized.borderLeft = style.borderLeft
+  
+  // Spacing
+  if (style.padding) serialized.padding = style.padding
+  if (style.margin) serialized.margin = style.margin
+  
+  // Alignment
+  if (style.horizontalAlign) serialized.horizontalAlign = style.horizontalAlign
+  if (style.verticalAlign) serialized.verticalAlign = style.verticalAlign
+  
+  // Dimensions
+  if (style.width !== undefined) serialized.width = style.width
+  if (style.height !== undefined) serialized.height = style.height
+  if (style.minWidth !== undefined) serialized.minWidth = style.minWidth
+  if (style.minHeight !== undefined) serialized.minHeight = style.minHeight
+  if (style.maxWidth !== undefined) serialized.maxWidth = style.maxWidth
+  if (style.maxHeight !== undefined) serialized.maxHeight = style.maxHeight
+  
+  // Other
+  if (style.wordBreak) serialized.wordBreak = style.wordBreak
+  if (style.overflow) serialized.overflow = style.overflow
+  
+  return Object.keys(serialized).length > 0 ? serialized : undefined
+}
 
 /**
  * Capture a screenshot of a View
@@ -16,7 +69,7 @@ import type { RendererService } from "@/services/renderer.ts"
 export function captureScreenshot(
   view: View,
   options: ScreenshotOptions
-): Effect.Effect<CliKitScreenshot, Error, RendererService> {
+): Effect.Effect<TuixScreenshot, Error, RendererService> {
   return Effect.gen(function* (_) {
     const renderer = yield* _(RendererService)
     
@@ -36,9 +89,9 @@ export function captureScreenshot(
     }
     
     // Create screenshot
-    const screenshot: CliKitScreenshot = {
+    const screenshot: TuixScreenshot = {
       metadata: {
-        version: "1.0.0", // TODO: Get from package.json
+        version,
         timestamp: new Date().toISOString(),
         name: options.name,
         description: options.description,
@@ -156,7 +209,7 @@ function extractComponentTree(view: View): ComponentSnapshot {
       type: 'styledText',
       content: viewAny.content,
       props: {
-        style: viewAny.style // TODO: Serialize style properly
+        style: serializeStyle(viewAny.style)
       }
     }
   } else if (viewAny._tag === 'HStack') {

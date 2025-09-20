@@ -1,7 +1,7 @@
 /**
  * Screenshot-Aware Demo
  * 
- * Demonstrates how CLI-KIT apps can detect and optimize for screenshot mode
+ * Demonstrates how TUIX apps can detect and optimize for screenshot mode
  */
 
 import { Effect, Stream } from "effect"

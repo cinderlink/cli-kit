@@ -289,7 +289,7 @@ describe("Components Module Coverage", () => {
       await new Promise(resolve => setTimeout(resolve, 20))
       expect(resolved).toBe(true)
       
-      if (cleanup) cleanup()
+      await cleanup?.()
     })
 
     it("handles useAsyncEffect with dependencies", async () => {
@@ -301,7 +301,7 @@ describe("Components Module Coverage", () => {
       
       expect(callCount).toBeGreaterThan(0)
       
-      if (cleanup) cleanup()
+      await cleanup?.()
     })
 
     it("handles useAsyncEffect with cleanup", async () => {
@@ -313,35 +313,42 @@ describe("Components Module Coverage", () => {
         }
       }, [])
       
-      if (cleanup) cleanup()
+      await cleanup?.()
       expect(cleanedUp).toBe(true)
     })
   })
 
   describe("timer utilities", () => {
-    it("handles useInterval", () => {
+    it("handles useInterval", async () => {
       let count = 0
       
       const cleanup = useInterval(() => {
         count++
       }, 10)
-      
-      setTimeout(() => {
-        expect(count).toBeGreaterThan(0)
-        if (cleanup) cleanup()
-      }, 50)
+
+      await new Promise<void>(resolve => {
+        setTimeout(() => {
+          expect(count).toBeGreaterThan(0)
+          if (cleanup) cleanup()
+          resolve()
+        }, 50)
+      })
     })
 
-    it("handles useTimeout", () => {
+    it("handles useTimeout", async () => {
       let executed = false
       
       const cleanup = useTimeout(() => {
         executed = true
       }, 10)
-      
-      setTimeout(() => {
-        expect(executed).toBe(true)
-      }, 20)
+
+      await new Promise<void>(resolve => {
+        setTimeout(() => {
+          expect(executed).toBe(true)
+          if (cleanup) cleanup()
+          resolve()
+        }, 30)
+      })
     })
 
     it("handles timer cleanup", () => {

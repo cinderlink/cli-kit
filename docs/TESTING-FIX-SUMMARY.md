@@ -20,9 +20,14 @@ Converted all runtime-based tests to use **Component Logic Testing** approach:
 ### Before (Broken)
 ```typescript
 // Used runtime with mock services - BROKEN
-const ctx = yield* _(createTestContext(component))
-yield* _(ctx.sendKey(key('up')))
-yield* _(ctx.waitForOutput(output => output.includes("Count: 1"), 1000))
+yield* _(Effect.scoped(
+  Effect.gen(function* (_) {
+    const ctx = yield* _(createTestContext(component))
+    yield* _(ctx.sendKey(key('up')))
+    yield* _(ctx.waitForOutput(output => output.includes("Count: 1"), 1000))
+    yield* _(ctx.cleanup())
+  })
+))
 ```
 
 ### After (Working)

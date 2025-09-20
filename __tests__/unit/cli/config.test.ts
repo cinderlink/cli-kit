@@ -173,8 +173,9 @@ describe("CLI Configuration - Comprehensive", () => {
         }
       })
       
-      expect(cmd.subcommands?.add).toBeDefined()
-      expect(cmd.subcommands?.remove).toBeDefined()
+      // subcommands are normalized to commands in defineCommand
+      expect((cmd as any).commands?.add).toBeDefined()
+      expect((cmd as any).commands?.remove).toBeDefined()
     })
 
     it("creates command with aliases", () => {

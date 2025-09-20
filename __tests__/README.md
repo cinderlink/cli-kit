@@ -1,6 +1,6 @@
 # Test Structure
 
-This directory contains all tests for the @cinderlink/cli-kit framework.
+This directory contains all tests for the TUIX framework.
 
 ## Directory Structure
 

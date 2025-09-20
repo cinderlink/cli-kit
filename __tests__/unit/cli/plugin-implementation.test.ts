@@ -327,12 +327,12 @@ describe("CLI Plugin Implementation", () => {
           name: "peer-dependent",
           version: "1.0.0",
           peerDependencies: {
-            "cli-kit": "^1.0.0"
+            "tuix": "^1.0.0"
           }
         }
       })
       
-      expect(plugin.metadata.peerDependencies?.["cli-kit"]).toBe("^1.0.0")
+      expect(plugin.metadata.peerDependencies?.["tuix"]).toBe("^1.0.0")
     })
   })
 

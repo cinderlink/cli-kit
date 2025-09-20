@@ -5,7 +5,7 @@ CLI Kit provides a Svelte-inspired runes system for reactive state management in
 ## Installation
 
 ```typescript
-import { $bindable, $state, $derived } from '@cli-kit/runes'
+import { $bindable, $state, $derived } from 'tuix/runes'
 ```
 
 ## Core Concepts
@@ -272,15 +272,15 @@ const saveSettings = (settings: Settings) => Effect.gen(function* () {
 
 ## Migration from Old Reactivity
 
-If you're using the old reactivity system from `@cli-kit/components`:
+If you're using the old reactivity system from `tuix/components`:
 
 ```typescript
 // Old
-import { $state } from '@cli-kit/components'
+import { $state } from 'tuix/components'
 const count = $state(0)
 
 // New
-import { $bindable } from '@cli-kit/runes'
+import { $bindable } from 'tuix/runes'
 const count = $bindable(0)
 ```
 

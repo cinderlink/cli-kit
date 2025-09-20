@@ -7,9 +7,70 @@
  */
 
 import { Effect } from "effect"
+import { $ } from "bun"
 import { Screenshot, formatScreenshot } from "../src/screenshot/index.ts"
 import { LiveServices } from "../src/services/impl/index.ts"
-import { showHelpSimple } from "./cli-kit-help-simple.ts"
+import { help as helpComponent } from "../src/components/Help.ts"
+import { InputService } from "../src/services/index.ts"
+import { runApp } from "../src/core/runtime.ts"
+// Built-in help command (minimal, printable)
+function showHelp() {
+  console.log()
+  console.log("TUIX – Terminal UI and CLI Toolkit")
+  console.log()
+  console.log("Usage:")
+  console.log("  tuix [command] [options]")
+  console.log()
+  console.log("Commands:")
+  console.log("  help                    Show this help")
+  console.log("  version                 Show version")
+  console.log("  screenshot <subcmd>     Capture and manage screenshots")
+  console.log("  examples                List example apps")
+  console.log("  examples:test           Run E2E tests for examples")
+  console.log("  create [name]           Scaffold a new app (coming soon)")
+  console.log()
+  console.log("Screenshot subcommands:")
+  console.log("  list                    List saved screenshots")
+  console.log("  quick <cmd>             Capture output of a command quickly")
+  console.log("  create <name> --command <cmd>  Create a named capture")
+  console.log("  show <name>             Preview a saved screenshot")
+  console.log("  delete <name>           Remove a screenshot")
+  console.log("  export <name> <file>    Export as json|text|ansi")
+  console.log("  multi [--file <json>]   Batch capture (or --examples)")
+  console.log()
+  console.log("Examples:")
+  console.log("  tuix screenshot quick 'ls -la' ")
+  console.log("  tuix screenshot create demo --command 'echo Hello' --show")
+  console.log("  tuix examples")
+  console.log()
+}
+
+// Optional interactive help using the built-in Help component
+async function showInteractiveHelp() {
+  const component = (() => {
+    const inner = helpComponent({ title: "TUIX Help & Shortcuts", showAsModal: true, showSearch: true })
+    return {
+      init: Effect.gen(function* () {
+        const [model, cmds] = yield* inner.init
+        return [{ ...model, isOpen: true }, cmds] as const
+      }),
+      update: inner.update,
+      view: inner.view,
+      subscriptions: (model: any) =>
+        Effect.gen(function* (_) {
+          const input: any = yield* InputService as any
+          return input.mapKeys((key: any) => (inner as any).handleKey?.(key, model) ?? null)
+        })
+    }
+  })()
+
+  await Effect.runPromise(
+    (runApp(component as any, {
+      quitOnEscape: true,
+      fullscreen: false
+    }) as any).pipe(Effect.provide(LiveServices)) as any
+  )
+}
 import * as fs from "fs/promises"
 import * as path from "path"
 
@@ -32,12 +93,12 @@ function parseArgs(argv: string[]): ParsedArgs {
   
   let i = 0
   while (i < argv.length) {
-    const arg = argv[i]
+    const arg = argv[i]!
     
     if (arg.startsWith('--')) {
       // Long option
       const key = arg.slice(2)
-      const nextArg = argv[i + 1]
+      const nextArg = argv[i + 1] as string | undefined
       if (nextArg && !nextArg.startsWith('-')) {
         result.options[key] = nextArg
         i += 2
@@ -96,7 +157,7 @@ async function handleScreenshot(subcommand: string | undefined, args: string[], 
         console.log("Usage: tuix screenshot create <name> --command <cmd>")
         process.exit(1)
       }
-      await createScreenshot(args[0], options)
+      await createScreenshot(args[0]!, options)
       break
       
     case 'show':
@@ -106,26 +167,26 @@ async function handleScreenshot(subcommand: string | undefined, args: string[], 
         console.log("Usage: tuix screenshot show <name>")
         process.exit(1)
       }
-      await showScreenshot(args[0], options)
+      await showScreenshot(args[0]!, options)
       break
       
     case 'delete':
     case 'rm':
       if (args.length === 0) {
         console.error("Error: Name required")
-        console.log("Usage: cli-kit screenshot delete <name>")
+        console.log("Usage: tuix screenshot delete <name>")
         process.exit(1)
       }
-      await deleteScreenshot(args[0], options)
+      await deleteScreenshot(args[0]!, options)
       break
       
     case 'export':
       if (args.length < 2) {
         console.error("Error: Name and output file required")
-        console.log("Usage: cli-kit screenshot export <name> <output>")
+        console.log("Usage: tuix screenshot export <name> <output>")
         process.exit(1)
       }
-      await exportScreenshot(args[0], args[1], options)
+      await exportScreenshot(args[0]!, args[1]!, options)
       break
       
     case 'multi':
@@ -135,8 +196,8 @@ async function handleScreenshot(subcommand: string | undefined, args: string[], 
       
     default:
       console.error(`Unknown screenshot command: ${subcommand}`)
-      console.log("Run 'cli-kit --help' for usage information")
-      process.exit(1)
+      console.log("Run 'tuix --help' for usage information")
+        process.exit(1)
   }
 }
 
@@ -149,7 +210,7 @@ async function listScreenshots(options: Record<string, string | boolean>) {
   
   if (result.length === 0) {
     console.log("No screenshots found.")
-    console.log("Create one with: cli-kit screenshot create <name>")
+    console.log("Create one with: tuix screenshot create <name>")
     return
   }
   
@@ -192,7 +253,7 @@ async function quickScreenshot(command: string, options: Record<string, string |
     let result
     if (options.pty) {
       const parts = command.split(' ')
-      const cmd = parts[0]
+      const cmd = parts[0]!
       const args = parts.slice(1)
       
       result = await Effect.runPromise(
@@ -234,12 +295,13 @@ async function quickScreenshot(command: string, options: Record<string, string |
 
 async function createScreenshot(name: string, options: Record<string, string | boolean>) {
   try {
-    const command = options.command || options.c
-    if (!command || typeof command !== 'string') {
+    const commandOpt = options.command || options.c
+    if (!commandOpt || typeof commandOpt !== 'string') {
       console.error("Error: --command is required")
-      console.log("Usage: cli-kit screenshot create <name> --command <cmd>")
+    console.log("Usage: tuix screenshot create <name> --command <cmd>")
       process.exit(1)
     }
+    const command = commandOpt as string
     
     console.log(`📸 Capturing screenshot: ${name}...`)
     
@@ -254,7 +316,7 @@ async function createScreenshot(name: string, options: Record<string, string | b
     if (options.pty) {
       // Parse command and args
       const parts = command.split(' ')
-      const cmd = parts[0]
+      const cmd = parts[0]!
       const args = parts.slice(1)
       
       result = await Effect.runPromise(
@@ -398,20 +460,20 @@ async function batchScreenshot(options: Record<string, string | boolean>) {
       commands = JSON.parse(content)
     } else if (options.examples) {
       // Use built-in example commands
-      console.log("💡 Note: For interactive CLI-KIT examples, use individual screenshot commands with --pty flag")
-      console.log("   Example: cli-kit screenshot create loading-demo --command 'bun examples/loading-screen.ts' --pty\n")
+      console.log("💡 Note: For interactive TUIX examples, use individual screenshot commands with --pty flag")
+      console.log("   Example: tuix screenshot create loading-demo --command 'bun examples/loading-screen.ts' --pty\n")
       
       commands = [
         { name: "list-examples", command: "ls -la examples/*.ts | head -15", description: "List of example files" },
         { name: "package-info", command: "cat package.json | jq '{name, version, description}'", description: "Package information" },
-        { name: "help-screen", command: "./bin/cli-kit.ts --help", description: "CLI-KIT help screen" },
-        { name: "screenshot-help", command: "./bin/cli-kit.ts screenshot --help", description: "Screenshot command help" }
+        { name: "help-screen", command: "./bin/tuix.ts --help", description: "TUIX help screen" },
+        { name: "screenshot-help", command: "./bin/tuix.ts screenshot --help", description: "Screenshot command help" }
       ]
     } else {
       console.error("❌ Error: Either --file or --examples must be specified")
       console.log("\nUsage:")
-      console.log("  cli-kit screenshot multi --file commands.json")
-      console.log("  cli-kit screenshot multi --examples")
+      console.log("  tuix screenshot multi --file commands.json")
+      console.log("  tuix screenshot multi --examples")
       process.exit(1)
     }
     
@@ -468,8 +530,8 @@ async function batchScreenshot(options: Record<string, string | boolean>) {
     }
     console.log()
     console.log("View screenshots with:")
-    console.log(`   cli-kit screenshot list`)
-    console.log(`   cli-kit screenshot show ${prefix}-{name}`)
+    console.log(`   tuix screenshot list`)
+    console.log(`   tuix screenshot show ${prefix}-{name}`)
   } catch (error) {
     console.error(`❌ Error: ${error}`)
     process.exit(1)
@@ -484,13 +546,17 @@ const parsed = parseArgs(process.argv.slice(2))
 
 // Show help if no command or help flag
 if (!parsed.command || parsed.command === 'help' || parsed.options.help || parsed.options.h) {
-  showHelpSimple()
+  if (parsed.options.interactive || parsed.options.i) {
+    await showInteractiveHelp()
+  } else {
+    showHelp()
+  }
   process.exit(0)
 }
 
 // Show version
 if (parsed.command === 'version' || parsed.options.version || parsed.options.v) {
-  console.log("cli-kit v1.0.0")
+  console.log("tuix v1.0.0")
   process.exit(0)
 }
 
@@ -500,15 +566,42 @@ switch (parsed.command) {
   case 'ss':
     await handleScreenshot(parsed.subcommand, parsed.args, parsed.options)
     break
+  case 'help': {
+    if (parsed.options.interactive || parsed.options.i) {
+      await showInteractiveHelp()
+    } else {
+      showHelp()
+    }
+    break
+  }
+  case 'examples': {
+    // List available examples in ./examples
+    const dir = path.join(process.cwd(), 'examples')
+    const entries = await fs.readdir(dir)
+    const files = entries
+      .filter((f) => (f.endsWith('.ts') || f.endsWith('.tuix')) && !f.endsWith('.bak'))
+      .sort()
+    console.log("Examples:\n")
+    files.forEach((f) => console.log(` - ${f}`))
+    break
+  }
+  case 'examples:test': {
+    const res = await $`bun tests/e2e/run-tests.ts`.
+      quiet()
+    process.stdout.write(res.stdout)
+    process.stderr.write(res.stderr)
+    process.exit(res.exitCode)
+    break
+  }
     
   case 'create':
-    console.log(`🚧 Creating new CLI-KIT app: ${parsed.subcommand || 'my-app'}`)
+    console.log(`🚧 Creating new TUIX app: ${parsed.subcommand || 'my-app'}`)
     console.log(`   Template: ${parsed.options.template || parsed.options.t || 'basic'}`)
     console.log(`   (This feature is coming soon!)`)
     break
     
   default:
     console.error(`Unknown command: ${parsed.command}`)
-    console.log("Run 'cli-kit --help' for usage information")
+    console.log("Run 'tuix --help' for usage information")
     process.exit(1)
 }

@@ -114,8 +114,9 @@ export function $bindable<T>(initial: T, options: BindableOptions<T> = {}): Bind
         return // Reject the change silently
       }
       if (typeof result === 'string') {
+        // Validation failed with error message - surface to developer
         console.error(`Validation error: ${result}`)
-        return // Reject with error message
+        return
       }
     }
     

@@ -1,5 +1,5 @@
 /**
- * CLI-KIT Framework Showcase
+ * TUIX Framework Showcase
  * 
  * A comprehensive demonstration of all framework components and examples
  * in an interactive grid layout. Navigate between examples, see live
@@ -39,7 +39,7 @@ const examples: readonly ExampleInfo[] = [
     description: "Interactive gradient text with animations",
     category: "components",
     command: "bun examples/loading-screen.ts",
-    preview: () => createPreviewComponent("CLI-KIT", "Animated gradient text")
+    preview: () => createPreviewComponent("TUIX", "Animated gradient text")
   },
   {
     id: "button-showcase",
@@ -276,7 +276,7 @@ const showcase: Component<ShowcaseModel, ShowcaseMsg> = {
   view: (model: ShowcaseModel) => {
     // Header with animated title
     const logo = largeAnimatedGradientText({
-      text: "CLI-KIT",
+      text: "TUIX",
       gradient: gradientPresets.neon,
       time: model.animationTime,
       animationSpeed: 0.05,
@@ -475,7 +475,7 @@ const config: AppOptions = {
   mouse: true
 }
 
-console.log("Starting CLI-KIT Framework Showcase...")
+console.log("Starting TUIX Framework Showcase...")
 
 const program = runApp(showcase, config).pipe(
   Effect.provide(LiveServices)

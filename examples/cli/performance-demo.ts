@@ -1,7 +1,7 @@
 /**
  * Performance Demo
  * 
- * Demonstrates the performance optimization features in CLI-KIT
+ * Demonstrates the performance optimization features in TUIX
  */
 
 import { defineConfig } from "../../src/cli/config"
@@ -164,7 +164,7 @@ const clearHandler = (args: any) => {
 const config = defineConfig({
   name: "performance-demo",
   version: "1.0.0",
-  description: "Demonstrates CLI-KIT performance optimizations",
+  description: "Demonstrates TUIX performance optimizations",
   
   commands: {
     // Regular command
@@ -198,7 +198,7 @@ const config = defineConfig({
       description: "Interactive performance demo",
       handler: (args: any) => {
         return vstack(
-          styledText("🚀 CLI-KIT Performance Demo", style().foreground(Colors.blue).bold()),
+          styledText("🚀 TUIX Performance Demo", style().foreground(Colors.blue).bold()),
           text(""),
           text("Available commands:"),
           text(""),

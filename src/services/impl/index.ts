@@ -10,7 +10,7 @@ import {
   StorageService,
   HitTestService,
   MouseRouterService
-} from "@/services/index.ts"
+} from "@/services/index"
 import { TerminalServiceLive } from "./terminal-impl.ts"
 import { InputServiceLive } from "./input-impl.ts"
 import { RendererServiceLive } from "./renderer-impl.ts"
@@ -40,11 +40,4 @@ export const LiveServices = TerminalServiceLive.pipe(
 /**
  * Test service layer for testing
  */
-export const TestServices = Layer.mergeAll([
-  Layer.succeed(TerminalService, {} as any),
-  Layer.succeed(InputService, {} as any),
-  Layer.succeed(RendererService, {} as any),
-  Layer.succeed(StorageService, {} as any),
-  Layer.succeed(HitTestService, {} as any),
-  Layer.succeed(MouseRouterService, {} as any)
-])
+// Note: Use typed testing layers from src/testing/test-utils.ts in tests.

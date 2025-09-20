@@ -6,10 +6,10 @@
  * Demonstrates the new $bindable runes with JSX bind: syntax
  * 
  * Usage:
- *   import { $bindable } from '@cli-kit/runes'
+ *   import { $bindable } from 'tuix/runes'
  *   
  *   // Instead of the old reactivity system:
- *   import { $state } from '@cli-kit/components'
+ *   import { $state } from 'tuix/components'
  */
 
 import { $bindable, $state as $runeState } from "../src/runes"

@@ -1,7 +1,7 @@
 /**
- * CLI-KIT Screenshot Protocol
+ * TUIX Screenshot Protocol
  * 
- * Allows CLI-KIT apps to communicate with the screenshot tool
+ * Allows TUIX apps to communicate with the screenshot tool
  * for enhanced capture capabilities
  */
 
@@ -12,15 +12,15 @@ import type { ComponentSnapshot } from "./types.ts"
 /**
  * Environment variable that indicates screenshot mode
  */
-export const CLI_KIT_SCREENSHOT_ENV = "CLI_KIT_SCREENSHOT"
-export const CLI_KIT_SCREENSHOT_PIPE = "CLI_KIT_SCREENSHOT_PIPE"
-export const CLI_KIT_SCREENSHOT_FORMAT = "CLI_KIT_SCREENSHOT_FORMAT"
+export const TUIX_SCREENSHOT_ENV = "TUIX_SCREENSHOT"
+export const TUIX_SCREENSHOT_PIPE = "TUIX_SCREENSHOT_PIPE"
+export const TUIX_SCREENSHOT_FORMAT = "TUIX_SCREENSHOT_FORMAT"
 
 /**
  * Check if we're running in screenshot mode
  */
 export function isScreenshotMode(): boolean {
-  return process.env[CLI_KIT_SCREENSHOT_ENV] === "true"
+  return process.env[TUIX_SCREENSHOT_ENV] === "true"
 }
 
 /**
@@ -29,13 +29,13 @@ export function isScreenshotMode(): boolean {
 export function getScreenshotConfig() {
   return {
     enabled: isScreenshotMode(),
-    format: process.env[CLI_KIT_SCREENSHOT_FORMAT] || "enhanced",
-    pipePath: process.env[CLI_KIT_SCREENSHOT_PIPE]
-  }
+    format: process.env[TUIX_SCREENSHOT_FORMAT] || "enhanced",
+    pipePath: process.env[TUIX_SCREENSHOT_PIPE]
+}
 }
 
 /**
- * Screenshot metadata that CLI-KIT apps can provide
+ * Screenshot metadata that TUIX apps can provide
  */
 export interface ScreenshotMetadata {
   readonly appName: string

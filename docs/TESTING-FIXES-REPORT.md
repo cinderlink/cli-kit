@@ -124,9 +124,15 @@ test("Feature Toggle", async () => {
 ### 2. Use Integration Testing Sparingly
 ```typescript
 // When you need to test service interactions
-const ctx = await Effect.runPromise(createTestContext(component))
-// Test service integration
-await ctx.cleanup()
+await Effect.runPromise(
+  Effect.scoped(
+    Effect.gen(function* (_) {
+      const ctx = yield* _(createTestContext(component))
+      // Test service integration
+      yield* _(ctx.cleanup())
+    })
+  )
+)
 ```
 
 ### 3. Avoid Runtime Testing
@@ -148,9 +154,16 @@ await ctx.cleanup()
 ### Old Approach (Unreliable)
 ```typescript
 test("Toggle Search", async () => {
-  const ctx = await Effect.runPromise(createTestContext(component))
-  await ctx.sendKey(key('/'))
-  await ctx.waitForOutput(output => output.includes("Search ON"), 1000)
+  await Effect.runPromise(
+    Effect.scoped(
+      Effect.gen(function* (_) {
+        const ctx = yield* _(createTestContext(component))
+        yield* _(ctx.sendKey(key('/')))
+        yield* _(ctx.waitForOutput(output => output.includes("Search ON"), 1000))
+        yield* _(ctx.cleanup())
+      })
+    )
+  )
   // Slow, complex, timing-dependent
 })
 ```

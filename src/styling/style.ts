@@ -11,6 +11,7 @@
 
 import { Data, Option, pipe } from "effect"
 import type { Color } from "./color.ts"
+import { Colors } from "./color.ts"
 import { type Border, BorderSide } from "./borders.ts"
 import { 
   type StyleProps,
@@ -39,6 +40,87 @@ import {
  *   .padding(2, 4)
  *   .border(Borders.Rounded)
  */
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
+
+const resolveColorInput = (value: Color | string): Color => {
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  const key = value.toLowerCase()
+  const possible = (Colors as Record<string, unknown>)[key]
+  if (possible && typeof possible === 'object' && '_tag' in (possible as Record<string, unknown>)) {
+    return possible as Color
+  }
+
+  const hslMatch = key.match(/^hsl\(([^)]+)\)$/)
+  if (hslMatch) {
+    const [h, s, l] = hslMatch[1]!
+      .split(',')
+      .map(part => part.trim())
+      .map((part, index) => {
+        const numeric = parseFloat(part.replace('%', ''))
+        if (index === 0) return numeric
+        return clamp(numeric / 100, 0, 1)
+      }) as [number, number, number]
+
+    const rgbColor = hslToRgb(h, s, l)
+    const maybeRgb = Colors.rgb(rgbColor.r, rgbColor.g, rgbColor.b)
+    if (Option.isSome(maybeRgb)) {
+      return maybeRgb.value
+    }
+  }
+
+  const rgbMatch = key.match(/^rgb\(([^)]+)\)$/)
+  if (rgbMatch) {
+    const [r, g, b] = rgbMatch[1]!
+      .split(',')
+      .map(part => clamp(parseInt(part.trim(), 10), 0, 255)) as [number, number, number]
+    const maybeRgb = Colors.rgb(r, g, b)
+    if (Option.isSome(maybeRgb)) {
+      return maybeRgb.value
+    }
+  }
+
+  const hexCandidate = value.startsWith('#') ? value : `#${value}`
+  const maybeHex = Colors.hex(hexCandidate)
+  if (Option.isSome(maybeHex)) {
+    return maybeHex.value
+  }
+
+  return Colors.white
+}
+
+const hslToRgb = (h: number, s: number, l: number): { r: number; g: number; b: number } => {
+  const hue = ((h % 360) + 360) % 360
+  const saturation = clamp(s, 0, 1)
+  const lightness = clamp(l, 0, 1)
+
+  if (saturation === 0) {
+    const gray = Math.round(lightness * 255)
+    return { r: gray, g: gray, b: gray }
+  }
+
+  const q = lightness < 0.5
+    ? lightness * (1 + saturation)
+    : lightness + saturation - lightness * saturation
+  const p = 2 * lightness - q
+
+  const hue2rgb = (t: number) => {
+    if (t < 0) t += 1
+    if (t > 1) t -= 1
+    if (t < 1 / 6) return p + (q - p) * 6 * t
+    if (t < 1 / 2) return q
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6
+    return p
+  }
+
+  const r = Math.round(hue2rgb((hue / 360) + 1 / 3) * 255)
+  const g = Math.round(hue2rgb(hue / 360) * 255)
+  const b = Math.round(hue2rgb((hue / 360) - 1 / 3) * 255)
+  return { r, g, b }
+}
 export class Style extends Data.Class<{
   readonly props: StyleProps
   readonly parent: Option.Option<Style>
@@ -50,21 +132,35 @@ export class Style extends Data.Class<{
   /**
    * Set the foreground (text) color
    */
-  foreground(color: Color): Style {
+  foreground(color: Color | string): Style {
     return new Style({
       ...this,
-      props: { ...this.props, foreground: color }
+      props: { ...this.props, foreground: resolveColorInput(color) }
     })
+  }
+
+  /**
+   * Alias for foreground that accepts color names or hex strings
+   */
+  color(color: Color | string): Style {
+    return this.foreground(resolveColorInput(color))
   }
   
   /**
    * Set the background color
    */
-  background(color: Color): Style {
+  background(color: Color | string): Style {
     return new Style({
       ...this,
-      props: { ...this.props, background: color }
+      props: { ...this.props, background: resolveColorInput(color) }
     })
+  }
+
+  /**
+   * Alias for background that accepts color names or hex strings
+   */
+  bg(color: Color | string): Style {
+    return this.background(resolveColorInput(color))
   }
   
   // ===========================================================================
@@ -660,6 +756,39 @@ export class Style extends Data.Class<{
   }
   
   /**
+   * Set a specific property value
+   */
+  set<K extends keyof StyleProps | 'color' | 'backgroundColor'>(prop: K, value: any): Style {
+    let mappedProp: keyof StyleProps
+    let mappedValue = value as StyleProps[keyof StyleProps]
+
+    if (prop === 'color') {
+      mappedProp = 'foreground'
+      mappedValue = resolveColorInput(value)
+    } else if (prop === 'backgroundColor') {
+      mappedProp = 'background'
+      mappedValue = resolveColorInput(value)
+    } else if (prop === 'foreground' || prop === 'background') {
+      mappedProp = prop
+      mappedValue = resolveColorInput(value)
+    } else {
+      mappedProp = prop as keyof StyleProps
+    }
+
+    if (typeof mappedValue === 'object' && mappedValue && 'r' in mappedValue && 'g' in mappedValue && 'b' in mappedValue) {
+      const maybeRgb = Colors.rgb(mappedValue.r, mappedValue.g, mappedValue.b)
+      if (Option.isSome(maybeRgb)) {
+        mappedValue = maybeRgb.value as StyleProps[keyof StyleProps]
+      }
+    }
+
+    return new Style({
+      ...this,
+      props: { ...this.props, [mappedProp]: mappedValue }
+    })
+  }
+
+  /**
    * Get a specific property value
    */
   get<K extends keyof StyleProps>(prop: K): StyleProps[K] | undefined {
@@ -684,20 +813,109 @@ export class Style extends Data.Class<{
 /**
  * Create a new empty style
  */
+const autoApplyProperties = new Set([
+  'bold',
+  'italic',
+  'underline',
+  'strikethrough',
+  'inverse',
+  'reverse',
+  'blink',
+  'faint',
+  'dim',
+  'hidden',
+  'inline',
+  'center',
+  'middle',
+  'uppercase',
+  'lowercase',
+  'capitalize'
+])
+
+const mutatingMethods = new Set(['set'])
+
+const createStyleProxy = (initial: Style): Style => {
+  const state = { current: initial }
+
+  const proxy: any = new Proxy({}, {
+    get(_target, prop, _receiver) {
+      if (prop === '__style__') {
+        return state.current
+      }
+
+      const target = state.current
+      const value = (target as any)[prop]
+
+      if (typeof value === 'function') {
+        const fn = value.bind(target)
+        const name = String(prop)
+
+        if (autoApplyProperties.has(name)) {
+          const applied = fn()
+          if (applied instanceof Style) {
+            if (mutatingMethods.has(name)) {
+              state.current = applied
+              return proxy
+            }
+            const appliedProxy = createStyleProxy(applied)
+            const callable: any = (...args: any[]) => {
+              const result = fn(...args)
+              if (result instanceof Style) {
+                if (mutatingMethods.has(name)) {
+                  state.current = result
+                  return proxy
+                }
+                return createStyleProxy(result)
+              }
+              return result
+            }
+            Object.setPrototypeOf(callable, appliedProxy)
+            return callable
+          }
+        }
+
+        return (...args: any[]) => {
+          const result = fn(...args)
+          if (result instanceof Style) {
+            if (mutatingMethods.has(name)) {
+              state.current = result
+              return proxy
+            }
+            return createStyleProxy(result)
+          }
+          return result
+        }
+      }
+
+      if (value instanceof Style) {
+        return createStyleProxy(value)
+      }
+
+      return value
+    },
+    set(_target, prop, value) {
+      (state.current as any)[prop] = value
+      return true
+    }
+  })
+
+  return proxy as Style
+}
+
 export const style = (): Style => 
-  new Style({
+  createStyleProxy(new Style({
     props: {},
     parent: Option.none()
-  })
+  }))
 
 /**
  * Create a style from properties
  */
 export const styleFrom = (props: StyleProps): Style =>
-  new Style({
+  createStyleProxy(new Style({
     props,
     parent: Option.none()
-  })
+  }))
 
 // =============================================================================
 // Common Style Presets

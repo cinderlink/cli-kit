@@ -4,7 +4,7 @@ This guide helps you set up proper tooling support for `.tuix` files (Terminal U
 
 ## What are .tuix files?
 
-`.tuix` files are Terminal UI component files that use JSX-like syntax specifically for building terminal user interfaces with `@cinderlink/cli-kit`. They are similar to `.tsx` files but designed for TUI components instead of web components.
+`.tuix` files are Terminal UI component files that use JSX-like syntax specifically for building terminal user interfaces with `tuix`. They are similar to `.tsx` files but designed for TUI components instead of web components.
 
 ## TypeScript Configuration
 
@@ -18,7 +18,7 @@ Create or extend your `tsconfig.json`:
 
 ```json
 {
-  "extends": "@cinderlink/cli-kit/tsconfig.tuix.json",
+  "extends": "tuix/tsconfig.tuix.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
@@ -38,7 +38,7 @@ Or if you prefer to configure manually:
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "@cinderlink/cli-kit",
+    "jsxImportSource": "tuix",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
@@ -63,7 +63,7 @@ Create or update your `bunfig.toml`:
 [jsx]
 factory = "jsx"
 fragment = "Fragment"
-importSource = "@cinderlink/cli-kit/jsx-runtime"
+importSource = "tuix/jsx-runtime"
 
 # File extension mappings
 [loader]
@@ -121,8 +121,8 @@ Add helpful scripts to your `package.json`:
 ```tsx
 #!/usr/bin/env bun
 
-import { $bindable } from "@cinderlink/cli-kit/runes"
-import { Box, Text, TextInput } from "@cinderlink/cli-kit/components"
+import { $bindable } from "tuix/runes"
+import { Box, Text, TextInput } from "tuix/components"
 
 export default function MyTUIApp() {
   const name = $bindable("")
@@ -184,7 +184,7 @@ Ensure your `bunfig.toml` has the correct loader configuration and restart your 
 
 ### JSX Transform Issues
 
-Make sure your `jsxImportSource` points to `@cinderlink/cli-kit` and not React.
+Make sure your `jsxImportSource` points to `tuix` and not React.
 
 ## Migration from .tsx
 

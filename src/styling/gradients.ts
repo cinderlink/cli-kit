@@ -137,7 +137,7 @@ const applyEasing = (t: number, easing: GradientConfig['interpolation']): number
 /**
  * Interpolate between two colors
  */
-const interpolateColors = (color1: Color, color2: Color, t: number): Color => {
+const interpolateGradientColors = (color1: Color, color2: Color, t: number): Color => {
   const [r1, g1, b1] = colorToRgb(color1)
   const [r2, g2, b2] = colorToRgb(color2)
   
@@ -177,7 +177,7 @@ const getGradientColor = (gradient: GradientConfig, position: number): Color => 
     if (position >= stop1.position && position <= stop2.position) {
       const localT = (position - stop1.position) / (stop2.position - stop1.position)
       const easedT = applyEasing(localT, gradient.interpolation)
-      return interpolateColors(stop1.color, stop2.color, easedT)
+      return interpolateGradientColors(stop1.color, stop2.color, easedT)
     }
   }
   
@@ -435,17 +435,6 @@ export const createGradient = (
 }
 
 /**
- * Reverse a gradient
- */
-export const reverseGradient = (gradient: GradientConfig): GradientConfig => ({
-  ...gradient,
-  stops: gradient.stops.map(stop => ({
-    ...stop,
-    position: 1 - stop.position
-  }))
-})
-
-/**
  * Shift gradient positions
  */
 export const shiftGradient = (gradient: GradientConfig, offset: number): GradientConfig => ({
@@ -515,4 +504,430 @@ export const pulsingGradient = (
       }
     })
   }
+}
+
+// =============================================================================
+// High-level gradient helpers (string-based)
+// =============================================================================
+
+export interface GradientStopDefinition {
+  readonly color: string
+  readonly position: number
+}
+
+export interface LinearGradientDefinition {
+  readonly type: 'linear'
+  readonly angle: number
+  readonly stops: GradientStopDefinition[]
+}
+
+export interface RadialGradientDefinition {
+  readonly type: 'radial'
+  readonly center: { readonly x: number; readonly y: number }
+  readonly radius: number
+  readonly stops: GradientStopDefinition[]
+}
+
+export type GradientDefinition = LinearGradientDefinition | RadialGradientDefinition
+
+interface LinearGradientOptions {
+  readonly angle?: number
+  readonly stops: GradientStopDefinition[]
+}
+
+interface RadialGradientOptions {
+  readonly center?: { readonly x: number; readonly y: number }
+  readonly radius?: number
+  readonly stops: GradientStopDefinition[]
+}
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
+
+const clamp01 = (value: number) => clamp(value, 0, 1)
+
+const normalizeAngle = (angle: number) => {
+  const normalized = angle % 360
+  return normalized < 0 ? normalized + 360 : normalized
+}
+
+const normalizeStops = (stops: GradientStopDefinition[]): GradientStopDefinition[] => {
+  if (stops.length === 0) {
+    return [{ color: '#000000', position: 0 }]
+  }
+
+  const sanitized = stops.map((stop, index) => {
+    const color = stop.color
+    const position = isFinite(stop.position) ? clamp01(stop.position) : clamp01(index / Math.max(1, stops.length - 1))
+    return { color, position }
+  })
+
+  return sanitized.sort((a, b) => a.position - b.position)
+}
+
+const colorNameMap: Record<string, string> = {
+  red: '#ff0000',
+  blue: '#0000ff',
+  green: '#008000',
+  black: '#000000',
+  white: '#ffffff',
+  yellow: '#ffff00',
+  cyan: '#00ffff',
+  magenta: '#ff00ff',
+  orange: '#ffa500',
+  purple: '#800080'
+}
+
+interface RgbColor {
+  r: number
+  g: number
+  b: number
+  a?: number
+}
+
+const parseColorString = (input: string): RgbColor => {
+  const color = input.trim().toLowerCase()
+
+  if (color.startsWith('#')) {
+    const normalized = color.length === 4
+      ? `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}`
+      : color
+    const value = normalized.replace('#', '')
+    const r = parseInt(value.substring(0, 2), 16)
+    const g = parseInt(value.substring(2, 4), 16)
+    const b = parseInt(value.substring(4, 6), 16)
+    return { r, g, b }
+  }
+
+  const rgbMatch = color.match(/^rgba?\(([^)]+)\)$/)
+  if (rgbMatch) {
+    const parts = rgbMatch[1]!.split(',').map(part => part.trim())
+    const r = clamp(parseFloat(parts[0] ?? '0'), 0, 255)
+    const g = clamp(parseFloat(parts[1] ?? '0'), 0, 255)
+    const b = clamp(parseFloat(parts[2] ?? '0'), 0, 255)
+    const a = parts[3] !== undefined ? clamp(parseFloat(parts[3]!), 0, 1) : undefined
+    return { r, g, b, a }
+  }
+
+  const hex = colorNameMap[color]
+  if (hex) {
+    return parseColorString(hex)
+  }
+
+  // Fallback to white
+  return { r: 255, g: 255, b: 255 }
+}
+
+const rgbToAnsi = ({ r, g, b }: RgbColor) => `\x1b[38;2;${Math.round(r)};${Math.round(g)};${Math.round(b)}m`
+
+const rgbToHex = ({ r, g, b }: RgbColor) => {
+  const toHex = (value: number) => value.toString(16).padStart(2, '0')
+  return `#${toHex(Math.round(r))}${toHex(Math.round(g))}${toHex(Math.round(b))}`
+}
+
+const getColorAtDefinition = (gradient: GradientDefinition, position: number): RgbColor => {
+  const stops = normalizeStops(gradient.stops)
+  if (stops.length === 1) {
+    return parseColorString(stops[0]!.color)
+  }
+
+  const clamped = clamp01(position)
+  if (clamped <= stops[0]!.position) {
+    return parseColorString(stops[0]!.color)
+  }
+  if (clamped >= stops[stops.length - 1]!.position) {
+    return parseColorString(stops[stops.length - 1]!.color)
+  }
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    const start = stops[i]!
+    const end = stops[i + 1]!
+    if (clamped >= start.position && clamped <= end.position) {
+      const localT = (clamped - start.position) / Math.max(1e-6, end.position - start.position)
+      const startColor = parseColorString(start.color)
+      const endColor = parseColorString(end.color)
+      return interpolateColors(startColor, endColor, localT)
+    }
+  }
+
+  return parseColorString(stops[0]!.color)
+}
+
+const distributeStops = (stops: GradientStopDefinition[]): GradientStopDefinition[] => {
+  if (stops.length <= 1) {
+    return stops
+  }
+  const defined = stops.some(stop => isFinite(stop.position))
+  if (defined) {
+    return stops
+  }
+  return stops.map((stop, index) => ({
+    color: stop.color,
+    position: clamp01(index / (stops.length - 1))
+  }))
+}
+
+export const createLinearGradient = (options: LinearGradientOptions): LinearGradientDefinition => {
+  const angle = normalizeAngle(options.angle ?? 0)
+  const normalizedStops = normalizeStops(distributeStops(options.stops))
+  return { type: 'linear', angle, stops: normalizedStops }
+}
+
+export const createRadialGradient = (options: RadialGradientOptions): RadialGradientDefinition => {
+  const center = options.center ?? { x: 0.5, y: 0.5 }
+  const radius = clamp(options.radius ?? 1, 0, 2)
+  const normalizedStops = normalizeStops(distributeStops(options.stops))
+  return {
+    type: 'radial',
+    center: { x: clamp01(center.x ?? 0.5), y: clamp01(center.y ?? 0.5) },
+    radius,
+    stops: normalizedStops
+  }
+}
+
+const parseStopsFromString = (stopsPart: string): GradientStopDefinition[] => {
+  const segments = stopsPart.split(',')
+  const stops: GradientStopDefinition[] = []
+  segments.forEach((segment, index) => {
+    const trimmed = segment.trim()
+    if (!trimmed) return
+    const parts = trimmed.split(/\s+/)
+    const color = parts[0]!
+    let position: number | undefined
+    if (parts[1]) {
+      const numeric = parseFloat(parts[1]!.replace('%', ''))
+      if (!Number.isNaN(numeric)) {
+        position = clamp01(numeric / 100)
+      }
+    }
+    stops.push({
+      color,
+      position: position ?? clamp01(stops.length === 1 ? 1 : index / Math.max(1, segments.length - 1))
+    })
+  })
+  return normalizeStops(stops)
+}
+
+export const parseGradientString = (input: string): GradientDefinition | null => {
+  if (typeof input !== 'string' || input.trim() === '') {
+    return null
+  }
+
+  const value = input.trim()
+  const linearMatch = value.match(/^linear-gradient\(([^,]+),(.*)\)$/i)
+  if (linearMatch) {
+    const anglePart = linearMatch[1]!.trim()
+    const angleMatch = anglePart.match(/(-?\d+(?:\.\d+)?)deg/i)
+    const angle = angleMatch ? parseFloat(angleMatch[1]!) : 0
+    const stops = parseStopsFromString(linearMatch[2]!)
+    return createLinearGradient({ angle, stops })
+  }
+
+  const radialMatch = value.match(/^radial-gradient\((.*)\)$/i)
+  if (radialMatch) {
+    const body = radialMatch[1]!
+    const parts = body.split(',')
+    let stopStartIndex = 0
+    let center = { x: 0.5, y: 0.5 }
+    let radius = 1
+
+    if (parts[0]) {
+      const descriptor = parts[0]!.trim()
+      const atMatch = descriptor.match(/circle\s*(?:at\s+([^,]+))?/i)
+      if (atMatch) {
+        stopStartIndex = 1
+        const position = (atMatch[1] ?? '').trim()
+        if (position === '' || position.toLowerCase() === 'center') {
+          center = { x: 0.5, y: 0.5 }
+        } else {
+          const coords = position.split(/\s+/)
+          const xPercent = parseFloat(coords[0]?.replace('%', '') ?? '50')
+          const yPercent = parseFloat(coords[1]?.replace('%', '') ?? String(xPercent))
+          center = { x: clamp01((xPercent || 0) / 100), y: clamp01((yPercent || 0) / 100) }
+        }
+      }
+    }
+
+    const stopsPart = parts.slice(stopStartIndex).join(',')
+    const stops = parseStopsFromString(stopsPart)
+    return createRadialGradient({ center, radius, stops })
+  }
+
+  return null
+}
+
+export const interpolateColors = (color1: RgbColor, color2: RgbColor, t: number): RgbColor => {
+  const clamped = clamp01(t)
+  const lerpComponent = (a: number, b: number) => Math.round(a + (b - a) * clamped)
+  const a = color1.a !== undefined || color2.a !== undefined
+    ? (color1.a ?? 1) + ((color2.a ?? 1) - (color1.a ?? 1)) * clamped
+    : undefined
+  return {
+    r: lerpComponent(color1.r, color2.r),
+    g: lerpComponent(color1.g, color2.g),
+    b: lerpComponent(color1.b, color2.b),
+    ...(a !== undefined ? { a } : {})
+  }
+}
+
+export const generateGradientStops = (gradient: GradientDefinition, width: number): string[] => {
+  if (width <= 0) {
+    return []
+  }
+  if (width === 1) {
+    const color = getColorAtDefinition(gradient, 0)
+    return [`rgb(${color.r}, ${color.g}, ${color.b})`]
+  }
+  const stops: string[] = []
+  for (let i = 0; i < width; i++) {
+    const position = i / (width - 1)
+    const color = getColorAtDefinition(gradient, position)
+    stops.push(`rgb(${color.r}, ${color.g}, ${color.b})`)
+  }
+  return stops
+}
+
+export const calculateGradientPosition = (
+  gradient: GradientDefinition,
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): number => {
+  const widthDen = Math.max(1, width)
+  const heightDen = Math.max(1, height)
+
+  if (gradient.type === 'linear') {
+    const angleRad = (gradient.angle * Math.PI) / 180
+    const nx = widthDen === 0 ? 0 : x / widthDen
+    const ny = heightDen === 0 ? 0 : y / heightDen
+    const value = nx * Math.cos(angleRad) + ny * Math.sin(angleRad)
+    return clamp01(value)
+  }
+
+  // radial
+  const nx = widthDen === 0 ? 0 : x / widthDen
+  const ny = heightDen === 0 ? 0 : y / heightDen
+  const dx = nx - gradient.center.x
+  const dy = ny - gradient.center.y
+  const distance = Math.sqrt(dx * dx + dy * dy)
+  const radius = gradient.radius <= 0 ? 1 : gradient.radius
+  return clamp01(distance / radius)
+}
+
+export const applyGradientToText = (text: string, gradient: GradientDefinition): string => {
+  if (!text) {
+    return ''
+  }
+  const stops = generateGradientStops(gradient, text.length)
+  let colored = ''
+  for (let i = 0; i < text.length; i++) {
+    const rgbMatch = stops[i]!.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
+    const color = rgbMatch
+      ? { r: parseInt(rgbMatch[1]!, 10), g: parseInt(rgbMatch[2]!, 10), b: parseInt(rgbMatch[3]!, 10) }
+      : parseColorString('#ffffff')
+    colored += `${rgbToAnsi(color)}${text[i]}`
+  }
+  return `${colored}\x1b[0m${text}`
+}
+
+export const validateGradientSyntax = (input: string): boolean => {
+  if (typeof input !== 'string') {
+    return false
+  }
+  return /^\s*(linear-gradient\([^)]*\)|radial-gradient\([^)]*\))\s*$/i.test(input)
+}
+
+export const getGradientColors = (gradient: GradientDefinition): string[] => {
+  return gradient.stops.map(stop => stop.color)
+}
+
+const isLinearDefinition = (gradient: unknown): gradient is LinearGradientDefinition =>
+  typeof gradient === 'object' && gradient !== null && (gradient as any).type === 'linear'
+
+const isRadialDefinition = (gradient: unknown): gradient is RadialGradientDefinition =>
+  typeof gradient === 'object' && gradient !== null && (gradient as any).type === 'radial'
+
+export const reverseGradient = (
+  gradient: GradientConfig | GradientDefinition
+): GradientConfig | GradientDefinition => {
+  if (isLinearDefinition(gradient) || isRadialDefinition(gradient)) {
+    const stops = gradient.stops.slice().reverse()
+    const recalculated = stops.map((stop, index) => ({
+      color: stop.color,
+      position: stops.length === 1 ? stop.position : clamp01(index / Math.max(1, stops.length - 1))
+    }))
+    if (isLinearDefinition(gradient)) {
+      return { ...gradient, stops: recalculated }
+    }
+    return { ...gradient, stops: recalculated }
+  }
+
+  return {
+    ...(gradient as GradientConfig),
+    stops: (gradient as GradientConfig).stops.map(stop => ({
+      ...stop,
+      position: 1 - stop.position
+    }))
+  }
+}
+
+export const rotateGradient = (gradient: GradientDefinition, angle: number): GradientDefinition => {
+  if (gradient.type === 'linear') {
+    return { ...gradient, angle: normalizeAngle(gradient.angle + angle) }
+  }
+  return gradient
+}
+
+export const optimizeGradient = (gradient: GradientDefinition): GradientDefinition => {
+  const optimizedStops = gradient.stops.filter((stop, index, array) => {
+    if (index === 0) return true
+    const prev = array[index - 1]!
+    return prev.color.toLowerCase() !== stop.color.toLowerCase()
+  })
+  if (isLinearDefinition(gradient)) {
+    return { ...gradient, stops: optimizedStops }
+  }
+  return { ...gradient, stops: optimizedStops }
+}
+
+export const blendGradients = (
+  gradientA: LinearGradientDefinition,
+  gradientB: LinearGradientDefinition,
+  factor: number
+): LinearGradientDefinition => {
+  const positions = new Set<number>([0, 1])
+  gradientA.stops.forEach(stop => positions.add(clamp01(stop.position)))
+  gradientB.stops.forEach(stop => positions.add(clamp01(stop.position)))
+  const sortedPositions = Array.from(positions).sort((a, b) => a - b)
+
+  const stops = sortedPositions.map(position => {
+    const colorA = getColorAtDefinition(gradientA, position)
+    const colorB = getColorAtDefinition(gradientB, position)
+    const blended = interpolateColors(colorA, colorB, factor)
+    return { color: rgbToHex(blended), position }
+  })
+
+  return {
+    type: 'linear',
+    angle: normalizeAngle(gradientA.angle),
+    stops
+  }
+}
+
+export const convertGradientFormat = (gradient: GradientDefinition, format: 'css' | 'object' = 'css'): string | GradientDefinition => {
+  if (format === 'object') {
+    return gradient
+  }
+
+  if (gradient.type === 'linear') {
+    const stops = gradient.stops
+      .map(stop => `${stop.color} ${(stop.position * 100).toFixed(0)}%`)
+      .join(', ')
+    return `linear-gradient(${gradient.angle}deg, ${stops})`
+  }
+
+  const stops = gradient.stops
+    .map(stop => `${stop.color} ${(stop.position * 100).toFixed(0)}%`)
+    .join(', ')
+  return `radial-gradient(circle at ${Math.round(gradient.center.x * 100)}% ${Math.round(gradient.center.y * 100)}%, ${stops})`
 }

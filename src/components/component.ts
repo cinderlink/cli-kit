@@ -61,7 +61,18 @@ let componentStateId = 0
  * Create a simplified component that wraps the Effect-based TEA architecture
  */
 export function createComponent<TModel = any, TMsg = any>(
-  componentFn: SimpleComponent<TModel, TMsg>
+  nameOrConfigOrFn: string | SimpleComponent<TModel, TMsg> | {
+    init?: () => TModel
+    update?: (msg: TMsg, model: TModel) => TModel
+    view: (model: TModel) => View
+    subscriptions?: (model: TModel) => any
+  },
+  maybeConfig?: {
+    init?: () => TModel
+    update?: (msg: TMsg, model: TModel) => TModel
+    view: (model: TModel) => View
+    subscriptions?: (model: TModel) => any
+  }
 ): Component<TModel, TMsg> {
   const stateId = ++componentStateId
   const state: ComponentState = {
@@ -189,11 +200,32 @@ export function createComponent<TModel = any, TMsg = any>(
     onDestroy
   }
 
-  // Call the component function to get the definition
-  const componentDef = componentFn(context)
+  // Support multiple creation styles
+  let componentDef: ReturnType<SimpleComponent<TModel, TMsg>>
+  if (typeof nameOrConfigOrFn === 'function' && !maybeConfig) {
+    // Functional style: createComponent((ctx) => ({ ... }))
+    componentDef = (nameOrConfigOrFn as SimpleComponent<TModel, TMsg>)(context)
+  } else {
+    // Config style: createComponent(name?, { init, update, view, ... })
+    const config = (maybeConfig ?? nameOrConfigOrFn) as {
+      init?: () => TModel
+      update?: (msg: TMsg, model: TModel) => TModel
+      view: (model: TModel) => View
+      subscriptions?: (model: TModel) => any
+    }
+    componentDef = {
+      view: () => config.view(initialModel as any),
+      init: config.init,
+      update: config.update,
+      subscriptions: config.subscriptions
+    }
+  }
+
+  // Determine friendly name when provided
+  const friendlyName = typeof nameOrConfigOrFn === 'string' ? nameOrConfigOrFn : undefined
 
   // Return TEA-compatible component
-  return {
+  const component: Component<TModel, TMsg> & { name?: string } = {
     init: Effect.succeed([
       componentDef.init ? componentDef.init() : {} as TModel,
       [] // No initial commands
@@ -217,6 +249,8 @@ export function createComponent<TModel = any, TMsg = any>(
       (model: TModel) => componentDef.subscriptions!(model) : 
       () => Effect.succeed([])
   }
+  if (friendlyName) (component as any).name = friendlyName
+  return component
 }
 
 /**

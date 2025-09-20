@@ -1,8 +1,8 @@
-# CLI-KIT Framework Implementation Plan
+# TUIX Framework Implementation Plan
 
 ## Project Overview
 
-Transform CLI-KIT into a full-featured CLI framework with a Svelte 5-inspired API while maintaining our powerful Effect-based core. This will provide an intuitive, component-based approach to building terminal applications with automatic argument parsing, plugin support, and reactive state management.
+Transform TUIX into a full-featured CLI framework with a Svelte 5-inspired API while maintaining our powerful Effect-based core. This will provide an intuitive, component-based approach to building terminal applications with automatic argument parsing, plugin support, and reactive state management.
 
 ## Current State Analysis
 
@@ -615,7 +615,7 @@ components/
     }
   },
   "bin": {
-    "cli-kit": "./bin/cli-kit.js"
+    "tuix": "./bin/tuix.ts"
   }
 }
 ```
@@ -731,7 +731,7 @@ docs/
 - Svelte 5-inspired API with $state, $derived, $effect
 - createComponent wrapper for simplified component creation
 - Builder functions (Panel, Button variants) with intuitive options
-- Clean imports: import { Panel, PrimaryButton } from "cli-kit"
+- Clean imports: import { Panel, PrimaryButton } from "tuix"
 - Lifecycle hooks (onMount, onDestroy, etc.)
 - Working integration with CLI framework
 - Component composition with vstack, hstack, text helpers

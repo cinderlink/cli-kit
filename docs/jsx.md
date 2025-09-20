@@ -1,6 +1,6 @@
 # JSX/TSX Support
 
-CLI-KIT provides built-in JSX/TSX support for building terminal UIs with familiar React-like syntax.
+TUIX provides built-in JSX/TSX support for building terminal UIs with familiar React-like syntax.
 
 ## Setup
 
@@ -12,7 +12,7 @@ Add to your `tsconfig.json`:
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "cli-kit"
+    "jsxImportSource": "tuix"
   }
 }
 ```
@@ -20,13 +20,13 @@ Add to your `tsconfig.json`:
 Or use per-file pragma:
 
 ```tsx
-/** @jsxImportSource cli-kit */
+/** @jsxImportSource tuix */
 ```
 
 ### Basic Usage
 
 ```tsx
-import { defineConfig, runCLI } from "cli-kit/cli"
+import { defineConfig, runCLI } from "tuix/cli"
 
 const config = defineConfig({
   name: "my-cli",
@@ -158,7 +158,7 @@ handler: () => (
 Combine with the style API:
 
 ```tsx
-import { style, Colors } from "cli-kit/styling"
+import { style, Colors } from "tuix/styling"
 
 const customStyle = style()
   .foreground(Colors.brightBlue)
@@ -197,8 +197,8 @@ Standard JSX patterns work:
 Use with reactive state:
 
 ```tsx
-import { createComponent } from "cli-kit/components"
-import { $state } from "cli-kit/components"
+import { createComponent } from "tuix/components"
+import { $state } from "tuix/components"
 
 const Counter = createComponent(() => {
   const count = $state(0)
@@ -227,8 +227,8 @@ const Counter = createComponent(() => {
 ## Complete Example
 
 ```tsx
-/** @jsxImportSource cli-kit */
-import { defineConfig, runCLI } from "cli-kit/cli"
+/** @jsxImportSource tuix */
+import { defineConfig, runCLI } from "tuix/cli"
 import { z } from "zod"
 
 // Task component
@@ -381,8 +381,8 @@ If you're familiar with React, here are the key differences:
 
 ## Troubleshooting
 
-**"Cannot find module 'cli-kit/jsx-runtime'"**
-- Ensure cli-kit is installed
+**"Cannot find module 'tuix/jsx-runtime'"**
+- Ensure tuix is installed
 - Check tsconfig.json jsx settings
 
 **"Element type is invalid"**
